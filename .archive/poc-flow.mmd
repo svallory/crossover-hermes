@@ -1,0 +1,49 @@
+graph TD
+    A["Start"] --> B{"Initialize Clients & Config"};
+    B --> C{"Load Data (Products, Emails, Prompts)"};
+    C --> D{"Initialize Pinecone Index"};
+    D -- Check if empty --> E{"Populate Pinecone Index"};
+    D -- Already populated/Error --> F["Ready for Email Processing"];
+    E --> F;
+
+    F --> G{"Loop Through Emails"};
+    G -- For Each Email --> H["Create Initial AgentGraphState"];
+    H --> I{"Invoke LangGraph Pipeline"};
+
+    subgraph LangGraph Pipeline
+        direction LR
+        I1["classify_email"] --> I_C1{"decide_after_classification"};
+        I_C1 -- order request / product inquiry --> I2["product_matcher"];
+        I_C1 -- other / error --> I5["response_composer"];
+        I2 --> I_C2{"decide_after_product_matching"};
+        I_C2 -- order request --> I3["order_processor"];
+        I_C2 -- product inquiry --> I4["inquiry_processor"];
+        I_C2 -- other / error --> I5;
+        I3 --> I_C3{"decide_after_order_processing"};
+        I_C3 -- needs_inquiry (OOS, etc.) --> I4;
+        I_C3 -- direct_to_compose / error --> I5;
+        I4 --> I5;
+    end
+
+    I --> J{"Process Graph Result"};
+    J --> K{"Apply Inventory Updates (if order)"};
+    K --> L{"Collect Results & Errors for Email"};
+    L -- Next Email --> G;
+    G -- All Emails Processed --> M["Processing Loop Finished"];
+
+    M --> N{"Generate Output DataFrames"};
+    N --> O{"Write DataFrames to Excel Sheets"};
+    O --> P["Print Final Inventory Snippet & Error Summary"];
+    P --> Q["End"];
+
+    %% Styling for decision nodes
+    classDef decision fill:#2d2d2d,stroke:#666,stroke-width:2px,color:#fff;
+    class I_C1,I_C2,I_C3 decision;
+
+    %% Styling for major process blocks
+    classDef process fill:#1a1a1a,stroke:#666,stroke-width:2px,color:#fff;
+    class B,C,D,E,G,I,J,K,M,N,O,P process;
+
+    %% Styling for subgraph
+    classDef subgraph_style fill:#2d2d2d,stroke:#666,stroke-width:1px,color:#fff;
+    classDef LangGraph_Pipeline subgraph_style;

@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "hermes-notebook-tools"
+version = "0.1.0"
+description = "Tools for converting and assembling Jupyter notebooks for the Hermes project."
+authors = ["svallory <me@saulo.engineer>"]
+readme = "README.md"
+packages = []
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+pandas = "^2.2.3"
+pydantic = "^2.11.4"
+openai = "^1.77.0"
+langgraph = "^0.4.3"
+httpx = "^0.28.1"
+scikit-learn = "^1.6.1"
+langchain-core = "^0.3.59"
+langchain-openai = "^0.3.16"
+langchain = "^0.3.25"
+chromadb = "^1.0.8"
+python-dotenv = "^1.1.0"
+langchain-google-genai = "^2.1.4"
+
+[tool.poetry.requires-plugins]
+poethepoet = { version = "~0.34.0", extras = ["poetry_plugin"]}
+
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.34.0"
+
+[tool.poe.tasks]
+nb2md = "python3 tools/ipynb_to_markdown.py"
+build-notebook = "python3 tools/md_py_to_notebook.py"
+test = "python3 -m unittest"
+tests = "python3 -m unittest discover -s tests -p \"test_*.py\""
+unit-tests = "python3 -m unittest discover -s tests/unit -p \"test_*.py\""
+integration-tests = "python3 -m unittest discover -s tests/integration -p \"test_*.py\""
+test-tools = "python3 -m unittest discover -s tools/tests"
+
+[build-system]
+requires = ["poetry-core>=2"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,119 @@
+classDiagram
+    direction LR
+
+    class LLMError {
+        +error: str
+        +raw_content: Optional[str]
+    }
+
+    class SignalDetail {
+        +product_identification: List[str]
+        +customer_sentiment: Optional[str]
+        +key_phrases_or_questions: List[str]
+    }
+
+    class ClassificationAgentOutput {
+        +category: str
+        +confidence: float
+        +signals: SignalDetail
+        +reasoning: Optional[str]
+    }
+    ClassificationAgentOutput --> SignalDetail : contains
+
+    class ProductItemDetail {
+        +product_id: Optional[str]
+        +product_name: Optional[str]
+        +original_mention: str
+        +quantity: Optional[int]
+        +questions: List[str]
+        +confidence_score: Optional[float]
+        +match_method: Optional[str]
+    }
+
+    class UnmatchedMentionDetail {
+        +original_mention: str
+        +reason_for_no_match: Optional[str]
+    }
+
+    class ProductMatcherAgentOutput {
+        +order_items: List[ProductItemDetail]
+        +inquiry_items: List[ProductItemDetail]
+        +unmatched_mentions: List[UnmatchedMentionDetail]
+    }
+    ProductMatcherAgentOutput --> "*" ProductItemDetail : has order_items
+    ProductMatcherAgentOutput --> "*" ProductItemDetail : has inquiry_items
+    ProductMatcherAgentOutput --> "*" UnmatchedMentionDetail : has unmatched_mentions
+
+    class ProcessedOrderItem {
+        +product_id: str
+        +original_mention: str
+        +requested_quantity: int
+        +fulfilled_quantity: int
+        +status: str
+        +reason: Optional[str]
+        +suggested_alternative_ids: List[str]
+    }
+
+    class OrderProcessingAgentOutput {
+        +processed_items: List[ProcessedOrderItem]
+    }
+    OrderProcessingAgentOutput --> "*" ProcessedOrderItem : has processed_items
+
+    class InquiryResponseItem {
+        +original_mention: str
+        +product_id_inquired: Optional[str]
+        +response_text: str
+    }
+
+    class AlternativeSuggestionItem {
+        +original_mention_or_unfulfilled_item: str
+        +suggested_product_id: str
+        +suggested_product_name: str
+        +reason_for_suggestion: str
+    }
+
+    class UpsellOpportunityItem {
+        +related_to_mention_or_product_id: Optional[str]
+        +upsell_product_id: str
+        +upsell_product_name: str
+        +reason_for_upsell: str
+    }
+
+    class InquiryProcessingAgentOutput {
+        +inquiry_responses: List[InquiryResponseItem]
+        +alternative_suggestions: List[AlternativeSuggestionItem]
+        +upsell_opportunities: List[UpsellOpportunityItem]
+    }
+    InquiryProcessingAgentOutput --> "*" InquiryResponseItem : has inquiry_responses
+    InquiryProcessingAgentOutput --> "*" AlternativeSuggestionItem : has alternative_suggestions
+    InquiryProcessingAgentOutput --> "*" UpsellOpportunityItem : has upsell_opportunities
+
+    class ComposedEmailOutput {
+        +subject: str
+        +greeting: str
+        +body: str
+        +signature: str
+    }
+
+    class EmailData {
+        <<TypedDict>>
+        +email_id: str
+        +subject: str
+        +message: str
+    }
+
+    class AgentGraphState {
+        <<TypedDict (LangGraph State)>>
+        +original_email: EmailData
+        +classification_output: Optional[ClassificationAgentOutput]
+        +product_match_output: Optional[ProductMatcherAgentOutput]
+        +order_processing_output: Optional[OrderProcessingAgentOutput]
+        +inquiry_processing_output: Optional[InquiryProcessingAgentOutput]
+        +final_composed_response: Optional[str]
+        +error_messages: List[str]
+    }
+    AgentGraphState --> EmailData : holds
+    AgentGraphState --> ClassificationAgentOutput : holds_optional
+    AgentGraphState --> ProductMatcherAgentOutput : holds_optional
+    AgentGraphState --> OrderProcessingAgentOutput : holds_optional
+    AgentGraphState --> InquiryProcessingAgentOutput : holds_optional
