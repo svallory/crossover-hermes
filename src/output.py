@@ -176,7 +176,7 @@ def write_results_to_sheet(spreadsheet: gspread.Spreadsheet, worksheet_name: str
         #     print(f"Fallback row-by-row append failed: {append_error}")
 
 def format_and_write_final_outputs(processed_states: List[Dict[str, Any]], 
-                                  spreadsheet_name: str = "Hermes - AI Processed Emails"):
+                                  spreadsheet_name: str = "Solving Business Problems with AI - Output"):
     """
     Formats the final processing results from multiple emails and writes them 
     to the specified Google Sheet with separate worksheets as required by the assignment.
@@ -197,11 +197,11 @@ def format_and_write_final_outputs(processed_states: List[Dict[str, Any]],
     
     # --- Prepare DataFrames for each required worksheet --- 
     
-    # 1. Processed Emails Worksheet
-    processed_emails_data = []
-    email_responses_data = []
-    order_processing_data = []
-    inquiry_processing_data = []
+    # Assignment-required sheets data
+    email_classification_data = []
+    order_status_data = []
+    order_response_data = []
+    inquiry_response_data = []
     
     for state in processed_states:
         email_id = state.get("email_id", "")
@@ -210,91 +210,66 @@ def format_and_write_final_outputs(processed_states: List[Dict[str, Any]],
         inquiry_result = state.get("inquiry_result", {})
         final_response = state.get("final_response", "")
         
-        # Data for "Processed Emails" sheet
-        processed_emails_data.append({
-            "Email ID": email_id,
-            "Subject": state.get("email_subject", ""),
-            "Body": state.get("email_body", ""),
-            "Classification": email_analysis.get("classification", "unknown"),
-            "Language": email_analysis.get("language", "unknown"),
-            "Analysis Reasoning": email_analysis.get("reasoning", ""),
-            "Final Status": order_result.get("overall_status", "") if order_result 
-                            else ("inquiry_answered" if inquiry_result else "unknown")
+        # Data for "email-classification" sheet (assignment requirement)
+        email_classification_data.append({
+            "email ID": email_id,
+            "category": email_analysis.get("classification", "unknown")
         })
         
-        # Data for "Email Responses" sheet
-        email_responses_data.append({
-            "Email ID": email_id,
-            "Generated Response": final_response
-        })
-        
-        # Data for "Order Processing" sheet (if applicable)
+        # Data for "order-status" sheet (assignment requirement)
         if order_result and order_result.get("order_items"):
             for item in order_result["order_items"]:
-                order_processing_data.append({
-                    "Email ID": email_id,
-                    "Product ID": item.get("product_id", ""),
-                    "Product Name": item.get("product_name", ""),
-                    "Quantity Requested": item.get("quantity_requested", 0),
-                    "Quantity Fulfilled": item.get("quantity_fulfilled", 0),
-                    "Status": item.get("status", ""),
-                    "Unit Price": item.get("unit_price"),
-                    "Promotion Details": item.get("promotion_details", "")
+                order_status_data.append({
+                    "email ID": email_id,
+                    "product ID": item.get("product_id", ""),
+                    "quantity": item.get("quantity_requested", 0),
+                    "status": item.get("status", "")
                 })
-            # Add alternatives if any
-            for alt in order_result.get("suggested_alternatives", []):
-                 order_processing_data.append({
-                    "Email ID": email_id,
-                    "Product ID": alt.get("original_product_id", ""),
-                    "Product Name": f"Alternative for {alt.get('original_product_name', '')}",
-                    "Quantity Requested": 0,
-                    "Quantity Fulfilled": 0,
-                    "Status": f"Suggested Alternative: {alt.get('suggested_product_name', '')} (ID: {alt.get('suggested_product_id', '')})",
-                    "Unit Price": alt.get("price"),
-                    "Promotion Details": alt.get("reason", "")
-                })
-        
-        # Data for "Inquiry Processing" sheet (if applicable)
-        if inquiry_result and inquiry_result.get("answered_questions"):
-            for qa in inquiry_result["answered_questions"]:
-                inquiry_processing_data.append({
-                    "Email ID": email_id,
-                    "Question": qa.get("question", ""),
-                    "Answer": qa.get("answer", ""),
-                    "Confidence": qa.get("confidence", 0.0),
-                    "Relevant Product IDs": ", ".join(qa.get("relevant_product_ids", []))
-                })
-            # Add unanswered questions
-            for question in inquiry_result.get("unanswered_questions", []):
-                 inquiry_processing_data.append({
-                    "Email ID": email_id,
-                    "Question": question,
-                    "Answer": "Could not answer with available information",
-                    "Confidence": 0.0,
-                    "Relevant Product IDs": ""
-                })
+            
+        # Data for response sheets based on classification
+        if email_analysis.get("classification") == "order_request":
+            # Data for "order-response" sheet (assignment requirement)
+            order_response_data.append({
+                "email ID": email_id,
+                "response": final_response
+            })
+        else:
+            # Data for "inquiry-response" sheet (assignment requirement)
+            inquiry_response_data.append({
+                "email ID": email_id,
+                "response": final_response
+            })
 
     # Create DataFrames
-    processed_emails_df = pd.DataFrame(processed_emails_data)
-    email_responses_df = pd.DataFrame(email_responses_data)
-    order_processing_df = pd.DataFrame(order_processing_data)
-    inquiry_processing_df = pd.DataFrame(inquiry_processing_data)
+    email_classification_df = pd.DataFrame(email_classification_data)
+    order_status_df = pd.DataFrame(order_status_data)
+    order_response_df = pd.DataFrame(order_response_data)
+    inquiry_response_df = pd.DataFrame(inquiry_response_data)
     
     # --- Define Headers and Write to Sheets --- 
     
-    processed_emails_headers = ["Email ID", "Subject", "Body", "Classification", "Language", "Analysis Reasoning", "Final Status"]
-    write_results_to_sheet(spreadsheet, "Processed Emails", processed_emails_df, processed_emails_headers)
+    # The headers exactly as specified in the assignment
+    email_classification_headers = ["email ID", "category"]
+    write_results_to_sheet(spreadsheet, "email-classification", email_classification_df, email_classification_headers)
     
-    email_responses_headers = ["Email ID", "Generated Response"]
-    write_results_to_sheet(spreadsheet, "Email Responses", email_responses_df, email_responses_headers)
+    order_status_headers = ["email ID", "product ID", "quantity", "status"]
+    write_results_to_sheet(spreadsheet, "order-status", order_status_df, order_status_headers)
     
-    order_processing_headers = ["Email ID", "Product ID", "Product Name", "Quantity Requested", "Quantity Fulfilled", "Status", "Unit Price", "Promotion Details"]
-    write_results_to_sheet(spreadsheet, "Order Processing", order_processing_df, order_processing_headers)
+    order_response_headers = ["email ID", "response"]
+    write_results_to_sheet(spreadsheet, "order-response", order_response_df, order_response_headers)
     
-    inquiry_processing_headers = ["Email ID", "Question", "Answer", "Confidence", "Relevant Product IDs"]
-    write_results_to_sheet(spreadsheet, "Inquiry Processing", inquiry_processing_df, inquiry_processing_headers)
+    inquiry_response_headers = ["email ID", "response"]
+    write_results_to_sheet(spreadsheet, "inquiry-response", inquiry_response_df, inquiry_response_headers)
+    
+    # Share the spreadsheet publicly
+    try:
+        spreadsheet.share('', perm_type='anyone', role='reader')
+        print(f"Spreadsheet shared publicly. Shareable link: https://docs.google.com/spreadsheets/d/{spreadsheet.id}")
+    except Exception as share_error:
+        print(f"Warning: Could not share spreadsheet publicly: {share_error}")
     
     print(f"Finished writing all results to Google Sheet: '{spreadsheet_name}'")
+    print(f"Shareable link: https://docs.google.com/spreadsheets/d/{spreadsheet.id}")
 
 """ {cell}
 ### Output Integration Implementation Notes

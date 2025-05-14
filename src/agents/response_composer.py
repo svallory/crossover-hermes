@@ -18,7 +18,7 @@ import json
 from typing import List, Dict, Any, Optional, Union
 from pydantic import BaseModel, Field
 import re # Import re here for extract_customer_name
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
@@ -28,15 +28,25 @@ from ..llm_client import get_llm_client
 
 # Import necessary models and tools
 from ..state import HermesState # Assuming state object is passed
+
+# Import agent-specific response models from their new locations for type hinting and reconstruction
+from .email_analyzer import EmailAnalysis 
+from .order_processor import OrderProcessingResult
+from .inquiry_responder import InquiryResponse
+
 from ..tools.response_tools import (
     ResponseCompositionPlan, 
     generate_natural_response, 
     analyze_tone, 
     extract_questions # Potentially needed if analyzing body here
 )
-from .email_classifier import EmailAnalysis # For type hinting
-from .order_processor import OrderProcessingResult # Import for type hinting
-from .inquiry_responder import InquiryResponse # Import for type hinting
+# Commented out old/redundant imports:
+# from ..state import EmailAnalysis # For type hinting -> Now from .email_classifier
+# from .order_processor import OrderProcessingResult # Import for type hinting -> Now covered above
+# from .inquiry_responder import InquiryResponse # Import for type hinting -> Now covered above
+
+# Import the prompt templates
+from ..prompts import response_composer_md, response_quality_verification_md
 
 # Optional Pydantic model for structured internal representation
 class ResponseComposition(BaseModel):
@@ -52,7 +62,7 @@ class ResponseComposition(BaseModel):
 async def compose_response_node(state: Dict[str, Any], config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     LangGraph node function for the Response Composer Agent.
-    Composes a final response based on previous agent outputs.
+    Composes a final response based on previous agent outputs using a consolidated LLM call.
     
     Args:
         state: The current state dictionary from LangGraph
@@ -61,6 +71,41 @@ async def compose_response_node(state: Dict[str, Any], config: Optional[Dict[str
     Returns:
         Updated state dictionary with final_response field
     """
+    # Reconstruct typed state object for better type safety
+    typed_state = HermesState(
+        email_id=state.get("email_id", "unknown"),
+        email_subject=state.get("email_subject", ""),
+        email_body=state.get("email_body", ""),
+        email_analysis=state.get("email_analysis"),
+        order_result=state.get("order_result"),
+        inquiry_result=state.get("inquiry_result"),
+        product_catalog_df=state.get("product_catalog_df"),
+        vector_store=state.get("vector_store")
+    )
+    
+    # Also reconstruct structured objects if available
+    email_analysis_obj = None
+    order_result_obj = None
+    inquiry_result_obj = None
+    
+    if typed_state.email_analysis:
+        try:
+            email_analysis_obj = EmailAnalysis(**typed_state.email_analysis)
+        except Exception as e:
+            print(f"Warning: Could not reconstruct EmailAnalysis: {e}")
+    
+    if typed_state.order_result:
+        try:
+            order_result_obj = OrderProcessingResult(**typed_state.order_result)
+        except Exception as e:
+            print(f"Warning: Could not reconstruct OrderProcessingResult: {e}")
+    
+    if typed_state.inquiry_result:
+        try:
+            inquiry_result_obj = InquiryResponse(**typed_state.inquiry_result)
+        except Exception as e:
+            print(f"Warning: Could not reconstruct InquiryResponse: {e}")
+    
     # Extract configuration
     if config and "configurable" in config and "hermes_config" in config["configurable"]:
         hermes_config = config["configurable"]["hermes_config"]
@@ -68,459 +113,227 @@ async def compose_response_node(state: Dict[str, Any], config: Optional[Dict[str
         # from ..config import HermesConfig # Already imported at the top
         hermes_config = HermesConfig()
     
-    # Extract data from state - handle both dictionary and object access
-    # Handle email_id properly whether state is a dict or object
-    if isinstance(state, dict):
-        email_id = state.get("email_id", "unknown")
-        email_body = state.get("email_body", "")
-        email_subject = state.get("email_subject", "")
-        email_analysis_data = state.get("email_analysis", {})
-        order_result = state.get("order_result", {})
-        inquiry_result = state.get("inquiry_result", {})
-    else:
-        # Object-style access with getattr
-        email_id = getattr(state, "email_id", "unknown")
-        email_body = getattr(state, "email_body", "")
-        email_subject = getattr(state, "email_subject", "")
-        email_analysis_data = getattr(state, "email_analysis", {}) 
-        order_result = getattr(state, "order_result", {})
-        inquiry_result = getattr(state, "inquiry_result", {})
+    # Extract data from typed state
+    email_id = typed_state.email_id
+    email_body = typed_state.email_body # Still useful for verify_response_quality and analyze_tone fallback
+    email_subject = typed_state.email_subject
+    email_analysis_data = typed_state.email_analysis # This is a dict
+    order_result_data = typed_state.order_result # This is a dict
+    inquiry_result_data = typed_state.inquiry_result # This is a dict
     
     # Further extract email_id from order_result or inquiry_result if still unknown
+    # This logic might be redundant if email_id is always present from initial state.
     if email_id == "unknown":
-        if isinstance(order_result, dict) and "email_id" in order_result:
-            email_id = order_result["email_id"]
-        elif hasattr(order_result, "email_id"):
-            email_id = order_result.email_id
-        elif isinstance(inquiry_result, dict) and "email_id" in inquiry_result:
-            email_id = inquiry_result["email_id"]
-        elif hasattr(inquiry_result, "email_id"):
-            email_id = inquiry_result.email_id
-    
+        if isinstance(order_result_data, dict) and order_result_data.get("email_id"):
+            email_id = order_result_data["email_id"]
+        # No need for hasattr check if order_result is always a dict from state
+        elif isinstance(inquiry_result_data, dict) and inquiry_result_data.get("email_id"):
+            email_id = inquiry_result_data["email_id"]
+            
     # Log processing start
-    print(f"Composing response for email {email_id}")
+    print(f"Composing response for email {email_id} using consolidated LLM approach")
     
-    # Initialize LLM for response generation with slightly higher temperature for creativity
     llm = get_llm_client(
         config=hermes_config,
-        temperature=hermes_config.llm_response_temperature # Higher temperature for natural responses
+        temperature=hermes_config.llm_response_temperature
     )
     
-    # Determine email type based on classification
-    classification = None
-    language = "English" # Default language
-    tone_info = {}
-    customer_signals = []
+    # Create prompt templates from markdown content
+    response_composer_prompt = PromptTemplate.from_template(response_composer_md)
     
-    if isinstance(email_analysis_data, dict):
-        classification = email_analysis_data.get("classification", "unknown")
-        language = email_analysis_data.get("language", "English")
-        if "tone_analysis" in email_analysis_data:
-            tone_analysis = email_analysis_data["tone_analysis"]
-            # Ensure tone_analysis itself is accessed as a dict
-            tone_info = {
-                "tone": tone_analysis.get("tone", "neutral"),
-                "formality_level": tone_analysis.get("formality_level", 3),
-                "key_phrases": tone_analysis.get("key_phrases", [])
-            }
-        customer_signals = email_analysis_data.get("customer_signals", [])
-        
-    elif hasattr(email_analysis_data, 'classification'): # Check if it's an object
-        classification = email_analysis_data.classification
-        language = email_analysis_data.language
-        if hasattr(email_analysis_data, 'tone_analysis'):
-            tone_analysis = email_analysis_data.tone_analysis
-            # Access attributes if tone_analysis is an object
-            tone_info = {
-                "tone": getattr(tone_analysis, "tone", "neutral"),
-                "formality_level": getattr(tone_analysis, "formality_level", 3),
-                "key_phrases": getattr(tone_analysis, "key_phrases", [])
-            }
-        if hasattr(email_analysis_data, 'customer_signals'):
-             customer_signals = email_analysis_data.customer_signals # Should be list of objects/dicts
+    response_quality_verification_prompt_template = PromptTemplate.from_template(response_quality_verification_md)
     
-    # If tone info still empty, analyze directly
-    if not tone_info:
-        tone_result = analyze_tone(email_body)
-        tone_info = {
-            "tone": tone_result.detected_tone,
-            "formality_level": tone_result.formality_level,
-            "key_phrases": tone_result.key_phrases,
-            "writing_style": tone_result.writing_style,
-            "sentiment": tone_result.sentiment
+    classification = email_analysis_data.get("classification", "unknown")
+    language = email_analysis_data.get("language", "English")
+    tone_info_from_analysis = email_analysis_data.get("tone_analysis", {}) # Expecting a dict
+    
+    # Ensure tone_info has the expected structure for the tool and prompt
+    # The tool's prompt now directly uses `tone` and `formality_level` args.
+    # `tone_info_from_analysis` directly from email_analysis should be suitable.
+    current_tone_info = {
+        "detected_tone": tone_info_from_analysis.get("detected_tone", tone_info_from_analysis.get("tone", "neutral")), # Prioritize detected_tone
+        "formality_level": tone_info_from_analysis.get("formality_level", 3),
+        # Other fields like key_phrases, writing_style, sentiment are in email_analysis_json for the LLM
+    }
+
+    # If tone_analysis was missing or incomplete from earlier step, analyze now (rule-based fallback)
+    if not tone_info_from_analysis or "detected_tone" not in tone_info_from_analysis:
+        print(f"Running fallback tone analysis for email {email_id}")
+        tone_result_obj = analyze_tone(email_body) # analyze_tone returns a ToneAnalysisResult object
+        current_tone_info = {
+            "detected_tone": tone_result_obj.detected_tone,
+            "formality_level": tone_result_obj.formality_level,
         }
-    
-    # Determine source of response points based on email type
-    response_points = []
-    
-    if classification == "order_request":
-        # order_result is already a dict from state access or processing
-        if order_result:
-            response_points = await generate_order_response_points(order_result, email_analysis_data)
-    elif classification == "product_inquiry":
-        # inquiry_result could be an object or dict, handle both
-        if isinstance(inquiry_result, dict):
-            response_points = inquiry_result.get("response_points", [])
-        elif hasattr(inquiry_result, 'response_points'):
-            response_points = inquiry_result.response_points
-    else:
-        # Fallback for unknown email types or missing results
-        response_points = ["Acknowledge receipt of the customer's email",
-                          "Express appreciation for their interest",
-                          "Offer general assistance"]
-    
-    # Get customer name if available
-    customer_name = extract_customer_name(email_body)
-    
+        # Update email_analysis_data with this fallback tone analysis so it's in the JSON for LLM
+        if email_analysis_data:
+          email_analysis_data["tone_analysis"] = tone_result_obj.model_dump() 
+        else: # Should not happen if email_analysis is always populated
+          email_analysis_data = {"tone_analysis": tone_result_obj.model_dump()}
+
     # Determine greeting and closing styles based on tone
-    greeting_style = determine_greeting_style(tone_info)
-    closing_style = determine_closing_style(tone_info)
+    # This logic can remain as it pre-sets style based on analysis before the main LLM call
+    detected_tone_for_style = current_tone_info.get("detected_tone", "neutral")
+    formality_level_for_style = current_tone_info.get("formality_level", 3)
+
+    if detected_tone_for_style == "formal" or formality_level_for_style >= 4:
+        greeting_style = "formal"
+        closing_style = "formal"
+    elif detected_tone_for_style == "casual" and formality_level_for_style <= 2:
+        greeting_style = "casual"
+        closing_style = "casual"
+    elif detected_tone_for_style == "friendly":
+        greeting_style = "friendly"
+        closing_style = "warm"
+    elif detected_tone_for_style == "urgent":
+        greeting_style = "direct"
+        closing_style = "efficient"
+    else:
+        greeting_style = "professional"
+        closing_style = "professional"
+
+    # The LLM will now generate response points and personalization from raw data.
+    # So, remove calls to generate_order_response_points and process_customer_signals.
+    # response_points = [] # No longer pre-calculated here
+    # personalization_elements = [] # No longer pre-calculated here
+
+    # Get customer name if available (e.g., from email_analysis or a dedicated extraction step if added)
+    customer_name = email_analysis_data.get("customer_name") # Assuming email_analysis might have this
+    if not customer_name:
+        # Basic extraction from email_body if not found (can be improved)
+        name_match = re.search(r"(?:Hi|Hello|Dear)\s+([A-Za-z]+)(?:,|!|$)", email_body, re.IGNORECASE)
+        if name_match:
+            customer_name = name_match.group(1)
     
-    # Process customer signals to personalize the response
-    personalization_elements = await process_customer_signals(
-        customer_signals=customer_signals,
-        email_body=email_body,
-        email_type=classification,
-        llm=llm
-    )
+    # Prepare JSON strings for the tool
+    email_analysis_json_str = json.dumps(email_analysis_data if email_analysis_data else {})
     
-    # Prepare the response composition plan
+    # Determine which processing result to use
+    processing_results_to_serialize = None
+    if classification == "order_request" and order_result_data:
+        processing_results_to_serialize = order_result_data
+    elif classification == "product_inquiry" and inquiry_result_data:
+        processing_results_to_serialize = inquiry_result_data
+    else:
+        # Fallback: if classification is unknown or results missing, provide a generic structure or empty dict
+        # The LLM prompt should be robust enough to handle cases with minimal processing_results.
+        processing_results_to_serialize = {"status": "information_not_available", "notes": "Could not determine specific order/inquiry details."}
+        if email_body:
+             processing_results_to_serialize["original_email_excerpt_for_context"] = email_body[:500]
+
+    processing_results_json_str = json.dumps(processing_results_to_serialize)
+
+    # Prepare the response composition plan using the new Pydantic model structure
     composition_plan = ResponseCompositionPlan(
         customer_name=customer_name,
         greeting_style=greeting_style,
-        response_points=response_points,
-        tone_info=tone_info,
-        answer_phrases=personalization_elements,
+        tone_info=current_tone_info, # Pass the directly used tone/formality for prompt
         closing_style=closing_style,
-        language=language
+        language=language,
+        email_analysis_json=email_analysis_json_str,
+        processing_results_json=processing_results_json_str
     )
     
-    # Convert the plan to the dictionary format expected by the tool
-    tool_input = {
-        "plan": composition_plan.model_dump() # Assuming tool expects a dict derived from Pydantic
-    }
+    customer_signal_manual_extract = """Follow the Customer Signal Processing Guide for:
+- Natural Communication: Avoid templates, use contractions (if appropriate), vary sentences, be authentic & personal.
+- Response Structure: Greeting, Direct Answer, Expanded Value, Relevant Suggestions, Clear Next Steps, Closing.
+- Empathy: Acknowledge emotions, connect product info to emotional context.
+- Upselling: Suggest relevant items based on signals, not pushy.
+- Limitations: Be transparent about OOS, suggest alternatives.
+""" # Kept for generate_natural_response tool
     
-    # Call the tool with the dictionary input
-    final_response = await generate_natural_response.ainvoke(composition_plan.model_dump(), config=config)
+    # Call the tool with the dictionary input by unpacking the Pydantic model
+    # and adding the llm instance and manual extract.
+    generated_response_text = await generate_natural_response.ainvoke(
+        {
+            **composition_plan.model_dump(), 
+            "llm": llm, 
+            "customer_signal_manual_extract": customer_signal_manual_extract
+        },
+        config=config
+    )
     
     # Verify the quality of the response
+    # The verify_response_quality function now needs to get response_points differently,
+    # as they are no longer pre-calculated. For now, we might pass an empty list
+    # or have verify_response_quality try to infer them, or this step might need its own LLM call
+    # to first list what points *should have been* covered by the main LLM.
+    # For simplicity, let's pass an empty list for now, acknowledging this makes verification less robust.
+    # A better approach would be to have the main LLM also output the key points it *intended* to cover.
+    key_points_for_verification = [] # This is a simplification due to points now being LLM-generated.
+                                      # Consider enhancing verify_response_quality or main LLM output.
+    
     verified_response = await verify_response_quality(
-        response=final_response,
+        response=generated_response_text,
         email_body=email_body,
         email_subject=email_subject,
-        response_points=response_points,
+        email_analysis_json=email_analysis_json_str, # Pass for context to verification LLM
+        processing_results_json=processing_results_json_str, # Pass for context
         email_type=classification,
-        tone_info=tone_info,
+        tone_info=current_tone_info, # Pass for expected tone/formality
         llm=llm
     )
     
-    # Return the updated state with the final response
     return {"final_response": verified_response}
 
-async def generate_order_response_points(order_result: Union[Dict[str, Any], OrderProcessingResult],
-                                     email_analysis: Union[Dict[str, Any], EmailAnalysis]) -> List[str]:
-    """Generate key response points based on order processing results."""
-    points = []
-    
-    # Determine how to access fields based on type
-    def _get_value(data, key, default=None):
-        if isinstance(data, dict):
-            return data.get(key, default)
-        elif hasattr(data, key):
-            return getattr(data, key, default)
-        return default
-
-    overall_status = _get_value(order_result, "overall_status", "unknown")
-    fulfilled_count = _get_value(order_result, "fulfilled_items_count", 0)
-    oos_count = _get_value(order_result, "out_of_stock_items_count", 0)
-    order_items = _get_value(order_result, "order_items", [])
-    alternatives = _get_value(order_result, "suggested_alternatives", [])
-    processing_notes = _get_value(order_result, "processing_notes", [])
-    total_price = _get_value(order_result, "total_price", 0.0)
-
-    if overall_status == "created":
-        points.append(f"Confirm order creation for {fulfilled_count} item(s).")
-        for item_data in order_items:
-            item_name = _get_value(item_data, "product_name", "Unknown Item")
-            fulfilled_qty = _get_value(item_data, "quantity_fulfilled", 0)
-            requested_qty = _get_value(item_data, "quantity_requested", 0)
-            item_status = _get_value(item_data, "status", "unknown")
-            promo = _get_value(item_data, "promotion_details", None)
-
-            if item_status == "created":
-                points.append(f"Confirm {fulfilled_qty} x {item_name} has been ordered.")
-                if promo:
-                    points.append(f"Mention applied promotion for {item_name}: {promo}")
-            elif item_status == "out_of_stock":
-                points.append(f"Inform that {item_name} (requested {requested_qty}) is out of stock.")
-    
-    # Add points for alternatives if any
-    if alternatives:
-        points.append("Suggest alternative products for out-of-stock items.")
-        for alt_info in alternatives:
-            orig_name = _get_value(alt_info, "original_product_name", "Original Item")
-            sugg_name = _get_value(alt_info, "suggested_product_name", "Alternative Item")
-            reason = _get_value(alt_info, "reason", "Similar product")
-            points.append(f"For {orig_name}, suggest {sugg_name} because: {reason}")
-    
-    # Add points for processing notes
-    if processing_notes:
-        points.append("Additional notes:")
-        # Check if processing_notes is a list of strings
-        if isinstance(processing_notes, list) and all(isinstance(note, str) for note in processing_notes):
-             points.append(chr(10).join(processing_notes))
-        elif isinstance(processing_notes, str): # Handle if it's just a single string
-             points.append(processing_notes)
-
-    # Add information about total price if applicable
-    if overall_status in ["created", "partially_fulfilled"] and total_price is not None:
-        points.append(f"Mention the total price: ${total_price:.2f}") # Format price
-    
-    # General closing point
-    points.append("Thank the customer for their business and offer further assistance")
-    
-    return points
-
-def determine_greeting_style(tone_info: Dict[str, Any]) -> str:
-    """
-    Determine the appropriate greeting style based on tone analysis.
-    
-    Args:
-        tone_info: Dictionary containing tone analysis information
-        
-    Returns:
-        A greeting style string: "formal", "casual", "friendly", etc.
-    """
-    detected_tone = tone_info.get("tone", "neutral")
-    formality_level = tone_info.get("formality_level", 3)
-    
-    if detected_tone == "formal" or formality_level >= 4:
-        return "formal"
-    elif detected_tone == "casual" and formality_level <= 2:
-        return "casual"
-    elif detected_tone == "friendly":
-        return "friendly"
-    elif detected_tone == "urgent":
-        return "direct"
-    else:
-        # Default to a professional greeting
-        return "professional"
-
-def determine_closing_style(tone_info: Dict[str, Any]) -> str:
-    """
-    Determine the appropriate closing style based on tone analysis.
-    
-    Args:
-        tone_info: Dictionary containing tone analysis information
-        
-    Returns:
-        A closing style string: "formal", "casual", "warm", etc.
-    """
-    detected_tone = tone_info.get("tone", "neutral")
-    formality_level = tone_info.get("formality_level", 3)
-    
-    if detected_tone == "formal" or formality_level >= 4:
-        return "formal"
-    elif detected_tone == "friendly":
-        return "warm"
-    elif detected_tone == "casual" and formality_level <= 2:
-        return "casual"
-    elif detected_tone == "urgent":
-        return "efficient"
-    else:
-        # Default to a professional closing
-        return "professional"
-
-async def process_customer_signals(customer_signals: List[Dict[str, Any]], email_body: str, 
-                                email_type: str, llm) -> List[str]:
-    """
-    Process customer signals to generate personalized response elements using an LLM.
-    
-    Args:
-        customer_signals: List of detected customer signals
-        email_body: The full email body text
-        email_type: Type of email (order_request, product_inquiry)
-        llm: Language model for processing
-        
-    Returns:
-        List of personalization phrases to include in the response
-    """
-    if not customer_signals:
-        return []
-    
-    # Create a prompt to process the signals
-    signals_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
-        You're an expert in customer communication who understands sales psychology.
-        Based on the customer signals in an email, suggest specific personalization phrases 
-        that should be included in the response to build rapport and show understanding.
-        
-        Suggestions should be specific phrases (not just concepts), relevant to the email type,
-        and phrased naturally as they would appear in the response.
-        
-        Limit your suggestions to 2-3 truly important phrases. Quality over quantity.
-        """),
-        HumanMessage(content=f"""
-        Email Type: {email_type}
-        
-        Customer Signals Detected:
-        {json.dumps(customer_signals, indent=2)}
-        
-        Email Excerpt:
-        {email_body[:500]}... (truncated)
-        
-        Based on these signals, suggest 2-3 specific personalization phrases to include in my response.
-        Return only the phrases, one per line.
-        """)
-    ])
-    
-    # Get personalization suggestions
-    try:
-        response = await (signals_prompt | llm | StrOutputParser()).ainvoke({})
-        
-        # Split into individual phrases
-        phrases = [phrase.strip() for phrase in response.split('\n') if phrase.strip()]
-        
-        # Filter out any non-phrases or excessively long entries
-        phrases = [phrase for phrase in phrases if 3 <= len(phrase.split()) <= 15]
-        
-        return phrases[:3]  # Limit to at most 3 phrases
-        
-    except Exception as e:
-        print(f"Error processing customer signals: {e}")
-        return []
-
 async def verify_response_quality(response: str, email_body: str, email_subject: str,
-                               response_points: List[str], email_type: str, 
-                               tone_info: Dict[str, Any], llm) -> str:
+                               email_analysis_json: str, processing_results_json: str, # ADDED for context
+                               email_type: str, 
+                               tone_info: Dict[str, Any], llm: ChatOpenAI) -> str:
     """
-    Verify the quality and completeness of the generated response using an LLM.
+    Verify and potentially fix issues in the generated natural language response using an LLM.
+    The LLM is now responsible for identifying and fixing issues based on comprehensive context.
     
     Args:
-        response: The generated response text
-        email_body: The original customer email
-        email_subject: The subject of the customer email
-        response_points: The points that should be covered
-        email_type: Type of email (order_request, product_inquiry)
-        tone_info: Dictionary containing tone analysis information
-        llm: Language model for verification
+        response: The generated email response string
+        email_body: Original customer email body
+        email_subject: Original email subject
+        email_analysis_json: JSON string of the full email analysis for context.
+        processing_results_json: JSON string of the order/inquiry results for context.
+        email_type: Classification of the email
+        tone_info: Analysis of customer's tone (detected_tone, formality_level)
+        llm: Language model for verification and fixing the response string
         
     Returns:
-        Verified (potentially improved) response text
+        Verified (potentially improved) response string
     """
-    # Check if the response is too short
-    if len(response.split()) < 30:
-        print("Response is too short, generating a more comprehensive version")
-        # This likely indicates an issue with the generation - retry with a different approach
-        return await generate_fallback_response(
-            email_body=email_body,
-            email_subject=email_subject,
-            response_points=response_points,
-            email_type=email_type,
-            tone_info=tone_info,
-            llm=llm
-        )
-    
-    # Create a prompt to verify the response
-    verification_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content="""
-        You are a quality assurance specialist for customer email responses.
-        Your job is to verify that a response meets all quality criteria:
-        
-        1. Contains all required information points
-        2. Matches the appropriate tone and style
-        3. Is natural and not template-like
-        4. Is complete and professionally written
-        5. Addresses the customer's concerns
-        
-        If the response needs improvements, provide a revised version.
-        If it meets all criteria, return it unchanged.
-        """),
-        HumanMessage(content=f"""
-        Original Customer Email Subject: {email_subject}
-        
-        Original Customer Email (excerpt):
-        {email_body[:300]}... (truncated)
-        
-        Email Type: {email_type}
-        
-        Response Tone Information:
-        {json.dumps(tone_info, indent=2)}
-        
-        Required Response Points:
-        {chr(10).join(f"- {point}" for point in response_points)}
-        
-        Generated Response:
-        {response}
-        
-        Evaluate the response against the quality criteria. If it meets all criteria, respond with "RESPONSE MEETS CRITERIA". 
-        If it needs improvement, provide a revised and improved version (keeping the same general structure).
-        """)
-    ])
-    
-    # Get verification result
-    verification_result = await (verification_prompt | llm | StrOutputParser()).ainvoke({})
-    
-    # Check if the response meets criteria
-    if "RESPONSE MEETS CRITERIA" in verification_result:
-        return response
-    
-    # Otherwise, the verification provided an improved version
-    # Check that the response isn't just the verification text
-    if len(verification_result.split()) > 20 and "Dear" in verification_result:
-        return verification_result
-    
-    # If the verification result doesn't look like a proper response, return the original
-    return response
+    print("Verifying response quality using LLM...")
 
-async def generate_fallback_response(email_body: str, email_subject: str, response_points: List[str],
-                                  email_type: str, tone_info: Dict[str, Any], llm) -> str:
-    """
-    Generate a fallback response when primary generation fails or needs supplementation.
-    
-    Args:
-        email_body: The original customer email
-        email_subject: The subject of the customer email
-        response_points: The points that should be covered
-        email_type: Type of email (order_request, product_inquiry)
-        tone_info: Dictionary containing tone analysis information
-        llm: Language model for generation
-        
-    Returns:
-        Fallback response text
-    """
-    # Create a direct prompt for response generation
-    fallback_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=f"""
-        You are a helpful, friendly customer service representative for a fashion retail store.
-        Generate a professional response in {tone_info.get('tone', 'professional')} tone
-        with formality level {tone_info.get('formality_level', 3)} (1=very casual, 5=very formal).
-        
-        Your response must include ALL the following information points, presented naturally:
-        {chr(10).join(f"- {point}" for point in response_points)}
-        
-        Make the response personal, friendly, and conversational, not robotic or template-like.
-        """),
-        HumanMessage(content=f"""
-        Customer Email Subject: {email_subject}
-        
-        Customer Email:
-        {email_body}
-        
-        Write a complete, helpful response addressing all required points.
-        """)
-    ])
-    
-    # Generate fallback response
-    fallback_response = await (fallback_prompt | llm | StrOutputParser()).ainvoke({})
-    
-    return fallback_response
+    # The LLM will perform the checks based on the prompt.
+    # Python-based error identification is removed.
 
-# Keep extract_customer_name defined locally in this file for now
-def extract_customer_name(email_body: str) -> Optional[str]:
-    """Extract customer name from email body."""
-    # Placeholder implementation: Use LLM or regex
-    # ... existing code ...
+    verification_prompt_payload = {
+        "email_subject": email_subject,
+        "email_body": email_body,
+        "email_analysis_json": email_analysis_json,
+        "processing_results_json": processing_results_json,
+        "email_type": email_type,
+        "expected_tone": tone_info.get("detected_tone", tone_info.get("tone", "neutral")),
+        "formality_level": tone_info.get("formality_level", 3),
+        "original_response": response
+    }
+    
+    # Check for None values in payload that the prompt template might not expect as None
+    # For example, processing_results_json might be an empty dict {} stringified, which is fine.
+    # Ensure all keys expected by response_quality_verification_prompt_template are present.
+    # The template now expects: email_subject, email_body, email_analysis_json, processing_results_json,
+    # email_type, expected_tone, formality_level, original_response.
+
+    verification_prompt = response_quality_verification_prompt_template.invoke(verification_prompt_payload)
+    
+    try:
+        fixed_response = await (verification_prompt | llm | StrOutputParser()).ainvoke({})
+        # The LLM might return the original response if no changes are needed, or a note.
+        # We should check if the fixed_response is substantially different or contains specific keywords
+        # indicating no changes were made, though this adds string matching back.
+        # For now, assume the LLM returns the (potentially) improved response.
+        if fixed_response.strip() != response.strip():
+             print("Response verification: LLM suggested revisions.")
+        else:
+             print("Response verification: LLM confirmed response quality or made no major changes.")
+        return fixed_response
+    except Exception as e:
+        print(f"Response verification: Failed to fix/review issues with LLM: {e}")
+        return response # Fallback to original response if LLM verification fails
 
 """ {cell}
 ### Response Composer Agent Implementation Notes

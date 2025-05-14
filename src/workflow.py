@@ -13,10 +13,11 @@ The workflow implements a directed graph:
 """
 from typing import Dict, List, Any, Annotated, TypedDict, Optional
 from langgraph.graph import StateGraph, END
+from networkx import Graph
 from .state import HermesState
 
 # Import agent node functions
-from .agents.email_classifier import analyze_email_node
+from .agents.email_analyzer import analyze_email_node
 from .agents.order_processor import process_order_node
 from .agents.inquiry_responder import process_inquiry_node
 from .agents.response_composer import compose_response_node
@@ -44,26 +45,44 @@ def create_hermes_workflow(config: Optional[Dict[str, Any]] = None) -> StateGrap
     workflow.set_entry_point("email_analyzer")
     
     # Define conditional routing based on email classification
-    def route_by_classification(state: HermesState) -> str:
+    def route_by_classification(state: Dict[str, Any]) -> str:
         """
-        Route to the appropriate agent based on email classification.
-        """
-        # Access email_analysis attribute from the state object
-        email_analysis_data = state.email_analysis
+        Routes workflow based on email classification.
         
-        if email_analysis_data is None:
-            # If analysis failed or is missing, default to inquiry responder
-            print("Routing: Email analysis missing, defaulting to inquiry_responder")
+        Args:
+            state: The current state dictionary from LangGraph
+            
+        Returns:
+            The next node to route to ("order_processor" or "inquiry_responder")
+        """
+        # Type annotation indicates Dict, but we can reconstruct HermesState for safety
+        typed_state = HermesState(
+            email_id=state.get("email_id", "unknown"),
+            email_analysis=state.get("email_analysis"),
+            product_catalog_df=state.get("product_catalog_df"),
+            vector_store=state.get("vector_store")
+        )
+        
+        # Also reconstruct EmailAnalysis if available
+        email_analysis = None
+        if typed_state.email_analysis:
+            try:
+                email_analysis = EmailAnalysis(**typed_state.email_analysis)
+            except Exception as e:
+                print(f"Warning: Could not reconstruct EmailAnalysis: {e}")
+        
+        # Check if email_analysis exists and is not None
+        if not typed_state.email_analysis:
+            print("Warning: email_analysis is missing from state. Defaulting to inquiry_responder.")
             return "inquiry_responder"
         
-        # Access classification from the email_analysis_data dictionary
-        classification = email_analysis_data.get("classification")
+        # Get classification from reconstructed object if possible
+        classification = email_analysis.classification if email_analysis else typed_state.email_analysis.get("classification")
         
+        # Route based on classification
         if classification == "order_request":
-            print("Routing: Classification is order_request, routing to order_processor")
             return "order_processor"
-        else:  # product_inquiry or anything else
-            print(f"Routing: Classification is '{classification}', routing to inquiry_responder")
+        else:  # Either "product_inquiry" or unknown
             return "inquiry_responder"
     
     # Connect email_analyzer to either order_processor or inquiry_responder
@@ -89,18 +108,7 @@ def create_hermes_workflow(config: Optional[Dict[str, Any]] = None) -> StateGrap
     return compiled_workflow
 
 """ {cell}
-# Visualize the Workflow Graph
-# Uncomment to see a visualization of the workflow
-
-# from IPython.display import display
-# from langgraph.graph.graph import StateGraph
-
-# workflow = create_hermes_workflow()
-# display(workflow)
-"""
-
-""" {cell}
-### Pipeline Implementation Notes
+### Workflow Implementation Notes
 
 The Hermes workflow is implemented using LangGraph's StateGraph, which provides:
 
@@ -128,5 +136,5 @@ The Hermes workflow is implemented using LangGraph's StateGraph, which provides:
    - If the email analyzer fails to classify an email, it defaults to the inquiry path
    - Each agent has internal error handling to prevent workflow failures
 
-This graph structure balances specialization (different agents for different tasks) with consistent outputs (all responses go through the Response Composer), ensuring robustness and maintainability.
-""" 
+This Graph structure balances specialization (different agents for different tasks) with consistent outputs (all responses go through the Response Composer), ensuring robustness and maintainability.
+"""

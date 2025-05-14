@@ -6,8 +6,8 @@ from unittest.mock import patch, MagicMock
 import pandas as pd
 from typing import Dict, Any, List, Optional
 
-from src.agents.email_classifier import EmailAnalysis, ProductReference, CustomerSignal
-from src.agents.inquiry_responder import process_inquiry_node, InquiryResponse, ProductInformation, QuestionAnswer
+from src.agents.inquiry_responder import process_inquiry_node
+from src.state import EmailAnalysis, ProductReference, CustomerSignal, InquiryResponse, ProductInformation, QuestionAnswer
 from src.state import HermesState
 from src.config import HermesConfig
 from src.tools.catalog_tools import Product, ProductNotFound

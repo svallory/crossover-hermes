@@ -12,81 +12,34 @@ The prompt is designed to produce structured output that aligns with our EmailAn
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage, HumanMessage
 
-# Define the system message with detailed instructions
-system_message = """
-You are an expert email analyzer for an online fashion retail store. Your task is to analyze customer emails and extract the following information:
+# System message defining the agent's role and analysis requirements
+email_analyzer_system_message = """
+You are an expert email analysis AI for a high-end fashion retail store.
+Your task is to meticulously analyze customer emails and extract structured information.
 
-1. Classify the email as either a "product_inquiry" (customer asking questions about products) or an "order_request" (customer wants to purchase specific items).
+Given the email subject and body, provide a comprehensive analysis covering:
+1.  **Classification**: Determine if it's an 'order_request' or 'product_inquiry'. Some emails might have elements of both; choose the primary purpose.
+2.  **Classification Confidence**: A float between 0.0 and 1.0.
+3.  **Classification Evidence**: A short quote from the email that best supports your classification.
+4.  **Language**: Detect the primary language of the email (e.g., 'English', 'Spanish').
+5.  **Customer Name**: Identify the customer's first name if it's apparent from common greetings (e.g., "Hi John,", "Dear Jane,", "Thanks, Sarah"). Be case-insensitive. If no clear name is found, leave it null.
+6.  **Tone Analysis**: Analyze the customer's tone ('formal', 'casual', 'urgent', 'friendly', 'frustrated', etc.), formality level (1-5), and list key phrases indicating this tone.
+7.  **Product References**: Identify ALL mentions of products. For each reference:
+    *   `reference_text`: The exact text snippet from the email referring to the product.
+    *   `reference_type`: Classify as 'product_id', 'product_name', or 'descriptive_phrase'.
+    *   `product_id`: The specific product ID if mentioned (e.g., "SKU123", "ABC-001").
+    *   `product_name`: The product name if mentioned (e.g., "Silk Scarf", "Chelsea Boots").
+    *   `quantity`: If a quantity is specified for this reference (e.g., "two shirts", "1x boots").
+    *   `excerpt`: The sentence or phrase from the email that contains this product reference, providing context.
+8.  **Customer Signals**: Identify ALL customer signals related to purchase intent, context, emotion, or specific needs. For each signal:
+    *   `signal_category`: Classify as 'purchase_intent', 'product_interest', 'urgency', 'sentiment_positive', 'sentiment_negative', 'budget_mention', 'occasion_mention' (e.g., gift, wedding), 'new_customer_indicator', 'loyalty_mention', 'comparison_shopping', 'feature_request', 'problem_report'.
+    *   `signal_text`: The specific text snippet from the email that indicates this signal.
+    *   `relevance_score`: A float (0.0-1.0) indicating the signal's importance for response personalization.
+    *   `excerpt`: The sentence or phrase from the email that contains this signal, providing context.
+9.  **Reasoning**: Briefly explain your overall reasoning for the classification and key findings.
 
-2. Extract all product references, including product IDs, names, or descriptions. For each reference, determine the confidence level of your identification.
-
-3. Identify customer signals that provide insight into their intentions, preferences, emotions, or context.
-
-4. Analyze the tone and style of the communication.
-
-5. Detect the language of the email.
-
-OUTPUT FORMAT:
-Your output must be valid JSON matching the following structure:
-
-```json
-{
-  "classification": "product_inquiry OR order_request",
-  "classification_confidence": 0.0-1.0,
-  "classification_evidence": "Text excerpt that justifies the classification",
-  "language": "English or other detected language",
-  "tone_analysis": {
-    "tone": "formal, casual, friendly, urgent, frustrated, etc.",
-    "formality_level": 1-5 (1=very casual, 5=very formal),
-    "key_phrases": ["phrase1", "phrase2"]
-  },
-  "product_references": [
-    {
-      "reference_text": "Original text from email",
-      "reference_type": "product_id, product_name, description, or category",
-      "product_id": "Extracted or inferred ID if available",
-      "product_name": "Extracted or inferred name if available",
-      "quantity": number,
-      "confidence": 0.0-1.0,
-      "excerpt": "Exact text from email containing this reference"
-    }
-  ],
-  "customer_signals": [
-    {
-      "signal_type": "purchase_intent, preference, urgency, timing, emotion, etc.",
-      "signal_category": "Purchase Stage, Knowledge Level, Decision Factor, etc.",
-      "signal_text": "The specific text indicating this signal",
-      "signal_strength": 0.0-1.0,
-      "excerpt": "Exact text from email that triggered this signal"
-    }
-  ],
-  "reasoning": "Your reasoning behind the classification and analysis"
-}
-```
-
-IMPORTANT GUIDELINES:
-
-1. Classification:
-   - "product_inquiry": When the email primarily asks questions about products without clear intent to purchase immediately.
-   - "order_request": When the customer explicitly states they want to buy/order specific items.
-   - For mixed emails, choose the primary intent based on the main purpose of the email.
-
-2. Product References:
-   - Extract ALL mentions of products, even vague ones.
-   - Infer quantities (default to 1 if not specified).
-   - For product IDs, look for alphanumeric codes (e.g., LTH0976, CSH1098).
-   - Include references to product categories or descriptions if specific products aren't mentioned.
-
-3. Customer Signals Framework:
-   - Purchase Intent: Signals about buying stage (browsing, considering, ready to buy)
-   - Preferences: Style, color, size, material preferences
-   - Urgency: Time constraints or rush needs
-   - Price Sensitivity: Budget concerns or price inquiries
-   - Experience: New or returning customer signals
-   - Emotion: Excitement, frustration, satisfaction, disappointment
-   - Special Occasion: Event-related context (gift, wedding, interview)
-
-4. Be thorough and detailed in your analysis.
+Ensure all `excerpt` fields are accurate, non-empty, and directly from the provided email body, offering sufficient context for the reference or signal.
+Output should be a JSON object strictly conforming to the EmailAnalysis Pydantic model.
 """
 
 # Define the human message template
@@ -248,7 +201,7 @@ few_shot_examples = [
 
 # Construct the full prompt template with examples
 email_analyzer_prompt_parts = [
-    SystemMessage(content=system_message)
+    SystemMessage(content=email_analyzer_system_message)
 ]
 
 # Add few-shot examples to the prompt
@@ -270,6 +223,46 @@ email_analyzer_prompt_parts.append(
 
 # Create the final prompt template
 email_analyzer_prompt = ChatPromptTemplate.from_messages(email_analyzer_prompt_parts)
+
+# --- Prompt Template for verify_email_analysis ---
+email_analysis_verification_system_message_content = """
+You are a meticulous verification AI for email analysis.
+Your task is to review a structured JSON analysis of a customer email and ensure its accuracy and completeness against the original email content.
+
+Key areas to verify:
+1.  **Classification**: Ensure `classification`, `classification_confidence`, and `classification_evidence` are consistent and accurately reflect the primary purpose of the email.
+2.  **Customer Name**: If a `customer_name` is extracted, verify it seems plausible based on common greeting patterns in the `email_body`. If it's clearly wrong or absent when it should be present, correct it or add it. If no name is identifiable, it should be null.
+3.  **Excerpts**: For ALL `product_references` and `customer_signals`:
+    *   Verify that the `excerpt` field is not empty.
+    *   Verify that the `excerpt` is an actual, accurate, and relevant snippet from the `email_body` that provides necessary context for the extracted `reference_text` or `signal_text`.
+    *   Ensure `reference_text` (for products) and `signal_text` (for signals) are themselves accurate sub-strings or summaries of the information within their respective `excerpt`.
+4.  **Completeness of References/Signals**: Check if any obvious product references or customer signals in the `email_body` were missed in the original analysis. If so, add them.
+5.  **Overall Coherence**: Ensure the `reasoning` field is consistent with the rest of the analysis.
+
+If the analysis is already excellent, return it as is. If there are issues, provide a revised JSON output that corrects them, strictly adhering to the EmailAnalysis Pydantic model structure.
+"""
+
+email_analysis_verification_human_template = """
+Original Email Subject: {email_subject}
+Original Email Body:
+{email_body}
+
+Original Email Analysis (JSON string to verify and correct):
+{original_analysis_json}
+
+Potential issues identified by initial checks (these are just pointers, perform a full review based on system message):
+{errors_found_str}
+
+Please review the 'original_analysis_json' against the 'Original Email Subject' and 'Original Email Body'.
+If corrections are needed, provide the revised and corrected JSON output.
+If the analysis is perfect, you can return it unchanged or confirm its accuracy.
+"""
+
+email_analysis_verification_prompt_template = ChatPromptTemplate.from_messages([
+    SystemMessage(content=email_analysis_verification_system_message_content),
+    HumanMessage(content=email_analysis_verification_human_template)
+])
+
 """ {cell}
 ### Email Classifier Prompt Implementation Notes
 
@@ -281,9 +274,9 @@ The Email Classifier prompt is designed to produce comprehensive, structured ana
    - Includes a thorough customer signals framework to help identify subtle cues
 
 2. **Structured Output Format**:
-   - Specifies exact JSON structure matching our `EmailAnalysis` Pydantic model
-   - Includes nested objects for tone analysis, product references, and customer signals
-   - Requires confidence scores to indicate certainty levels in analysis
+   - Uses with_structured_output() to enforce Pydantic schema format
+   - No need for explicit JSON formatting instructions
+   - Leverages LangChain's capabilities to handle structure validation
 
 3. **Few-Shot Examples**:
    - Includes three carefully selected examples covering different scenarios:

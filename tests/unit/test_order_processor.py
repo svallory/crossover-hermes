@@ -7,7 +7,7 @@ from typing import Dict, Any, List
 import pandas as pd
 
 from src.agents.order_processor import process_order_node, OrderProcessingResult, OrderItem, AlternativeProduct
-from src.agents.email_classifier import EmailAnalysis, ProductReference
+from src.state import EmailAnalysis, ProductReference
 from src.state import HermesState
 from src.config import HermesConfig
 from src.tools.order_tools import StockStatus, PromotionDetails, StockUpdateResult
@@ -61,7 +61,6 @@ class TestOrderProcessor(unittest.TestCase):
     @patch('src.agents.order_processor.extract_promotion')
     @patch('src.agents.order_processor.resolve_product_reference')
     @patch('src.agents.order_processor.find_alternatives_for_oos')
-    @patch('src.agents.order_processor.update_stock')
     @patch('src.agents.order_processor.check_stock')
     @patch('src.agents.order_processor.find_product_by_name')
     @patch('src.agents.order_processor.find_product_by_id')
@@ -72,7 +71,6 @@ class TestOrderProcessor(unittest.TestCase):
         mock_find_by_id,
         mock_find_by_name, 
         mock_check_stock, 
-        mock_update_stock, 
         mock_find_alternatives,
         mock_resolve_reference,
         mock_extract_promotion,
@@ -138,7 +136,13 @@ class TestOrderProcessor(unittest.TestCase):
         self.assertEqual(len(order_result["order_items"]), 1)
         self.assertEqual(order_result["order_items"][0]["status"], "created")
         self.assertEqual(order_result["fulfilled_items_count"], 1)
-        mock_update_stock.assert_called_once_with(product_id="RSG8901", quantity_to_decrement=1, product_catalog_df=state.product_catalog_df)
+
+        # Verify that the product_catalog_df in the state has been updated
+        self.assertIsNotNone(state.product_catalog_df, "Product catalog DataFrame should exist in state.")
+        updated_product_row = state.product_catalog_df[state.product_catalog_df['product_id'] == "RSG8901"]
+        self.assertFalse(updated_product_row.empty, "Product RSG8901 should exist in the updated catalog.")
+        # The 'stock_amount' column might be object type if read from string, ensure comparison is with numeric 0
+        self.assertEqual(pd.to_numeric(updated_product_row['stock_amount'].iloc[0]), 0, "Stock amount for RSG8901 should be 0 after order.")
     
     @patch('src.agents.order_processor.verify_order_processing')
     @patch('src.agents.order_processor.extract_promotion')
@@ -211,7 +215,7 @@ class TestOrderProcessor(unittest.TestCase):
         mock_find_alternatives.return_value = [
             AlternativeProduct(
                 original_product_id=product_data["product_id"], original_product_name=product_data["name"],
-                suggested_product_id="BKR0123", suggested_product_name="Biker Shorts", 
+                product_id="BKR0123", product_name="Biker Shorts", 
                 stock_available=10, price=19.99, reason="Similar summer accessory"
             ).model_dump() # Ensure it's a dict if the agent node expects it
         ]

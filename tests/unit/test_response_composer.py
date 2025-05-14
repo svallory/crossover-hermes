@@ -7,9 +7,7 @@ from typing import Dict, Any, List, Optional
 
 from src.agents.response_composer import compose_response_node
 from src.tools.response_tools import ResponseCompositionPlan, generate_natural_response
-from src.agents.email_classifier import EmailAnalysis, ProductReference, CustomerSignal
-from src.agents.order_processor import OrderProcessingResult, OrderItem
-from src.agents.inquiry_responder import InquiryResponse, ProductInformation
+from src.state import EmailAnalysis, ProductReference, CustomerSignal, OrderProcessingResult, OrderItem, InquiryResponse, ProductInformation
 from src.state import HermesState
 from src.config import HermesConfig
 from tests.fixtures import get_test_email, get_test_product, get_test_cases
@@ -388,9 +386,9 @@ The Team
         order_result = OrderProcessingResult(
             email_id="E007",
             order_items=[
-                OrderItem(product_id="RSG8901", product_name="Retro Sunglasses", 
-                          quantity_requested=2, quantity_fulfilled=1, status="out_of_stock", 
-                          unit_price=product_data.get("price"))
+                OrderItem(product_id="RSG8901", product_name="Retro Sunglasses",
+                          quantity_requested=2, quantity_fulfilled=1, status="out_of_stock",
+                          price=product_data.get("price"))
             ],
             overall_status="out_of_stock",
             out_of_stock_items_count=1,
@@ -491,7 +489,7 @@ The Hermes Team"""
         order_result = OrderProcessingResult(
             email_id=email_data["email_id"],
             order_items=[
-                OrderItem(product_id=product_data["product_id"], product_name=product_data["name"], quantity_requested=1, quantity_fulfilled=1, status="created", unit_price=product_data.get("price"), promotion_details="Buy one, get one 50% off! (applied to second item)")
+                OrderItem(product_id=product_data["product_id"], product_name=product_data["name"], quantity_requested=1, quantity_fulfilled=1, status="created", price=product_data.get("price"), promotion_details="Buy one, get one 50% off! (applied to second item)")
             ],
             overall_status="created",
             fulfilled_items_count=1, # Should be 1 order line item, 1 quantity

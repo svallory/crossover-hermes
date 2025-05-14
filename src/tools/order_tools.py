@@ -21,17 +21,8 @@ import pandas as pd
 import re
 import os
 import sys
-
-# Reuse Product model from catalog_tools (in real implementation, this would be imported)
-class Product(BaseModel):
-    """Represents a product from the catalog."""
-    product_id: str = Field(description="Unique identifier for the product.")
-    name: str = Field(description="Name of the product.")
-    category: str = Field(description="Category the product belongs to.")
-    stock_amount: int = Field(description="Current stock level.")
-    description: str = Field(description="Detailed description of the product.")
-    season: Optional[str] = Field(default=None, description="Recommended season for the product.")
-    price: Optional[float] = Field(default=None, description="Price of the product.")
+from ..state import Product, AlternativeProduct # Corrected import from ..state
+from ..model.errors import ProductNotFound # Import from new errors module
 
 class ProductNotFound(BaseModel):
     """Indicates that a product was not found."""
@@ -57,15 +48,15 @@ class StockUpdateResult(BaseModel):
     status: str  # "success", "insufficient_stock", "product_not_found"
     message: Optional[str] = None
 
-class AlternativeProduct(BaseModel):
-    """Details of an alternative product suggested for an out-of-stock item."""
-    original_product_id: str
-    original_product_name: str
-    suggested_product_id: str
-    suggested_product_name: str
-    stock_available: int
-    price: Optional[float] = None
-    reason: str
+# class AlternativeProduct(BaseModel):
+#     """Details of an alternative product suggested for an out-of-stock item."""
+#     original_product_id: str
+#     original_product_name: str
+#     suggested_product_id: str
+#     suggested_product_name: str
+#     stock_available: int
+#     price: Optional[float] = None
+#     reason: str
 
 class PromotionDetails(BaseModel):
     """Details of an extracted promotion."""
@@ -79,23 +70,25 @@ class PromotionDetails(BaseModel):
 # --- Tool Definitions ---
 
 @tool
-def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStatus, ProductNotFound]:
+def check_stock(product_id: str, requested_quantity: int = 1, product_catalog_df: pd.DataFrame = None) -> Union[StockStatus, ProductNotFound]:
     """    Check if a product is in stock and has enough inventory to fulfill an order.
     This tool validates stock levels before processing an order.
     
     Args:
         product_id: The Product ID to check availability for.
         requested_quantity: The number of items the customer wants to order. Defaults to 1.
+        product_catalog_df: The pandas DataFrame containing the product catalog. This will be injected by the agent.
         
     Returns:
         A StockStatus object with availability information, or ProductNotFound if the product ID is invalid.
     """
-    # Path to sample data files
-    sample_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'sample-data'))
-    products_path = os.path.join(sample_dir, 'products.csv')
-    
-    # Load the product catalog
-    product_catalog_df = pd.read_csv(products_path)
+    if product_catalog_df is None:
+        # This case should ideally not happen if the agent correctly injects the DataFrame.
+        # Raise an error or return a specific error model if the DataFrame is critical and missing.
+        return ProductNotFound(
+            message="Product catalog DataFrame not provided to check_stock tool.",
+            query_product_id=product_id
+        )
     
     # Standardize the product ID format
     product_id = product_id.replace(" ", "").upper()
@@ -131,23 +124,30 @@ def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStat
     )
 
 @tool
-def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResult:
+def update_stock(product_id: str, quantity_to_decrement: int, product_catalog_df: pd.DataFrame = None) -> StockUpdateResult:
     """    Update the stock level for a product by decrementing the specified quantity.
-    This should be called when an order is confirmed to be fulfilled.
+    This should be called when an order is confirmed to be fulfilled. IMPORTANT: This tool modifies the DataFrame in place.
     
     Args:
         product_id: The Product ID for which to update stock.
         quantity_to_decrement: The number of items to decrement from stock (must be positive).
+        product_catalog_df: The pandas DataFrame containing the product catalog. This will be injected by the agent and modified by this tool.
         
     Returns:
         A StockUpdateResult object detailing the outcome of the stock update.
     """
-    # Path to sample data files
-    sample_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'sample-data'))
-    products_path = os.path.join(sample_dir, 'products.csv')
-    
-    # Load the product catalog
-    product_catalog_df = pd.read_csv(products_path)
+    if product_catalog_df is None:
+        # This case should ideally not happen.
+        # For a tool that modifies data, operating on a missing DataFrame is problematic.
+        return StockUpdateResult(
+            product_id=product_id,
+            product_name="Unknown",
+            previous_stock=0,
+            new_stock=0,
+            quantity_changed=0,
+            status="error_missing_dataframe",
+            message="Product catalog DataFrame not provided to update_stock tool."
+        )
     
     # Validation
     if quantity_to_decrement <= 0:
@@ -209,23 +209,24 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResu
     )
 
 @tool
-def find_alternatives_for_oos(original_product_id: str, limit: int = 2) -> Union[List[AlternativeProduct], ProductNotFound]:
+def find_alternatives_for_oos(original_product_id: str, product_catalog_df: pd.DataFrame = None, limit: int = 2) -> Union[List[AlternativeProduct], ProductNotFound]:
     """    Find and suggest in-stock alternative products if a requested item is out of stock.
     This helps provide customers with options when their desired item isn't available.
     
     Args:
         original_product_id: The Product ID for which to find alternatives.
+        product_catalog_df: The pandas DataFrame containing the product catalog. This will be injected by the agent.
         limit: Maximum number of alternatives to suggest. Defaults to 2.
         
     Returns:
         A list of AlternativeProduct objects with suggested alternatives, or ProductNotFound if the original product ID is invalid.
     """
-    # Path to sample data files
-    sample_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'sample-data'))
-    products_path = os.path.join(sample_dir, 'products.csv')
-    
-    # Load the product catalog
-    product_catalog_df = pd.read_csv(products_path)
+    if product_catalog_df is None:
+        # This case should ideally not happen.
+        return ProductNotFound(
+            message="Product catalog DataFrame not provided to find_alternatives_for_oos tool.",
+            query_product_id=original_product_id
+        )
     
     # First, check if the original product exists
     original_product_data = product_catalog_df[product_catalog_df['product_id'] == original_product_id]
@@ -252,8 +253,8 @@ def find_alternatives_for_oos(original_product_id: str, limit: int = 2) -> Union
         return [AlternativeProduct(
             original_product_id=original_product_id,
             original_product_name=original_name,
-            suggested_product_id="",
-            suggested_product_name="",
+            product_id="",
+            product_name="",
             stock_available=0,
             reason="No alternatives with available stock found in the same category."
         )]
@@ -279,8 +280,8 @@ def find_alternatives_for_oos(original_product_id: str, limit: int = 2) -> Union
         results.append(AlternativeProduct(
             original_product_id=original_product_id,
             original_product_name=original_name,
-            suggested_product_id=alt_product_id,
-            suggested_product_name=alt_name,
+            product_id=alt_product_id,
+            product_name=alt_name,
             stock_available=alt_stock,
             price=alt_price,
             reason=reason
@@ -425,4 +426,6 @@ The order tools provide essential functionality for inventory management and ord
 5. **Helper Functions**: The `extract_promotion_text` helper extracts full sentences containing promotions for natural-sounding responses.
 
 These tools are designed to be called by the Order Processor agent when processing customer order requests, ensuring accurate inventory management and detailed order information.
+
+**Scalability Note**: While pandas DataFrames are suitable for the current scale of this project, for significantly larger product catalogs (e.g., 100,000+ products), direct DataFrame operations for every lookup/update, especially stock updates, might become a performance bottleneck. In such production scenarios, a dedicated database (SQL or NoSQL) for structured product data and stock management, used in conjunction with the vector store, would be a more scalable approach.
 """ 

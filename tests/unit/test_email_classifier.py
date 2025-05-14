@@ -8,7 +8,8 @@ from typing import Dict, Any
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
-from src.agents.email_classifier import analyze_email_node, EmailAnalysis, ProductReference, CustomerSignal
+from src.agents.email_analyzer import analyze_email_node
+from src.state import EmailAnalysis, ProductReference, CustomerSignal
 from src.state import HermesState
 from src.config import HermesConfig
 

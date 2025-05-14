@@ -22,8 +22,28 @@ from .vectorstore import (
     create_product_vectorstore_batched, 
     load_product_vectorstore
 )
-from .pipeline import create_hermes_workflow
+from .workflow import create_hermes_workflow
 from .output import format_and_write_final_outputs
+
+# Google Sheet Document ID for input data
+INPUT_SPREADSHEET_ID = '14fKHsblfqZfWj3iAaM2oA51TlYfQlFT4WKo52fVaQ9U'
+
+def read_data_from_gsheet(document_id: str, sheet_name: str) -> pd.DataFrame:
+    """Reads a sheet from a Google Spreadsheet into a pandas DataFrame."""
+    export_link = f"https://docs.google.com/spreadsheets/d/{document_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
+    try:
+        df = pd.read_csv(export_link)
+        # Standardize column names: lowercase and replace spaces with underscores
+        df.columns = [col.lower().replace(' ', '_') for col in df.columns]
+        return df
+    except Exception as e:
+        print(f"Error reading Google Sheet {sheet_name} from document {document_id}: {e}")
+        # Return an empty DataFrame with expected columns for graceful failure if needed, or raise
+        if sheet_name == 'products':
+            return pd.DataFrame(columns=['product_id', 'name', 'category', 'stock_amount', 'description', 'price', 'season'])
+        elif sheet_name == 'emails':
+            return pd.DataFrame(columns=['email_id', 'subject', 'body'])
+        return pd.DataFrame()
 
 async def process_emails_batch(emails_data: List[Dict[str, str]], 
                              product_catalog_df: pd.DataFrame, 
@@ -78,11 +98,9 @@ async def process_emails_batch(emails_data: List[Dict[str, str]],
             email_id=email.get('id', 'unknown'),
             email_subject=email.get('subject', ''),
             email_body=email.get('body', ''),
-            # Inject shared resources into metadata for agents/tools to access
-            metadata={
-                "product_catalog_df": product_catalog_df,
-                "vector_store": vector_store
-            }
+            product_catalog_df=product_catalog_df,  # Assign directly
+            vector_store=vector_store,              # Assign directly
+            metadata={}                             # Keep metadata for other potential uses, or remove if not used
         )
         initial_states.append(initial_state)
     
@@ -106,46 +124,58 @@ async def process_emails_batch(emails_data: List[Dict[str, str]],
 
 # --- 1. Load Data --- 
 
-# Load Product Catalog (replace with actual loading logic)
-# Example: Load from a CSV file
-try:
-    product_catalog_df = pd.read_csv("sample-data/fashion_catalog.csv")
+# Load Product Catalog from Google Sheets
+print(f"Loading product catalog from Google Sheet ID: {INPUT_SPREADSHEET_ID}, sheet: products")
+product_catalog_df = read_data_from_gsheet(INPUT_SPREADSHEET_ID, 'products')
+if not product_catalog_df.empty:
     print(f"Loaded product catalog with {len(product_catalog_df)} items.")
-except FileNotFoundError:
-    print("Error: Product catalog file 'sample-data/fashion_catalog.csv' not found.")
-    # Create a dummy DataFrame for demonstration if file is missing
-    product_catalog_df = pd.DataFrame({
-        'product ID': ['DUMMY001'], 
-        'name': ['Dummy Product'], 
-        'category': ['Dummies'], 
-        'stock amount': [10], 
-        'description': ['This is a dummy product for testing.'],
-        'price': [99.99]
-    })
+    # Ensure critical columns exist, e.g., for vector store creation
+    if 'description' not in product_catalog_df.columns:
+        print("Warning: 'description' column missing from product catalog. Adding empty column.")
+        product_catalog_df['description'] = ""
+    if 'name' not in product_catalog_df.columns:
+        print("Warning: 'name' column missing from product catalog. Adding empty column.")
+        product_catalog_df['name'] = "Unknown Product"
+    if 'product_id' not in product_catalog_df.columns:
+        # Attempt to use 'product id' if it exists (common variation)
+        if 'product_id' in product_catalog_df.columns:
+            product_catalog_df.rename(columns={'product id': 'product_id'}, inplace=True)
+        else:
+            print("Error: 'product_id' column missing from product catalog. Cannot proceed without product IDs.")
+            # Potentially create a dummy product_id if it's absolutely essential for schema and not for logic
+            # For now, we'll let it proceed and fail later if product_id is strictly needed by core logic
+else:
+    print("Failed to load product catalog. Using an empty DataFrame.")
+    product_catalog_df = pd.DataFrame(columns=['product_id', 'name', 'category', 'stock_amount', 'description', 'price', 'season'])
 
-# Sample Emails Data (replace with actual loading logic, e.g., from Google Sheets or a list)
-sample_emails = [
-    {
-        "id": "email_001",
-        "subject": "Order Request - LTH0976 Jacket",
-        "body": "Hi team, I'd like to order the brown leather jacket, product ID LTH0976, in size Large. Please confirm availability. Thanks!"
-    },
-    {
-        "id": "email_002",
-        "subject": "Question about cashmere scarves",
-        "body": "Hello, I'm interested in your cashmere scarves. Can you tell me if the CSH1098 model is 100% cashmere? Also, what colors does it come in?"
-    },
-    {
-        "id": "email_003",
-        "subject": "Urgent: Need summer dress for wedding!",
-        "body": "Help! I need a beautiful dress for a summer wedding next weekend. Looking for something floral, maybe knee-length? Do you have anything suitable? I'm a size Medium."
-    },
-    {
-        "id": "email_004",
-        "subject": "Order TSH5678 and inquiry",
-        "body": "I want to order the basic white T-shirt (TSH5678), quantity 2, size Small. Also, do you have any recommendations for casual jeans to go with it?"
+
+# Load Emails Data from Google Sheets
+print(f"Loading emails from Google Sheet ID: {INPUT_SPREADSHEET_ID}, sheet: emails")
+emails_df = read_data_from_gsheet(INPUT_SPREADSHEET_ID, 'emails')
+
+if not emails_df.empty:
+    print(f"Loaded {len(emails_df)} emails.")
+    # Convert DataFrame to list of dictionaries for process_emails_batch function
+    # Ensure column names match what process_emails_batch expects (e.g., 'id', 'subject', 'body')
+    # The read_data_from_gsheet function already standardizes to lowercase with underscores.
+    # We need to map them if they are different.
+    column_mapping = {
+        'email_id': 'id', # Assuming 'email_id' from sheet maps to 'id' expected by function
+        'subject': 'subject',
+        'body': 'body'
     }
-]
+    # Filter for necessary columns and rename them
+    if not all(col in emails_df.columns for col in column_mapping.keys()):
+        print(f"Error: Emails DataFrame is missing one of the required columns: {list(column_mapping.keys())}")
+        print(f"Available columns: {emails_df.columns.tolist()}")
+        sample_emails_list = [] # Fallback to empty list
+    else:
+        emails_df_renamed = emails_df[list(column_mapping.keys())].rename(columns=column_mapping)
+        sample_emails_list = emails_df_renamed.to_dict(orient='records')
+else:
+    print("Failed to load emails. Using an empty list.")
+    sample_emails_list = []
+
 
 # --- 2. Setup Configuration --- 
 
@@ -153,7 +183,6 @@ sample_emails = [
 hermes_config = HermesConfig(
     llm_model_name="gpt-4o", # Specify desired model
     # llm_api_key="YOUR_API_KEY", # Optional: set if not using environment variables
-    debug_mode=False
 )
 
 # --- 3. Run Processing --- 
@@ -161,7 +190,7 @@ hermes_config = HermesConfig(
 async def main():
     # Run the batch processing
     final_states = await process_emails_batch(
-        emails_data=sample_emails,
+        emails_data=sample_emails_list, # Use the list loaded from Google Sheets
         product_catalog_df=product_catalog_df,
         config=hermes_config
     )

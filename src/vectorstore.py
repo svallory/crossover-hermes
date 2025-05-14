@@ -19,7 +19,67 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
 
-# Function to create the vector store from a product catalog DataFrame
+# Helper function to create document from product row
+def _create_product_document(row):
+    """
+    Create a Document from a product catalog row.
+    
+    Args:
+        row: A pandas Series representing a row in the product catalog
+        
+    Returns:
+        A Document object with product content and metadata
+    """
+    # Construct a rich text representation of the product
+    content = f"Product: {row['name']}\nID: {row['product ID']}\nCategory: {row['category']}\n"
+    
+    if 'description' in row and pd.notna(row['description']):
+        content += f"Description: {row['description']}\n"
+    
+    if 'season' in row and pd.notna(row['season']):
+        content += f"Season: {row['season']}\n"
+    
+    # Create metadata for filtering
+    metadata = {
+        "product_id": row['product ID'],
+        "category": row['category'],
+        "name": row['name'],
+    }
+    
+    # Add optional metadata if available
+    if 'season' in row and pd.notna(row['season']):
+        metadata["season"] = row['season']
+    
+    if 'stock amount' in row and pd.notna(row['stock amount']):
+        metadata["stock_available"] = int(row['stock amount']) > 0
+    
+    # Create the document
+    return Document(
+        page_content=content,
+        metadata=metadata
+    )
+
+# Helper function to determine embedding dimensions based on model name
+def _get_embedding_dimensions(model_name: str) -> int:
+    """
+    Determine the appropriate embedding dimensions based on the model name.
+    
+    Args:
+        model_name: The name of the embedding model
+        
+    Returns:
+        The appropriate dimension for the embeddings
+    """
+    # Map of known models to their dimensions
+    dimension_map = {
+        "text-embedding-ada-002": 1536,
+        "text-embedding-3-small": 1536,
+        "text-embedding-3-large": 3072,
+    }
+    
+    # Return the dimension if known, otherwise default to 1536
+    return dimension_map.get(model_name, 1536)
+
 def create_product_vectorstore(product_catalog_df: pd.DataFrame, 
                                embedding_model_name: str = "text-embedding-ada-002",
                                chroma_persist_directory: str = "./chroma_db",
@@ -38,45 +98,18 @@ def create_product_vectorstore(product_catalog_df: pd.DataFrame,
     """
     print(f"Creating vector store with {len(product_catalog_df)} products...")
     
-    # Initialize the embedding function
+    # Initialize the embedding function with dimensions based on model
+    embedding_dimensions = _get_embedding_dimensions(embedding_model_name)
     embedding_function = OpenAIEmbeddings(
         model=embedding_model_name,
-        dimensions=1536  # Dimensions for text-embedding-ada-002
+        dimensions=embedding_dimensions
     )
     
     # Create documents from product data
     documents = []
     
     for _, row in product_catalog_df.iterrows():
-        # Construct a rich text representation of the product
-        content = f"Product: {row['name']}\nID: {row['product ID']}\nCategory: {row['category']}\n"
-        
-        if 'description' in row and pd.notna(row['description']):
-            content += f"Description: {row['description']}\n"
-        
-        if 'season' in row and pd.notna(row['season']):
-            content += f"Season: {row['season']}\n"
-        
-        # Create metadata for filtering
-        metadata = {
-            "product_id": row['product ID'],
-            "category": row['category'],
-            "name": row['name'],
-        }
-        
-        # Add optional metadata if available
-        if 'season' in row and pd.notna(row['season']):
-            metadata["season"] = row['season']
-        
-        if 'stock amount' in row and pd.notna(row['stock amount']):
-            metadata["stock_available"] = int(row['stock amount']) > 0
-        
-        # Create the document
-        doc = Document(
-            page_content=content,
-            metadata=metadata
-        )
-        documents.append(doc)
+        documents.append(_create_product_document(row))
     
     # Create the vector store
     vector_store = Chroma.from_documents(
@@ -113,10 +146,11 @@ def create_product_vectorstore_batched(product_catalog_df: pd.DataFrame,
     """
     print(f"Creating vector store with {len(product_catalog_df)} products in batches of {batch_size}...")
     
-    # Initialize the embedding function
+    # Initialize the embedding function with dimensions based on model
+    embedding_dimensions = _get_embedding_dimensions(embedding_model_name)
     embedding_function = OpenAIEmbeddings(
         model=embedding_model_name,
-        dimensions=1536  # Dimensions for text-embedding-ada-002
+        dimensions=embedding_dimensions
     )
     
     # Initialize vector store
@@ -142,35 +176,7 @@ def create_product_vectorstore_batched(product_catalog_df: pd.DataFrame,
         documents = []
         
         for _, row in batch_df.iterrows():
-            # Construct a rich text representation of the product
-            content = f"Product: {row['name']}\nID: {row['product ID']}\nCategory: {row['category']}\n"
-            
-            if 'description' in row and pd.notna(row['description']):
-                content += f"Description: {row['description']}\n"
-            
-            if 'season' in row and pd.notna(row['season']):
-                content += f"Season: {row['season']}\n"
-            
-            # Create metadata for filtering
-            metadata = {
-                "product_id": row['product ID'],
-                "category": row['category'],
-                "name": row['name'],
-            }
-            
-            # Add optional metadata if available
-            if 'season' in row and pd.notna(row['season']):
-                metadata["season"] = row['season']
-            
-            if 'stock amount' in row and pd.notna(row['stock amount']):
-                metadata["stock_available"] = int(row['stock amount']) > 0
-            
-            # Create the document
-            doc = Document(
-                page_content=content,
-                metadata=metadata
-            )
-            documents.append(doc)
+            documents.append(_create_product_document(row))
         
         # Add batch to vector store
         vector_store.add_documents(documents)
@@ -260,10 +266,11 @@ def load_product_vectorstore(chroma_persist_directory: str = "./chroma_db",
     Returns:
         A ChromaDB vector store instance
     """
-    # Initialize the embedding function
+    # Initialize the embedding function with dimensions based on model
+    embedding_dimensions = _get_embedding_dimensions(embedding_model_name)
     embedding_function = OpenAIEmbeddings(
         model=embedding_model_name,
-        dimensions=1536  # Dimensions for text-embedding-ada-002
+        dimensions=embedding_dimensions
     )
     
     # Load the vector store

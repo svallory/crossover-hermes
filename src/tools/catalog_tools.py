@@ -18,23 +18,10 @@ from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel, Field
 import pandas as pd
 
+from ..state import Product # Import Product from state
+from ..model.errors import ProductNotFound # Import from new errors module
+
 # --- Input/Output Models for Tools ---
-
-class Product(BaseModel):
-    """Represents a product from the catalog."""
-    product_id: str = Field(description="Unique identifier for the product.")
-    name: str = Field(description="Name of the product.")
-    category: str = Field(description="Category the product belongs to.")
-    stock_amount: int = Field(description="Current stock level.")
-    description: str = Field(description="Detailed description of the product.")
-    season: Optional[str] = Field(default=None, description="Recommended season for the product.")
-    price: Optional[float] = Field(default=None, description="Price of the product.")
-
-class ProductNotFound(BaseModel):
-    """Indicates that a product was not found."""
-    message: str
-    query_product_id: Optional[str] = None
-    query_product_name: Optional[str] = None
 
 class FuzzyMatchResult(BaseModel):
     """Result of a fuzzy name match."""
@@ -384,6 +371,46 @@ def find_related_products(product_id: str, product_catalog_df: pd.DataFrame, rel
         )
     
     return related_products
+
+@tool
+async def resolve_product_reference(product_ref_dict: Dict[str, Any], product_catalog_df: pd.DataFrame, vector_store: Optional[Any]) -> Union[Product, ProductNotFound]:
+    """Resolves a product reference dictionary to a specific product using a series of lookup strategies.
+    It tries to find a product by ID, then by name, then by semantic description search.
+
+    Args:
+        product_ref_dict: A dictionary containing product reference information. 
+                          Expected keys: 'product_id' (Optional[str]), 'product_name' (Optional[str]), 'reference_text' (Optional[str]).
+        product_catalog_df: The pandas DataFrame containing the product catalog.
+        vector_store: The vector store instance for semantic search. Required if 'reference_text' is used for searching.
+
+    Returns:
+        A Product object if a match is found, otherwise a ProductNotFound object.
+    """
+    product_id = product_ref_dict.get("product_id")
+    product_name = product_ref_dict.get("product_name")
+    reference_text = product_ref_dict.get("reference_text", "")
+
+    if product_id:
+        product_result = find_product_by_id.invoke(input={"product_id": product_id, "product_catalog_df": product_catalog_df})
+        if not isinstance(product_result, ProductNotFound): return product_result
+    
+    if product_name:
+        name_results = find_product_by_name.invoke(input={"product_name": product_name, "product_catalog_df": product_catalog_df, "threshold": 0.8, "top_n": 1})
+        if isinstance(name_results, list) and name_results:
+            if isinstance(name_results[0], FuzzyMatchResult):
+                 return name_results[0].matched_product
+        elif isinstance(name_results, FuzzyMatchResult):
+            return name_results.matched_product
+            
+    if reference_text and vector_store:
+        search_results_data = search_products_by_description.invoke(
+            input={"query": reference_text, "product_catalog_df": product_catalog_df, "vector_store": vector_store, "top_k": 1}
+        )
+        if isinstance(search_results_data, list) and search_results_data:
+            return search_results_data[0]
+
+    return ProductNotFound(message=f"Could not resolve product reference: {product_ref_dict}")
+
 """ {cell}
 ### Catalog Tools Implementation Notes
 
@@ -407,4 +434,6 @@ The catalog tools provide a comprehensive interface for interacting with product
    - `alternative`: Similar products that could substitute for the original
 
 These tools form the foundation for both the Order Processor and Inquiry Responder agents, enabling accurate product resolution and relevant recommendations.
+
+**Scalability Note**: While pandas DataFrames are suitable for the current scale of this project, for significantly larger product catalogs (e.g., 100,000+ products), direct DataFrame operations for every lookup/update might become a performance bottleneck. In such production scenarios, a dedicated database (SQL or NoSQL) for structured product data and stock management, used in conjunction with the vector store, would be a more scalable approach.
 """ 
