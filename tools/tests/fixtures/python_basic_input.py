@@ -1,4 +1,4 @@
-# %% 
+# %%
 # Regular Python code cell
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,16 +12,16 @@ y = np.sin(x)
 # This is a markdown cell with some formatting:
 # - Item 1
 # - Item 2
-# 
+#
 # And math: $y = sin(x)$
 
 # %%
 # Another code cell
 plt.figure(figsize=(10, 6))
 plt.plot(x, y)
-plt.title('Sine Wave')
-plt.xlabel('x')
-plt.ylabel('sin(x)')
+plt.title("Sine Wave")
+plt.xlabel("x")
+plt.ylabel("sin(x)")
 
 # This comment stays with the code
 plt.grid(True)
@@ -33,4 +33,4 @@ plt.grid(True)
 # %%
 # Final code cell
 print("Maximum value:", np.max(y))
-print("Minimum value:", np.min(y)) 
+print("Minimum value:", np.min(y))

@@ -1,9 +1,11 @@
 {
   "mcpServers": {
     "the-notebook-mcp": {
-      "command": "cursor-notebook-mcp",
+      "command": "the-notebook-mcp",
       "args": [
-        "--allow-root /work/crossover/hermes/notebooks"
+        "start",
+        "--allow-root",
+        "."
       ],
       "env": {
       }

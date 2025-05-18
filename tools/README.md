@@ -1,125 +1,49 @@
-# Markdown/Python to Jupyter Notebook Converter
+# Hermes Tools
 
-This tool converts Markdown and Python files to Jupyter notebook format.
+This directory contains various utility scripts for the Hermes project.
 
-## Usage
+## Available Tools
 
+### `evaluate_agent_flow.py`
+
+Evaluates the Hermes agent flow using LangSmith's LLM-as-judge framework.
+
+**Features:**
+- Runs the Hermes agent flow using the test infrastructure
+- Creates a LangSmith experiment to evaluate the results
+- Uses LLM-as-judge to evaluate each agent's performance
+- Generates a summary report of evaluation scores
+
+**Usage:**
 ```bash
-python3 md_py_to_notebook.py [inputs...] [-o OUTPUT_DIR]
+# Run with default settings (5 emails)
+python -m tools.evaluate_agent_flow
+
+# Process a specific number of emails
+python -m tools.evaluate_agent_flow --limit 10 
+
+# Specify a custom experiment name
+python -m tools.evaluate_agent_flow --experiment-name "my_evaluation"
 ```
 
-When using through Poetry:
+**Requirements:**
+- LangSmith API key in your `.env` file (`LANGSMITH_API_KEY`)
+- Properly configured Hermes environment
+
+### `ipynb_to_markdown.py`
+
+Converts a Jupyter notebook to a Markdown file. Useful for documentation.
+
+**Usage:**
 ```bash
-poetry run poe build-notebook [inputs...] [-o OUTPUT_DIR]
+python -m tools.ipynb_to_markdown notebook.ipynb output.md
 ```
 
-### Arguments:
+### `md_py_to_notebook.py`
 
-- `inputs`: One or more Markdown (.md), Python (.py) files, or directories
-- `-o, --output-dir`: Directory to save the output notebooks (default: current directory)
+Converts a Markdown/Python file to a Jupyter notebook.
 
-## Conversion Rules
-
-### Markdown Files
-
-1. Regular markdown content is preserved as markdown cells
-2. Code blocks with the `{cell}` attribute become code cells (regardless of language):
-   ```python {cell}
-   print("This becomes a code cell")
-   ```
-3. Code blocks without the `{cell}` attribute remain as markdown code blocks:
-   ```python
-   print("This stays as markdown")
-   ```
-4. Code blocks delimited with triple tildes (~~~) always remain as markdown code blocks:
-   ~~~python
-   print("This stays as markdown")
-   ~~~
-5. Supported `{cell}` attribute variations include:
-   ```javascript {cell}
-   // Basic cell attribute
-   ```
-   ```javascript {cell=true}
-   // Explicit true value
-   ```
-   ```javascript {cell="true"}
-   // String value
-   ```
-
-### Python Files
-
-1. Regular Python code becomes code cells
-2. Triple-quote blocks with the `{cell}` attribute become markdown cells:
-
-```python
-# This is a regular code cell
-x = 10
-print(x)
-
-""" {cell}
-# This is a markdown cell
-This content will be rendered as markdown in the notebook.
-- It can include lists
-- And other markdown formatting
-"""
-
-# Back to code
-y = 20
-print(x + y)
-```
-
-3. Support for attribute variations in triple quotes:
-   ```python
-   """ {cell}
-   # Basic cell attribute
-   """
-   
-   """ {cell=true}
-   # Explicit true value
-   """
-   
-   """ {cell="true"}
-   # String value
-   """
-   ```
-
-## Directory Support
-
-When a directory is provided as an input:
-
-1. The script recursively searches for all .md, .markdown, and .py files in the directory
-2. Files are sorted alphabetically
-3. A single notebook is created containing all files in order
-4. Each file is preceded by a markdown cell with the filename as a header
-
-Example:
+**Usage:**
 ```bash
-python3 md_py_to_notebook.py docs/ -o notebooks/
-```
-
-## Examples
-
-Convert a single file:
-```bash
-python3 md_py_to_notebook.py document.md
-```
-
-Convert multiple files with a specific output directory:
-```bash
-python3 md_py_to_notebook.py file1.md file2.py -o notebooks/
-```
-
-Convert an entire directory:
-```bash
-python3 md_py_to_notebook.py src/ -o notebooks/
-```
-
-Convert mixed inputs:
-```bash
-python3 md_py_to_notebook.py file1.md directory1/ directory2/
-```
-
-## Requirements
-
-- Python 3.6+
-- No external dependencies (uses only standard library modules) 
+python -m tools.md_py_to_notebook some_file.md notebook.ipynb
+``` 
