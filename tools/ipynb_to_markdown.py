@@ -24,7 +24,7 @@ def convert_notebook_to_markdown(ipynb_file_path: str, output_file_path: str | N
                 markdown_output_parts.append(source_content)
                 markdown_output_parts.append("\n\n")
             elif cell_type == "code":
-                metadata = cell.get("metadata", {})
+                cell.get("metadata", {})
                 # Try to determine the language from metadata
                 language = "python"  # Default to python
                 if "language_info" in notebook.get("metadata", {}):

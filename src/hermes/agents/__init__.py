@@ -15,8 +15,6 @@ from .order_processor import (
     process_order,
     OrderProcessorInput,
     OrderProcessorOutput,
-    OrderedItem,
-    ProcessedOrder,
 )
 from .response_composer import (
     compose_response,

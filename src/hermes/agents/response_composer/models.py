@@ -3,7 +3,7 @@ Pydantic models for the response composer agent.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Any, Union
+from typing import List, Optional
 from enum import Enum
 
 from src.hermes.agents.email_analyzer.models import EmailAnalysis
@@ -34,9 +34,7 @@ class ResponsePoint(BaseModel):
         le=10,
         description="Priority of this point (1-10, 10 being highest)",
     )
-    related_to: Optional[str] = Field(
-        default=None, description="Product ID or question this point relates to, if any"
-    )
+    related_to: Optional[str] = Field(default=None, description="Product ID or question this point relates to, if any")
 
 
 class ResponseComposerInput(BaseModel):
@@ -46,9 +44,7 @@ class ResponseComposerInput(BaseModel):
     Contains outputs from previous agents in the pipeline.
     """
 
-    email_analysis: EmailAnalysis = Field(
-        description="Complete EmailAnalysisResult from the analyzer"
-    )
+    email_analysis: EmailAnalysis = Field(description="Complete EmailAnalysisResult from the analyzer")
     inquiry_response: Optional[InquiryAnswers] = Field(
         default=None, description="Results from the Inquiry Responder, if applicable"
     )
@@ -65,9 +61,7 @@ class ComposedResponse(BaseModel):
     email_id: str = Field(description="The ID of the email being responded to")
     subject: str = Field(description="Subject line for the response email")
     response_body: str = Field(description="Full text of the response")
-    language: str = Field(
-        description="Language code of the response (should match customer's language)"
-    )
+    language: str = Field(description="Language code of the response (should match customer's language)")
     tone: ResponseTone = Field(description="Detected tone used in the response")
     response_points: List[ResponsePoint] = Field(
         default_factory=list, description="Structured breakdown of response elements"
@@ -79,6 +73,4 @@ class ResponseComposerOutput(BaseModel):
     Output model for the response composer function.
     """
 
-    composed_response: ComposedResponse = Field(
-        description="The final composed response to send to the customer"
-    )
+    composed_response: ComposedResponse = Field(description="The final composed response to send to the customer")

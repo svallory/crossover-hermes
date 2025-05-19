@@ -14,27 +14,13 @@ import os
 import pandas as pd
 import argparse
 import yaml
-from typing import Optional, Dict, Any
-
-# Set base path assuming the script is run from the workspace root via `python -m`
-# This helps locate the src and data directories correctly.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# Modify sys.path if necessary to ensure src is importable
-# This is usually handled by `python -m` but can be explicit for robustness
+from typing import Optional, Dict
 import sys
-
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
-if os.path.join(BASE_DIR, "src") not in sys.path:
-    sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 
 from src.hermes.config import HermesConfig, load_app_env_vars
 from src.hermes.data_processing import load_data
 from src.hermes.data_processing.vector_store import create_vector_store
 import src.hermes.main as hermes_main
-
-# Import our test helpers
 from tests.integration.test_helpers import (
     OUTPUT_DIR_TEST,
     apply_patches,
@@ -43,6 +29,15 @@ from tests.integration.test_helpers import (
     prepare_output_data,
     save_results_locally,
 )
+
+# Set base path assuming the script is run from the workspace root via `python -m`
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Modify sys.path if necessary to ensure src is importable
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+if os.path.join(BASE_DIR, "src") not in sys.path:
+    sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 
 # Ensure environment variables from .env are loaded for the test context
 load_app_env_vars()
@@ -135,6 +130,15 @@ async def run_test_workflow(limit: Optional[int] = None):
         # 4. Convert emails to the expected format and apply limit
         emails_batch = test_emails_df.to_dict(orient="records")
 
+        # Explicitly convert values to strings to match the expected type hint
+        emails_for_processing: list[Dict[str, str]] = []
+        for email in emails_batch:
+            email_dict: Dict[str, str] = {}
+            for k, v in email.items():
+                if isinstance(k, str):
+                    email_dict[k] = str(v) if v is not None else ""
+            emails_for_processing.append(email_dict)
+
         # Set HERMES_PROCESSING_LIMIT for this run based on the 'limit' argument
         if limit is None:
             limit = int(os.environ.get("HERMES_PROCESSING_LIMIT", "0"))
@@ -145,7 +149,7 @@ async def run_test_workflow(limit: Optional[int] = None):
         print("\nStarting Hermes agent workflow using process_emails...")
         try:
             processed_outputs = await hermes_main.process_emails(
-                emails_to_process=emails_batch,
+                emails_to_process=emails_for_processing,
                 config_obj=hermes_config,
                 limit_processing=limit,
             )
@@ -206,7 +210,6 @@ class SafeLoader(yaml.SafeLoader):
 
 
 # Import YAML with custom tag handling
-import yaml
 
 
 def custom_tag_constructor(loader, tag, node):

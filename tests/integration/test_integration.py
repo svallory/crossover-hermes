@@ -1,12 +1,9 @@
 """Integration tests for the Hermes email processing pipeline."""
 
 import unittest
-import os
-import sys
 from unittest.mock import patch, MagicMock, AsyncMock
 import pandas as pd
 import asyncio
-from typing import Dict, Any, List, Optional
 
 # Set up a proper mock environment
 with patch.dict(
@@ -28,11 +25,11 @@ with patch.dict(
 # Import test fixtures first (doesn't depend on mocked modules)
 from tests.fixtures import (
     get_test_cases,
-    get_test_email,
-    get_test_product,
     load_sample_data,
 )
 
+# Import the real configuration (not mocked)
+from src.config import HermesConfig
 
 # Mock required modules
 class MockHermesState:
@@ -88,10 +85,6 @@ class MockWorkflow:
         # Always finish with response composer
         state = await self.nodes["response_composer"](state, self.config)
         return state
-
-
-# Import the real configuration (not mocked)
-from src.config import HermesConfig
 
 
 # Create mocked node functions

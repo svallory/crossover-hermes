@@ -5,6 +5,8 @@ Order Processor prompts for use with LangChain.
 from typing import Dict
 from langchain_core.prompts import PromptTemplate
 
+from src.hermes.model import Agents
+
 # Dictionary to store all prompt templates
 PROMPTS: Dict[str, PromptTemplate] = {}
 
@@ -115,7 +117,7 @@ Email Analysis:
 Please process this order request and return a complete `OrderProcessingResult`.
 """
 
-PROMPTS["order_processor"] = PromptTemplate.from_template(
+PROMPTS[Agents.ORDER_PROCESSOR] = PromptTemplate.from_template(
     order_processor_prompt_template_str, template_format="mustache"
 )
 

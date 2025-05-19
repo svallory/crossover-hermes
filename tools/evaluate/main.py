@@ -24,7 +24,6 @@ import uuid
 import datetime
 import requests
 from typing import Dict, List, Any, Optional
-from pathlib import Path
 
 # Add project root to system path if necessary
 from .utils import (
@@ -192,7 +191,7 @@ async def run_evaluation(
         experiment_name = f"hermes_evaluation_{uuid.uuid4().hex[:8]}"
 
     print(f"Evaluating {len(results)} workflow results in experiment '{experiment_name}'...")
-    print(f"Using master evaluator for comprehensive evaluation")
+    print("Using master evaluator for comprehensive evaluation")
 
     # Create LLM model for evaluation
     model = ChatOpenAI(model="gpt-4")
@@ -294,7 +293,7 @@ async def run_evaluation(
             if not dataset_name:
                 dataset_name = f"hermes_dataset_{uuid.uuid4().hex[:8]}"
 
-            print(f"\nUploading results to LangSmith using the datasets API...")
+            print("\nUploading results to LangSmith using the datasets API...")
 
             # Convert results to serializable format for uploading
             serializable_results = [convert_to_serializable(r) for r in results]
@@ -319,7 +318,7 @@ async def run_evaluation(
                 # Update the saved report with external upload info
                 report_path = save_report(report, output_dir, experiment_name)
 
-                print(f"\nExperiment data uploaded successfully!")
+                print("\nExperiment data uploaded successfully!")
                 print(f"Dataset ID: {dataset_id}")
                 print(f"Experiment ID: {external_experiment_id}")
                 print(f"View the external experiment at: https://smith.langchain.com/projects/{external_experiment_id}")

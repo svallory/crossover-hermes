@@ -3,22 +3,20 @@
 import unittest
 import asyncio
 from unittest.mock import patch, MagicMock
-from typing import Dict, Any, List
+from typing import Dict, Any
 import pandas as pd
 
 from src.agents.order_processor import (
     process_order_node,
-    OrderProcessingResult,
-    OrderItem,
     AlternativeProduct,
 )
 from src.state import EmailAnalysis, ProductReference
 from src.state import HermesState
 from src.config import HermesConfig
-from src.tools.order_tools import StockStatus, PromotionDetails, StockUpdateResult
+from src.tools.order_tools import PromotionDetails
 from src.tools.catalog_tools import Product, ProductNotFound
 
-from tests.fixtures import get_test_email, get_test_product, get_test_cases
+from tests.fixtures import get_test_product, get_test_cases
 from tests.__init__ import mock_openai
 
 # For mocking LLM client

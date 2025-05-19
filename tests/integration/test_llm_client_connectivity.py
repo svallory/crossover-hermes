@@ -13,7 +13,7 @@ MODEL_NAME_TO_TEST = "gpt-4o"  # Make sure this is an OpenAI model
 
 class TestLLMClientConnectivity(unittest.TestCase):
     def test_successful_connection_with_custom_url(self):
-        print(f"Testing LLM client with:")
+        print("Testing LLM client with:")
         print(f"  Model: {MODEL_NAME_TO_TEST}")
         print(f"  Base URL: {ASSIGNMENT_BASE_URL}")
         # Avoid printing the full key, even a placeholder, in test logs if possible
@@ -48,7 +48,7 @@ class TestLLMClientConnectivity(unittest.TestCase):
             elif original_openai_api_key:  # If it was pre-existing and we didn't override
                 config.llm_api_key = original_openai_api_key
 
-            print(f"\nResolved HermesConfig values:")
+            print("\nResolved HermesConfig values:")
             print(f"  llm_model_name: {config.llm_model_name}")
             print(f"  llm_base_url: {config.llm_base_url}")
             api_key_configured_status = "Not set / Using placeholder"

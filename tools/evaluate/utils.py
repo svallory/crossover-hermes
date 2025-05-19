@@ -7,7 +7,7 @@ import os
 import yaml
 import json
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 # Define paths
 EVALUATE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))

@@ -13,7 +13,6 @@ Usage:
 import os
 import asyncio
 import argparse
-from typing import Dict, Any
 
 # Import the main function from main.py
 from src.hermes.main import main, create_output_spreadsheet
@@ -66,7 +65,7 @@ async def generate_assignment_output(limit: int = None):
             output_name=hermes_config.output_spreadsheet_name,
         )
 
-        print(f"\nAssignment output successfully generated!")
+        print("\nAssignment output successfully generated!")
         print(f"Spreadsheet URL: {output_url}")
 
     except ImportError:

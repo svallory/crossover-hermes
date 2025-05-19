@@ -5,7 +5,6 @@ import sys
 import json
 import tempfile
 import shutil
-from pathlib import Path
 
 # Add the parent directory to sys.path to import the tool module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -95,7 +94,7 @@ class TestMdPyToNotebook(unittest.TestCase):
 
     def test_directory_processing(self):
         """Test processing of a directory with multiple markdown and Python files."""
-        output_file = os.path.join(self.temp_dir, "output.ipynb")
+        os.path.join(self.temp_dir, "output.ipynb")
 
         # Define the list of files to process
         input_files = [

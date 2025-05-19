@@ -2,32 +2,28 @@
 Main function for composing final customer responses.
 """
 
-from typing import Dict, Any, Optional, Literal
-from src.hermes.model import KeyedConfigDict
+from typing import Dict, Any, Optional, Literal, Union
+from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
+
+from src.hermes.utils.errors import create_node_response
 
 from .models import (
     ComposedResponse,
     ResponseComposerOutput,
     ResponseComposerInput,
+    ResponseTone,
 )
 from .prompts import get_prompt
 from ...config import HermesConfig
-from ...utils.llm_client import get_llm_client
+from ...utils import get_llm_client
+from ...model import WorkflowNodeOutput, Agents, Error
 
-
-@traceable(
-    name="Response Composer Agent",
-    description="Composes the final customer response by combining outputs from previous agents.",
-)
+@traceable(run_type="chain", name="Response Composer Agent")  # type: ignore
 async def compose_response(
     state: ResponseComposerInput,
-    runnable_config: Optional[
-        KeyedConfigDict[
-            Literal["configurable"], Dict[Literal["hermes_config"], HermesConfig]
-        ]
-    ] = None,
-) -> ResponseComposerOutput:
+    runnable_config: Optional[RunnableConfig] = None,
+) -> WorkflowNodeOutput[Literal[Agents.RESPONSE_COMPOSER], ResponseComposerOutput]:
     """
     Composes a natural, personalized customer email response by combining information
     from the Email Analyzer, Inquiry Responder, and Order Processor agents.
@@ -37,78 +33,95 @@ async def compose_response(
         runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
-        ResponseComposerOutput: The output model containing the final composed email response.
+        Dict[str, Any]: In the LangGraph workflow, returns {"response_composer": ResponseComposerOutput} or {"errors": Error}
     """
-    hermes_config = HermesConfig.from_runnable_config(runnable_config)
-
-    # Extract email_id from the analysis result
-    # For Pydantic models, use hasattr and __dict__ to safely access attributes
-    if hasattr(state.email_analysis, "email_id"):
-        email_id = state.email_analysis.email_id
-    elif isinstance(state.email_analysis, dict) and "email_id" in state.email_analysis:
-        email_id = state.email_analysis["email_id"]
-    else:
-        email_id = "unknown_id"
-
-    print(f"Composing final customer response for email {email_id}")
-
-    # Use a strong model for natural language generation
-    llm = get_llm_client(config=hermes_config, model_strength="strong", temperature=0.7)
-
-    # Create the prompt and chain
-    response_composer_prompt = get_prompt("response_composer")
-
-    # Prepare the input data for the prompt - convert Pydantic models to dicts if necessary
-    prompt_input = {
-        "email_analysis": state.email_analysis.model_dump()
-        if hasattr(state.email_analysis, "model_dump")
-        else state.email_analysis
-    }
-
-    # Add inquiry response if available
-    if state.inquiry_response:
-        prompt_input["inquiry_response"] = (
-            state.inquiry_response.model_dump()
-            if hasattr(state.inquiry_response, "model_dump")
-            else state.inquiry_response
-        )
-
-    # Add order result if available
-    if state.order_result:
-        prompt_input["order_result"] = (
-            state.order_result.model_dump()
-            if hasattr(state.order_result, "model_dump")
-            else state.order_result
-        )
-
-    # Create the chain with structured output
-    response_chain = response_composer_prompt | llm.with_structured_output(
-        ComposedResponse
-    )
-
     try:
-        # Generate the composed response
-        composed_response: ComposedResponse = await response_chain.ainvoke(prompt_input)
+        # Validate the input
+        if not hasattr(state, "email_analysis") or not state.email_analysis:
+            return create_node_response(
+                Agents.RESPONSE_COMPOSER,
+                Exception("No email analysis available for response composition.")
+            )
+            
+            
+        hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
-        # Log the results
-        print(f"  Response composed for email {email_id}")
-        print(f"  Response tone: {composed_response.tone.value}")
-        print(f"  Response language: {composed_response.language}")
-        print(f"  Response length: {len(composed_response.response_body)} characters")
+        # Extract email_id from the analysis result
+        # For Pydantic models, use hasattr and __dict__ to safely access attributes
+        if hasattr(state.email_analysis, "email_id"):
+            email_id = state.email_analysis.email_id  # type: ignore[attr-defined]
+        elif isinstance(state.email_analysis, dict) and "email_id" in state.email_analysis:
+            email_id = state.email_analysis["email_id"]
+        else:
+            email_id = "unknown_id"
 
-        return ResponseComposerOutput(composed_response=composed_response)
+        print(f"Composing final customer response for email {email_id}")
 
+        # Use a strong model for natural language generation
+        llm = get_llm_client(config=hermes_config, model_strength="strong", temperature=0.7)
+
+        # Create the prompt
+        composer_prompt = get_prompt(Agents.RESPONSE_COMPOSER)
+
+        # Create the chain
+        composer_chain = composer_prompt | llm.with_structured_output(ComposedResponse)
+
+        try:
+            # Execute the chain
+            response_data = await composer_chain.ainvoke(state.model_dump())
+
+            # Properly handle the response with type checking
+            if isinstance(response_data, ComposedResponse):
+                response = response_data
+            else:
+                # If we got a dict, convert it to ComposedResponse
+                if isinstance(response_data, dict):
+                    # Make sure email_id is included
+                    response_data["email_id"] = email_id
+                    response = ComposedResponse(**response_data)
+                else:
+                    # Fallback if we got something unexpected
+                    response = ComposedResponse(
+                        email_id=email_id,
+                        subject="Re: Your Recent Inquiry",
+                        response_body="Thank you for contacting us. We're processing your request.",
+                        language="en",
+                        tone=ResponseTone.PROFESSIONAL,
+                        response_points=[],
+                    )
+
+            # Make sure the email_id is set correctly
+            response.email_id = email_id
+
+            # Log the results
+            print(f"  Response composed for email {email_id}")
+            print(f"  Response tone: {response.tone.value}")
+            print(f"  Response language: {response.language}")
+            print(f"  Response length: {len(response.response_body)} characters")
+
+            return create_node_response(
+                Agents.RESPONSE_COMPOSER,
+                ResponseComposerOutput(composed_response=response)
+            )
+            
+        except Exception as e:
+            # Create a basic response in case of errors
+            response = ComposedResponse(
+                email_id=email_id,
+                subject="Re: Your Recent Inquiry",
+                response_body=f"Thank you for your message. We're experiencing technical difficulties processing your request. Error: {str(e)}",
+                language="en",
+                tone=ResponseTone.PROFESSIONAL,
+                response_points=[],
+            )
+            # Although it's an internal error, we return a composed response for the user
+            return create_node_response(
+                Agents.RESPONSE_COMPOSER,
+                ResponseComposerOutput(composed_response=response)
+            )
+            
     except Exception as e:
-        print(f"Error composing response for {email_id}: {e}")
+        # Return errors in the format expected by LangGraph
+        print(f"Outer error in compose_response: {e}")
+        return create_node_response(Agents.RESPONSE_COMPOSER, e)
 
-        # Create a simple fallback response
-        fallback_response = ComposedResponse(
-            email_id=email_id,
-            subject="Re: Your Recent Communication",
-            response_body="Thank you for your message. We're experiencing technical difficulties at the moment. A team member will reach out to you shortly to address your inquiry or order request. We apologize for any inconvenience.\n\nBest regards,\nHermes - Delivering divine fashion",
-            language="en",  # Default to English for fallback
-            tone="professional",  # Default to professional tone for fallback
-            response_points=[],
-        )
-
-        return ResponseComposerOutput(composed_response=fallback_response)

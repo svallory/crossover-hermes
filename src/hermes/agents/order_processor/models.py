@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Literal, Any, Union
 from enum import Enum
 
-from src.hermes.model import Product
+from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput, EmailAnalyzerOutput
 from src.hermes.state import AlternativeProduct
 
 
@@ -64,11 +64,11 @@ class ProcessedOrder(BaseModel):
     )
 
 
-class OrderProcessorInput(BaseModel):
+class OrderProcessorInput(EmailAnalyzerInput):
     """Input data for the order processor function."""
 
-    email_analysis: Dict[str, Any] = Field(description="Analysis of the customer email containing the order request")
-    email_id: Optional[str] = Field(default=None, description="The ID of the email containing this order request")
+    email_analyzer: EmailAnalyzerOutput = Field(description="The output of the email analyzer")
+
 
 
 class OrderProcessorOutput(BaseModel):

@@ -2,9 +2,6 @@
 Tests for the product deduplication functionality.
 """
 
-import pytest
-from typing import List
-
 from src.hermes.agents.email_analyzer.models import (
     EmailAnalysis,
     ProductMention,

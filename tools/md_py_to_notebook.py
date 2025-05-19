@@ -4,7 +4,7 @@ import json
 import re
 import os
 import sys
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Optional
 
 
 def parse_markdown_file(file_path: str) -> List[Dict[str, Any]]:

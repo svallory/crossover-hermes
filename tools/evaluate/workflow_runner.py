@@ -3,11 +3,9 @@
 Module for running the Hermes workflow against examples.
 """
 
-import os
 import sys
 import uuid
 from typing import Dict, List, Any, Optional
-from pathlib import Path
 
 # Add project root to system path if necessary
 from .utils import PROJECT_ROOT

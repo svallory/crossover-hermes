@@ -5,6 +5,8 @@ Response Composer prompts for use with LangChain.
 from typing import Dict
 from langchain_core.prompts import PromptTemplate
 
+from src.hermes.model import Agents
+
 # Dictionary to store all prompt templates
 PROMPTS: Dict[str, PromptTemplate] = {}
 
@@ -104,7 +106,7 @@ ProcessOrderResult:
 Please generate the ComposedResponse object with the final email to be sent to the customer.
 """
 
-PROMPTS["response_composer"] = PromptTemplate.from_template(
+PROMPTS[Agents.RESPONSE_COMPOSER] = PromptTemplate.from_template(
     response_composer_prompt_template_str,
     template_format="mustache",
     partial_variables={
@@ -128,7 +130,5 @@ def get_prompt(key: str) -> PromptTemplate:
         KeyError: If the key doesn't exist in the PROMPTS dictionary.
     """
     if key not in PROMPTS:
-        raise KeyError(
-            f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}"
-        )
+        raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")
     return PROMPTS[key]

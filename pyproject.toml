@@ -43,8 +43,7 @@ load_env = "set -a; source .env; set +a"
 test-flow = "python -m tests.integration.test_agent_flow"
 # Default evaluation task - uses the more efficient master evaluator
 evaluate = "python -m tools.evaluate.main --dataset-id b43d1e52-72ae-47c8-9a49-55198eb6dd87 --auto-upload"
-# Legacy evaluation task - kept for backward compatibility
-evaluate-legacy = "python -m tools.evaluate_custom --auto-upload --dataset-id b43d1e52-72ae-47c8-9a49-55198eb6dd87 --result-dir experiments"
+
 dev = "langgraph dev"
 
 [dependency-groups]

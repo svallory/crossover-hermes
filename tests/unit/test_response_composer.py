@@ -2,11 +2,10 @@
 
 import unittest
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
-from typing import Dict, Any, List, Optional
+from unittest.mock import patch, AsyncMock
+from typing import Dict, Any, Optional
 
 from src.agents.response_composer import compose_response_node
-from src.tools.response_tools import ResponseCompositionPlan, generate_natural_response
 from src.state import (
     EmailAnalysis,
     ProductReference,
@@ -18,7 +17,7 @@ from src.state import (
 )
 from src.state import HermesState
 from src.config import HermesConfig
-from tests.fixtures import get_test_email, get_test_product, get_test_cases
+from tests.fixtures import get_test_product, get_test_cases
 from tests.__init__ import mock_openai
 
 # For mocking LLM client

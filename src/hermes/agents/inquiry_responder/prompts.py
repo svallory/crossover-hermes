@@ -5,6 +5,8 @@ Inquiry Responder prompts for use with LangChain.
 from typing import Dict
 from langchain_core.prompts import PromptTemplate
 
+from src.hermes.model import Agents
+
 # Dictionary to store all prompt templates
 PROMPTS: Dict[str, PromptTemplate] = {}
 
@@ -69,12 +71,12 @@ Complete EmailAnalysisResult:
 Please generate the InquiryResponse JSON object with factual answers to customer questions.
 """
 
-PROMPTS["inquiry_responder"] = PromptTemplate.from_template(
+PROMPTS[Agents.INQUIRY_RESPONDER] = PromptTemplate.from_template(
     inquiry_responder_prompt_template_str, template_format="mustache"
 )
 
 
-def get_prompt(key: str) -> PromptTemplate:
+def get_prompt(key: Agents) -> PromptTemplate:
     """
     Get a specific prompt template by key.
 

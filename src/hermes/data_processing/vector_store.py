@@ -10,118 +10,71 @@ from typing import Optional, List, Dict, Any, Union, Tuple
 import uuid
 
 import chromadb
+from chromadb.utils import embedding_functions
 
-# Should be using the correct import for embedding functions
+# Import Hermes models
+from src.hermes.model import Product, ProductCategory, Season
+
+# Import the embedding functions in a way that works with type checking
+SentenceTransformerEmbeddingFunction: Any = None  # Define a type variable instead
 try:
     # Modern chromadb versions
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction  # type: ignore
+except ImportError:
+    pass  # Keep the None value for SentenceTransformerEmbeddingFunction
+
+# For OpenAI embeddings
+try:
+    from langchain_openai import OpenAIEmbeddings as LangchainEmbeddings
 except ImportError:
     try:
-        # Old chromadb versions might have it in a different location
-        from chromadb.utils import SentenceTransformerEmbeddingFunction
+        # Fallback to older langchain structure
+        from langchain.embeddings import OpenAIEmbeddings as LangchainEmbeddings  # type: ignore
     except ImportError:
-        # Fallback for very old versions or if the module structure changed
-        logging.error(
-            "Could not import SentenceTransformerEmbeddingFunction - vector store will not be functional"
-        )
-        SentenceTransformerEmbeddingFunction = None
+        LangchainEmbeddings = None  # type: ignore
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("vector_store")
+logger = logging.getLogger(__name__)
 
-from src.hermes.model import ProductCategory, Product, Season
+# Type for embedding function - use Any for flexibility
+EmbeddingFunction = Any
 
 
-def create_openai_embedding_function(
-    model_name: str = "text-embedding-3-small",
-    api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-) -> Any:
+def get_embedding_function(
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+    use_openai: bool = False,
+    openai_api_key: Optional[str] = None,
+    **kwargs: Any,
+) -> EmbeddingFunction:
     """
-    Create an embedding function using OpenAI's embedding models.
+    Get an embedding function for the vector store.
 
     Args:
-        model_name: The name of the OpenAI embedding model to use
-        api_key: Optional API key to use (if None, will use OPENAI_API_KEY from environment)
-        base_url: Optional base URL for OpenAI API (useful for custom API endpoints)
+        embedding_model: Name of the embedding model to use
+        use_openai: Whether to use OpenAI's embedding API
+        openai_api_key: OpenAI API key if using OpenAI embeddings
+        **kwargs: Additional arguments to pass to the embedding function
 
     Returns:
         An embedding function compatible with ChromaDB
-
-    Raises:
-        ValueError: If OpenAI API key is missing or embedding creation fails
     """
-    from langchain_openai import OpenAIEmbeddings
+    if use_openai:
+        if LangchainEmbeddings is None:
+            raise ImportError("OpenAI embeddings requested but langchain_openai is not installed")
 
-    # Try to import LangchainEmbeddings from different possible locations
-    try:
-        # Modern chromadb versions
-        from chromadb.utils.embedding_functions import LangchainEmbeddings
-    except ImportError:
-        try:
-            # Alternative location in some versions
-            from chromadb.utils import LangchainEmbeddings
-        except ImportError:
-            # Fallback solution for testing
-            logger.warning(
-                "Could not import LangchainEmbeddings. Using direct embedding function instead."
-            )
+        # Get API key from environment if not provided
+        api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OpenAI API key is required for OpenAI embeddings")
 
-            # Define a simple wrapper class that mimics LangchainEmbeddings for testing
-            class MockLangchainEmbeddings:
-                def __init__(self, embeddings_model):
-                    self.embeddings_model = embeddings_model
+        # Create OpenAI embedding function
+        openai_ef = embedding_functions.OpenAIEmbeddingFunction(api_key=api_key, model_name=embedding_model)
+        return openai_ef
+    else:
+        # Use sentence-transformers for local embeddings
+        if SentenceTransformerEmbeddingFunction is None:
+            raise ImportError("SentenceTransformerEmbeddingFunction not found in chromadb")
 
-                def __call__(self, input):
-                    # Direct call to the embeddings model's embed_documents method
-                    # ChromaDB expects 'input' parameter (not 'texts')
-                    if isinstance(input, str):
-                        input = [input]
-                    return self.embeddings_model.embed_documents(input)
-
-            LangchainEmbeddings = MockLangchainEmbeddings
-
-    # Get API key from arguments or environment
-    api_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError(
-            "OpenAI API key is required. Provide it as an argument or set OPENAI_API_KEY environment variable."
-        )
-
-    # Initialize embeddings with optional base_url
-    kwargs = {"model": model_name, "openai_api_key": api_key}
-    if base_url:
-        kwargs["openai_api_base"] = base_url
-
-    openai_embeddings = OpenAIEmbeddings(**kwargs)
-    embedding_function = LangchainEmbeddings(openai_embeddings)
-    logger.info(f"Created OpenAI embedding function using {model_name}")
-    return embedding_function
-
-
-def _create_embedding_function(
-    api_key: Optional[str] = None,
-    base_url: Optional[str] = None,
-    model_name: str = "text-embedding-3-small",
-) -> Any:
-    """
-    Create an embedding function using OpenAI's embedding models exclusively.
-
-    Args:
-        api_key: Optional OpenAI API key
-        base_url: Optional base URL for OpenAI API
-        model_name: The name of the OpenAI embedding model to use
-
-    Returns:
-        An embedding function for ChromaDB
-
-    Raises:
-        ValueError: If embedding function creation fails
-    """
-    return create_openai_embedding_function(
-        model_name=model_name, api_key=api_key, base_url=base_url
-    )
+        return SentenceTransformerEmbeddingFunction(model_name=embedding_model)
 
 
 def create_vector_store(
@@ -153,14 +106,10 @@ def create_vector_store(
 
     # Create embedding function if not provided
     if embedding_function is None:
-        embedding_function = _create_embedding_function(
-            api_key=api_key, base_url=base_url, model_name=model_name
-        )
+        embedding_function = get_embedding_function(model_name=model_name, use_openai=True, openai_api_key=api_key)
 
     # Get or create the collection
-    collection = chroma_client.get_or_create_collection(
-        name=collection_name, embedding_function=embedding_function
-    )
+    collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=embedding_function)
     logger.info(f"Created/accessed collection: {collection_name}")
 
     # Extract product data and prepare for ChromaDB
@@ -183,7 +132,7 @@ def create_vector_store(
 
     # Add products to the collection
     if documents:
-        collection.upsert(documents=documents, metadatas=metadatas, ids=ids)
+        collection.upsert(documents=documents, metadatas=metadatas, ids=ids)  # type: ignore
         logger.info(f"Added {len(documents)} products to the vector store")
     else:
         logger.warning("No products found in the dataframe")
@@ -208,18 +157,10 @@ def _create_product_text(product: Union[Dict[str, Any], pd.Series]) -> str:
     type_fields = ["product_type", "type"]
 
     # Extract available product information using multiple possible field names
-    product_name = next(
-        (product.get(field, "") for field in name_fields if field in product), ""
-    )
-    product_description = next(
-        (product.get(field, "") for field in description_fields if field in product), ""
-    )
-    product_category = next(
-        (product.get(field, "") for field in category_fields if field in product), ""
-    )
-    product_type = next(
-        (product.get(field, "") for field in type_fields if field in product), ""
-    )
+    product_name = next((product.get(field, "") for field in name_fields if field in product), "")
+    product_description = next((product.get(field, "") for field in description_fields if field in product), "")
+    product_category = next((product.get(field, "") for field in category_fields if field in product), "")
+    product_type = next((product.get(field, "") for field in type_fields if field in product), "")
 
     # Create a comprehensive text representation
     text_parts = []
@@ -233,11 +174,12 @@ def _create_product_text(product: Union[Dict[str, Any], pd.Series]) -> str:
         text_parts.append(f"Type: {product_type}")
 
     # Additional product details if available
-    exclude_fields = set(
-        name_fields + description_fields + category_fields + type_fields
-    )
+    # Get other key-value pairs not already included in text
     for key, value in product.items():
-        if key not in exclude_fields and value and not key.startswith("_"):
+        if value is not None and isinstance(key, str) and not key.startswith("_"):
+            # Skip fields we already processed
+            if key in name_fields or key in description_fields or key in category_fields or key in type_fields:
+                continue
             text_parts.append(f"{key}: {value}")
 
     return " ".join(text_parts)
@@ -245,7 +187,7 @@ def _create_product_text(product: Union[Dict[str, Any], pd.Series]) -> str:
 
 def _extract_product_metadata(
     product: Union[Dict[str, Any], pd.Series],
-) -> Dict[str, Any]:
+) -> Dict[str, Union[str, int, float, bool, None]]:
     """
     Extract metadata from a product for filtering in ChromaDB.
 
@@ -255,7 +197,7 @@ def _extract_product_metadata(
     Returns:
         Dictionary of metadata
     """
-    metadata = {}
+    metadata: Dict[str, Union[str, int, float, bool, None]] = {}
 
     # Map column names for flexibility
     id_fields = ["product_id", "id"]
@@ -266,63 +208,57 @@ def _extract_product_metadata(
     stock_fields = ["stock", "stock_amount"]
     season_fields = ["seasons", "season"]
 
-    # Extract core product attributes as metadata using multiple possible field names
-    # Product ID
-    for field in id_fields:
-        if field in product:
-            metadata["product_id"] = str(product[field])
-            break
+    # Helper function to get value from product
+    def get_value(fields: List[str]) -> Any:
+        if isinstance(product, dict):
+            for field in fields:
+                if field in product:
+                    return product[field]
+        else:  # pd.Series
+            for field in fields:
+                if field in product.index:
+                    return product[field]
+        return None
 
-    # Product Name
-    for field in name_fields:
-        if field in product:
-            metadata["product_name"] = str(product[field])
-            break
+    # Extract fields
+    product_id = get_value(id_fields)
+    if product_id:
+        metadata["product_id"] = str(product_id)
 
-    # Product Category
-    for field in category_fields:
-        if field in product:
-            if isinstance(product[field], ProductCategory):
-                metadata["product_category"] = product[field].value
-            else:
-                metadata["product_category"] = str(product[field])
-            break
+    name = get_value(name_fields)
+    if name:
+        metadata["name"] = str(name)
 
-    # Product Type
-    for field in type_fields:
-        if field in product:
-            metadata["product_type"] = str(product[field])
-            break
+    category = get_value(category_fields)
+    if category:
+        metadata["category"] = str(category)
 
-    # Price
-    for field in price_fields:
-        if field in product and pd.notna(product[field]):
-            metadata["price"] = float(product[field])
-            break
+    product_type = get_value(type_fields)
+    if product_type:
+        metadata["type"] = str(product_type)
 
-    # Stock
-    for field in stock_fields:
-        if field in product and pd.notna(product[field]):
-            metadata["stock"] = int(product[field])
-            break
+    price = get_value(price_fields)
+    if price is not None:
+        try:
+            metadata["price"] = float(price)
+        except (ValueError, TypeError):
+            pass
 
-    # Seasons
-    for field in season_fields:
-        if field in product and product[field]:
-            if isinstance(product[field], list):
-                seasons_str = ",".join(
-                    [
-                        s.value if isinstance(s, Season) else str(s)
-                        for s in product[field]
-                    ]
-                )
-                metadata["seasons"] = seasons_str
-            elif not pd.isna(product[field]):
-                metadata["seasons"] = str(product[field])
-            break
+    stock = get_value(stock_fields)
+    if stock is not None:
+        try:
+            metadata["stock"] = int(stock)
+        except (ValueError, TypeError):
+            pass
 
-    # Clean metadata by removing None values
-    return {k: v for k, v in metadata.items() if v is not None}
+    season = get_value(season_fields)
+    if season:
+        if isinstance(season, list):
+            metadata["season"] = ",".join(str(s) for s in season)
+        else:
+            metadata["season"] = str(season)
+
+    return metadata
 
 
 def query_vector_store(
@@ -330,26 +266,36 @@ def query_vector_store(
     query_text: str,
     n_results: int = 5,
     filter_criteria: Optional[Dict[str, Any]] = None,
-) -> Dict[str, List]:
+) -> Dict[str, List[Any]]:
     """
-    Query the vector store for similar products.
+    Query the vector store for similar documents.
 
     Args:
         collection: ChromaDB collection to query
-        query_text: Text to search for
+        query_text: Text query to search for
         n_results: Number of results to return
-        filter_criteria: Dictionary of metadata filters
+        filter_criteria: Optional criteria for filtering results
 
     Returns:
-        Dictionary with query results
+        Dictionary containing query results
     """
-    results = collection.query(
+    query_result = collection.query(
         query_texts=[query_text],
         n_results=n_results,
         where=filter_criteria,
+        include=["embeddings", "documents", "metadatas", "distances"],
     )
 
-    return results
+    # Convert QueryResult to Dict
+    result_dict: Dict[str, List[Any]] = {}
+    for key, value in query_result.items():
+        if isinstance(value, list):
+            result_dict[key] = value
+        else:
+            # Convert non-list values to a list containing the value
+            result_dict[key] = [value]
+
+    return result_dict
 
 
 def load_vector_store(
@@ -379,14 +325,10 @@ def load_vector_store(
 
     # Create embedding function if not provided
     if embedding_function is None:
-        embedding_function = _create_embedding_function(
-            api_key=api_key, base_url=base_url, model_name=model_name
-        )
+        embedding_function = get_embedding_function(model_name=model_name, use_openai=True, openai_api_key=api_key)
 
     # Get the collection
-    collection = chroma_client.get_or_create_collection(
-        name=collection_name, embedding_function=embedding_function
-    )
+    collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=embedding_function)
 
     return collection
 
@@ -417,23 +359,45 @@ def similarity_search_with_score(
     )
 
     # Format results as a list of tuples (metadata, score)
-    formatted_results = []
-    if results and results["metadatas"] and results["metadatas"][0]:
+    formatted_results: List[Tuple[Dict[str, Any], float]] = []
+    if (
+        results
+        and "metadatas" in results
+        and results["metadatas"] is not None
+        and len(results["metadatas"]) > 0
+        and results["metadatas"][0] is not None
+    ):
         for i, metadata in enumerate(results["metadatas"][0]):
             # Convert distance to similarity score (1 - normalized distance)
             # ChromaDB returns cosine distance, so lower is better
-            distance = (
-                results["distances"][0][i]
-                if "distances" in results and results["distances"][0]
-                else 1.0
-            )
+            distance = 1.0
+            if (
+                "distances" in results
+                and results["distances"] is not None
+                and len(results["distances"]) > 0
+                and results["distances"][0] is not None  # Explicitly check the inner list
+                and i < len(results["distances"][0])
+            ):
+                distance = results["distances"][0][i]
+
             score = 1.0 - min(distance, 1.0)  # Ensure score is in [0, 1]
 
             # Add document text to metadata for reference
-            if "documents" in results and results["documents"][0]:
-                metadata["document"] = results["documents"][0][i]
-
-            formatted_results.append((metadata, score))
+            if (
+                "documents" in results
+                and results["documents"] is not None
+                and len(results["documents"]) > 0
+                and results["documents"][0] is not None  # Explicitly check the inner list
+                and i < len(results["documents"][0])
+            ):
+                # Convert metadata to dict if it's not already to ensure copy() is available
+                metadata_dict = dict(metadata) if not isinstance(metadata, dict) else metadata.copy()
+                metadata_dict["document"] = results["documents"][0][i]
+                formatted_results.append((metadata_dict, score))
+            else:
+                # Ensure we're always returning a Dict[str, Any] for consistent return type
+                metadata_dict = dict(metadata) if not isinstance(metadata, dict) else metadata.copy()
+                formatted_results.append((metadata_dict, score))
 
     return formatted_results
 
@@ -453,7 +417,7 @@ def convert_to_product_model(metadata: Dict[str, Any]) -> Product:
     product_name = metadata.get("product_name", "")
     product_description = metadata.get("document", "")  # Use document text if available
     if "description" in metadata:
-        product_description = metadata.get("description")
+        product_description = str(metadata.get("description", ""))  # Ensure description is string
 
     # Handle product category (convert string to enum)
     product_category_str = metadata.get("product_category", "")
@@ -462,9 +426,7 @@ def convert_to_product_model(metadata: Dict[str, Any]) -> Product:
     except ValueError:
         # Default to first category if invalid
         product_category = next(iter(ProductCategory))
-        logger.warning(
-            f"Invalid product category: {product_category_str}, defaulting to {product_category}"
-        )
+        logger.warning(f"Invalid product category: {product_category_str}, defaulting to {product_category}")
 
     # Extract other fields with defaults
     product_type = metadata.get("product_type", "")
@@ -517,6 +479,14 @@ def search_products_by_description(
     Returns:
         List of Product objects matching the query
     """
+    # Ensure filters is a dictionary
+    if filters is None:
+        filters = {}
+
+    # Add category filter if specified
+    if category_filter and "product_category" not in filters:
+        filters["product_category"] = category_filter
+
     # Handle edge cases
     if not query or not query.strip():
         logger.warning("Empty query provided to search_products_by_description")
@@ -526,20 +496,13 @@ def search_products_by_description(
         logger.error("No collection provided to search_products_by_description")
         return []
 
-    # Prepare filter criteria - support both old and new filtering methods
-    filter_criteria = filters or {}
-
-    # For backward compatibility with category_filter parameter
-    if category_filter and "product_category" not in filter_criteria:
-        filter_criteria["product_category"] = category_filter
-
     try:
         # Execute similarity search
         search_results = similarity_search_with_score(
             collection=collection,
             query_text=query,
             k=top_k,
-            filter=filter_criteria if filter_criteria else None,
+            filter=filters if filters else None,
         )
 
         # Convert results to Product models
@@ -547,9 +510,9 @@ def search_products_by_description(
         for metadata, score in search_results:
             product = convert_to_product_model(metadata)
             # Add the search score to the product's metadata for potential use
-            if not hasattr(product, "metadata"):
+            if product.metadata is None:
                 product.metadata = {}
-            product.metadata["search_score"] = score
+            product.metadata["search_score"] = score  # type: ignore[index]
             products.append(product)
 
         logger.info(f"Found {len(products)} products matching query: '{query}'")
@@ -579,6 +542,13 @@ def search_products_by_name(
     Returns:
         List of Product objects with names similar to the query
     """
+    # Ensure filters is a dictionary
+    if filters is None:
+        filters = {}
+
+    # Use 'document' field for name search as it contains the product name
+    query_text = f"Product: {product_name}"
+
     if not product_name or not product_name.strip():
         logger.warning("Empty product name provided to search_products_by_name")
         return []
@@ -586,9 +556,6 @@ def search_products_by_name(
     if collection is None:
         logger.error("No collection provided to search_products_by_name")
         return []
-
-    # Create a search query focused on product name
-    query_text = f"Product: {product_name}"
 
     try:
         # Execute similarity search
@@ -601,14 +568,12 @@ def search_products_by_name(
         for metadata, score in search_results:
             product = convert_to_product_model(metadata)
             # Add the search score to the product's metadata
-            if not hasattr(product, "metadata"):
+            if product.metadata is None:
                 product.metadata = {}
-            product.metadata["search_score"] = score
+            product.metadata["search_score"] = score  # type: ignore[index]
             products.append(product)
 
-        logger.info(
-            f"Found {len(products)} products with names similar to: '{product_name}'"
-        )
+        logger.info(f"Found {len(products)} products with names similar to: '{product_name}'")
         return products
 
     except Exception as e:
@@ -646,22 +611,22 @@ def create_filter_dict(
     if season:
         # ChromaDB has limited filtering capabilities for string contained in a list
         # This approach relies on our data storage format where seasons are comma-separated
-        filters["seasons"] = {"$contains": season}
+        filters["seasons"] = {"$contains": season}  # type: ignore
 
     # Add stock filter (greater than or equal to)
     if min_stock is not None:
-        filters["stock"] = {"$gte": min_stock}
+        filters["stock"] = {"$gte": min_stock}  # type: ignore
 
     # Add price range filter
     if price_range and len(price_range) == 2:
         min_price, max_price = price_range
         if min_price is not None:
-            filters["price"] = {"$gte": min_price}
+            filters["price"] = {"$gte": min_price}  # type: ignore
         if max_price is not None:
             if "price" in filters:
-                filters["price"]["$lte"] = max_price
+                filters["price"]["$lte"] = max_price  # type: ignore
             else:
-                filters["price"] = {"$lte": max_price}
+                filters["price"] = {"$lte": max_price}  # type: ignore
 
     # Add any additional filters
     filters.update(additional_filters)
@@ -696,15 +661,11 @@ def filtered_search_products(
         List of matching Product objects
     """
     # Create filter dictionary
-    filters = create_filter_dict(
-        category=category, season=season, min_stock=min_stock, price_range=price_range
-    )
+    filters = create_filter_dict(category=category, season=season, min_stock=min_stock, price_range=price_range)
 
     # Choose the search method based on search_type
     if search_type.lower() == "name":
-        return search_products_by_name(
-            collection=collection, product_name=query, top_k=top_k, filters=filters
-        )
+        return search_products_by_name(collection=collection, product_name=query, top_k=top_k, filters=filters)
     else:  # Default to description search
         return search_products_by_description(
             collection=collection,
@@ -712,3 +673,32 @@ def filtered_search_products(
             top_k=top_k,
             filters=filters,  # Pass the filters directly
         )
+
+
+def create_openai_embedding_function(
+    model_name: str = "text-embedding-3-small",
+    api_key: Optional[str] = None,
+    base_url: Optional[str] = None,
+) -> Any:
+    """
+    Create an OpenAI embedding function for the vector store.
+
+    Args:
+        model_name: The OpenAI embedding model to use.
+        api_key: Optional OpenAI API key. If not provided, will look for OPENAI_API_KEY env var.
+        base_url: Optional base URL for OpenAI API.
+
+    Returns:
+        An OpenAI embedding function compatible with ChromaDB.
+    """
+    # Get API key from environment if not provided
+    effective_api_key = api_key or os.environ.get("OPENAI_API_KEY")
+    if not effective_api_key:
+        raise ValueError("OpenAI API key is required for OpenAI embeddings")
+
+    # Create OpenAI embedding function
+    return embedding_functions.OpenAIEmbeddingFunction(
+        api_key=effective_api_key,
+        model_name=model_name,
+        api_base=base_url,  # This will use the default if None
+    )

@@ -6,14 +6,11 @@ This module provides a comprehensive evaluator for all Hermes components in a si
 significantly reducing API calls and improving evaluation efficiency.
 """
 
-import os
 import json
-from typing import Dict, List, Any, Optional
-from pathlib import Path
+from typing import Dict, Any
 
 # Import LangChain evaluator tools
 from langchain.evaluation import load_evaluator
-from langchain_openai import ChatOpenAI
 
 # Import utility functions
 from .utils import read_prompt
@@ -66,7 +63,7 @@ def convert_to_serializable(obj):
         # For any other non-serializable object, convert to string
         try:
             return str(obj)
-        except:
+        except Exception:
             return f"<Non-serializable object of type {type(obj).__name__}>"
 
 
@@ -220,7 +217,7 @@ async def evaluate_master(
 
                 print(f"    Logged comprehensive evaluation to LangSmith: {run_id}")
             else:
-                print(f"    Warning: Could not create LangSmith run (run object invalid)")
+                print("    Warning: Could not create LangSmith run (run object invalid)")
         except Exception as run_error:
             print(f"    Error creating LangSmith run: {run_error}")
 

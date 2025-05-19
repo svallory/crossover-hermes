@@ -3,8 +3,7 @@
 import unittest
 import asyncio
 from unittest.mock import patch, MagicMock
-import pandas as pd
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 
 from src.agents.inquiry_responder import process_inquiry_node
 from src.state import (
@@ -19,7 +18,6 @@ from src.state import HermesState
 from src.config import HermesConfig
 from src.tools.catalog_tools import Product, ProductNotFound
 from tests.fixtures import (
-    get_test_email,
     get_test_product,
     get_test_cases,
     load_sample_data,
@@ -72,11 +70,11 @@ class TestInquiryResponder(unittest.TestCase):
         # Ensure all required fields for Product model are present
         for field_name, field_info in Product.model_fields.items():
             if field_name not in transformed and field_info.is_required():
-                if field_info.annotation == int:
+                if field_info.annotation is int:
                     transformed[field_name] = 0
-                elif field_info.annotation == str:
+                elif field_info.annotation is str:
                     transformed[field_name] = f"Default {field_name}"
-                elif field_info.annotation == float:
+                elif field_info.annotation is float:
                     transformed[field_name] = 0.0
                 # Add other default types if necessary
         return transformed

@@ -12,14 +12,12 @@ Usage:
   python -m tools.evaluate.custom_end_to_end --dataset-id UUID [--experiment-name NAME]
 """
 
-import os
 import sys
 import asyncio
 import argparse
 import uuid
 import json
 from typing import Dict, List, Any, Optional
-from pathlib import Path
 
 # Add project root to system path if necessary
 from .utils import PROJECT_ROOT, save_report
@@ -155,7 +153,7 @@ async def run_custom_end_to_end_evaluation(
 
             # Skip if missing required outputs
             if not email_analyzer_output or not response_composer_output:
-                print(f"  Skipping evaluation due to missing outputs")
+                print("  Skipping evaluation due to missing outputs")
                 continue
 
             if (
@@ -163,7 +161,7 @@ async def run_custom_end_to_end_evaluation(
                 or "response_body" not in response_composer_output
                 or "subject" not in response_composer_output
             ):
-                print(f"  Skipping evaluation due to invalid response format")
+                print("  Skipping evaluation due to invalid response format")
                 continue
 
             final_subject = response_composer_output.get("subject", "")

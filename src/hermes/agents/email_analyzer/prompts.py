@@ -5,6 +5,8 @@ Email Analyzer prompts for use with LangChain.
 from typing import Dict
 from langchain_core.prompts import PromptTemplate
 
+from src.hermes.model import Agents
+
 # Dictionary to store all prompt templates
 PROMPTS: Dict[str, PromptTemplate] = {}
 
@@ -92,7 +94,7 @@ Subject: {{email_subject}}
 Message: {{email_message}}
 """
 
-PROMPTS["email_analyzer"] = PromptTemplate.from_template(email_analyzer_prompt_template_str, template_format="mustache")
+PROMPTS[Agents.EMAIL_ANALYZER] = PromptTemplate.from_template(email_analyzer_prompt_template_str, template_format="mustache")
 
 
 def get_prompt(key: str) -> PromptTemplate:

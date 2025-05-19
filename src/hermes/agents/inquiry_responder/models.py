@@ -3,8 +3,7 @@ Pydantic models for the inquiry responder agent.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Union, Any
-from enum import Enum
+from typing import List, Optional
 
 from src.hermes.agents.email_analyzer.models import EmailAnalysis
 from src.hermes.model import Product

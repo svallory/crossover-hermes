@@ -1,9 +1,7 @@
 """Tests for the Email Classifier Agent."""
 
 import unittest
-import asyncio
-from unittest.mock import patch, MagicMock
-from typing import Dict, Any
+from unittest.mock import patch
 
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
@@ -13,7 +11,7 @@ from src.state import EmailAnalysis, ProductReference, CustomerSignal
 from src.state import HermesState
 from src.config import HermesConfig
 
-from tests.fixtures import get_test_email, get_test_cases
+from tests.fixtures import get_test_cases
 from tests.__init__ import mock_openai
 
 

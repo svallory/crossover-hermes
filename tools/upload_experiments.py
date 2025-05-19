@@ -13,20 +13,11 @@ import os
 import sys
 import argparse
 import yaml
-import json
 import uuid
 import datetime
 from pathlib import Path
 import requests
 from typing import Dict, List, Any, Optional
-
-# Add project root to system path if necessary
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-# Import Hermes test infrastructure
 from tests.integration.test_agent_flow import OUTPUT_DIR_TEST
 from src.hermes.config import load_app_env_vars
 
@@ -131,7 +122,6 @@ def upload_experiment_to_langsmith(
 
 
 # Import YAML with custom tag handling
-import yaml
 
 
 def custom_tag_constructor(loader, tag, node):
