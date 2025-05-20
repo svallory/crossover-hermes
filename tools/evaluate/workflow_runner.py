@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from langsmith import Client
 
 # Import Hermes workflow
-from src.hermes.agents.workflow import hermes_langgraph_workflow
+from src.hermes.agents.workflow.run_workflow import run_workflow
 from src.hermes.config import HermesConfig
 
 
@@ -99,7 +99,7 @@ async def run_with_dataset(
             }
 
             # Run the workflow directly
-            workflow_result = await hermes_langgraph_workflow(email_data=email_data, hermes_config=hermes_config)
+            workflow_result = await run_workflow(email_data=email_data, hermes_config=hermes_config)
 
             # Store the workflow state in our results format
             results.append(

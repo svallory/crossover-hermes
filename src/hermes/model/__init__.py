@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any, Literal, TypeVar, Union
 from enum import Enum
 
+# Import enums from the new enums.py file
+from .enums import ProductCategory, Season
+
 # Enum of nodes
 class Agents(str, Enum):
     """Names of our Agents (also nodes in the workflow graph)."""
@@ -18,29 +21,6 @@ class Nodes(str, Enum):
     PROCESS = "process"
     ANSWER = "answer"
     COMPOSE = "compose"
-
-class ProductCategory(str, Enum):
-    """Categories of products available in the store."""
-
-    ACCESSORIES = "Accessories"
-    BAGS = "Bags"
-    KIDS_CLOTHING = "Kid's Clothing"
-    LOUNGEWEAR = "Loungewear"
-    MENS_ACCESSORIES = "Men's Accessories"
-    MENS_CLOTHING = "Men's Clothing"
-    MENS_SHOES = "Men's Shoes"
-    WOMENS_CLOTHING = "Women's Clothing"
-    WOMENS_SHOES = "Women's Shoes"
-
-
-class Season(str, Enum):
-    """Seasons in which a product is available."""
-
-    SPRING = "Spring"
-    SUMMER = "Summer"
-    AUTUMN = "Autumn"
-    WINTER = "Winter"
-
 
 class Product(BaseModel):
     """A product from the catalog."""

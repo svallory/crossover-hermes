@@ -1,0 +1,65 @@
+"""
+Entry point for running the Hermes workflow.
+This initializes the vector store and runs the workflow.
+"""
+
+from typing import Optional, Annotated, Dict, Any
+from langchain_core.runnables import RunnableConfig
+
+from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput
+from src.hermes.agents.workflow.graph import workflow
+from src.hermes.config import HermesConfig
+from src.hermes.agents.workflow.states import OverallState
+from src.hermes.data_processing.load_data import initialize_data_and_vector_store
+
+
+async def run_workflow(
+    input_state: EmailAnalyzerInput,
+    hermes_config: HermesConfig,
+) -> OverallState:
+    """
+    Run the workflow with the given input state and configuration.
+    Ensures the vector store is initialized before running.
+
+    Args:
+        input_state: The input state for the workflow.
+        hermes_config: The configuration for the workflow.
+
+    Returns:
+        The final state of the workflow.
+    """
+    # First, ensure vector store is initialized
+    # This is crucial for the inquiry responder to work
+    print("Ensuring vector store is initialized before running workflow...")
+    vs_success = await initialize_data_and_vector_store()
+    
+    if not vs_success:
+        print("ERROR: Vector store initialization failed. Exiting workflow.")
+        exit(1)
+    else:
+        print("Vector store initialized successfully.")
+    
+    # Prepare the runnable config
+    config: Dict[str, Dict[str, Any]] = {
+        "configurable": {
+            "hermes_config": hermes_config,
+        }
+    }
+    
+    # Create a typed config for the LangGraph StateGraph
+    runnable_config: RunnableConfig = config  # type: ignore
+    
+    # Run the workflow with the input state and config
+    print(f"Running workflow for email {input_state.email_id}...")
+    result = await workflow.ainvoke(input_state, config=runnable_config)
+    
+    print(f"Workflow completed for email {input_state.email_id}")
+    
+    # Convert the result to an OverallState
+    if isinstance(result, dict):
+        final_state = OverallState.model_validate(result)
+    else:
+        # If result is already an OverallState, use it directly
+        final_state = result
+    
+    return final_state

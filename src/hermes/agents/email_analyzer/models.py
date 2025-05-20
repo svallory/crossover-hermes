@@ -3,10 +3,10 @@ Pydantic models for the email analyzer agent.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Literal
+from typing import List, Dict, Optional, Literal, Any
 from enum import Enum
 
-from src.hermes.model import ProductCategory
+from src.hermes.model.enums import ProductCategory
 
 
 class SegmentType(str, Enum):
@@ -53,7 +53,7 @@ class EmailAnalysis(BaseModel):
         description="The main purpose of the customer's email"
     )
 
-    customer_pii: Dict[str, str] = Field(
+    customer_pii: Dict[str, Any] = Field(
         default_factory=dict,
         description="Personal identifiable information like name, email, phone, etc.",
     )

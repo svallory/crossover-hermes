@@ -7,3 +7,5 @@
 .env.production.local
 **/__pycache__
 .langgraph_api
+
+chroma_db/

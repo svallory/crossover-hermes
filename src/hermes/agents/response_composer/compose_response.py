@@ -2,7 +2,7 @@
 Main function for composing final customer responses.
 """
 
-from typing import Dict, Any, Optional, Literal, Union
+from typing import Optional, Literal
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
@@ -10,14 +10,17 @@ from src.hermes.utils.errors import create_node_response
 
 from .models import (
     ComposedResponse,
-    ResponseComposerOutput,
     ResponseComposerInput,
+    ResponseComposerOutput,
     ResponseTone,
 )
 from .prompts import get_prompt
 from ...config import HermesConfig
 from ...utils import get_llm_client
-from ...model import WorkflowNodeOutput, Agents, Error
+from ...model import WorkflowNodeOutput, Agents
+from ...agents.email_analyzer.models import EmailAnalysis
+from ...agents.inquiry_responder.models import InquiryAnswers
+from ...agents.order_processor.models import ProcessedOrder
 
 @traceable(run_type="chain", name="Response Composer Agent")  # type: ignore
 async def compose_response(
@@ -29,34 +32,38 @@ async def compose_response(
     from the Email Analyzer, Inquiry Responder, and Order Processor agents.
 
     Args:
-        state (ResponseComposerInput): The input model containing outputs from previous agents.
+        state (OverallState): The current overall state of the workflow.
         runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
         Dict[str, Any]: In the LangGraph workflow, returns {"response_composer": ResponseComposerOutput} or {"errors": Error}
     """
     try:
-        # Validate the input
-        if not hasattr(state, "email_analysis") or not state.email_analysis:
+        email_analysis_data: Optional[EmailAnalysis] = None
+        if state.email_analyzer and state.email_analyzer.email_analysis:
+            email_analysis_data = state.email_analyzer.email_analysis
+        
+        if email_analysis_data is None:
             return create_node_response(
                 Agents.RESPONSE_COMPOSER,
                 Exception("No email analysis available for response composition.")
             )
             
-            
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
-        # Extract email_id from the analysis result
-        # For Pydantic models, use hasattr and __dict__ to safely access attributes
-        if hasattr(state.email_analysis, "email_id"):
-            email_id = state.email_analysis.email_id  # type: ignore[attr-defined]
-        elif isinstance(state.email_analysis, dict) and "email_id" in state.email_analysis:
-            email_id = state.email_analysis["email_id"]
-        else:
-            email_id = "unknown_id"
-
+        email_id = email_analysis_data.email_id if email_analysis_data.email_id else state.email_id or "unknown_id"
+        
         print(f"Composing final customer response for email {email_id}")
 
+        # Prepare data for the prompt
+        inquiry_answers_data: Optional[InquiryAnswers] = None
+        if state.inquiry_responder and state.inquiry_responder.inquiry_answers:
+            inquiry_answers_data = state.inquiry_responder.inquiry_answers
+
+        order_result_data: Optional[ProcessedOrder] = None
+        if state.order_processor and state.order_processor.order_result:
+            order_result_data = state.order_processor.order_result
+        
         # Use a strong model for natural language generation
         llm = get_llm_client(config=hermes_config, model_strength="strong", temperature=0.7)
 
@@ -67,8 +74,18 @@ async def compose_response(
         composer_chain = composer_prompt | llm.with_structured_output(ComposedResponse)
 
         try:
+            # Prepare the input dictionary for the chain, ensuring all keys expected by the prompt are present
+            # (typically matching fields of ResponseComposerInput model)
+            prompt_input_data = {
+                "email_analysis": email_analysis_data.model_dump() if email_analysis_data else None,
+                "inquiry_response": inquiry_answers_data.model_dump() if inquiry_answers_data else None,
+                "order_result": order_result_data.model_dump() if order_result_data else None,
+            }
+            # Filter out keys with None values to avoid passing them if not available
+            filtered_prompt_input_data = {k: v for k, v in prompt_input_data.items() if v is not None}
+
             # Execute the chain
-            response_data = await composer_chain.ainvoke(state.model_dump())
+            response_data = await composer_chain.ainvoke(filtered_prompt_input_data)
 
             # Properly handle the response with type checking
             if isinstance(response_data, ComposedResponse):

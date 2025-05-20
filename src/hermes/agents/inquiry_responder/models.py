@@ -5,7 +5,7 @@ Pydantic models for the inquiry responder agent.
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from src.hermes.agents.email_analyzer.models import EmailAnalysis
+from src.hermes.agents.email_analyzer.models import EmailAnalysis, EmailAnalyzerOutput
 from src.hermes.model import Product
 
 
@@ -74,7 +74,7 @@ class InquiryResponderInput(BaseModel):
     Input model for the inquiry responder.
     """
 
-    email_analysis: EmailAnalysis = Field(description="Complete EmailAnalysisResult from the analyzer")
+    email_analyzer: EmailAnalyzerOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
 
 
 class InquiryResponderOutput(BaseModel):

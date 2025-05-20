@@ -4,18 +4,16 @@ import pandas as pd  # type: ignore
 from typing import List, Dict, Any, Optional
 
 # Apply nest_asyncio for Jupyter compatibility
-import nest_asyncio  # type: ignore
+import nest_asyncio
 
-# All imports must be before any code execution
-from .config import HermesConfig, load_app_env_vars
-from .data_processing.load_data import initialize_data_and_vector_store, load_emails_df
-from .agents.workflow import hermes_langgraph_workflow, InputState, OutputState
+from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput
+from src.hermes.agents.workflow.states import OverallState
+from src.hermes.agents.workflow.workflow import run_workflow
+from src.hermes.config import HermesConfig
+from src.hermes.data_processing.load_data import load_emails_df
 
 # Apply nest_asyncio after imports
 nest_asyncio.apply()
-
-# Load environment variables
-load_app_env_vars()
 
 # Default output directory
 OUTPUT_DIR = "output"
@@ -49,16 +47,17 @@ async def process_emails(
         print(f"\nProcessing email {i + 1}/{len(emails_to_process)}: ID {email_id}")
 
         try:
-            # Create InputState from email_data
-            input_state = InputState(
-                email_id=str(email_data.get("email_id", f"unknown_email_{i}")),
-                subject=email_data.get("subject"),
+            # Create EmailAnalyzerInput from email_data
+            input_state = EmailAnalyzerInput(
+                email_id=email_data.get("email_id", f"unknown_email_{i}"),
+                subject=email_data.get("subject", ""),
                 message=email_data.get("message", ""),
             )
 
             # Execute the LangGraph workflow
-            workflow_state: OutputState = await hermes_langgraph_workflow(
-                input_state=input_state, hermes_config=config_obj
+            workflow_state: OverallState = await run_workflow(
+                input_state=input_state, 
+                hermes_config=config_obj
             )
 
             # Extract results for the assignment output format
@@ -111,6 +110,40 @@ async def process_emails(
     return results
 
 
+def create_output_csv(
+    email_classification_df: pd.DataFrame,
+    order_status_df: pd.DataFrame,
+    order_response_df: pd.DataFrame,
+    inquiry_response_df: pd.DataFrame,
+    output_dir: str = OUTPUT_DIR,
+) -> Dict[str, str]:
+    """Create CSV files with the assignment output."""
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Define file paths
+    email_classification_path = os.path.join(output_dir, "email-classification.csv")
+    order_status_path = os.path.join(output_dir, "order-status.csv")
+    order_response_path = os.path.join(output_dir, "order-response.csv")
+    inquiry_response_path = os.path.join(output_dir, "inquiry-response.csv")
+    
+    # Save DataFrames to CSV files
+    email_classification_df.to_csv(email_classification_path, index=False)
+    order_status_df.to_csv(order_status_path, index=False)
+    order_response_df.to_csv(order_response_path, index=False)
+    inquiry_response_df.to_csv(inquiry_response_path, index=False)
+    
+    print(f"CSV files saved to {output_dir}")
+    
+    # Return file paths
+    return {
+        "email-classification": email_classification_path,
+        "order-status": order_status_path,
+        "order-response": order_response_path,
+        "inquiry-response": inquiry_response_path
+    }
+
+
 async def create_output_spreadsheet(
     email_classification_df: pd.DataFrame,
     order_status_df: pd.DataFrame,
@@ -118,127 +151,85 @@ async def create_output_spreadsheet(
     inquiry_response_df: pd.DataFrame,
     output_name: str = "Solving Business Problems with AI - Output",
 ) -> str:
-    """
-    Create the Google Spreadsheet with the assignment output.
+    """Create the Google Spreadsheet with the assignment output."""
+    # Import Google Colab dependencies
+    from google.colab import auth
+    import gspread
+    from google.auth import default
+    from gspread_dataframe import set_with_dataframe
 
-    Args:
-        email_classification_df: DataFrame with email classifications
-        order_status_df: DataFrame with order status information
-        order_response_df: DataFrame with order responses
-        inquiry_response_df: DataFrame with inquiry responses
-        output_name: Name for the output spreadsheet
+    # Authenticate with Google
+    auth.authenticate_user()
+    creds, _ = default()
+    gc = gspread.authorize(creds)
 
-    Returns:
-        URL of the created spreadsheet
-    """
-    try:
-        # Try to import Google Colab dependencies
-        try:
-            # Use dynamic imports to avoid static type checking errors
-            # pyright: ignore
-            colab_auth = __import__("google.colab", fromlist=["auth"]).auth
-            gspread = __import__("gspread")
-            google_auth_default = __import__("google.auth", fromlist=["default"]).default
-            set_with_dataframe = __import__("gspread_dataframe", fromlist=["set_with_dataframe"]).set_with_dataframe
-        except ImportError:
-            print("Google Colab dependencies not available. Output spreadsheet not created.")
-            return "Google Colab dependencies not available"
+    # Create output document
+    output_document = gc.create(output_name)
 
-        # Authenticate with Google
-        colab_auth.authenticate_user()
-        creds, _ = google_auth_default()
-        gc = gspread.authorize(creds)  # type: ignore
+    # Create and populate sheets
+    email_classification_sheet = output_document.add_worksheet(title="email-classification", rows=50, cols=2)
+    email_classification_sheet.update([["email ID", "category"]], "A1:B1")
+    set_with_dataframe(email_classification_sheet, email_classification_df)
 
-        # Create output document
-        output_document = gc.create(output_name)
+    order_status_sheet = output_document.add_worksheet(title="order-status", rows=50, cols=4)
+    order_status_sheet.update([["email ID", "product ID", "quantity", "status"]], "A1:D1")
+    set_with_dataframe(order_status_sheet, order_status_df)
 
-        # Create and populate 'email-classification' sheet
-        email_classification_sheet = output_document.add_worksheet(title="email-classification", rows=50, cols=2)
-        email_classification_sheet.update([["email ID", "category"]], "A1:B1")
-        set_with_dataframe(email_classification_sheet, email_classification_df)
+    order_response_sheet = output_document.add_worksheet(title="order-response", rows=50, cols=2)
+    order_response_sheet.update([["email ID", "response"]], "A1:B1")
+    set_with_dataframe(order_response_sheet, order_response_df)
 
-        # Create and populate 'order-status' sheet
-        order_status_sheet = output_document.add_worksheet(title="order-status", rows=50, cols=4)
-        order_status_sheet.update([["email ID", "product ID", "quantity", "status"]], "A1:D1")
-        set_with_dataframe(order_status_sheet, order_status_df)
+    inquiry_response_sheet = output_document.add_worksheet(title="inquiry-response", rows=50, cols=2)
+    inquiry_response_sheet.update([["email ID", "response"]], "A1:B1")
+    set_with_dataframe(inquiry_response_sheet, inquiry_response_df)
 
-        # Create and populate 'order-response' sheet
-        order_response_sheet = output_document.add_worksheet(title="order-response", rows=50, cols=2)
-        order_response_sheet.update([["email ID", "response"]], "A1:B1")
-        set_with_dataframe(order_response_sheet, order_response_df)
+    # Delete the default Sheet1
+    worksheet = output_document.get_worksheet(0)
+    output_document.del_worksheet(worksheet)
 
-        # Create and populate 'inquiry-response' sheet
-        inquiry_response_sheet = output_document.add_worksheet(title="inquiry-response", rows=50, cols=2)
-        inquiry_response_sheet.update([["email ID", "response"]], "A1:B1")
-        set_with_dataframe(inquiry_response_sheet, inquiry_response_df)
+    # Share the spreadsheet publicly
+    output_document.share("", perm_type="anyone", role="reader")
 
-        # Delete the default Sheet1
-        worksheet = output_document.get_worksheet(0)
-        output_document.del_worksheet(worksheet)
-
-        # Share the spreadsheet publicly
-        output_document.share("", perm_type="anyone", role="reader")
-
-        # Return the shareable link
-        shareable_link = f"https://docs.google.com/spreadsheets/d/{output_document.id}"
-        print(f"Shareable link: {shareable_link}")
-        return shareable_link
-
-    except Exception as e:
-        print(f"Error creating output spreadsheet: {e}")
-        return f"Error: {str(e)}"
+    # Return the shareable link
+    shareable_link = f"https://docs.google.com/spreadsheets/d/{output_document.id}"
+    print(f"Shareable link: {shareable_link}")
+    return shareable_link
 
 
-async def main() -> Dict[str, Dict[str, Any]]:
+async def main(
+    spreadsheet_id: str,
+    use_csv_output: bool = False,
+    processing_limit: Optional[int] = None
+) -> str:
     """
     Main function implementing the assignment requirements.
 
+    Args:
+        spreadsheet_id: ID of the Google Spreadsheet with input data
+        use_csv_output: Whether to use CSV output instead of Google Sheets
+        processing_limit: Optional limit on the number of emails to process
+
     Returns:
-        Dictionary mapping email_id to processed results
+        Shareable link to the output spreadsheet or path to CSV files
     """
-    # 1. Load app config and initialize data
+    # 1. Load app config
     hermes_config = HermesConfig()
+    hermes_config.input_spreadsheet_id = spreadsheet_id
     print(f"Config loaded, using model: {hermes_config.llm_model_name}")
 
-    # 2. Initialize the vector store and data
-    # Pass the correct parameters to initialize_data_and_vector_store
-    init_success = initialize_data_and_vector_store(
-        spreadsheet_id=hermes_config.input_spreadsheet_id,
-        collection_name=hermes_config.chroma_collection_name,
-        openai_api_key=hermes_config.llm_api_key,
-        openai_base_url=hermes_config.llm_base_url,
-    )
-
-    if not init_success:
-        print("Failed to initialize data. Exiting.")
-        return {}
-
-    # 3. Load the emails dataset
-    emails_df = load_emails_df(spreadsheet_id=hermes_config.input_spreadsheet_id)
-
-    # Check if emails_df is None before using it
-    if emails_df is None or emails_df.empty:
-        print("No emails found to process. Exiting.")
-        return {}
-
+    # 2. Load the emails dataset - no need for validation checks in a notebook environment
+    emails_df = await load_emails_df(spreadsheet_id=spreadsheet_id)
     print(f"Loaded {len(emails_df)} emails.")
 
-    # Convert emails to dictionary format
-    emails_batch = emails_df.to_dict(orient="records")  # type: ignore # Ignore type mismatch from to_dict
+    # 3. Convert emails to dictionary format
+    emails_batch = emails_df.to_dict(orient="records")
 
     # 4. Process emails with LangGraph workflow
-    processing_limit_env = os.getenv("HERMES_PROCESSING_LIMIT")
-    processing_limit: Optional[int] = None
-    if processing_limit_env and processing_limit_env.isdigit():
-        processing_limit = int(processing_limit_env)
-
-    # Cast emails_batch to the correct type
-    emails_for_processing: List[Dict[str, str]] = []
+    emails_for_processing = []
     for email in emails_batch:
-        # Ensure all values are strings and keys are strings
-        email_dict: Dict[str, str] = {}
+        email_dict = {}
         for k, v in email.items():
-            if isinstance(k, str):  # Only include string keys
+            if isinstance(k, str):
                 email_dict[k] = str(v) if v is not None else ""
         emails_for_processing.append(email_dict)
 
@@ -249,8 +240,86 @@ async def main() -> Dict[str, Dict[str, Any]]:
     )
 
     print(f"\nProcessed {len(processing_results)} emails successfully.")
-    return processing_results
+    
+    # 5. Prepare DataFrames for the output
+    email_classification_data = []
+    order_status_data = []
+    order_response_data = []
+    inquiry_response_data = []
+    
+    for email_id, result in processing_results.items():
+        # Email classification data
+        email_classification_data.append({
+            "email ID": email_id,
+            "category": result["classification"]
+        })
+        
+        # Order status data
+        for order_status in result["order_status"]:
+            order_status_data.append({
+                "email ID": email_id,
+                "product ID": order_status["product_id"],
+                "quantity": order_status["quantity"],
+                "status": order_status["status"]
+            })
+        
+        # Response data
+        if result["classification"] == "order request" and result["response"]:
+            order_response_data.append({
+                "email ID": email_id,
+                "response": result["response"]
+            })
+        elif result["classification"] == "product inquiry" and result["response"]:
+            inquiry_response_data.append({
+                "email ID": email_id,
+                "response": result["response"]
+            })
+    
+    # Create DataFrames
+    email_classification_df = pd.DataFrame(email_classification_data)
+    order_status_df = pd.DataFrame(order_status_data)
+    order_response_df = pd.DataFrame(order_response_data)
+    inquiry_response_df = pd.DataFrame(inquiry_response_data)
+    
+    # 6. Create and populate the output
+    if use_csv_output:
+        output_paths = create_output_csv(
+            email_classification_df=email_classification_df,
+            order_status_df=order_status_df,
+            order_response_df=order_response_df,
+            inquiry_response_df=inquiry_response_df
+        )
+        return f"CSV files saved to: {OUTPUT_DIR}"
+    else:
+        shareable_link = await create_output_spreadsheet(
+            email_classification_df=email_classification_df,
+            order_status_df=order_status_df,
+            order_response_df=order_response_df,
+            inquiry_response_df=inquiry_response_df
+        )
+        return shareable_link
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # For command-line execution, but this code will primarily be used in a notebook
+    import sys
+    
+    # Default values
+    input_spreadsheet_id = "14fKHsblfqZfWj3iAaM2oA51TlYfQlFT4WKo52fVaQ9U"  # From assignment
+    use_csv = "--csv" in sys.argv
+    
+    # Get limit if specified
+    limit = None
+    for arg in sys.argv:
+        if arg.startswith("--limit="):
+            try:
+                limit = int(arg.split("=")[1])
+            except:
+                pass
+    
+    result = asyncio.run(main(
+        spreadsheet_id=input_spreadsheet_id,
+        use_csv_output=use_csv,
+        processing_limit=limit
+    ))
+    print(f"Final result: {result}")

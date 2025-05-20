@@ -37,7 +37,7 @@ Return a JSON structure with the following format:
     "name": "Customer name if provided",
     "address": "Customer address if provided",
     // Other PII fields as found
-  },
+  }, // Always return a JSON object (dictionary) for customer_pii, e.g., {"name": "John Doe", "email": "john.doe@example.com"} or {} if no PII is found.
   "segments": [
     {
       "segment_type": "order|inquiry|personal_statement",
@@ -78,6 +78,7 @@ GUIDELINES:
 - Be cautious with numbers in general text - only extract as product IDs when context clearly indicates a product (avoid false positives)
 - Extract product IDs as they appear, even if formatted differently (in brackets, with spaces, etc.)
 - Set lower confidence scores for IDs that don't strictly follow the 3-letter/4-number pattern
+- When a specific product name or ID is not mentioned, extract the product type and description into the `product_type` and `product_description` fields.
 
 PRODUCT NAME EXTRACTION RULES:
 - The product_name field should contain ONLY the distinctive branded name without generic category words, unless those words are part of the official product name
@@ -90,8 +91,8 @@ PRODUCT NAME EXTRACTION RULES:
 
 ### USER REQUEST
 CUSTOMER EMAIL:
-Subject: {{email_subject}}
-Message: {{email_message}}
+Subject: {{subject}}
+Message: {{message}}
 """
 
 PROMPTS[Agents.EMAIL_ANALYZER] = PromptTemplate.from_template(email_analyzer_prompt_template_str, template_format="mustache")

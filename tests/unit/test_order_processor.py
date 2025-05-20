@@ -6,15 +6,15 @@ from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 import pandas as pd
 
-from src.agents.order_processor import (
-    process_order_node,
-    AlternativeProduct,
+from src.hermes.agents.order_processor import (
+    process_order,
 )
-from src.state import EmailAnalysis, ProductReference
-from src.state import HermesState
-from src.config import HermesConfig
-from src.tools.order_tools import PromotionDetails
-from src.tools.catalog_tools import Product, ProductNotFound
+from src.hermes.model.product import AlternativeProduct, Product
+from src.hermes.model import EmailAnalysis, ProductReference
+from src.hermes.state import HermesState
+from src.hermes.config import HermesConfig
+from src.hermes.tools.order_tools import PromotionDetails
+from src.hermes.tools.catalog_tools import ProductNotFound
 
 from tests.fixtures import get_test_product, get_test_cases
 from tests.__init__ import mock_openai
@@ -244,17 +244,25 @@ class TestOrderProcessor(unittest.TestCase):
             "requested_quantity": 2,
             "is_available": False,  # Use a simple boolean False
         }
-        mock_find_alternatives.return_value = [
-            AlternativeProduct(
-                original_product_id=product_data["product_id"],
-                original_product_name=product_data["name"],
-                product_id="BKR0123",
-                product_name="Biker Shorts",
-                stock_available=10,
-                price=19.99,
-                reason="Similar summer accessory",
-            ).model_dump()  # Ensure it's a dict if the agent node expects it
-        ]
+        
+        # Create an alternative product using the new structure
+        alt_product = Product(
+            product_id="BKR0123",
+            name="Biker Shorts",
+            description="Comfortable shorts for biking",
+            category="Accessories",
+            product_type="Shorts",
+            stock=10,
+            seasons=["Summer"],
+            price=19.99
+        )
+        alternative = AlternativeProduct(
+            product=alt_product,
+            similarity_score=0.75,
+            reason="Similar summer accessory"
+        )
+        
+        mock_find_alternatives.return_value = [alternative.model_dump()]  # Ensure it's a dict if the agent node expects it
 
         # Mock extract_promotion
         mock_extract_promotion.return_value = PromotionDetails(has_promotion=False)

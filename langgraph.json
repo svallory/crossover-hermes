@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "workflow": "./src/hermes/agents/workflow.py:workflow"
+    "workflow": "./src/hermes/agents/workflow/graph.py:workflow"
   },
   "env": ".env"
 }

@@ -1,0 +1,146 @@
+email_analyzer:
+  email_analysis:
+    customer_pii: {}
+    email_id: E001
+    language: english
+    primary_intent: order request
+    segments:
+    - main_sentence: I want to order all the remaining LTH0976 Leather Bifold Wallets
+        you have in stock.
+      product_mentions:
+      - confidence: 1.0
+        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        - Men's Accessories
+        product_description: null
+        product_id: LTH0976
+        product_name: LTH0976
+        product_type: Leather Bifold Wallet
+        quantity: null
+      related_sentences:
+      - I'm opening up a small boutique shop and these would be perfect for my inventory.
+      - Thank you!
+      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      - order
+  unique_products:
+  - confidence: 1.0
+    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    - Men's Accessories
+    product_description: null
+    product_id: LTH0976
+    product_name: LTH0976
+    product_type: Leather Bifold Wallet
+    quantity: null
+email_id: E001
+errors: {}
+inquiry_responder: null
+message: Hi there, I want to order all the remaining LTH0976 Leather Bifold Wallets
+  you have in stock. I'm opening up a small boutique shop and these would be perfect
+  for my inventory. Thank you!
+order_processor:
+  order_result:
+    email_id: E001
+    message: Your order has been successfully processed. All 5 units of LTH0976 Leather
+      Bifold Wallet have been included with a 10% discount as per our current promotion
+      for boutique owners.
+    ordered_items:
+    - alternatives: []
+      available_stock: 0
+      price: 45.0
+      product_id: LTH0976
+      product_name: Leather Bifold Wallet
+      promotion: 10% off for new boutique owners/bulk orders (5+ units)
+      quantity: 5
+      status: !!python/object/apply:src.hermes.agents.order_processor.models.OrderItemStatus
+      - out_of_stock
+      total_price: 202.5
+    overall_status: created
+    stock_updated: true
+    total_price: 202.5
+response_composer:
+  composed_response:
+    email_id: E001
+    language: english
+    response_body: 'Dear Customer,
+
+
+      Thank you for reaching out to Hermes and for your interest in our LTH0976 Leather
+      Bifold Wallets. We are delighted to hear you are opening a new boutique and
+      are considering our products for your inventory!
+
+
+      We received your request to order all available stock of the LTH0976 Leather
+      Bifold Wallet.
+
+
+      Currently, this item is out of stock, which means we are unable to fulfill your
+      request for these wallets at this moment. We understand this news may be disappointing,
+      especially given your plans for your new boutique, and we sincerely apologize
+      for any inconvenience this causes.
+
+
+      We would like to assure you that we do have a special promotion for new boutique
+      owners, offering a 10% discount on bulk orders (5 or more units of an item).
+      We would be very happy to apply this for you if you choose to order the LTH0976
+      wallets once they are restocked, or if you find other suitable items in our
+      collection.
+
+
+      Would you like us to add you to our notification list? We can then contact you
+      directly as soon as the LTH0976 Leather Bifold Wallets are back in stock.
+
+
+      We appreciate your understanding and are keen to help you find the perfect items
+      for your new venture. Please let us know if you''d like to be notified or if
+      there''s anything else we can assist you with.
+
+
+      Best regards,
+
+      Hermes - Delivering divine fashion'
+    response_points:
+    - content: Thank you for reaching out to Hermes and for your interest in our LTH0976
+        Leather Bifold Wallets. We are delighted to hear you are opening a new boutique
+        and are considering our products for your inventory!
+      content_type: greeting
+      priority: 10
+      related_to: null
+    - content: We received your request to order all available stock of the LTH0976
+        Leather Bifold Wallet.
+      content_type: order_acknowledgment
+      priority: 9
+      related_to: LTH0976
+    - content: Currently, this item is out of stock, which means we are unable to
+        fulfill your request for these wallets at this moment.
+      content_type: product_info
+      priority: 8
+      related_to: LTH0976
+    - content: We understand this news may be disappointing, especially given your
+        plans for your new boutique, and we sincerely apologize for any inconvenience
+        this causes.
+      content_type: apology
+      priority: 7
+      related_to: null
+    - content: We would like to assure you that we do have a special promotion for
+        new boutique owners, offering a 10% discount on bulk orders (5 or more units
+        of an item). We would be very happy to apply this for you if you choose to
+        order the LTH0976 wallets once they are restocked, or if you find other suitable
+        items in our collection.
+      content_type: promotion_info
+      priority: 6
+      related_to: LTH0976
+    - content: Would you like us to add you to our notification list? We can then
+        contact you directly as soon as the LTH0976 Leather Bifold Wallets are back
+        in stock.
+      content_type: solution_offer
+      priority: 5
+      related_to: LTH0976
+    - content: We appreciate your understanding and are keen to help you find the
+        perfect items for your new venture. Please let us know if you'd like to be
+        notified or if there's anything else we can assist you with.
+      content_type: closing
+      priority: 4
+      related_to: null
+    subject: Update on your inquiry for LTH0976 Leather Bifold Wallets
+    tone: !!python/object/apply:src.hermes.agents.response_composer.models.ResponseTone
+    - apologetic
+subject: Leather Wallets

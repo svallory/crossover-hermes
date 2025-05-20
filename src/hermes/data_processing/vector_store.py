@@ -6,6 +6,7 @@ This handles creating, updating, and querying the vector database (ChromaDB).
 import os
 import logging
 import pandas as pd
+import asyncio
 from typing import Optional, List, Dict, Any, Union, Tuple
 import uuid
 
@@ -15,23 +16,24 @@ from chromadb.utils import embedding_functions
 # Import Hermes models
 from src.hermes.model import Product, ProductCategory, Season
 
-# Import the embedding functions in a way that works with type checking
-SentenceTransformerEmbeddingFunction: Any = None  # Define a type variable instead
+# Sentinel for in-memory storage
+IN_MEMORY_SENTINEL = "___IN_MEMORY___"
+
+# Define a type variable instead
+SentenceTransformerEmbeddingFunction: Any = None
 try:
-    # Modern chromadb versions
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction  # type: ignore
+    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 except ImportError:
-    pass  # Keep the None value for SentenceTransformerEmbeddingFunction
+    pass
 
 # For OpenAI embeddings
 try:
     from langchain_openai import OpenAIEmbeddings as LangchainEmbeddings
 except ImportError:
     try:
-        # Fallback to older langchain structure
-        from langchain.embeddings import OpenAIEmbeddings as LangchainEmbeddings  # type: ignore
+        from langchain.embeddings import OpenAIEmbeddings as LangchainEmbeddings
     except ImportError:
-        LangchainEmbeddings = None  # type: ignore
+        LangchainEmbeddings = None
 
 logger = logging.getLogger(__name__)
 
@@ -58,36 +60,31 @@ def get_embedding_function(
         An embedding function compatible with ChromaDB
     """
     if use_openai:
-        if LangchainEmbeddings is None:
-            raise ImportError("OpenAI embeddings requested but langchain_openai is not installed")
-
-        # Get API key from environment if not provided
-        api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("OpenAI API key is required for OpenAI embeddings")
-
         # Create OpenAI embedding function
-        openai_ef = embedding_functions.OpenAIEmbeddingFunction(api_key=api_key, model_name=embedding_model)
+        openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+            api_key=openai_api_key or os.environ.get("OPENAI_API_KEY"), 
+            model_name=embedding_model
+        )
         return openai_ef
     else:
         # Use sentence-transformers for local embeddings
-        if SentenceTransformerEmbeddingFunction is None:
-            raise ImportError("SentenceTransformerEmbeddingFunction not found in chromadb")
-
         return SentenceTransformerEmbeddingFunction(model_name=embedding_model)
 
 
-def create_vector_store(
+async def create_vector_store(
     products_df: pd.DataFrame,
     collection_name: str = "products",
     embedding_function: Optional[Any] = None,
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     model_name: str = "text-embedding-3-small",
+    storage: str = "./chroma_db",
 ) -> chromadb.Collection:
     """
     Create a vector store using ChromaDB from a dataframe of products.
-    Always runs in memory.
+
+    If storage is IN_MEMORY_STORAGE_SENTINEL, runs in memory.
+    Otherwise, uses a persistent client, storing data at the specified storage path.
 
     Args:
         products_df: DataFrame containing product data
@@ -96,48 +93,53 @@ def create_vector_store(
         api_key: Optional OpenAI API key
         base_url: Optional base URL for OpenAI API
         model_name: The OpenAI embedding model to use
+        storage: Path for persistent storage, or IN_MEMORY_STORAGE_SENTINEL for in-memory.
+                 Defaults to "./chroma_db".
 
     Returns:
         The created ChromaDB collection
     """
-    # Initialize the in-memory ChromaDB client
-    chroma_client = chromadb.Client()
-    logger.info("Initialized in-memory ChromaDB client")
+    # Run the synchronous parts in a separate thread
+    def create_store():
+        # Initialize ChromaDB client
+        if storage == IN_MEMORY_SENTINEL:
+            chroma_client = chromadb.Client()
+        else:
+            chroma_client = chromadb.PersistentClient(path=storage)
+            
+        # Create embedding function if not provided
+        nonlocal embedding_function
+        if embedding_function is None:
+            embedding_function = get_embedding_function(model_name=model_name, use_openai=True, openai_api_key=api_key)
 
-    # Create embedding function if not provided
-    if embedding_function is None:
-        embedding_function = get_embedding_function(model_name=model_name, use_openai=True, openai_api_key=api_key)
+        # Get or create the collection
+        collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=embedding_function)
+        
+        # Prepare data for ChromaDB
+        documents = []
+        metadatas = []
+        ids = []
 
-    # Get or create the collection
-    collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=embedding_function)
-    logger.info(f"Created/accessed collection: {collection_name}")
+        for _, row in products_df.iterrows():
+            # Extract product text representation for embedding
+            product_text = _create_product_text(row)
+            documents.append(product_text)
 
-    # Extract product data and prepare for ChromaDB
-    documents = []
-    metadatas = []
-    ids = []
+            # Extract metadata
+            metadata = _extract_product_metadata(row)
+            metadatas.append(metadata)
 
-    for _, row in products_df.iterrows():
-        # Extract product text representation for embedding
-        product_text = _create_product_text(row)
-        documents.append(product_text)
+            # Use product_id as document id if available, otherwise generate one
+            product_id = str(row.get("product_id", str(uuid.uuid4())))
+            ids.append(product_id)
 
-        # Extract metadata
-        metadata = _extract_product_metadata(row)
-        metadatas.append(metadata)
+        # Add products to the collection
+        collection.upsert(documents=documents, metadatas=metadatas, ids=ids)
 
-        # Use product_id as document id if available, otherwise generate one
-        product_id = str(row.get("product_id", str(uuid.uuid4())))
-        ids.append(product_id)
+        return collection
 
-    # Add products to the collection
-    if documents:
-        collection.upsert(documents=documents, metadatas=metadatas, ids=ids)  # type: ignore
-        logger.info(f"Added {len(documents)} products to the vector store")
-    else:
-        logger.warning("No products found in the dataframe")
-
-    return collection
+    # Run the synchronous function in a separate thread
+    return await asyncio.to_thread(create_store)
 
 
 def _create_product_text(product: Union[Dict[str, Any], pd.Series]) -> str:
@@ -150,13 +152,13 @@ def _create_product_text(product: Union[Dict[str, Any], pd.Series]) -> str:
     Returns:
         Text representation of the product
     """
-    # Map column names for flexibility (support different column naming conventions)
+    # Map column names for flexibility
     name_fields = ["product_name", "name"]
     description_fields = ["product_description", "description"]
     category_fields = ["product_category", "category"]
     type_fields = ["product_type", "type"]
 
-    # Extract available product information using multiple possible field names
+    # Extract available product information
     product_name = next((product.get(field, "") for field in name_fields if field in product), "")
     product_description = next((product.get(field, "") for field in description_fields if field in product), "")
     product_category = next((product.get(field, "") for field in category_fields if field in product), "")
@@ -174,7 +176,6 @@ def _create_product_text(product: Union[Dict[str, Any], pd.Series]) -> str:
         text_parts.append(f"Type: {product_type}")
 
     # Additional product details if available
-    # Get other key-value pairs not already included in text
     for key, value in product.items():
         if value is not None and isinstance(key, str) and not key.startswith("_"):
             # Skip fields we already processed
@@ -189,79 +190,68 @@ def _extract_product_metadata(
     product: Union[Dict[str, Any], pd.Series],
 ) -> Dict[str, Union[str, int, float, bool, None]]:
     """
-    Extract metadata from a product for filtering in ChromaDB.
+    Extract metadata from a product for storing in ChromaDB.
 
     Args:
         product: Product data as dictionary or pandas Series
 
     Returns:
-        Dictionary of metadata
+        A dictionary of metadata
     """
-    metadata: Dict[str, Union[str, int, float, bool, None]] = {}
+    # Define mappings from possible field names to standard field names
+    field_mappings = {
+        "product_id": ["product_id", "id"],
+        "product_name": ["product_name", "name"],
+        "product_type": ["product_type", "type"],
+        "product_category": ["product_category", "category"],
+        "price": ["price", "unit_price"],
+        "stock": ["stock", "inventory", "quantity"],
+        "seasons": ["seasons", "season"],
+    }
 
-    # Map column names for flexibility
-    id_fields = ["product_id", "id"]
-    name_fields = ["product_name", "name"]
-    category_fields = ["product_category", "category"]
-    type_fields = ["product_type", "type"]
-    price_fields = ["price"]
-    stock_fields = ["stock", "stock_amount"]
-    season_fields = ["seasons", "season"]
-
-    # Helper function to get value from product
+    # Helper function to get the first matching field value
     def get_value(fields: List[str]) -> Any:
-        if isinstance(product, dict):
-            for field in fields:
-                if field in product:
-                    return product[field]
-        else:  # pd.Series
-            for field in fields:
-                if field in product.index:
-                    return product[field]
+        for field in fields:
+            if field in product:
+                return product[field]
         return None
 
-    # Extract fields
-    product_id = get_value(id_fields)
-    if product_id:
-        metadata["product_id"] = str(product_id)
+    # Build metadata dictionary with standardized field names
+    metadata = {}
+    for standard_name, possible_fields in field_mappings.items():
+        value = get_value(possible_fields)
+        if value is not None:
+            # Convert to appropriate type based on field
+            if standard_name == "price":
+                try:
+                    metadata[standard_name] = float(value)
+                except (ValueError, TypeError):
+                    metadata[standard_name] = 0.0
+            elif standard_name == "stock":
+                try:
+                    metadata[standard_name] = int(value)
+                except (ValueError, TypeError):
+                    metadata[standard_name] = 0
+            else:
+                # For text fields, ensure it's a string
+                metadata[standard_name] = str(value)
 
-    name = get_value(name_fields)
-    if name:
-        metadata["name"] = str(name)
-
-    category = get_value(category_fields)
-    if category:
-        metadata["category"] = str(category)
-
-    product_type = get_value(type_fields)
-    if product_type:
-        metadata["type"] = str(product_type)
-
-    price = get_value(price_fields)
-    if price is not None:
-        try:
-            metadata["price"] = float(price)
-        except (ValueError, TypeError):
-            pass
-
-    stock = get_value(stock_fields)
-    if stock is not None:
-        try:
-            metadata["stock"] = int(stock)
-        except (ValueError, TypeError):
-            pass
-
-    season = get_value(season_fields)
-    if season:
-        if isinstance(season, list):
-            metadata["season"] = ",".join(str(s) for s in season)
-        else:
-            metadata["season"] = str(season)
+    # Add all remaining fields as metadata
+    for key, value in product.items():
+        # Skip fields we've already processed
+        if any(key in fields for fields in field_mappings.values()):
+            continue
+        # Skip private fields
+        if isinstance(key, str) and not key.startswith("_"):
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                metadata[key] = value
+            else:
+                metadata[key] = str(value)
 
     return metadata
 
 
-def query_vector_store(
+async def query_vector_store(
     collection: chromadb.Collection,
     query_text: str,
     n_results: int = 5,
@@ -272,42 +262,46 @@ def query_vector_store(
 
     Args:
         collection: ChromaDB collection to query
-        query_text: Text query to search for
+        query_text: Text to search for
         n_results: Number of results to return
-        filter_criteria: Optional criteria for filtering results
+        filter_criteria: Dictionary of metadata filters to apply
 
     Returns:
-        Dictionary containing query results
+        Query results as a dictionary with lists
     """
-    query_result = collection.query(
-        query_texts=[query_text],
-        n_results=n_results,
-        where=filter_criteria,
-        include=["embeddings", "documents", "metadatas", "distances"],
-    )
+    # Run the query in a separate thread
+    def run_query():
+        query_result = collection.query(
+            query_texts=[query_text],
+            n_results=n_results,
+            where=filter_criteria,
+            include=["metadatas", "documents", "distances"],
+        )
+        
+        # Convert QueryResult to Dict
+        result_dict: Dict[str, List[Any]] = {}
+        for key, value in query_result.items():
+            if isinstance(value, list):
+                result_dict[key] = value
+            else:
+                result_dict[key] = [value]
+                
+        return result_dict
+    
+    # Use asyncio to prevent blocking
+    return await asyncio.to_thread(run_query)
 
-    # Convert QueryResult to Dict
-    result_dict: Dict[str, List[Any]] = {}
-    for key, value in query_result.items():
-        if isinstance(value, list):
-            result_dict[key] = value
-        else:
-            # Convert non-list values to a list containing the value
-            result_dict[key] = [value]
 
-    return result_dict
-
-
-def load_vector_store(
+async def load_vector_store(
     collection_name: str = "products",
     embedding_function: Optional[Any] = None,
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
     model_name: str = "text-embedding-3-small",
+    storage_path: str = "./chroma_db",
 ) -> chromadb.Collection:
     """
-    Load an existing ChromaDB vector store.
-    Always runs in memory.
+    Load an existing ChromaDB vector store from a persistent path.
 
     Args:
         collection_name: Name of the collection in ChromaDB
@@ -315,150 +309,29 @@ def load_vector_store(
         api_key: Optional OpenAI API key
         base_url: Optional base URL for OpenAI API
         model_name: The OpenAI embedding model to use
+        storage_path: Path to the persistent storage. Defaults to "./chroma_db".
 
     Returns:
         The loaded ChromaDB collection
     """
-    # Initialize the in-memory ChromaDB client
-    chroma_client = chromadb.Client()
-    logger.info("Initialized in-memory ChromaDB client")
+    # Run the synchronous function in a separate thread
+    def load_store():
+        # Initialize the persistent ChromaDB client
+        chroma_client = chromadb.PersistentClient(path=storage_path)
+        
+        # Create embedding function if not provided
+        nonlocal embedding_function
+        if embedding_function is None:
+            embedding_function = get_embedding_function(model_name=model_name, use_openai=True, openai_api_key=api_key)
 
-    # Create embedding function if not provided
-    if embedding_function is None:
-        embedding_function = get_embedding_function(model_name=model_name, use_openai=True, openai_api_key=api_key)
+        # Get the collection
+        collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=embedding_function)
+        return collection
 
-    # Get the collection
-    collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=embedding_function)
-
-    return collection
-
-
-def similarity_search_with_score(
-    collection: chromadb.Collection,
-    query_text: str,
-    k: int = 5,
-    filter: Optional[Dict[str, Any]] = None,
-) -> List[Tuple[Dict[str, Any], float]]:
-    """
-    Perform similarity search and return results with scores.
-
-    Args:
-        collection: ChromaDB collection to query
-        query_text: Text to search for
-        k: Number of results to return
-        filter: Dictionary of metadata filters
-
-    Returns:
-        List of tuples with (metadata, score)
-    """
-    results = collection.query(
-        query_texts=[query_text],
-        n_results=k,
-        where=filter,
-        include=["metadatas", "documents", "distances"],
-    )
-
-    # Format results as a list of tuples (metadata, score)
-    formatted_results: List[Tuple[Dict[str, Any], float]] = []
-    if (
-        results
-        and "metadatas" in results
-        and results["metadatas"] is not None
-        and len(results["metadatas"]) > 0
-        and results["metadatas"][0] is not None
-    ):
-        for i, metadata in enumerate(results["metadatas"][0]):
-            # Convert distance to similarity score (1 - normalized distance)
-            # ChromaDB returns cosine distance, so lower is better
-            distance = 1.0
-            if (
-                "distances" in results
-                and results["distances"] is not None
-                and len(results["distances"]) > 0
-                and results["distances"][0] is not None  # Explicitly check the inner list
-                and i < len(results["distances"][0])
-            ):
-                distance = results["distances"][0][i]
-
-            score = 1.0 - min(distance, 1.0)  # Ensure score is in [0, 1]
-
-            # Add document text to metadata for reference
-            if (
-                "documents" in results
-                and results["documents"] is not None
-                and len(results["documents"]) > 0
-                and results["documents"][0] is not None  # Explicitly check the inner list
-                and i < len(results["documents"][0])
-            ):
-                # Convert metadata to dict if it's not already to ensure copy() is available
-                metadata_dict = dict(metadata) if not isinstance(metadata, dict) else metadata.copy()
-                metadata_dict["document"] = results["documents"][0][i]
-                formatted_results.append((metadata_dict, score))
-            else:
-                # Ensure we're always returning a Dict[str, Any] for consistent return type
-                metadata_dict = dict(metadata) if not isinstance(metadata, dict) else metadata.copy()
-                formatted_results.append((metadata_dict, score))
-
-    return formatted_results
+    return await asyncio.to_thread(load_store)
 
 
-def convert_to_product_model(metadata: Dict[str, Any]) -> Product:
-    """
-    Convert metadata from ChromaDB to a Product model.
-
-    Args:
-        metadata: Metadata from ChromaDB query result
-
-    Returns:
-        Product model instance
-    """
-    # Extract required fields with defaults
-    product_id = metadata.get("product_id", "")
-    product_name = metadata.get("product_name", "")
-    product_description = metadata.get("document", "")  # Use document text if available
-    if "description" in metadata:
-        product_description = str(metadata.get("description", ""))  # Ensure description is string
-
-    # Handle product category (convert string to enum)
-    product_category_str = metadata.get("product_category", "")
-    try:
-        product_category = ProductCategory(product_category_str)
-    except ValueError:
-        # Default to first category if invalid
-        product_category = next(iter(ProductCategory))
-        logger.warning(f"Invalid product category: {product_category_str}, defaulting to {product_category}")
-
-    # Extract other fields with defaults
-    product_type = metadata.get("product_type", "")
-    stock = int(metadata.get("stock", 0))
-    price = float(metadata.get("price", 0.0))
-
-    # Handle seasons (convert comma-separated string to list of Season enums)
-    seasons = []
-    if "seasons" in metadata:
-        seasons_str = metadata.get("seasons", "")
-        if seasons_str:
-            season_names = seasons_str.split(",")
-            for season_name in season_names:
-                try:
-                    seasons.append(Season(season_name.strip()))
-                except ValueError:
-                    logger.warning(f"Invalid season: {season_name}")
-
-    # Create and return Product instance
-    return Product(
-        product_id=product_id,
-        product_name=product_name,
-        product_description=product_description,
-        product_category=product_category,
-        product_type=product_type,
-        stock=stock,
-        seasons=seasons,
-        price=price,
-    )
-
-
-def search_products_by_description(
+async def search_products_by_description(
     collection: chromadb.Collection,
     query: str,
     top_k: int = 5,
@@ -487,192 +360,83 @@ def search_products_by_description(
     if category_filter and "product_category" not in filters:
         filters["product_category"] = category_filter
 
-    # Handle edge cases
-    if not query or not query.strip():
-        logger.warning("Empty query provided to search_products_by_description")
-        return []
-
-    if collection is None:
-        logger.error("No collection provided to search_products_by_description")
-        return []
-
-    try:
-        # Execute similarity search
-        search_results = similarity_search_with_score(
-            collection=collection,
-            query_text=query,
-            k=top_k,
-            filter=filters if filters else None,
-        )
-
-        # Convert results to Product models
-        products = []
-        for metadata, score in search_results:
+    # Run similarity search with filters
+    results = await query_vector_store(collection, query, n_results=top_k, filter_criteria=filters)
+    
+    # Convert results to Product models
+    products = []
+    if "metadatas" in results and results["metadatas"] and results["metadatas"][0]:
+        for i, metadata in enumerate(results["metadatas"][0]):
+            # Add distance as search_score
+            score = 1.0
+            if "distances" in results and results["distances"] and i < len(results["distances"][0]):
+                score = 1.0 - min(results["distances"][0][i], 1.0)
+            
+            metadata["search_score"] = score
+            
+            # Add document text to metadata if available
+            if "documents" in results and results["documents"] and i < len(results["documents"][0]):
+                metadata["document"] = results["documents"][0][i]
+                
             product = convert_to_product_model(metadata)
-            # Add the search score to the product's metadata for potential use
-            if product.metadata is None:
-                product.metadata = {}
-            product.metadata["search_score"] = score  # type: ignore[index]
             products.append(product)
-
-        logger.info(f"Found {len(products)} products matching query: '{query}'")
-        return products
-
-    except Exception as e:
-        logger.error(f"Error in search_products_by_description: {e}")
-        return []
+    
+    return products
 
 
-def search_products_by_name(
-    collection: chromadb.Collection,
-    product_name: str,
-    top_k: int = 5,
-    filters: Optional[Dict[str, Any]] = None,
-) -> List[Product]:
+def convert_to_product_model(metadata: Dict[str, Any]) -> Product:
     """
-    Search for products based on similar names using vector similarity search.
-    This provides semantic matching rather than just fuzzy string matching.
+    Convert metadata from ChromaDB to a Product model.
 
     Args:
-        collection: ChromaDB collection to query
-        product_name: Name or partial name to search for
-        top_k: Number of top matching products to return
-        filters: Optional dictionary of metadata filters (including category and season)
+        metadata: Metadata from ChromaDB query result
 
     Returns:
-        List of Product objects with names similar to the query
+        Product model instance
     """
-    # Ensure filters is a dictionary
-    if filters is None:
-        filters = {}
+    # Extract required fields with defaults
+    product_id = metadata.get("product_id", "")
+    product_name = metadata.get("product_name", "")
+    product_description = metadata.get("document", "")
+    if "description" in metadata:
+        product_description = str(metadata.get("description", ""))
 
-    # Use 'document' field for name search as it contains the product name
-    query_text = f"Product: {product_name}"
-
-    if not product_name or not product_name.strip():
-        logger.warning("Empty product name provided to search_products_by_name")
-        return []
-
-    if collection is None:
-        logger.error("No collection provided to search_products_by_name")
-        return []
-
+    # Handle product category (convert string to enum)
+    product_category_str = metadata.get("product_category", "")
     try:
-        # Execute similarity search
-        search_results = similarity_search_with_score(
-            collection=collection, query_text=query_text, k=top_k, filter=filters
-        )
+        product_category = ProductCategory(product_category_str)
+    except ValueError:
+        # Default to first category if invalid
+        product_category = next(iter(ProductCategory))
 
-        # Convert results to Product models
-        products = []
-        for metadata, score in search_results:
-            product = convert_to_product_model(metadata)
-            # Add the search score to the product's metadata
-            if product.metadata is None:
-                product.metadata = {}
-            product.metadata["search_score"] = score  # type: ignore[index]
-            products.append(product)
+    # Extract other fields with defaults
+    product_type = metadata.get("product_type", "")
+    stock = int(metadata.get("stock", 0))
+    price = float(metadata.get("price", 0.0))
 
-        logger.info(f"Found {len(products)} products with names similar to: '{product_name}'")
-        return products
+    # Handle seasons (convert comma-separated string to list)
+    seasons = []
+    if "seasons" in metadata:
+        seasons_str = metadata.get("seasons", "")
+        if seasons_str:
+            season_names = seasons_str.split(",")
+            for season_name in season_names:
+                try:
+                    seasons.append(Season(season_name.strip()))
+                except ValueError:
+                    pass
 
-    except Exception as e:
-        logger.error(f"Error in search_products_by_name: {e}")
-        return []
-
-
-def create_filter_dict(
-    category: Optional[str] = None,
-    season: Optional[str] = None,
-    min_stock: Optional[int] = None,
-    price_range: Optional[Tuple[float, float]] = None,
-    **additional_filters,
-) -> Dict[str, Any]:
-    """
-    Create a filter dictionary for ChromaDB queries with support for common product filters.
-
-    Args:
-        category: Optional product category to filter by
-        season: Optional season to filter by (will do partial match within seasons list)
-        min_stock: Optional minimum stock level
-        price_range: Optional tuple of (min_price, max_price)
-        **additional_filters: Any additional filter key-value pairs
-
-    Returns:
-        Dictionary of filters compatible with ChromaDB where clause
-    """
-    filters = {}
-
-    # Add category filter
-    if category:
-        filters["product_category"] = category
-
-    # Add season filter (needs special handling since seasons are stored as comma-separated string)
-    if season:
-        # ChromaDB has limited filtering capabilities for string contained in a list
-        # This approach relies on our data storage format where seasons are comma-separated
-        filters["seasons"] = {"$contains": season}  # type: ignore
-
-    # Add stock filter (greater than or equal to)
-    if min_stock is not None:
-        filters["stock"] = {"$gte": min_stock}  # type: ignore
-
-    # Add price range filter
-    if price_range and len(price_range) == 2:
-        min_price, max_price = price_range
-        if min_price is not None:
-            filters["price"] = {"$gte": min_price}  # type: ignore
-        if max_price is not None:
-            if "price" in filters:
-                filters["price"]["$lte"] = max_price  # type: ignore
-            else:
-                filters["price"] = {"$lte": max_price}  # type: ignore
-
-    # Add any additional filters
-    filters.update(additional_filters)
-
-    return filters
-
-
-def filtered_search_products(
-    collection: chromadb.Collection,
-    query: str,
-    top_k: int = 5,
-    category: Optional[str] = None,
-    season: Optional[str] = None,
-    min_stock: Optional[int] = None,
-    price_range: Optional[Tuple[float, float]] = None,
-    search_type: str = "description",  # 'description' or 'name'
-) -> List[Product]:
-    """
-    Search for products with flexible filtering options.
-
-    Args:
-        collection: ChromaDB collection to query
-        query: Text to search for
-        top_k: Number of results to return
-        category: Optional product category to filter by
-        season: Optional season to filter by
-        min_stock: Optional minimum stock level
-        price_range: Optional tuple of (min_price, max_price)
-        search_type: Whether to search by 'description' or 'name'
-
-    Returns:
-        List of matching Product objects
-    """
-    # Create filter dictionary
-    filters = create_filter_dict(category=category, season=season, min_stock=min_stock, price_range=price_range)
-
-    # Choose the search method based on search_type
-    if search_type.lower() == "name":
-        return search_products_by_name(collection=collection, product_name=query, top_k=top_k, filters=filters)
-    else:  # Default to description search
-        return search_products_by_description(
-            collection=collection,
-            query=query,
-            top_k=top_k,
-            filters=filters,  # Pass the filters directly
-        )
+    # Create and return Product instance
+    return Product(
+        product_id=product_id,
+        product_name=product_name,
+        product_description=product_description,
+        product_category=product_category,
+        product_type=product_type,
+        stock=stock,
+        seasons=seasons,
+        price=price,
+    )
 
 
 def create_openai_embedding_function(
@@ -681,24 +445,25 @@ def create_openai_embedding_function(
     base_url: Optional[str] = None,
 ) -> Any:
     """
-    Create an OpenAI embedding function for the vector store.
+    Create an OpenAI embedding function for ChromaDB.
 
     Args:
-        model_name: The OpenAI embedding model to use.
-        api_key: Optional OpenAI API key. If not provided, will look for OPENAI_API_KEY env var.
-        base_url: Optional base URL for OpenAI API.
+        model_name: The name of the OpenAI embedding model to use
+        api_key: OpenAI API key
+        base_url: Optional base URL for the OpenAI API
 
     Returns:
-        An OpenAI embedding function compatible with ChromaDB.
+        An embedding function compatible with ChromaDB
     """
     # Get API key from environment if not provided
-    effective_api_key = api_key or os.environ.get("OPENAI_API_KEY")
-    if not effective_api_key:
-        raise ValueError("OpenAI API key is required for OpenAI embeddings")
+    openai_api_key = api_key or os.environ.get("OPENAI_API_KEY")
+    
+    # Create embedding function kwargs
+    ef_kwargs = {"api_key": openai_api_key, "model_name": model_name}
 
-    # Create OpenAI embedding function
-    return embedding_functions.OpenAIEmbeddingFunction(
-        api_key=effective_api_key,
-        model_name=model_name,
-        api_base=base_url,  # This will use the default if None
-    )
+    # Add base_url if provided
+    if base_url:
+        ef_kwargs["api_base"] = base_url
+
+    # Create and return the OpenAI embedding function
+    return embedding_functions.OpenAIEmbeddingFunction(**ef_kwargs)
