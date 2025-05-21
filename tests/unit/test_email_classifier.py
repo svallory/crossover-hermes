@@ -6,10 +6,10 @@ from unittest.mock import patch
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
-from src.agents.email_analyzer import analyze_email_node
-from src.state import EmailAnalysis, ProductReference, CustomerSignal
-from src.state import HermesState
-from src.config import HermesConfig
+from src.hermes.agents.email_analyzer import analyze_email_node
+from src.hermes.state import EmailAnalysis, ProductReference, CustomerSignal
+from src.hermes.state import HermesState
+from src.hermes.config import HermesConfig
 
 from tests.fixtures import get_test_cases
 from tests.__init__ import mock_openai
@@ -24,8 +24,8 @@ class TestEmailClassifier(unittest.IsolatedAsyncioTestCase):
         self.config = HermesConfig()
         self.test_cases = get_test_cases()
 
-    @patch("src.agents.email_classifier.verify_email_analysis")
-    @patch("src.agents.email_classifier.get_llm_client")
+    @patch("src.hermes.agents.email_classifier.verify_email_analysis")
+    @patch("src.hermes.agents.email_classifier.get_llm_client")
     async def test_multi_language_email(self, mock_get_llm_client, mock_verify_analysis, mock_openai_client):
         """Test that Spanish emails are correctly classified and language is detected."""
         # Setup
@@ -115,8 +115,8 @@ class TestEmailClassifier(unittest.IsolatedAsyncioTestCase):
         self.assertGreaterEqual(len(analysis["product_references"]), 1)
         self.assertGreaterEqual(len(analysis["customer_signals"]), 1)
 
-    @patch("src.agents.email_classifier.verify_email_analysis")
-    @patch("src.agents.email_classifier.get_llm_client")
+    @patch("src.hermes.agents.email_classifier.verify_email_analysis")
+    @patch("src.hermes.agents.email_classifier.get_llm_client")
     async def test_mixed_intent_email(self, mock_get_llm_client, mock_verify_analysis, mock_openai_client):
         """Test emails with both order elements and future interests."""
         # Setup
@@ -243,8 +243,8 @@ class TestEmailClassifier(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNotNone(future_intent)
 
-    @patch("src.agents.email_classifier.verify_email_analysis")
-    @patch("src.agents.email_classifier.get_llm_client")
+    @patch("src.hermes.agents.email_classifier.verify_email_analysis")
+    @patch("src.hermes.agents.email_classifier.get_llm_client")
     async def test_vague_reference_email(self, mock_get_llm_client, mock_verify_analysis, mock_openai_client):
         """Test emails with vague product references like 'that popular item'."""
         # Setup
@@ -335,8 +335,8 @@ class TestEmailClassifier(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNotNone(vague_signal)
 
-    @patch("src.agents.email_classifier.verify_email_analysis")
-    @patch("src.agents.email_classifier.get_llm_client")
+    @patch("src.hermes.agents.email_classifier.verify_email_analysis")
+    @patch("src.hermes.agents.email_classifier.get_llm_client")
     async def test_missing_subject_email(self, mock_get_llm_client, mock_verify_analysis, mock_openai_client):
         """Test emails with missing subjects."""
         # Setup
@@ -428,8 +428,8 @@ class TestEmailClassifier(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNotNone(browsing_intent)
 
-    @patch("src.agents.email_classifier.verify_email_analysis")
-    @patch("src.agents.email_classifier.get_llm_client")
+    @patch("src.hermes.agents.email_classifier.verify_email_analysis")
+    @patch("src.hermes.agents.email_classifier.get_llm_client")
     async def test_tangential_info_email(self, mock_get_llm_client, mock_verify_analysis, mock_openai_client):
         """Test emails where primary intent is mixed with tangential info."""
         # Setup

@@ -61,14 +61,14 @@ class TestOrderProcessor(unittest.TestCase):
             reasoning="Default mock email analysis for order processing.",
         )
 
-    @patch("src.agents.order_processor.verify_order_processing")
-    @patch("src.agents.order_processor.extract_promotion")
-    @patch("src.agents.order_processor.resolve_product_reference")
-    @patch("src.agents.order_processor.find_alternatives_for_oos")
-    @patch("src.agents.order_processor.check_stock")
-    @patch("src.agents.order_processor.find_product_by_name")
-    @patch("src.agents.order_processor.find_product_by_id")
-    @patch("src.agents.order_processor.get_llm_client")
+    @patch("src.hermes.agents.order_processor.verify_order_processing")
+    @patch("src.hermes.agents.order_processor.extract_promotion")
+    @patch("src.hermes.agents.order_processor.resolve_product_reference")
+    @patch("src.hermes.agents.order_processor.find_alternatives_for_oos")
+    @patch("src.hermes.agents.order_processor.check_stock")
+    @patch("src.hermes.agents.order_processor.find_product_by_name")
+    @patch("src.hermes.agents.order_processor.find_product_by_id")
+    @patch("src.hermes.agents.order_processor.get_llm_client")
     def test_last_item_stock(
         self,
         mock_get_llm_client,  # Corresponds to @patch (bottom one)
@@ -166,15 +166,15 @@ class TestOrderProcessor(unittest.TestCase):
             "Stock amount for RSG8901 should be 0 after order.",
         )
 
-    @patch("src.agents.order_processor.verify_order_processing")
-    @patch("src.agents.order_processor.extract_promotion")
-    @patch("src.agents.order_processor.resolve_product_reference")
-    @patch("src.agents.order_processor.find_alternatives_for_oos")
-    @patch("src.agents.order_processor.update_stock")
-    @patch("src.agents.order_processor.check_stock")
-    @patch("src.agents.order_processor.find_product_by_name")
-    @patch("src.agents.order_processor.find_product_by_id")
-    @patch("src.agents.order_processor.get_llm_client")
+    @patch("src.hermes.agents.order_processor.verify_order_processing")
+    @patch("src.hermes.agents.order_processor.extract_promotion")
+    @patch("src.hermes.agents.order_processor.resolve_product_reference")
+    @patch("src.hermes.agents.order_processor.find_alternatives_for_oos")
+    @patch("src.hermes.agents.order_processor.update_stock")
+    @patch("src.hermes.agents.order_processor.check_stock")
+    @patch("src.hermes.agents.order_processor.find_product_by_name")
+    @patch("src.hermes.agents.order_processor.find_product_by_id")
+    @patch("src.hermes.agents.order_processor.get_llm_client")
     def test_exceeds_stock(
         self,
         mock_get_llm_client,
@@ -278,15 +278,15 @@ class TestOrderProcessor(unittest.TestCase):
         self.assertGreaterEqual(len(order_result["suggested_alternatives"]), 1)
         mock_update_stock.assert_not_called()
 
-    @patch("src.agents.order_processor.verify_order_processing")
-    @patch("src.agents.order_processor.extract_promotion")
-    @patch("src.agents.order_processor.resolve_product_reference")
-    @patch("src.agents.order_processor.find_alternatives_for_oos")
-    @patch("src.agents.order_processor.update_stock")
-    @patch("src.agents.order_processor.check_stock")
-    @patch("src.agents.order_processor.find_product_by_name")
-    @patch("src.agents.order_processor.find_product_by_id")
-    @patch("src.agents.order_processor.get_llm_client")
+    @patch("src.hermes.agents.order_processor.verify_order_processing")
+    @patch("src.hermes.agents.order_processor.extract_promotion")
+    @patch("src.hermes.agents.order_processor.resolve_product_reference")
+    @patch("src.hermes.agents.order_processor.find_alternatives_for_oos")
+    @patch("src.hermes.agents.order_processor.update_stock")
+    @patch("src.hermes.agents.order_processor.check_stock")
+    @patch("src.hermes.agents.order_processor.find_product_by_name")
+    @patch("src.hermes.agents.order_processor.find_product_by_id")
+    @patch("src.hermes.agents.order_processor.get_llm_client")
     def test_complex_format_reference(
         self,
         mock_get_llm_client,
@@ -376,15 +376,15 @@ class TestOrderProcessor(unittest.TestCase):
         self.assertEqual(order_result["order_items"][0]["status"], "created")
         mock_update_stock.assert_called_once()
 
-    @patch("src.agents.order_processor.verify_order_processing")
-    @patch("src.agents.order_processor.extract_promotion")
-    @patch("src.agents.order_processor.resolve_product_reference")
-    @patch("src.agents.order_processor.find_alternatives_for_oos")
-    @patch("src.agents.order_processor.update_stock")
-    @patch("src.agents.order_processor.check_stock")
-    @patch("src.agents.order_processor.find_product_by_name")
-    @patch("src.agents.order_processor.find_product_by_id")
-    @patch("src.agents.order_processor.get_llm_client")
+    @patch("src.hermes.agents.order_processor.verify_order_processing")
+    @patch("src.hermes.agents.order_processor.extract_promotion")
+    @patch("src.hermes.agents.order_processor.resolve_product_reference")
+    @patch("src.hermes.agents.order_processor.find_alternatives_for_oos")
+    @patch("src.hermes.agents.order_processor.update_stock")
+    @patch("src.hermes.agents.order_processor.check_stock")
+    @patch("src.hermes.agents.order_processor.find_product_by_name")
+    @patch("src.hermes.agents.order_processor.find_product_by_id")
+    @patch("src.hermes.agents.order_processor.get_llm_client")
     def test_multiple_item_order(
         self,
         mock_get_llm_client,
@@ -517,15 +517,15 @@ class TestOrderProcessor(unittest.TestCase):
             product_catalog_df=state.product_catalog_df,
         )
 
-    @patch("src.agents.order_processor.verify_order_processing")
-    @patch("src.agents.order_processor.extract_promotion")
-    @patch("src.agents.order_processor.resolve_product_reference")
-    @patch("src.agents.order_processor.find_alternatives_for_oos")
-    @patch("src.agents.order_processor.update_stock")
-    @patch("src.agents.order_processor.check_stock")
-    @patch("src.agents.order_processor.find_product_by_name")
-    @patch("src.agents.order_processor.find_product_by_id")
-    @patch("src.agents.order_processor.get_llm_client")
+    @patch("src.hermes.agents.order_processor.verify_order_processing")
+    @patch("src.hermes.agents.order_processor.extract_promotion")
+    @patch("src.hermes.agents.order_processor.resolve_product_reference")
+    @patch("src.hermes.agents.order_processor.find_alternatives_for_oos")
+    @patch("src.hermes.agents.order_processor.update_stock")
+    @patch("src.hermes.agents.order_processor.check_stock")
+    @patch("src.hermes.agents.order_processor.find_product_by_name")
+    @patch("src.hermes.agents.order_processor.find_product_by_id")
+    @patch("src.hermes.agents.order_processor.get_llm_client")
     def test_promotion_detection(
         self,
         mock_get_llm_client,

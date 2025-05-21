@@ -5,6 +5,7 @@ class Agents(str, Enum):
     """Names of our Agents (also nodes in the workflow graph)."""
 
     EMAIL_ANALYZER = "email_analyzer"
+    PRODUCT_RESOLVER = "product_resolver"
     ORDER_PROCESSOR = "order_processor"
     INQUIRY_RESPONDER = "inquiry_responder"
     RESPONSE_COMPOSER = "response_composer"
@@ -12,10 +13,11 @@ class Agents(str, Enum):
 class Nodes(str, Enum):
     """Names of our Nodes (also nodes in the workflow graph)."""
 
-    ANALYZE = "analyze"
-    PROCESS = "process"
-    ANSWER = "answer"
-    COMPOSE = "compose"
+    CLASSIFIER = "classifier"
+    STOCKKEEPER = "stockkeeper"
+    FULFILLER = "fulfiller"
+    ADVISOR = "advisor"
+    COMPOSER = "composer"
     
 class ProductCategory(str, Enum):
     """Categories of products available in the store."""

@@ -29,7 +29,7 @@ from tests.fixtures import (
 )
 
 # Import the real configuration (not mocked)
-from src.config import HermesConfig
+from src.hermes.config import HermesConfig
 
 # Mock required modules
 class MockHermesState:

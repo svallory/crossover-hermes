@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional, Literal, TypeVar, Union
 
-from src.hermes.model.Error import Error
+from src.hermes.model.error import Error
 
 from src.hermes.model.enums import Agents
 from src.hermes.types import ErrorReturn, WorkflowNodeOutput

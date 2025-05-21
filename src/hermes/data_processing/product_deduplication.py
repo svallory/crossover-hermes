@@ -43,6 +43,9 @@ async def get_product_mention_stats(email_analysis: EmailAnalysis) -> Dict[str, 
 async def deduplicate_product_mentions(product_mentions: List[Any]) -> List[Any]:
     """
     Deduplicates product mentions by merging mentions of the same product.
+    
+    DEPRECATED: This function will be moved to the Product Resolver agent as part of
+    the responsibility for deduplicating and resolving product mentions.
 
     Args:
         product_mentions: List of ProductMention objects

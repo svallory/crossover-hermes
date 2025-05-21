@@ -6,11 +6,12 @@ from typing import (
     Any,
     Union,
 )
-from src.hermes.model.Error import Error
+from src.hermes.model.error import Error
 from pydantic import Field, BaseModel, create_model
 from typing_extensions import Hashable
 
 from src.hermes.agents.email_analyzer.models import EmailAnalyzerOutput
+from src.hermes.agents.product_resolver.models import ResolvedProductsOutput
 from src.hermes.agents.inquiry_responder.models import InquiryResponderOutput
 from hermes.agents.order_processor.models.agent import OrderProcessorOutput
 from src.hermes.agents.response_composer.models import ResponseComposerOutput
@@ -32,6 +33,7 @@ class OverallState(BaseModel):
 
     # Use properly quoted string literals for forward references
     email_analyzer: Optional[EmailAnalyzerOutput] = None
+    product_resolver: Optional[ResolvedProductsOutput] = None
     order_processor: Optional[OrderProcessorOutput] = None
     inquiry_responder: Optional[InquiryResponderOutput] = None
     response_composer: Optional[ResponseComposerOutput] = None

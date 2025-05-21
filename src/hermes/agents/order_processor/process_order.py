@@ -2,7 +2,7 @@
 Main function for processing customer order requests.
 """
 
-from typing import Optional, Dict, Any, List, Literal
+from typing import Optional, Dict, Any, Literal
 import json
 
 from src.hermes.config import HermesConfig
@@ -15,7 +15,7 @@ from src.hermes.tools.order_tools import (
 )
 from src.hermes.tools.catalog_tools import find_product_by_id, Product
 
-from .models.agent import OrderProcessorOutput, ProcessedOrder, OrderProcessorInput, OrderedItem, OrderItemStatus
+from .models import ProcessedOrder, OrderedItemStatus
 from .prompts import get_prompt
 
 
@@ -218,7 +218,7 @@ def process_order(
                     if isinstance(stock_result, StockStatus):
                         # In stock - update status and decrement stock
                         if stock_result.is_available:
-                            item.status = OrderItemStatus.CREATED
+                            item.status = OrderedItemStatus.CREATED
                             item.stock = stock_result.current_stock
                             
                             # Update the stock
@@ -233,7 +233,7 @@ def process_order(
                                 processed_order.stock_updated = True
                         else:
                             # Out of stock - set status and available stock
-                            item.status = OrderItemStatus.OUT_OF_STOCK
+                            item.status = OrderedItemStatus.OUT_OF_STOCK
                             item.stock = stock_result.current_stock
                             
                             # Find alternatives
@@ -248,15 +248,15 @@ def process_order(
                                 item.alternatives = alternatives_result
                     elif isinstance(stock_result, ProductNotFound):
                         # Product not found - set to out of stock
-                        item.status = OrderItemStatus.OUT_OF_STOCK
+                        item.status = OrderedItemStatus.OUT_OF_STOCK
                         item.stock = 0
                     else:
                         # Unexpected result - set to out of stock
-                        item.status = OrderItemStatus.OUT_OF_STOCK
+                        item.status = OrderedItemStatus.OUT_OF_STOCK
                         item.stock = 0
                         
                     # Process promotions for this item if available
-                    if item.promotion and item.price is not None and item.status == OrderItemStatus.CREATED:
+                    if item.promotion and item.price is not None and item.status == OrderedItemStatus.CREATED:
                         promotion_text = item.promotion
                         if isinstance(promotion_text, dict) and "text" in promotion_text:
                             promotion_text = promotion_text["text"]
@@ -277,14 +277,14 @@ def process_order(
                             item.price = discounted_price
                     
                     # Recalculate item total price based on potentially updated item price
-                    if item.price is not None and item.status == OrderItemStatus.CREATED:
+                    if item.price is not None and item.status == OrderedItemStatus.CREATED:
                         item.total_price = round(item.price * item.quantity, 2)
                         total_price += item.total_price
                     
                 except Exception as e:
                     print(f"Error processing order item {item.product_id}: {e}")
                     # Default to out of stock if there's an error
-                    item.status = OrderItemStatus.OUT_OF_STOCK
+                    item.status = OrderedItemStatus.OUT_OF_STOCK
                     item.stock = 0
             
             # Update the total price with our recalculated value

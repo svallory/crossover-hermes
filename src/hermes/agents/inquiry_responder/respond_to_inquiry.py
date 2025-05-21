@@ -23,6 +23,41 @@ from ...agents.email_analyzer.models import SegmentType
 from ...data_processing.vector_store import VectorStore
 
 
+def format_resolved_products(products: List[Product]) -> str:
+    """
+    Format resolved products into a string for LLM context.
+    
+    Args:
+        products: A list of resolved Product objects
+        
+    Returns:
+        A formatted string containing all product information
+    """
+    if not products:
+        return "No resolved products available."
+    
+    formatted_products = []
+    for product in products:
+        # Format seasons correctly
+        seasons_str = ", ".join([s if isinstance(s, str) else s.value for s in product.seasons])
+        
+        # Format product details
+        product_info = (
+            f"Product: {product.name}\n"
+            f"ID: {product.product_id}\n"
+            f"Type: {product.product_type}\n"
+            f"Category: {product.category.value if hasattr(product.category, 'value') else product.category}\n"
+            f"Price: ${float(product.price):.2f}\n"
+            f"Availability: {product.stock} in stock\n"
+            f"Seasons: {seasons_str}\n"
+            f"Description: {product.description}\n"
+            f"Confidence: High (Exact catalog match)\n"
+        )
+        formatted_products.append(product_info)
+    
+    return "\n\n".join(formatted_products)
+
+
 def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
     """
     Search the vector store for products matching the queries.
@@ -170,9 +205,26 @@ async def respond_to_inquiry(
         
         print(f"  Extracted search queries: {unique_search_queries}")
 
-        # Perform vector search
+        # Format resolved products from the product resolver if available
+        resolved_products_context = ""
+        if state.product_resolver and state.product_resolver.resolved_products:
+            resolved_products_context = format_resolved_products(state.product_resolver.resolved_products)
+            print(f"  Using {len(state.product_resolver.resolved_products)} resolved products")
+
+        # Perform vector search for additional context
         retrieved_products_context = search_vector_store(unique_search_queries, hermes_config)
-        print(f"  Retrieved products context (length: {len(retrieved_products_context)} chars)")
+        print(f"  Retrieved additional products context (length: {len(retrieved_products_context)} chars)")
+        
+        # Combine both sources of product information
+        product_context = ""
+        if resolved_products_context:
+            product_context += "### EXACTLY MATCHED PRODUCTS (High Confidence):\n" + resolved_products_context + "\n\n"
+        if retrieved_products_context:
+            product_context += "### SIMILAR PRODUCTS (Vector Search Results):\n" + retrieved_products_context
+        
+        # If no product context, provide a note
+        if not product_context:
+            product_context = "No specific product information available for this inquiry."
         # --- End RAG Step ---
 
         # Use a strong model for factual accuracy
@@ -194,10 +246,10 @@ async def respond_to_inquiry(
                 email_analysis.model_dump() if hasattr(email_analysis, "model_dump") else email_analysis
             )
 
-            # Generate the inquiry response, now including retrieved_products_context
+            # Generate the inquiry response, now including combined product context
             response_data = await inquiry_response_chain.ainvoke({
                 "email_analysis": email_analysis_data,
-                "retrieved_products_context": retrieved_products_context,
+                "retrieved_products_context": product_context,
                 "seasons_instruction": "IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter. Do not use 'All seasons'."
             })
 

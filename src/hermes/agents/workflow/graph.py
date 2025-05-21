@@ -4,8 +4,9 @@ StateGraph-based workflow for Hermes agent system using LangGraph.
 
 This module defines the agent flow for processing customer emails:
 1. Email Analyzer to classify and segment the email
-2. Conditional routing to Order Processor and/or Inquiry Responder
-3. Response Composer for generating the final response
+2. Product Resolver to resolve product mentions to catalog products
+3. Conditional routing to Order Processor and/or Inquiry Responder
+4. Response Composer for generating the final response
 
 The workflow is implemented as a LangGraph StateGraph.
 """
@@ -22,11 +23,13 @@ from langchain_core.runnables import RunnableConfig
 # Import agent models
 from src.hermes.agents.email_analyzer.models import (
     EmailAnalyzerInput,
+    EmailAnalyzerOutput,
 )
 from src.hermes.config import HermesConfig
 
 # Import agent functions directly
 from src.hermes.agents.email_analyzer.analyze_email import analyze_email
+from src.hermes.agents.product_resolver.resolve_products import resolve_product_mentions
 from src.hermes.agents.order_processor.process_order import process_order
 from src.hermes.agents.inquiry_responder.respond_to_inquiry import respond_to_inquiry
 from src.hermes.agents.response_composer.compose_response import compose_response
@@ -34,29 +37,20 @@ from src.hermes.model import Nodes
 
 from src.hermes.agents.workflow.states import OverallState
 
-# Conditional Logic Functions
-def route_analysis_result(
+def route_resolver_result(
     state: OverallState,
 ) -> List[Hashable] | Hashable:
-    """Determine the next node in the workflow based on the current state."""
-    print("\nExecuting route_analysis_result...")
-    errors = getattr(state, "errors", None)
-    email_analyzer = getattr(state, "email_analyzer", None)
+    """Route after product resolution based on email intents."""
     
-    print(f"Inside route_analysis_result: errors={bool(errors)}, email_analyzer={email_analyzer is not None}")
-    if not errors and email_analyzer is not None:
-        email_analysis = email_analyzer.email_analysis
-        
-        email_has_order = email_analysis.has_order()
-        email_has_inquiry = email_analysis.has_inquiry()
-
-        print(f"\nRouting Decision:\n email_has_order: {email_has_order}\n email_has_inquiry: {email_has_inquiry}")
+    email_analyzer = state.email_analyzer
+    
+    if email_analyzer is not None:
+        analysis = email_analyzer.email_analysis
 
         return \
-          [Nodes.PROCESS, Nodes.ANSWER] if email_has_order and email_has_inquiry else \
-          Nodes.PROCESS if email_has_order else \
-          Nodes.ANSWER if email_has_inquiry else \
-          Nodes.COMPOSE
+          Nodes.ADVISOR if analysis.primary_intent is "product inquiry" else \
+          [Nodes.FULFILLER, Nodes.ADVISOR] if analysis.has_inquiry() else \
+          Nodes.FULFILLER
     
     return END
 
@@ -68,6 +62,35 @@ async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dic
         message=state.message
     )
     return await analyze_email(state=email_analyzer_input, runnable_config=config)
+
+async def resolve_products_node(state: OverallState, config: RunnableConfig) -> dict:
+    """
+    Wrapper function for resolve_product_mentions that passes the email_analyzer output.
+    
+    Args:
+        state: The workflow state containing email_analyzer output
+        config: Runnable configuration for the agent
+    
+    Returns:
+        Result from resolve_product_mentions function
+    """
+    # Extract email_analyzer from state
+    email_analyzer = state.email_analyzer
+    
+    if email_analyzer is None:
+        # If email_analyzer is None, return an error
+        from src.hermes.utils.errors import create_node_response
+        from src.hermes.model.enums import Agents
+        return create_node_response(
+            Agents.PRODUCT_RESOLVER,
+            Exception("Email analyzer output is required for product resolution")
+        )
+    
+    # Call resolve_product_mentions with the email analyzer output
+    return await resolve_product_mentions(
+        state=email_analyzer,
+        runnable_config=config
+    )
 
 async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
     """
@@ -95,12 +118,20 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
             Exception("Email analyzer output is required for order processing")
         )
     
+    # Get resolved products if available
+    resolved_products = state.product_resolver.resolved_products if state.product_resolver else []
+    unresolved_mentions = state.product_resolver.unresolved_mentions if state.product_resolver else []
+    
     # Convert EmailAnalyzerOutput to dict for process_order
     if hasattr(email_analyzer, "model_dump"):
         email_analysis_dict = email_analyzer.model_dump()
     else:
         # Fallback if model_dump not available
         email_analysis_dict = dict(email_analyzer)
+    
+    # Add resolved products to the email analysis dict
+    email_analysis_dict["resolved_products"] = resolved_products
+    email_analysis_dict["unresolved_mentions"] = unresolved_mentions
     
     # Call process_order with the extracted information
     processed_order = process_order(
@@ -125,32 +156,44 @@ graph_builder = StateGraph(OverallState, input=EmailAnalyzerInput, config_schema
 
 # Add nodes with the agent functions directly, specifying that they expect runnable_config
 graph_builder.add_node(
-    Nodes.ANALYZE,
+    Nodes.CLASSIFIER,
     analyze_email_node
 )
 graph_builder.add_node(
-    Nodes.PROCESS, 
-    process_order_node,  # Use the wrapper function to correctly pass email_id
+    Nodes.STOCKKEEPER,
+    resolve_products_node
 )
 graph_builder.add_node(
-    Nodes.ANSWER, 
+    Nodes.FULFILLER, 
+    process_order_node,
+)
+graph_builder.add_node(
+    Nodes.ADVISOR, 
     respond_to_inquiry,
 )
 graph_builder.add_node(
-    Nodes.COMPOSE, 
+    Nodes.COMPOSER, 
     compose_response,
 )
 
 # Add edges to create the workflow
-graph_builder.add_edge(START, Nodes.ANALYZE)
+graph_builder.add_edge(START, Nodes.CLASSIFIER)
+graph_builder.add_edge(Nodes.CLASSIFIER, Nodes.STOCKKEEPER)
+
+# graph_builder.add_conditional_edges(
+#     Nodes.ANALYZE,
+#     lambda state: END if len(state.errors.keys()) > 0 else Nodes.PROCESS,
+#     [Nodes.RESOLVE, END],
+# )
+
 graph_builder.add_conditional_edges(
-    Nodes.ANALYZE,
-    route_analysis_result,
-    [Nodes.PROCESS, Nodes.ANSWER, Nodes.COMPOSE, END],
+    Nodes.STOCKKEEPER,
+    route_resolver_result,
+    [Nodes.FULFILLER, Nodes.ADVISOR],
 )
-graph_builder.add_edge(Nodes.PROCESS, Nodes.COMPOSE)
-graph_builder.add_edge(Nodes.ANSWER, Nodes.COMPOSE)
-graph_builder.add_edge(Nodes.COMPOSE, END)
+graph_builder.add_edge(Nodes.FULFILLER, Nodes.COMPOSER)
+graph_builder.add_edge(Nodes.ADVISOR, Nodes.COMPOSER)
+graph_builder.add_edge(Nodes.COMPOSER, END)
 
 # Compile the workflow
 workflow = graph_builder.compile()

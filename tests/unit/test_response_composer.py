@@ -5,8 +5,8 @@ import asyncio
 from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, Optional
 
-from src.agents.response_composer import compose_response_node
-from src.state import (
+from src.hermes.agents.response_composer import compose_response_node
+from src.hermes.state import (
     EmailAnalysis,
     ProductReference,
     CustomerSignal,
@@ -15,8 +15,8 @@ from src.state import (
     InquiryResponse,
     ProductInformation,
 )
-from src.state import HermesState
-from src.config import HermesConfig
+from src.hermes.state import HermesState
+from src.hermes.config import HermesConfig
 from tests.fixtures import get_test_product, get_test_cases
 from tests.__init__ import mock_openai
 
@@ -61,10 +61,10 @@ class TestResponseComposer(unittest.TestCase):
         self.test_cases = get_test_cases()
         self.mock_llm_instance = MockRunnableLLMComposer()
 
-    @patch("src.agents.response_composer.get_llm_client")
-    @patch("src.agents.response_composer.process_customer_signals")
-    @patch("src.agents.response_composer.generate_natural_response")
-    @patch("src.agents.response_composer.verify_response_quality")
+    @patch("src.hermes.agents.response_composer.get_llm_client")
+    @patch("src.hermes.agents.response_composer.process_customer_signals")
+    @patch("src.hermes.agents.response_composer.generate_natural_response")
+    @patch("src.hermes.agents.response_composer.verify_response_quality")
     def test_formal_tone_adaptation(
         self,
         mock_verify_response,
@@ -221,10 +221,10 @@ Customer Service Team
             )
         )
 
-    @patch("src.agents.response_composer.get_llm_client")
-    @patch("src.agents.response_composer.process_customer_signals")
-    @patch("src.agents.response_composer.generate_natural_response")
-    @patch("src.agents.response_composer.verify_response_quality")
+    @patch("src.hermes.agents.response_composer.get_llm_client")
+    @patch("src.hermes.agents.response_composer.process_customer_signals")
+    @patch("src.hermes.agents.response_composer.generate_natural_response")
+    @patch("src.hermes.agents.response_composer.verify_response_quality")
     def test_casual_tone_adaptation(
         self,
         mock_verify_response,
@@ -377,10 +377,10 @@ The Team
         # Check that personal context is acknowledged
         self.assertIn("birthday", response)
 
-    @patch("src.agents.response_composer.get_llm_client")
-    @patch("src.agents.response_composer.process_customer_signals")
-    @patch("src.agents.response_composer.generate_natural_response")
-    @patch("src.agents.response_composer.verify_response_quality")
+    @patch("src.hermes.agents.response_composer.get_llm_client")
+    @patch("src.hermes.agents.response_composer.process_customer_signals")
+    @patch("src.hermes.agents.response_composer.generate_natural_response")
+    @patch("src.hermes.agents.response_composer.verify_response_quality")
     def test_out_of_stock_response(
         self,
         mock_verify_response,
@@ -512,10 +512,10 @@ The Hermes Team"""
         # Check that future ordering options are provided
         self.assertIn("back in stock soon", response)
 
-    @patch("src.agents.response_composer.get_llm_client")
-    @patch("src.agents.response_composer.process_customer_signals")
-    @patch("src.agents.response_composer.generate_natural_response")
-    @patch("src.agents.response_composer.verify_response_quality")
+    @patch("src.hermes.agents.response_composer.get_llm_client")
+    @patch("src.hermes.agents.response_composer.process_customer_signals")
+    @patch("src.hermes.agents.response_composer.generate_natural_response")
+    @patch("src.hermes.agents.response_composer.verify_response_quality")
     def test_promotion_inclusion(
         self,
         mock_verify_response,
@@ -638,10 +638,10 @@ The Hermes Team"""
         # Check that product description is included
         self.assertIn("summer wardrobe", response)
 
-    @patch("src.agents.response_composer.get_llm_client")
-    @patch("src.agents.response_composer.process_customer_signals")
-    @patch("src.agents.response_composer.generate_natural_response")
-    @patch("src.agents.response_composer.verify_response_quality")
+    @patch("src.hermes.agents.response_composer.get_llm_client")
+    @patch("src.hermes.agents.response_composer.process_customer_signals")
+    @patch("src.hermes.agents.response_composer.generate_natural_response")
+    @patch("src.hermes.agents.response_composer.verify_response_quality")
     def test_natural_language_generation(
         self,
         mock_verify_response,
@@ -784,10 +784,10 @@ The Hermes Team"""
         self.assertIn("1960s", response)
         self.assertTrue(any(detail in response for detail in ["swinging London", "Twiggy", "statement eyewear"]))
 
-    @patch("src.agents.response_composer.get_llm_client")
-    @patch("src.agents.response_composer.process_customer_signals")
-    @patch("src.agents.response_composer.generate_natural_response")
-    @patch("src.agents.response_composer.verify_response_quality")
+    @patch("src.hermes.agents.response_composer.get_llm_client")
+    @patch("src.hermes.agents.response_composer.process_customer_signals")
+    @patch("src.hermes.agents.response_composer.generate_natural_response")
+    @patch("src.hermes.agents.response_composer.verify_response_quality")
     def test_multi_language_response(
         self,
         mock_verify_response,

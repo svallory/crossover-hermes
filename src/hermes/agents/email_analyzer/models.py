@@ -91,8 +91,3 @@ class EmailAnalyzerOutput(BaseModel):
     """
 
     email_analysis: EmailAnalysis = Field(description="The initial email analysis result")
-
-    unique_products: List[ProductMention] = Field(
-        default_factory=list,
-        description="Deduplicated list of product mentions extracted from all segments",
-    )

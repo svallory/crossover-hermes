@@ -1,6 +1,6 @@
 import unittest
-from src.config import HermesConfig
-from src.llm_client import get_llm_client
+from src.hermes.config import HermesConfig
+from src.hermes.llm_client import get_llm_client
 import os
 
 # --- Configuration for the test ---

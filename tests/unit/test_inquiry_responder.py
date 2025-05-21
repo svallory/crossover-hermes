@@ -5,8 +5,8 @@ import asyncio
 from unittest.mock import patch, MagicMock
 from typing import Dict, Any, Optional
 
-from src.agents.inquiry_responder import process_inquiry_node
-from src.state import (
+from src.hermes.agents.inquiry_responder import process_inquiry_node
+from src.hermes.state import (
     EmailAnalysis,
     ProductReference,
     CustomerSignal,
@@ -14,9 +14,9 @@ from src.state import (
     ProductInformation,
     QuestionAnswer,
 )
-from src.state import HermesState
-from src.config import HermesConfig
-from src.tools.catalog_tools import Product, ProductNotFound
+from src.hermes.state import HermesState
+from src.hermes.config import HermesConfig
+from src.hermes.tools.catalog_tools import Product, ProductNotFound
 from tests.fixtures import (
     get_test_product,
     get_test_cases,
@@ -89,13 +89,13 @@ class TestInquiryResponder(unittest.TestCase):
         self.mock_vector_store = MagicMock()
         self.mock_vector_store.similarity_search_with_score.return_value = []
 
-    @patch("src.agents.inquiry_responder.search_products_by_description")
-    @patch("src.tools.response_tools.extract_questions")
-    @patch("src.agents.inquiry_responder.resolve_product_reference")
-    @patch("src.agents.inquiry_responder.answer_product_question")
-    @patch("src.agents.inquiry_responder.generate_response_points")
-    @patch("src.agents.inquiry_responder.get_llm_client")
-    @patch("src.agents.inquiry_responder.find_related_products")
+    @patch("src.hermes.agents.inquiry_responder.search_products_by_description")
+    @patch("src.hermes.tools.response_tools.extract_questions")
+    @patch("src.hermes.agents.inquiry_responder.resolve_product_reference")
+    @patch("src.hermes.agents.inquiry_responder.answer_product_question")
+    @patch("src.hermes.agents.inquiry_responder.generate_response_points")
+    @patch("src.hermes.agents.inquiry_responder.get_llm_client")
+    @patch("src.hermes.agents.inquiry_responder.find_related_products")
     def test_seasonal_inquiry(
         self,
         mock_find_related,
@@ -211,13 +211,13 @@ class TestInquiryResponder(unittest.TestCase):
         else:
             mock_answer_question.assert_called()
 
-    @patch("src.agents.inquiry_responder.search_products_by_description")
-    @patch("src.tools.response_tools.extract_questions")
-    @patch("src.agents.inquiry_responder.resolve_product_reference")
-    @patch("src.agents.inquiry_responder.answer_product_question")
-    @patch("src.agents.inquiry_responder.generate_response_points")
-    @patch("src.agents.inquiry_responder.get_llm_client")
-    @patch("src.agents.inquiry_responder.find_related_products")
+    @patch("src.hermes.agents.inquiry_responder.search_products_by_description")
+    @patch("src.hermes.tools.response_tools.extract_questions")
+    @patch("src.hermes.agents.inquiry_responder.resolve_product_reference")
+    @patch("src.hermes.agents.inquiry_responder.answer_product_question")
+    @patch("src.hermes.agents.inquiry_responder.generate_response_points")
+    @patch("src.hermes.agents.inquiry_responder.get_llm_client")
+    @patch("src.hermes.agents.inquiry_responder.find_related_products")
     def test_occasion_specific_inquiry(
         self,
         mock_find_related,
@@ -334,13 +334,13 @@ class TestInquiryResponder(unittest.TestCase):
         mock_answer_question.assert_called()
         mock_generate_points.assert_called()
 
-    @patch("src.agents.inquiry_responder.search_products_by_description")
-    @patch("src.tools.response_tools.extract_questions")
-    @patch("src.agents.inquiry_responder.resolve_product_reference")
-    @patch("src.agents.inquiry_responder.answer_product_question")
-    @patch("src.agents.inquiry_responder.generate_response_points")
-    @patch("src.agents.inquiry_responder.get_llm_client")
-    @patch("src.agents.inquiry_responder.find_related_products")
+    @patch("src.hermes.agents.inquiry_responder.search_products_by_description")
+    @patch("src.hermes.tools.response_tools.extract_questions")
+    @patch("src.hermes.agents.inquiry_responder.resolve_product_reference")
+    @patch("src.hermes.agents.inquiry_responder.answer_product_question")
+    @patch("src.hermes.agents.inquiry_responder.generate_response_points")
+    @patch("src.hermes.agents.inquiry_responder.get_llm_client")
+    @patch("src.hermes.agents.inquiry_responder.find_related_products")
     def test_material_quality_inquiry(
         self,
         mock_find_related,
@@ -458,13 +458,13 @@ class TestInquiryResponder(unittest.TestCase):
         mock_answer_question.assert_called()
         mock_generate_points.assert_called()
 
-    @patch("src.agents.inquiry_responder.search_products_by_description")
-    @patch("src.tools.response_tools.extract_questions")
-    @patch("src.agents.inquiry_responder.resolve_product_reference")
-    @patch("src.agents.inquiry_responder.answer_product_question")
-    @patch("src.agents.inquiry_responder.generate_response_points")
-    @patch("src.agents.inquiry_responder.get_llm_client")
-    @patch("src.agents.inquiry_responder.find_related_products")
+    @patch("src.hermes.agents.inquiry_responder.search_products_by_description")
+    @patch("src.hermes.tools.response_tools.extract_questions")
+    @patch("src.hermes.agents.inquiry_responder.resolve_product_reference")
+    @patch("src.hermes.agents.inquiry_responder.answer_product_question")
+    @patch("src.hermes.agents.inquiry_responder.generate_response_points")
+    @patch("src.hermes.agents.inquiry_responder.get_llm_client")
+    @patch("src.hermes.agents.inquiry_responder.find_related_products")
     def test_style_inspiration_inquiry(
         self,
         mock_find_related,
@@ -587,13 +587,13 @@ class TestInquiryResponder(unittest.TestCase):
         mock_answer_question.assert_called()
         mock_generate_points.assert_called()
 
-    @patch("src.agents.inquiry_responder.search_products_by_description")
-    @patch("src.tools.response_tools.extract_questions")
-    @patch("src.agents.inquiry_responder.resolve_product_reference")
-    @patch("src.agents.inquiry_responder.answer_product_question")
-    @patch("src.agents.inquiry_responder.generate_response_points")
-    @patch("src.agents.inquiry_responder.get_llm_client")
-    @patch("src.agents.inquiry_responder.find_related_products")
+    @patch("src.hermes.agents.inquiry_responder.search_products_by_description")
+    @patch("src.hermes.tools.response_tools.extract_questions")
+    @patch("src.hermes.agents.inquiry_responder.resolve_product_reference")
+    @patch("src.hermes.agents.inquiry_responder.answer_product_question")
+    @patch("src.hermes.agents.inquiry_responder.generate_response_points")
+    @patch("src.hermes.agents.inquiry_responder.get_llm_client")
+    @patch("src.hermes.agents.inquiry_responder.find_related_products")
     def test_product_not_found_resolution(
         self,
         mock_find_related,
@@ -671,13 +671,13 @@ class TestInquiryResponder(unittest.TestCase):
         mock_resolve_reference.assert_called()
         mock_generate_points.assert_called()
 
-    @patch("src.agents.inquiry_responder.search_products_by_description")
-    @patch("src.tools.response_tools.extract_questions")
-    @patch("src.agents.inquiry_responder.resolve_product_reference")
-    @patch("src.agents.inquiry_responder.answer_product_question")
-    @patch("src.agents.inquiry_responder.generate_response_points")
-    @patch("src.agents.inquiry_responder.get_llm_client")
-    @patch("src.agents.inquiry_responder.find_related_products")
+    @patch("src.hermes.agents.inquiry_responder.search_products_by_description")
+    @patch("src.hermes.tools.response_tools.extract_questions")
+    @patch("src.hermes.agents.inquiry_responder.resolve_product_reference")
+    @patch("src.hermes.agents.inquiry_responder.answer_product_question")
+    @patch("src.hermes.agents.inquiry_responder.generate_response_points")
+    @patch("src.hermes.agents.inquiry_responder.get_llm_client")
+    @patch("src.hermes.agents.inquiry_responder.find_related_products")
     def test_multi_language_inquiry(
         self,
         mock_find_related,

@@ -92,22 +92,16 @@ async def analyze_email(
             # Set the email_id in the analysis
             email_analysis.email_id = state.email_id
 
-            # Collect all product mentions from all segments
-            all_products = []
-            for segment in email_analysis.segments:
-                all_products.extend(segment.product_mentions)
-
-            # Get stats about product mentions - using await with the async function
+            # Get stats about product mentions
             product_stats = await get_product_mention_stats(email_analysis)
             print(
-                f"  Analysis for {state.email_id} complete. Found {product_stats['unique_products']} unique products across {product_stats['segments_with_products']} segments."
+                f"  Analysis for {state.email_id} complete. Found {product_stats['total_mentions']} product mentions across {product_stats['segments_with_products']} segments."
             )
 
             return create_node_response(
                 Agents.EMAIL_ANALYZER,
                 EmailAnalyzerOutput(
                     email_analysis=email_analysis,
-                    unique_products=all_products,
                 )
             )
 

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 from src.hermes.agents.email_analyzer.models import EmailAnalysis, EmailAnalyzerOutput
+from src.hermes.agents.product_resolver.models import ResolvedProductsOutput
 from src.hermes.model.product import Product
 
 
@@ -75,6 +76,10 @@ class InquiryResponderInput(BaseModel):
     """
 
     email_analyzer: EmailAnalyzerOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
+    product_resolver: Optional[ResolvedProductsOutput] = Field(
+        default=None, 
+        description="Resolved products from the product resolver"
+    )
 
 
 class InquiryResponderOutput(BaseModel):

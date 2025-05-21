@@ -1,6 +1,6 @@
 from typing import Dict, Literal, TypeVar, Union, Type, Any, Generic
 from .model.enums import Agents
-from .model.Error import Error
+from .model.error import Error
 
 # Type for standardized agent return values
 SpecificAgent = TypeVar('SpecificAgent', bound=Agents)
