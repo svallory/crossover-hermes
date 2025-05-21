@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional
 # Apply nest_asyncio for Jupyter compatibility
 import nest_asyncio
 
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput
+from src.hermes.agents.classifier.models import EmailAnalyzerInput
 from src.hermes.agents.workflow.states import OverallState
 from src.hermes.agents.workflow.workflow import run_workflow
 from src.hermes.config import HermesConfig

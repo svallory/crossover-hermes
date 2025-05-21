@@ -8,9 +8,9 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
-from src.hermes.agents.email_analyzer.models import EmailAnalysis, Segment, SegmentType, ProductMention
-from src.hermes.agents.inquiry_responder.respond_to_inquiry import respond_to_inquiry, search_vector_store
-from src.hermes.agents.inquiry_responder.models import InquiryResponderInput, EmailAnalyzerOutput
+from src.hermes.agents.classifier.models import EmailAnalysis, Segment, SegmentType, ProductMention
+from src.hermes.agents.advisor.agent import respond_to_inquiry, search_vector_store
+from src.hermes.agents.advisor.models import InquiryResponderInput, EmailAnalyzerOutput
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.vector_store import VectorStore
 from src.hermes.model import ProductCategory, Agents

@@ -6,9 +6,9 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from enum import Enum
 
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput, EmailAnalyzerOutput
-from src.hermes.agents.inquiry_responder.models import InquiryResponderOutput
-from src.hermes.agents.order_processor.models.agent import (
+from src.hermes.agents.classifier.models import EmailAnalyzerInput, EmailAnalyzerOutput
+from src.hermes.agents.advisor.models import InquiryResponderOutput
+from src.hermes.agents.fulfiller.models.agent import (
     OrderProcessorOutput,
     ProcessedOrder,
 )

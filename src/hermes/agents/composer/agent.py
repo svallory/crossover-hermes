@@ -19,9 +19,9 @@ from ...config import HermesConfig
 from ...utils import get_llm_client
 from ...model.enums import Agents
 from ...types import WorkflowNodeOutput
-from ...agents.email_analyzer.models import EmailAnalysis
-from ...agents.inquiry_responder.models import InquiryAnswers
-from ..order_processor.models.agent import ProcessedOrder
+from ...agents.classifier.models import EmailAnalysis
+from ...agents.advisor.models import InquiryAnswers
+from ..fulfiller.models.agent import ProcessedOrder
 
 @traceable(run_type="chain", name="Response Composer Agent")  # type: ignore
 async def compose_response(

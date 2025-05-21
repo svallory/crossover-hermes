@@ -8,7 +8,7 @@ import time
 from langchain_core.prompts import PromptTemplate
 import json
 
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerOutput, ProductMention
+from src.hermes.agents.classifier.models import EmailAnalyzerOutput, ProductMention
 from src.hermes.agents.product_resolver.models import ResolvedProductsOutput
 from src.hermes.agents.product_resolver.prompts import get_prompt
 from src.hermes.model.product import Product

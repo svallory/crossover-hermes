@@ -6,7 +6,7 @@ from unittest.mock import patch
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
-from src.hermes.agents.email_analyzer import analyze_email_node
+from src.hermes.agents.classifier import analyze_email_node
 from src.hermes.state import EmailAnalysis, ProductReference, CustomerSignal
 from src.hermes.state import HermesState
 from src.hermes.config import HermesConfig

@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from typing import List, Dict, Any, cast
 
-from src.hermes.agents.email_analyzer.models import ProductMention, EmailAnalysis, EmailAnalyzerOutput, Segment, SegmentType
+from src.hermes.agents.classifier.models import ProductMention, EmailAnalysis, EmailAnalyzerOutput, Segment, SegmentType
 from src.hermes.agents.product_resolver.resolve_products import (
     resolve_product_mentions,
     resolve_product_reference,

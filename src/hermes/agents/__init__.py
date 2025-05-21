@@ -5,13 +5,13 @@ This package contains agent implementations for various email processing tasks.
 """
 
 # Legacy agent (will be removed)
-from .email_analyzer import analyze_email, EmailAnalyzerInput, EmailAnalyzerOutput
-from .inquiry_responder import (
+from .classifier import analyze_email, EmailAnalyzerInput, EmailAnalyzerOutput
+from .advisor import (
     respond_to_inquiry,
     InquiryResponderInput,
     InquiryResponderOutput,
 )
-from .order_processor import (
+from .fulfiller import (
     process_order,
     OrderProcessorInput,
     OrderProcessorOutput,

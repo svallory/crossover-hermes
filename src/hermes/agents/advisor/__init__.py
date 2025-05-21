@@ -5,7 +5,7 @@ This agent handles customer inquiries about products, answering questions
 and suggesting related products using RAG techniques.
 """
 
-from .respond_to_inquiry import respond_to_inquiry
+from .agent import respond_to_inquiry
 from .models import (
     ExtractedQuestion,
     QuestionAnswer,
@@ -16,7 +16,7 @@ from .models import (
 )
 
 __all__ = [
-    "respond_to_inquiry",
+    "agent",
     "ExtractedQuestion",
     "QuestionAnswer",
     "ProductInformation",

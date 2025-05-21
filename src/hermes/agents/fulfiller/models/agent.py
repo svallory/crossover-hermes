@@ -5,7 +5,7 @@ Pydantic models for the order processor agent.
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput, EmailAnalyzerOutput
+from src.hermes.agents.classifier.models import EmailAnalyzerInput, EmailAnalyzerOutput
 from .order import OrderedItem
 
 

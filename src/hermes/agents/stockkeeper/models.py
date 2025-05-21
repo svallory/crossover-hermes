@@ -5,7 +5,7 @@ Pydantic models for the product resolver agent.
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any, Union
 
-from src.hermes.agents.email_analyzer.models import ProductMention
+from src.hermes.agents.classifier.models import ProductMention
 from src.hermes.model.product import Product
 
 

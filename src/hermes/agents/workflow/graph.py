@@ -21,17 +21,17 @@ from langgraph.graph import StateGraph
 from langgraph.constants import END, START
 from langchain_core.runnables import RunnableConfig
 # Import agent models
-from src.hermes.agents.email_analyzer.models import (
+from src.hermes.agents.classifier.models import (
     EmailAnalyzerInput,
     EmailAnalyzerOutput,
 )
 from src.hermes.config import HermesConfig
 
 # Import agent functions directly
-from src.hermes.agents.email_analyzer.analyze_email import analyze_email
+from src.hermes.agents.classifier.agent import analyze_email
 from src.hermes.agents.product_resolver.resolve_products import resolve_product_mentions
-from src.hermes.agents.order_processor.process_order import process_order
-from src.hermes.agents.inquiry_responder.respond_to_inquiry import respond_to_inquiry
+from src.hermes.agents.fulfiller.agent import process_order
+from src.hermes.agents.advisor.agent import respond_to_inquiry
 from src.hermes.agents.response_composer.compose_response import compose_response
 from src.hermes.model import Nodes
 
@@ -143,7 +143,7 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
     # Convert the result to a dictionary for LangGraph
     from src.hermes.utils.errors import create_node_response
     from src.hermes.model import Agents
-    from hermes.agents.order_processor.models.agent import OrderProcessorOutput
+    from hermes.agents.fulfiller.models.agent import OrderProcessorOutput
     
     # Create the expected output type
     order_processor_output = OrderProcessorOutput(order_result=processed_order)

@@ -10,10 +10,10 @@ from src.hermes.model.error import Error
 from pydantic import Field, BaseModel, create_model
 from typing_extensions import Hashable
 
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerOutput
+from src.hermes.agents.classifier.models import EmailAnalyzerOutput
 from src.hermes.agents.product_resolver.models import ResolvedProductsOutput
-from src.hermes.agents.inquiry_responder.models import InquiryResponderOutput
-from hermes.agents.order_processor.models.agent import OrderProcessorOutput
+from src.hermes.agents.advisor.models import InquiryResponderOutput
+from hermes.agents.fulfiller.models.agent import OrderProcessorOutput
 from src.hermes.agents.response_composer.models import ResponseComposerOutput
 from src.hermes.model import Agents  # This should be fine
 

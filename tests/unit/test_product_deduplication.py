@@ -2,7 +2,7 @@
 Tests for the product deduplication functionality.
 """
 
-from src.hermes.agents.email_analyzer.models import (
+from src.hermes.agents.classifier.models import (
     EmailAnalysis,
     ProductMention,
     Segment,

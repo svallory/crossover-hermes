@@ -6,7 +6,7 @@ This initializes the vector store and runs the workflow.
 from typing import Optional, Annotated, Dict, Any
 from langchain_core.runnables import RunnableConfig
 
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput
+from src.hermes.agents.classifier.models import EmailAnalyzerInput
 from src.hermes.agents.workflow.graph import workflow
 from src.hermes.config import HermesConfig
 from src.hermes.agents.workflow.states import OverallState

@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 from typing import Dict, Any
 import pandas as pd
 
-from src.hermes.agents.order_processor import (
+from src.hermes.agents.fulfiller import (
     process_order,
 )
 from src.hermes.model.product import AlternativeProduct, Product

@@ -5,7 +5,7 @@ Product deduplication utilities to identify and merge duplicate product mentions
 from typing import Dict, List, Any, Set
 from collections import defaultdict
 
-from src.hermes.agents.email_analyzer.models import EmailAnalysis
+from src.hermes.agents.classifier.models import EmailAnalysis
 
 
 async def get_product_mention_stats(email_analysis: EmailAnalysis) -> Dict[str, int]:

@@ -5,7 +5,7 @@ import asyncio
 from unittest.mock import patch, MagicMock
 from typing import Dict, Any, Optional
 
-from src.hermes.agents.inquiry_responder import process_inquiry_node
+from src.hermes.agents.advisor import process_inquiry_node
 from src.hermes.state import (
     EmailAnalysis,
     ProductReference,

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 # Assuming the HermesConfig and EmailAnalyzerInput are structured like this based on workflow.py
 # You might need to adjust imports based on your actual project structure
-from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput
+from src.hermes.agents.classifier.models import EmailAnalyzerInput
 from src.hermes.config import HermesConfig # Adjust import if HermesConfig is elsewhere
 from src.hermes.agents.workflow.workflow import run_workflow
 from src.hermes.data_processing.vector_store import VectorStore

@@ -19,7 +19,7 @@ from ...utils.llm_client import get_llm_client
 from ...types import WorkflowNodeOutput
 from ...model.enums import Agents, Season
 from ...utils.errors import create_node_response
-from ...agents.email_analyzer.models import SegmentType
+from ..classifier.models import SegmentType
 from ...data_processing.vector_store import VectorStore
 
 
