@@ -137,7 +137,7 @@ This approach provides several advantages for our Hermes implementation:
    class HermesConfig(BaseModel):
        max_retries: int = 3
        classifier_config: ClassifierConfig
-       order_processor_config: OrderProcessorConfig
+       fulfiller_config: FulfillerConfig
        response_generator_config: ResponseGeneratorConfig
    ```
 

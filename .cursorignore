@@ -1,4 +1,10 @@
 .archive/
 .vscode/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.DS_Store
 
-!.env
+.env
+.env.*

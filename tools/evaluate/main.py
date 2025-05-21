@@ -98,10 +98,10 @@ def upload_experiment_to_langsmith(
         inputs = serializable_result.get("input", {})
         outputs = serializable_result.get("output", {})
 
-        email_analyzer_output = outputs.get("email-analyzer", {})
-        order_processor_output = outputs.get("order-processor", {})
-        inquiry_responder_output = outputs.get("inquiry-responder", {})
-        response_composer_output = outputs.get("response-composer", {})
+        classifier_output = outputs.get("email-analyzer", {})
+        fulfiller_output = outputs.get("order-processor", {})
+        advisor_output = outputs.get("inquiry-responder", {})
+        composer_output = outputs.get("response-composer", {})
 
         # Create a result entry for each email
         eval_result = {
@@ -110,10 +110,10 @@ def upload_experiment_to_langsmith(
             "inputs": inputs,
             "expected_outputs": {},  # We don't have expected outputs in this case
             "actual_outputs": {
-                "email_analyzer": email_analyzer_output,
-                "order_processor": order_processor_output,
-                "inquiry_responder": inquiry_responder_output,
-                "response_composer": response_composer_output,
+                "classifier": classifier_output,
+                "fulfiller": fulfiller_output,
+                "advisor": advisor_output,
+                "composer": composer_output,
             },
             "start_time": experiment_start_time,
             "end_time": experiment_end_time,
@@ -209,10 +209,10 @@ async def run_evaluation(
 
         # Keep track of scores for the final report
         all_scores = {
-            "email_analyzer": [],
-            "order_processor": [],
-            "inquiry_responder": [],
-            "response_composer": [],
+            "classifier": [],
+            "fulfiller": [],
+            "advisor": [],
+            "composer": [],
             "end_to_end": [],
         }
 
@@ -236,37 +236,37 @@ async def run_evaluation(
 
             # Extract agent outputs
             outputs = serializable_result.get("output", {})
-            email_analyzer_output = outputs.get("email-analyzer", {})
-            order_processor_output = outputs.get("order-processor", {})
-            inquiry_responder_output = outputs.get("inquiry-responder", {})
-            response_composer_output = outputs.get("response-composer", {})
+            classifier_output = outputs.get("email-analyzer", {})
+            fulfiller_output = outputs.get("order-processor", {})
+            advisor_output = outputs.get("inquiry-responder", {})
+            composer_output = outputs.get("response-composer", {})
 
             # Create workflow state for master evaluator
             workflow_state = {
                 "email_id": email_id,
                 "email_subject": email_subject,
                 "email_message": email_message,
-                "email_analysis": email_analyzer_output,
-                "order_result": order_processor_output,
-                "inquiry_response": inquiry_responder_output,
-                "final_response": response_composer_output,
+                "email_analysis": classifier_output,
+                "order_result": fulfiller_output,
+                "inquiry_response": advisor_output,
+                "final_response": composer_output,
             }
 
             # Use the master evaluator for all components at once
             eval_results = await evaluate_master(client, experiment_name, email_id, workflow_state, model)
 
             # Store results in the appropriate structure
-            if "email_analyzer" in eval_results and eval_results["email_analyzer"]:
-                all_scores["email_analyzer"].append(eval_results["email_analyzer"])
+            if "classifier" in eval_results and eval_results["classifier"]:
+                all_scores["classifier"].append(eval_results["classifier"])
 
-            if "order_processor" in eval_results and eval_results["order_processor"]:
-                all_scores["order_processor"].append(eval_results["order_processor"])
+            if "fulfiller" in eval_results and eval_results["fulfiller"]:
+                all_scores["fulfiller"].append(eval_results["fulfiller"])
 
-            if "inquiry_responder" in eval_results and eval_results["inquiry_responder"]:
-                all_scores["inquiry_responder"].append(eval_results["inquiry_responder"])
+            if "advisor" in eval_results and eval_results["advisor"]:
+                all_scores["advisor"].append(eval_results["advisor"])
 
-            if "response_composer" in eval_results and eval_results["response_composer"]:
-                all_scores["response_composer"].append(eval_results["response_composer"])
+            if "composer" in eval_results and eval_results["composer"]:
+                all_scores["composer"].append(eval_results["composer"])
 
             if "end_to_end" in eval_results and eval_results["end_to_end"]:
                 all_scores["end_to_end"].append(eval_results["end_to_end"])

@@ -10,8 +10,8 @@ from src.hermes.utils.errors import create_node_response
 
 from .models import (
     ComposedResponse,
-    ResponseComposerInput,
-    ResponseComposerOutput,
+    ComposerInput,
+    ComposerOutput,
     ResponseTone,
 )
 from .prompts import get_prompt
@@ -23,11 +23,12 @@ from ...agents.classifier.models import EmailAnalysis
 from ...agents.advisor.models import InquiryAnswers
 from ..fulfiller.models.agent import ProcessedOrder
 
+
 @traceable(run_type="chain", name="Response Composer Agent")  # type: ignore
 async def compose_response(
-    state: ResponseComposerInput,
+    state: ComposerInput,
     runnable_config: Optional[RunnableConfig] = None,
-) -> WorkflowNodeOutput[Literal[Agents.RESPONSE_COMPOSER], ResponseComposerOutput]:
+) -> WorkflowNodeOutput[Literal[Agents.COMPOSER], ComposerOutput]:
     """
     Composes a natural, personalized customer email response by combining information
     from the Email Analyzer, Inquiry Responder, and Order Processor agents.
@@ -37,46 +38,45 @@ async def compose_response(
         runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
-        Dict[str, Any]: In the LangGraph workflow, returns {"response_composer": ResponseComposerOutput} or {"errors": Error}
+        Dict[str, Any]: In the LangGraph workflow, returns {"composer": ComposerOutput} or {"errors": Error}
     """
     try:
         email_analysis_data: Optional[EmailAnalysis] = None
-        if state.email_analyzer and state.email_analyzer.email_analysis:
-            email_analysis_data = state.email_analyzer.email_analysis
-        
+        if state.classifier and state.classifier.email_analysis:
+            email_analysis_data = state.classifier.email_analysis
+
         if email_analysis_data is None:
             return create_node_response(
-                Agents.RESPONSE_COMPOSER,
-                Exception("No email analysis available for response composition.")
+                Agents.COMPOSER, Exception("No email analysis available for response composition.")
             )
-            
+
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
         email_id = email_analysis_data.email_id if email_analysis_data.email_id else state.email_id or "unknown_id"
-        
+
         print(f"Composing final customer response for email {email_id}")
 
         # Prepare data for the prompt
         inquiry_answers_data: Optional[InquiryAnswers] = None
-        if state.inquiry_responder and state.inquiry_responder.inquiry_answers:
-            inquiry_answers_data = state.inquiry_responder.inquiry_answers
+        if state.advisor and state.advisor.inquiry_answers:
+            inquiry_answers_data = state.advisor.inquiry_answers
 
         order_result_data: Optional[ProcessedOrder] = None
-        if state.order_processor and state.order_processor.order_result:
-            order_result_data = state.order_processor.order_result
-        
+        if state.fulfiller and state.fulfiller.order_result:
+            order_result_data = state.fulfiller.order_result
+
         # Use a strong model for natural language generation
         llm = get_llm_client(config=hermes_config, model_strength="strong", temperature=0.7)
 
         # Create the prompt
-        composer_prompt = get_prompt(Agents.RESPONSE_COMPOSER)
+        composer_prompt = get_prompt(Agents.COMPOSER)
 
         # Create the chain
         composer_chain = composer_prompt | llm.with_structured_output(ComposedResponse)
 
         try:
             # Prepare the input dictionary for the chain, ensuring all keys expected by the prompt are present
-            # (typically matching fields of ResponseComposerInput model)
+            # (typically matching fields of ComposerInput model)
             prompt_input_data = {
                 "email_analysis": email_analysis_data.model_dump() if email_analysis_data else None,
                 "inquiry_response": inquiry_answers_data.model_dump() if inquiry_answers_data else None,
@@ -117,11 +117,8 @@ async def compose_response(
             print(f"  Response language: {response.language}")
             print(f"  Response length: {len(response.response_body)} characters")
 
-            return create_node_response(
-                Agents.RESPONSE_COMPOSER,
-                ResponseComposerOutput(composed_response=response)
-            )
-            
+            return create_node_response(Agents.COMPOSER, ComposerOutput(composed_response=response))
+
         except Exception as e:
             # Create a basic response in case of errors
             response = ComposedResponse(
@@ -133,13 +130,9 @@ async def compose_response(
                 response_points=[],
             )
             # Although it's an internal error, we return a composed response for the user
-            return create_node_response(
-                Agents.RESPONSE_COMPOSER,
-                ResponseComposerOutput(composed_response=response)
-            )
-            
+            return create_node_response(Agents.COMPOSER, ComposerOutput(composed_response=response))
+
     except Exception as e:
         # Return errors in the format expected by LangGraph
         print(f"Outer error in compose_response: {e}")
-        return create_node_response(Agents.RESPONSE_COMPOSER, e)
-
+        return create_node_response(Agents.COMPOSER, e)

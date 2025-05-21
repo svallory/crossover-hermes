@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class SignalCategory(str, Enum):
     """Customer signal categories, aligned with prompt examples."""
 
@@ -26,4 +27,3 @@ class SignalCategory(str, Enum):
     COMPARISON_SHOPPING = "Comparison Shopping"
     FEATURE_REQUEST = "Feature Request"
     PROBLEM_REPORT = "Problem Report"
-

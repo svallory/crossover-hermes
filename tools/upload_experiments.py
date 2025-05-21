@@ -64,10 +64,10 @@ def upload_experiment_to_langsmith(
         inputs = result.get("input", {})
         outputs = result.get("output", {})
 
-        email_analyzer_output = outputs.get("email-analyzer", {})
-        order_processor_output = outputs.get("order-processor", {})
-        inquiry_responder_output = outputs.get("inquiry-responder", {})
-        response_composer_output = outputs.get("response-composer", {})
+        classifier_output = outputs.get("email-analyzer", {})
+        fulfiller_output = outputs.get("order-processor", {})
+        advisor_output = outputs.get("inquiry-responder", {})
+        composer_output = outputs.get("response-composer", {})
 
         # Create a result entry for each email
         eval_result = {
@@ -75,10 +75,10 @@ def upload_experiment_to_langsmith(
             "inputs": inputs,
             "expected_outputs": {},  # We don't have expected outputs in this case
             "actual_outputs": {
-                "email_analyzer": email_analyzer_output,
-                "order_processor": order_processor_output,
-                "inquiry_responder": inquiry_responder_output,
-                "response_composer": response_composer_output,
+                "classifier": classifier_output,
+                "fulfiller": fulfiller_output,
+                "advisor": advisor_output,
+                "composer": composer_output,
             },
             "start_time": experiment_start_time,
             "end_time": experiment_end_time,

@@ -73,7 +73,7 @@ class EmailAnalysis(BaseModel):
         return any(seg.segment_type == "inquiry" for seg in self.segments)
 
 
-class EmailAnalyzerInput(BaseModel):
+class ClassifierInput(BaseModel):
     """
     Input model for the email analyzer.
     """
@@ -85,7 +85,7 @@ class EmailAnalyzerInput(BaseModel):
     message: str = Field(description="The body of the email")
 
 
-class EmailAnalyzerOutput(BaseModel):
+class ClassifierOutput(BaseModel):
     """
     Output model for the email analyzer function.
     """

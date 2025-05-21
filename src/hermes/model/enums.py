@@ -1,24 +1,27 @@
 from enum import Enum
 
+
 # Enum of nodes
 class Agents(str, Enum):
     """Names of our Agents (also nodes in the workflow graph)."""
 
-    EMAIL_ANALYZER = "email_analyzer"
-    PRODUCT_RESOLVER = "product_resolver"
-    ORDER_PROCESSOR = "order_processor"
-    INQUIRY_RESPONDER = "inquiry_responder"
-    RESPONSE_COMPOSER = "response_composer"
+    CLASSIFIER = "classifier"
+    STOCKKEEPER = "stockkeeper"
+    FULFILLER = "fulfiller"
+    ADVISOR = "advisor"
+    COMPOSER = "composer"
+
 
 class Nodes(str, Enum):
     """Names of our Nodes (also nodes in the workflow graph)."""
 
-    CLASSIFIER = "classifier" # email_analyzer
-    STOCKKEEPER = "stockkeeper" # product_resolver
-    FULFILLER = "fulfiller" # order_processor
-    ADVISOR = "advisor" # inquiry_responder
-    COMPOSER = "composer" # response_composer
-    
+    CLASSIFIER = "classifier_node"
+    STOCKKEEPER = "stockkeeper_node"
+    FULFILLER = "fulfiller_node"
+    ADVISOR = "advisor_node"
+    COMPOSER = "composer_node"
+
+
 class ProductCategory(str, Enum):
     """Categories of products available in the store."""
 
@@ -39,4 +42,4 @@ class Season(str, Enum):
     SPRING = "Spring"
     SUMMER = "Summer"
     AUTUMN = "Autumn"
-    WINTER = "Winter" 
+    WINTER = "Winter"

@@ -12,7 +12,7 @@ PROMPTS: Dict[str, PromptTemplate] = {}
 
 # Main Email Analyzer Prompt
 markdown = str
-email_analyzer_prompt_template_str: markdown = """
+classifier_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
 You are an AI agent that preprocesses customer emails for an e-commerce store. Your task is to analyze customer emails and extract structured information for further processing.
 
@@ -95,7 +95,7 @@ Subject: {{subject}}
 Message: {{message}}
 """
 
-PROMPTS[Agents.EMAIL_ANALYZER] = PromptTemplate.from_template(email_analyzer_prompt_template_str, template_format="mustache")
+PROMPTS[Agents.CLASSIFIER] = PromptTemplate.from_template(classifier_prompt_template_str, template_format="mustache")
 
 
 def get_prompt(key: str) -> PromptTemplate:

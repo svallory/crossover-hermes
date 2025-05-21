@@ -72,10 +72,10 @@ This agent uses AI techniques for end-to-end factual processing:
 ## Usage Example
 
 ```python
-from src.hermes.agents.inquiry_responder import respond_to_inquiry
+from src.hermes.agents.advisor import respond_to_inquiry
 
 # Create the input with EmailAnalysisResult
-input_state = InquiryResponderInput(
+input_state = AdvisorInput(
     email_analysis=email_analysis_result  # From Email Analyzer
 )
 

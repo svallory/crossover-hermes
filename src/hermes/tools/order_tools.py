@@ -16,7 +16,7 @@ Key functionalities include:
 - Calculating discounted prices based on promotion text.
 """
 
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 import pandas as pd  # type: ignore
 import re
@@ -69,7 +69,7 @@ class PromotionDetails(BaseModel):
 
 class DiscountResult(BaseModel):
     """Result of a discount calculation."""
-    
+
     original_price: float = Field(description="Original price before discount")
     discounted_price: float = Field(description="Price after applying the discount")
     discount_amount: float = Field(description="Amount discounted")
@@ -279,9 +279,9 @@ def find_alternatives_for_oos(
             product_type="",
             stock=0,
             seasons=[],
-            price=0.0
+            price=0.0,
         )
-        
+
         return [
             AlternativeProduct(
                 product=empty_product,
@@ -431,18 +431,18 @@ def extract_promotion(product_description: str, product_name: Optional[str] = No
 def calculate_discount_price(original_price: float, promotion_text: str, quantity: int = 1) -> DiscountResult:
     """
     Calculate the discounted price based on the promotion text and original price.
-    
+
     This tool handles various promotion types:
     - Percentage discounts (e.g., "25% off")
     - Buy-one-get-one (BOGO) offers
     - Free item offers
     - Bundle discounts
-    
+
     Args:
         original_price: The original unit price before any discount
         promotion_text: The text describing the promotion
         quantity: The number of items being ordered
-        
+
     Returns:
         A DiscountResult object with the calculated discount and explanation
     """
@@ -452,7 +452,7 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
     discount_applied = False
     discount_type = "none"
     explanation = "No discount applied."
-    
+
     if not promotion_text:
         return DiscountResult(
             original_price=original_price,
@@ -461,12 +461,12 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
             discount_percentage=None,
             discount_applied=False,
             discount_type="none",
-            explanation="No promotion text provided."
+            explanation="No promotion text provided.",
         )
-    
+
     # Convert to lowercase for case-insensitive matching
     promo_lower = promotion_text.lower()
-    
+
     # 1. Check for percentage discounts
     percentage_patterns = [
         r"(\d+)%\s+off",  # e.g., "25% off"
@@ -474,7 +474,7 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
         r"discount\s+of\s+(\d+)%",  # e.g., "discount of 15%"
         r"(\d+)%\s+discount",  # e.g., "15% discount"
     ]
-    
+
     for pattern in percentage_patterns:
         match = re.search(pattern, promo_lower)
         if match:
@@ -487,11 +487,11 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                     discount_applied = True
                     discount_type = "percentage"
                     explanation = f"Applied {percentage}% discount to original price ${original_price:.2f}."
-                    
+
                     # Handle quantity correctly
-                    total_discount = discount_amount * quantity
-                    total_discounted_price = discounted_price * quantity
-                    
+                    discount_amount * quantity
+                    discounted_price * quantity
+
                     return DiscountResult(
                         original_price=original_price,
                         discounted_price=discounted_price,
@@ -499,11 +499,11 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                         discount_percentage=discount_percentage,
                         discount_applied=discount_applied,
                         discount_type=discount_type,
-                        explanation=explanation
+                        explanation=explanation,
                     )
             except (ValueError, IndexError):
                 pass  # Continue to next pattern if this one fails
-    
+
     # 2. Check for BOGO offers
     if any(phrase in promo_lower for phrase in ["buy one, get one", "bogo", "get one free", "buy 1 get 1"]):
         if "50% off" in promo_lower or "half off" in promo_lower or "half price" in promo_lower:
@@ -512,14 +512,14 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                 # For every pair, one item is half price
                 full_price_items = (quantity + 1) // 2  # Rounds up for odd quantities
                 half_price_items = quantity // 2  # Rounds down for odd quantities
-                
+
                 total_original = original_price * quantity
                 total_discounted = (full_price_items * original_price) + (half_price_items * original_price * 0.5)
-                
+
                 # Calculate per-unit values
                 discount_amount = (total_original - total_discounted) / quantity
                 discounted_price = original_price - discount_amount
-                
+
                 discount_applied = True
                 discount_type = "bogo_half"
                 explanation = f"Buy one, get one 50% off applied. For {quantity} items, {full_price_items} at full price, {half_price_items} at half price."
@@ -532,21 +532,21 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                 # For every pair, one item is free
                 paid_items = (quantity + 1) // 2  # Rounds up for odd quantities
                 free_items = quantity // 2  # Rounds down for odd quantities
-                
+
                 total_original = original_price * quantity
                 total_discounted = original_price * paid_items
-                
+
                 # Calculate per-unit values
                 discount_amount = (total_original - total_discounted) / quantity
                 discounted_price = original_price - discount_amount
-                
+
                 discount_applied = True
                 discount_type = "bogo_free"
                 explanation = f"Buy one, get one free applied. For {quantity} items, paying for {paid_items}, getting {free_items} free."
             else:
                 # Not enough quantity for discount
                 explanation = "Buy one, get one free requires at least 2 items to apply."
-    
+
     # 3. Check for bulk discounts on quantity thresholds
     bulk_match = re.search(r"(\d+)\+\s+units", promo_lower)
     if bulk_match:
@@ -561,12 +561,14 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                 discounted_price = original_price - discount_amount
                 discount_applied = True
                 discount_type = "bulk_discount"
-                explanation = f"Bulk discount of {percentage}% applied for ordering {quantity} items (minimum {threshold})."
+                explanation = (
+                    f"Bulk discount of {percentage}% applied for ordering {quantity} items (minimum {threshold})."
+                )
             elif quantity < threshold:
                 explanation = f"Bulk discount requires at least {threshold} items (only ordered {quantity})."
         except (ValueError, IndexError):
             pass
-    
+
     # Return the result
     return DiscountResult(
         original_price=original_price,
@@ -575,7 +577,7 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
         discount_percentage=discount_percentage,
         discount_applied=discount_applied,
         discount_type=discount_type,
-        explanation=explanation
+        explanation=explanation,
     )
 
 

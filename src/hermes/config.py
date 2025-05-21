@@ -83,7 +83,7 @@ class HermesConfig(BaseModel):
     embedding_model_name: str = Field(default_factory=lambda: os.getenv("EMBEDDING_MODEL", DEFAULT_EMBEDDING_MODEL))
     openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
     openai_base_url: str = Field(default_factory=lambda: os.getenv("OPENAI_BASE_URL", DEFAULT_OPENAI_BASE_URL))
-    
+
     vector_store_path: str = Field(default_factory=lambda: os.getenv("VECTOR_STORE_PATH", DEFAULT_VECTOR_STORE_PATH))
     chroma_collection_name: str = Field(
         default_factory=lambda: os.getenv("CHROMA_COLLECTION_NAME", DEFAULT_CHROMA_COLLECTION_NAME)

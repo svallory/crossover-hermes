@@ -60,7 +60,7 @@ class EmailAnalysis(BaseModel):
     reasoning: str = Field(description="Reasoning behind the classification")
 
 # Create email analyzer chain
-email_analyzer_chain = create_structured_output_chain(
+classifier_chain = create_structured_output_chain(
     llm,
     EmailAnalysis,
     prompt_template="""
@@ -914,7 +914,7 @@ async def analyze_email(state):
     body = state["email_body"]
     
     # Run email analysis
-    analysis = await email_analyzer_chain.ainvoke({"subject": subject, "body": body})
+    analysis = await classifier_chain.ainvoke({"subject": subject, "body": body})
     
     # Verify and potentially fix the analysis
     verified_analysis = verify_email_analysis(analysis)

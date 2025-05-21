@@ -69,16 +69,6 @@ exclude = [
 line-length = 120
 indent-width = 4
 
-[tool.ruff.lint]
-ignore = []
-
-# Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
-
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
 quote-style = "double"
@@ -105,3 +95,17 @@ docstring-code-format = true
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = 88
+
+[tool.ruff.lint]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore `F403` (don't use import *) in all `__init__.py` files.
+"__init__.py" = ["F403"]

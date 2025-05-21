@@ -5,7 +5,7 @@ Pydantic models for the order processor agent.
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
-from src.hermes.agents.classifier.models import EmailAnalyzerInput, EmailAnalyzerOutput
+from src.hermes.agents.classifier.models import ClassifierInput, ClassifierOutput
 from .order import OrderedItem
 
 
@@ -36,14 +36,13 @@ class ProcessedOrder(BaseModel):
     )
 
 
-class OrderProcessorInput(EmailAnalyzerInput):
+class FulfillerInput(ClassifierInput):
     """Input data for the order processor function."""
 
-    email_analyzer: EmailAnalyzerOutput = Field(description="The output of the email analyzer")
+    classifier: ClassifierOutput = Field(description="The output of the email analyzer")
 
 
-
-class OrderProcessorOutput(BaseModel):
+class FulfillerOutput(BaseModel):
     """Output data for the order processor function."""
 
     order_result: ProcessedOrder = Field(description="The complete result of processing the order request")

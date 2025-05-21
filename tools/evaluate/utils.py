@@ -79,54 +79,54 @@ def format_evaluation_scores(report: Dict[str, Any]) -> List[Dict[str, Any]]:
     scores = report.get("scores", {})
 
     # Format email analyzer scores
-    if "email_analyzer" in scores and scores["email_analyzer"]:
-        analyzer_scores = scores["email_analyzer"]
+    if "classifier" in scores and scores["classifier"]:
+        analyzer_scores = scores["classifier"]
         avg_accuracy = (
             sum(s.get("accuracy", 0) for s in analyzer_scores) / len(analyzer_scores) if analyzer_scores else 0
         )
         summary_scores.append(
             {
-                "key": "email_analyzer_accuracy",
+                "key": "classifier_accuracy",
                 "score": round(avg_accuracy, 2),
                 "comment": "Average accuracy score for email analysis",
             }
         )
 
     # Format order processor scores
-    if "order_processor" in scores and scores["order_processor"]:
-        processor_scores = scores["order_processor"]
+    if "fulfiller" in scores and scores["fulfiller"]:
+        processor_scores = scores["fulfiller"]
         avg_accuracy = (
             sum(s.get("accuracy", 0) for s in processor_scores) / len(processor_scores) if processor_scores else 0
         )
         summary_scores.append(
             {
-                "key": "order_processor_accuracy",
+                "key": "fulfiller_accuracy",
                 "score": round(avg_accuracy, 2),
                 "comment": "Average accuracy score for order processing",
             }
         )
 
     # Format inquiry responder scores
-    if "inquiry_responder" in scores and scores["inquiry_responder"]:
-        responder_scores = scores["inquiry_responder"]
+    if "advisor" in scores and scores["advisor"]:
+        responder_scores = scores["advisor"]
         avg_accuracy = (
             sum(s.get("accuracy", 0) for s in responder_scores) / len(responder_scores) if responder_scores else 0
         )
         summary_scores.append(
             {
-                "key": "inquiry_responder_accuracy",
+                "key": "advisor_accuracy",
                 "score": round(avg_accuracy, 2),
                 "comment": "Average accuracy score for inquiry responses",
             }
         )
 
     # Format response composer scores
-    if "response_composer" in scores and scores["response_composer"]:
-        composer_scores = scores["response_composer"]
+    if "composer" in scores and scores["composer"]:
+        composer_scores = scores["composer"]
         avg_quality = sum(s.get("quality", 0) for s in composer_scores) / len(composer_scores) if composer_scores else 0
         summary_scores.append(
             {
-                "key": "response_composer_quality",
+                "key": "composer_quality",
                 "score": round(avg_quality, 2),
                 "comment": "Average quality score for composed responses",
             }

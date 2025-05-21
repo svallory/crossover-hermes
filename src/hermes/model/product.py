@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from src.hermes.model.enums import ProductCategory, Season
 
+
 class Product(BaseModel):
     """A product from the catalog."""
 
@@ -16,9 +17,10 @@ class Product(BaseModel):
     price: float = Field(description="The price of the product")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata for the product")
 
+
 class AlternativeProduct(BaseModel):
     """A recommended alternative product."""
-    
+
     product: Product = Field(description="The product being recommended as an alternative")
     similarity_score: float = Field(description="Similarity score to the requested product")
     reason: str = Field(description="Reason this product is recommended as an alternative")

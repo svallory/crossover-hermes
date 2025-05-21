@@ -33,7 +33,7 @@ This document maps each architectural decision to the concrete project structure
 ## 3. Agents (Nodes)
 - **Location:** `src/agents/`
   - `email_classifier.py`
-  - `order_processor.py`
+  - `fulfiller.py`
   - `response_generator.py`
   - `supervisor.py` (if needed)
 - **Pattern:** Each agent as a function (or class with a `__call__` method if stateful)
@@ -49,7 +49,7 @@ This document maps each architectural decision to the concrete project structure
 
 ## 4. Prompts
 - **Location:** `src/prompts/`
-  - One Python file per agent (e.g., `email_classifier.py`, `order_processor.py`, etc)
+  - One Python file per agent (e.g., `email_classifier.py`, `fulfiller.py`, etc)
 - **Pattern:** Exported variables (e.g., `EMAIL_CLASSIFIER_PROMPT: ChatPromptTemplate`)
 - **Library:**
   - `langchain.prompts.ChatPromptTemplate`, `SystemMessagePromptTemplate`, `HumanMessagePromptTemplate`

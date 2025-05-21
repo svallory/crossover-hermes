@@ -5,7 +5,7 @@ This agent verifies stock availability, updates inventory, suggests alternatives
 for out-of-stock items, and processes product promotions.
 """
 
+from .promotion_rulesets import *
+from .prompts import *
 from .models import *
 from .agent import *
-from .prompts import *
-from .promotion_rulesets import *

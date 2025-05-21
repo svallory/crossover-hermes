@@ -1,10 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing import List, Optional
 from enum import Enum
 
 from src.hermes.model.product import Product, AlternativeProduct
 
 from .promotions import PromotionSpec
+
 
 class OrderedItemStatus(str, Enum):
     """Status of an order item."""
@@ -19,7 +20,7 @@ class OrderedItem(Product):
     quantity: int = Field(ge=1, description="The quantity ordered")
     status: OrderedItemStatus = Field(description="The status of this order item")
     total_price: Optional[float] = Field(default=None, description="Total price for this item")
-    
+
     alternatives: List[AlternativeProduct] = Field(
         default_factory=list,
         description="Alternative products suggested if this item is out of stock",

@@ -4,7 +4,7 @@ The Email Analyzer Agent processes customer emails to extract structured informa
 
 ## Structure
 
-The agent (`src/hermes/agents/email_analyzer/`) is organized as follows:
+The agent (`src/hermes/agents/classifier/`) is organized as follows:
 
 - `__init__.py`: Exports the main functions and models.
 - `models.py`: Defines Pydantic models (`EmailAnalysisResult`, `Segment`, `ProductMention`, etc.).
@@ -14,8 +14,8 @@ The agent (`src/hermes/agents/email_analyzer/`) is organized as follows:
 ## Agent Flow
 
 1.  The `analyze_email` function is called with email data.
-2.  It uses the `email_analyzer` prompt (from `prompts.py`) and a **weak** LLM to perform an initial analysis, attempting to structure the output according to the `EmailAnalysisResult` model (from `models.py`).
-3.  The final `EmailAnalyzerOutput` object (containing the initial analysis and unique products) is returned.
+2.  It uses the `classifier` prompt (from `prompts.py`) and a **weak** LLM to perform an initial analysis, attempting to structure the output according to the `EmailAnalysisResult` model (from `models.py`).
+3.  The final `ClassifierOutput` object (containing the initial analysis and unique products) is returned.
 
 ## Configuration
 
@@ -30,7 +30,7 @@ Refer to `docs/env-sample.md` for detailed environment variable configuration.
 
 The agent uses one main prompt defined in `prompts.py`:
 
-1.  `email_analyzer`: For the initial analysis step, designed to output the `EmailAnalysisResult` structure.
+1.  `classifier`: For the initial analysis step, designed to output the `EmailAnalysisResult` structure.
 
 ## Models
 
@@ -39,14 +39,14 @@ The primary Pydantic models used are defined in `models.py`:
 - `EmailAnalysisResult`: The main output structure, including language, intent, PII, and segments.
 - `Segment`: Represents a distinct part of the email, with type, sentences, and product mentions.
 - `ProductMention`: Details about a product mentioned in a segment.
-- `EmailAnalyzerInput`: Input model for the email analyzer.
-- `EmailAnalyzerOutput`: The overall output model containing the initial analysis and unique products.
+- `ClassifierInput`: Input model for the email analyzer.
+- `ClassifierOutput`: The overall output model containing the initial analysis and unique products.
 
 ## Usage Example
 
 ~~~python
-from hermes.config import HermesConfig
-from hermes.agents.email_analyzer import analyze_email, EmailAnalysis, EmailAnalyzerOutput
+from src.hermes.config import HermesConfig
+from src.hermes.agents.classifier import analyze_email, EmailAnalysis, ClassifierOutput
 
 # Initialize HermesConfig (ensure your .env or environment variables are set)
 hermes_config = HermesConfig()
@@ -66,7 +66,7 @@ run_config = {
 }
 
 async def main():
-    output: EmailAnalyzerOutput = await analyze_email(email_state, runnable_config=run_config)
+    output: ClassifierOutput = await analyze_email(email_state, runnable_config=run_config)
     
     analysis_result = output.email_analysis
     print("--- Initial Email Analysis ---")

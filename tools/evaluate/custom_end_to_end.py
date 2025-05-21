@@ -148,24 +148,24 @@ async def run_custom_end_to_end_evaluation(
 
             # Extract outputs
             outputs = result.get("output", {})
-            email_analyzer_output = outputs.get("email-analyzer", {})
-            response_composer_output = outputs.get("response-composer", {})
+            classifier_output = outputs.get("email-analyzer", {})
+            composer_output = outputs.get("response-composer", {})
 
             # Skip if missing required outputs
-            if not email_analyzer_output or not response_composer_output:
+            if not classifier_output or not composer_output:
                 print("  Skipping evaluation due to missing outputs")
                 continue
 
             if (
-                not isinstance(response_composer_output, dict)
-                or "response_body" not in response_composer_output
-                or "subject" not in response_composer_output
+                not isinstance(composer_output, dict)
+                or "response_body" not in composer_output
+                or "subject" not in composer_output
             ):
                 print("  Skipping evaluation due to invalid response format")
                 continue
 
-            final_subject = response_composer_output.get("subject", "")
-            final_body = response_composer_output.get("response_body", "")
+            final_subject = composer_output.get("subject", "")
+            final_body = composer_output.get("response_body", "")
 
             # Run evaluation
             try:
@@ -174,7 +174,7 @@ async def run_custom_end_to_end_evaluation(
                     input={
                         "email_subject": email_subject,
                         "email_message": email_message,
-                        "email_analysis": json.dumps(email_analyzer_output, indent=2),
+                        "email_analysis": json.dumps(classifier_output, indent=2),
                         "response_subject": final_subject,
                         "response_body": final_body,
                     },
@@ -187,7 +187,7 @@ async def run_custom_end_to_end_evaluation(
                     name=f"Custom End-to-End Evaluation - {email_id}",
                     inputs={
                         "email": f"Subject: {email_subject}\nMessage: {email_message}",
-                        "email_analysis": json.dumps(email_analyzer_output, indent=2),
+                        "email_analysis": json.dumps(classifier_output, indent=2),
                     },
                     outputs={"final_response": f"Subject: {final_subject}\nBody: {final_body}"},
                     tags=["custom_end_to_end", email_id],

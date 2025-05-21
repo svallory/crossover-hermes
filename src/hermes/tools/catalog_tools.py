@@ -47,6 +47,7 @@ script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 data_dir = script_dir.parent.parent.parent / "data"
 product_file = data_dir / "product_catalog.csv"
 
+
 class ProductNotFound(BaseModel):
     """Indicates that a product was not found."""
 
@@ -62,12 +63,11 @@ class FuzzyMatchResult(BaseModel):
     similarity_score: float = Field(description="Similarity score between 0.0 and 1.0")
 
 
-
 @tool  # type: ignore[call-overload]
 def find_product_by_id(product_id: str) -> Union[Product, ProductNotFound]:
     """
     Find a product by its ID.
-    
+
     Retrieve detailed product information by its exact Product ID.
     Use this when you have a precise Product ID (e.g., 'LTH0976', 'CSH1098').
 
@@ -82,7 +82,7 @@ def find_product_by_id(product_id: str) -> Union[Product, ProductNotFound]:
 
     # Get products_df using the memoized function
     products_df = load_products_df()
-    
+
     # Ensure products_df is not None before trying to index it
     if products_df is None:
         return ProductNotFound(
@@ -126,7 +126,7 @@ def find_product_by_name(
 ) -> Union[List[FuzzyMatchResult], ProductNotFound]:
     """
     Find products by name using fuzzy matching.
-    
+
     Use this when the customer provides a product name that might have typos, be incomplete, or slightly different from the catalog.
 
     Args:
@@ -143,7 +143,7 @@ def find_product_by_name(
 
     # Get products_df using the memoized function
     products_df = load_products_df()
-    
+
     # Check if product catalog is available
     if products_df is None:
         return ProductNotFound(
@@ -227,7 +227,7 @@ def search_products_by_description(
 ) -> Union[List[Product], ProductNotFound]:
     """
     Search for products by description.
-    
+
     Search for products using semantic description matching.
     This tool is great for answering open-ended inquiries about products with specific features or characteristics.
 
@@ -243,7 +243,7 @@ def search_products_by_description(
     try:
         # Get products_df using the memoized function
         products_df = load_products_df()
-        
+
         # First check if we have a DataFrame for direct searching
         if products_df is not None and not products_df.empty:
             # For demonstration, we'll implement a simplified search using the DataFrame
@@ -280,7 +280,7 @@ def find_related_products(
 ) -> Union[List[Product], ProductNotFound]:
     """
     Find products related to a given product ID.
-    
+
     Find products related to a given product ID, such as complementary items or alternatives from the same category.
 
     Args:
@@ -293,7 +293,7 @@ def find_related_products(
     """
     # Get products_df using the memoized function
     products_df = load_products_df()
-    
+
     if products_df is None:
         return ProductNotFound(
             message="Product catalog data is not loaded.",
@@ -392,7 +392,7 @@ def find_related_products(
 def resolve_product_reference(*, query: str) -> Union[Product, ProductNotFound]:
     """
     Resolve a product reference from a natural language query.
-    
+
     Resolves a product reference dictionary to a specific product using a series of lookup strategies.
     It tries to find a product by ID, then by name, then by semantic description search.
 
@@ -427,7 +427,7 @@ def filtered_product_search(
 ) -> Union[List[Product], ProductNotFound]:
     """
     Search and filter products based on various criteria.
-    
+
     This is a comprehensive search tool that combines semantic search with metadata filtering.
 
     Args:
@@ -446,7 +446,7 @@ def filtered_product_search(
     try:
         # Get products_df using the memoized function
         products_df = load_products_df()
-        
+
         # First check if we have a DataFrame for direct searching
         if products_df is not None and not products_df.empty:
             # Start with all products

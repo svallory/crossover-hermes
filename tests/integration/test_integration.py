@@ -31,6 +31,7 @@ from tests.fixtures import (
 # Import the real configuration (not mocked)
 from src.hermes.config import HermesConfig
 
+
 # Mock required modules
 class MockHermesState:
     """Mock implementation of HermesState with needed attributes."""
@@ -65,25 +66,25 @@ class MockWorkflow:
     def __init__(self, config=None):
         self.config = config
         self.nodes = {
-            "email_analyzer": AsyncMock(),
-            "order_processor": AsyncMock(),
-            "inquiry_responder": AsyncMock(),
-            "response_composer": AsyncMock(),
+            "classifier": AsyncMock(),
+            "fulfiller": AsyncMock(),
+            "advisor": AsyncMock(),
+            "composer": AsyncMock(),
         }
 
     async def ainvoke(self, state):
         """Simulate pipeline workflow execution."""
         # Start with email analyzer
-        state = await self.nodes["email_analyzer"](state, self.config)
+        state = await self.nodes["classifier"](state, self.config)
 
         # Determine routing
         if state.email_analysis and state.email_analysis.get("classification") == "order_request":
-            state = await self.nodes["order_processor"](state, self.config)
+            state = await self.nodes["fulfiller"](state, self.config)
         else:
-            state = await self.nodes["inquiry_responder"](state, self.config)
+            state = await self.nodes["advisor"](state, self.config)
 
         # Always finish with response composer
-        state = await self.nodes["response_composer"](state, self.config)
+        state = await self.nodes["composer"](state, self.config)
         return state
 
 
@@ -326,10 +327,10 @@ class TestHermesPipeline(unittest.TestCase):
         self.mock_pipeline = MockWorkflow(config={"configurable": {"hermes_config": self.config}})
 
         # Patch the node functions
-        self.mock_pipeline.nodes["email_analyzer"] = mock_analyze_email
-        self.mock_pipeline.nodes["order_processor"] = mock_process_order
-        self.mock_pipeline.nodes["inquiry_responder"] = mock_process_inquiry
-        self.mock_pipeline.nodes["response_composer"] = mock_compose_response
+        self.mock_pipeline.nodes["classifier"] = mock_analyze_email
+        self.mock_pipeline.nodes["fulfiller"] = mock_process_order
+        self.mock_pipeline.nodes["advisor"] = mock_process_inquiry
+        self.mock_pipeline.nodes["composer"] = mock_compose_response
 
     def run_pipeline(self, state_input):
         """Helper to run the pipeline with a given state."""

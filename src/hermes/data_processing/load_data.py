@@ -12,6 +12,7 @@ _products_df: Optional[pd.DataFrame] = None
 vector_store: Optional[Collection] = None
 # emails_df can also be made global here if widely needed, or loaded specifically by main.py
 
+
 def read_data_from_gsheet(document_id: str, sheet_name: str) -> pd.DataFrame:
     """Reads a sheet from a Google Spreadsheet into a pandas DataFrame."""
     export_link = f"https://docs.google.com/spreadsheets/d/{document_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
@@ -29,18 +30,18 @@ def load_emails_df(spreadsheet_id: str = INPUT_SPREADSHEET_ID_DEFAULT) -> pd.Dat
 def load_products_df(spreadsheet_id: str = INPUT_SPREADSHEET_ID_DEFAULT) -> pd.DataFrame:
     """
     Loads the products DataFrame from Google Sheets with memoization.
-    
+
     Args:
         spreadsheet_id: The Google Spreadsheet ID
-        
+
     Returns:
         DataFrame with product data
     """
     global _products_df
-    
+
     if _products_df is None:
         print(f"Loading products from spreadsheet ID: {spreadsheet_id}")
         _products_df = read_data_from_gsheet(spreadsheet_id, "products")
         print(f"Loaded {len(_products_df)} products")
-    
+
     return _products_df

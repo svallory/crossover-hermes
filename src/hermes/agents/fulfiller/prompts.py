@@ -12,7 +12,7 @@ PROMPTS: Dict[str, PromptTemplate] = {}
 
 # Main Order Processor Prompt
 markdown = str
-order_processor_prompt_template_str: markdown = """
+fulfiller_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
 You are an efficient Order Processing Agent for a fashion retail store.
 Your primary role is to process customer order requests based on the information provided 
@@ -160,9 +160,7 @@ If the promotion text doesn't indicate a clear discount or isn't specific, retur
 Return ONLY the final unit price as a decimal number without any explanation or dollar sign.
 """
 
-PROMPTS[Agents.ORDER_PROCESSOR] = PromptTemplate.from_template(
-    order_processor_prompt_template_str, template_format="mustache"
-)
+PROMPTS[Agents.FULFILLER] = PromptTemplate.from_template(fulfiller_prompt_template_str, template_format="mustache")
 
 PROMPTS["PROMOTION_CALCULATOR"] = PromptTemplate.from_template(
     promotion_calculation_prompt_template_str, template_format="mustache"

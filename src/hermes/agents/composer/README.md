@@ -24,10 +24,10 @@ The primary purpose of this agent is to:
 The Response Composer should be the final agent in the pipeline, after the Email Analyzer and any applicable domain-specific agents (Inquiry Responder, Order Processor).
 
 ```python
-from hermes.agents.response_composer import compose_response, ResponseComposerInput
+from src.hermes.agents.composer import compose_response, ComposerInput
 
 # Create input from previous agent outputs
-composer_input = ResponseComposerInput(
+composer_input = ComposerInput(
     email_analysis=email_analysis_result,
     inquiry_response=inquiry_response,  # Optional
     order_result=order_result  # Optional

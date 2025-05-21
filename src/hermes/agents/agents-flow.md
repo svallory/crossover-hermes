@@ -2,7 +2,7 @@
 
 This directory contains the implementation of the four specialized agents that form the Hermes system:
 
-## 1. Email Analyzer Agent (email_analyzer.py)
+## 1. Email Analyzer Agent (classifier.py)
 
 This agent serves as the entry point for all customer emails. It:
 
@@ -18,7 +18,7 @@ This agent serves as the entry point for all customer emails. It:
 
 The Email Analyzer establishes the context for all subsequent processing by producing a comprehensive `EmailAnalysisResult` that includes all product mentions found across all segments.
 
-## 2. Product Resolver Agent (product_resolver.py)
+## 2. Product Resolver Agent (stockkeeper.py)
 
 This agent takes product mentions from the Email Analyzer and converts them to actual catalog products. It:
 
@@ -32,7 +32,7 @@ This agent takes product mentions from the Email Analyzer and converts them to a
 
 The Product Resolver produces a `ResolvedProductsOutput` containing successfully resolved products and any unresolved mentions.
 
-## 3. Order Processor Agent (order_processor.py)
+## 3. Order Processor Agent (fulfiller.py)
 
 This agent processes emails containing order requests. It:
 
@@ -47,7 +47,7 @@ This agent processes emails containing order requests. It:
 
 The Order Processor produces a detailed `OrderProcessingResult` with information about the order's status and any issues encountered.
 
-## 4. Inquiry Responder Agent (inquiry_responder.py)
+## 4. Inquiry Responder Agent (advisor.py)
 
 This agent handles emails containing product inquiries. It:
 - Uses resolved products from the Product Resolver
@@ -59,7 +59,7 @@ This agent handles emails containing product inquiries. It:
 
 The Inquiry Responder produces an `InquiriesResponse` containing the answers for each inquiry.
 
-## 5. Response Composer Agent (response_composer.py)
+## 5. Response Composer Agent (composer.py)
 
 This agent takes the outputs from previous agents and creates the final response. It:
 - Adapts tone and style to match the customer's communication
@@ -90,18 +90,18 @@ The workflow is defined by the `hermes_workflow` function, which orchestrates th
 flowchart TD
     Start([Start])
     Analyze[Email Analyzer]
-    ProductResolver[Product Resolver]
+    Stockkeeper[Product Resolver]
     Order[Order Processor]
     Inquiry[Inquiry Responder]
     Compose[Response Composer]
     End([End])
 
     Start --> Analyze
-    Analyze -->|Extract Product Mentions| ProductResolver
-    ProductResolver -->|Has Order & Inquiry| Order & Inquiry
-    ProductResolver -->|Has Order Only| Order
-    ProductResolver -->|Has Inquiry Only| Inquiry
-    ProductResolver -->|No Order/Inquiry| Compose
+    Analyze -->|Extract Product Mentions| Stockkeeper
+    Stockkeeper -->|Has Order & Inquiry| Order & Inquiry
+    Stockkeeper -->|Has Order Only| Order
+    Stockkeeper -->|Has Inquiry Only| Inquiry
+    Stockkeeper -->|No Order/Inquiry| Compose
     Order --> Compose
     Inquiry --> Compose
     Compose --> End

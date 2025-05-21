@@ -18,7 +18,7 @@ The Order Processor is responsible for handling customer order requests extracte
 ## Usage Example
 
 ```python
-from src.hermes.agents.order_processor import process_order, ProcessOrderInput
+from src.hermes.agents.fulfiller import process_order, ProcessOrderInput
 
 # Create input from email analysis
 input_data = ProcessOrderInput(

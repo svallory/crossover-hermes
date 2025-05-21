@@ -111,40 +111,40 @@ async def evaluate_master(
         # Extract relevant data from workflow state
         email_subject = workflow_state.get("email_subject", "")
         email_message = workflow_state.get("email_message", "")
-        email_analyzer_output = workflow_state.get("email_analysis", {})
-        order_processor_output = workflow_state.get("order_result", {})
-        inquiry_responder_output = workflow_state.get("inquiry_response", {})
-        response_composer_output = workflow_state.get("final_response", {})
+        classifier_output = workflow_state.get("email_analysis", {})
+        fulfiller_output = workflow_state.get("order_result", {})
+        advisor_output = workflow_state.get("inquiry_response", {})
+        composer_output = workflow_state.get("final_response", {})
 
         # Convert non-serializable objects to serializable dictionaries
-        email_analyzer_dict = convert_to_serializable(email_analyzer_output)
-        order_processor_dict = convert_to_serializable(order_processor_output)
-        inquiry_responder_dict = convert_to_serializable(inquiry_responder_output)
-        response_composer_dict = convert_to_serializable(response_composer_output)
+        classifier_dict = convert_to_serializable(classifier_output)
+        fulfiller_dict = convert_to_serializable(fulfiller_output)
+        advisor_dict = convert_to_serializable(advisor_output)
+        composer_dict = convert_to_serializable(composer_output)
 
         # Determine which components were executed
-        has_order_processing = order_processor_output is not None
-        has_inquiry_response = inquiry_responder_output is not None
+        has_order_processing = fulfiller_output is not None
+        has_inquiry_response = advisor_output is not None
 
         # Create comprehensive evaluator with all criteria
         criteria = {
             # Email Analyzer criteria
-            "email_analyzer_intent": "Did the agent correctly identify the primary intent of the email?",
-            "email_analyzer_extraction": "Did the agent extract all relevant entities and details?",
-            "email_analyzer_segmentation": "Did the agent properly segment the email?",
+            "classifier_intent": "Did the agent correctly identify the primary intent of the email?",
+            "classifier_extraction": "Did the agent extract all relevant entities and details?",
+            "classifier_segmentation": "Did the agent properly segment the email?",
             # Order Processor criteria (if applicable)
-            "order_processor_identification": "Did the agent correctly identify all ordered items?",
-            "order_processor_inventory": "Did the agent correctly handle inventory checks?",
-            "order_processor_response": "Did the agent provide appropriate order status info?",
+            "fulfiller_identification": "Did the agent correctly identify all ordered items?",
+            "fulfiller_inventory": "Did the agent correctly handle inventory checks?",
+            "fulfiller_response": "Did the agent provide appropriate order status info?",
             # Inquiry Responder criteria (if applicable)
-            "inquiry_responder_questions": "Did the agent correctly identify all customer questions?",
-            "inquiry_responder_accuracy": "Are the answers factually correct based on available information?",
-            "inquiry_responder_completeness": "Did the agent address all aspects of the questions?",
+            "advisor_questions": "Did the agent correctly identify all customer questions?",
+            "advisor_accuracy": "Are the answers factually correct based on available information?",
+            "advisor_completeness": "Did the agent address all aspects of the questions?",
             # Response Composer criteria
-            "response_composer_tone": "Is the tone suitable for the customer's situation?",
-            "response_composer_completeness": "Does the response address all aspects of the customer's email?",
-            "response_composer_clarity": "Is the response clear, well-structured, and professional?",
-            "response_composer_cta": "Does it include appropriate next steps?",
+            "composer_tone": "Is the tone suitable for the customer's situation?",
+            "composer_completeness": "Does the response address all aspects of the customer's email?",
+            "composer_clarity": "Is the response clear, well-structured, and professional?",
+            "composer_cta": "Does it include appropriate next steps?",
             # End-to-End criteria
             "end_to_end_understanding": "Did the system understand the customer's request and situation?",
             "end_to_end_accuracy": "Is the response factually correct and appropriate?",
@@ -167,15 +167,13 @@ async def evaluate_master(
         evaluation_input = {
             "email_subject": email_subject,
             "email_message": email_message,
-            "email_analysis": json.dumps(email_analyzer_dict, indent=2),
+            "email_analysis": json.dumps(classifier_dict, indent=2),
             "has_order_processing": has_order_processing,
-            "order_result": json.dumps(order_processor_dict, indent=2) if has_order_processing else "Not applicable",
+            "order_result": json.dumps(fulfiller_dict, indent=2) if has_order_processing else "Not applicable",
             "has_inquiry_response": has_inquiry_response,
-            "inquiry_response": json.dumps(inquiry_responder_dict, indent=2)
-            if has_inquiry_response
-            else "Not applicable",
-            "response_subject": response_composer_dict.get("subject", ""),
-            "response_body": response_composer_dict.get("response_body", ""),
+            "inquiry_response": json.dumps(advisor_dict, indent=2) if has_inquiry_response else "Not applicable",
+            "response_subject": composer_dict.get("subject", ""),
+            "response_body": composer_dict.get("response_body", ""),
         }
 
         # Run evaluation
@@ -223,34 +221,34 @@ async def evaluate_master(
 
         # Organize results by component
         organized_results = {
-            "email_analyzer": {
-                "intent_accuracy": eval_result.get("email_analyzer_intent", 0),
-                "information_extraction": eval_result.get("email_analyzer_extraction", 0),
-                "segmentation_quality": eval_result.get("email_analyzer_segmentation", 0),
-                "reasoning": eval_result.get("email_analyzer_intent_reasoning", ""),
+            "classifier": {
+                "intent_accuracy": eval_result.get("classifier_intent", 0),
+                "information_extraction": eval_result.get("classifier_extraction", 0),
+                "segmentation_quality": eval_result.get("classifier_segmentation", 0),
+                "reasoning": eval_result.get("classifier_intent_reasoning", ""),
             },
-            "order_processor": {
-                "order_identification": eval_result.get("order_processor_identification", 0),
-                "inventory_handling": eval_result.get("order_processor_inventory", 0),
-                "response_appropriateness": eval_result.get("order_processor_response", 0),
-                "reasoning": eval_result.get("order_processor_identification_reasoning", ""),
+            "fulfiller": {
+                "order_identification": eval_result.get("fulfiller_identification", 0),
+                "inventory_handling": eval_result.get("fulfiller_inventory", 0),
+                "response_appropriateness": eval_result.get("fulfiller_response", 0),
+                "reasoning": eval_result.get("fulfiller_identification_reasoning", ""),
             }
             if has_order_processing
             else None,
-            "inquiry_responder": {
-                "question_identification": eval_result.get("inquiry_responder_questions", 0),
-                "answer_accuracy": eval_result.get("inquiry_responder_accuracy", 0),
-                "answer_completeness": eval_result.get("inquiry_responder_completeness", 0),
-                "reasoning": eval_result.get("inquiry_responder_questions_reasoning", ""),
+            "advisor": {
+                "question_identification": eval_result.get("advisor_questions", 0),
+                "answer_accuracy": eval_result.get("advisor_accuracy", 0),
+                "answer_completeness": eval_result.get("advisor_completeness", 0),
+                "reasoning": eval_result.get("advisor_questions_reasoning", ""),
             }
             if has_inquiry_response
             else None,
-            "response_composer": {
-                "tone_appropriateness": eval_result.get("response_composer_tone", 0),
-                "response_completeness": eval_result.get("response_composer_completeness", 0),
-                "clarity_professionalism": eval_result.get("response_composer_clarity", 0),
-                "call_to_action": eval_result.get("response_composer_cta", 0),
-                "reasoning": eval_result.get("response_composer_tone_reasoning", ""),
+            "composer": {
+                "tone_appropriateness": eval_result.get("composer_tone", 0),
+                "response_completeness": eval_result.get("composer_completeness", 0),
+                "clarity_professionalism": eval_result.get("composer_clarity", 0),
+                "call_to_action": eval_result.get("composer_cta", 0),
+                "reasoning": eval_result.get("composer_tone_reasoning", ""),
             },
             "end_to_end": {
                 "understanding": eval_result.get("end_to_end_understanding", 0),

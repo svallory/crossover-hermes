@@ -52,15 +52,15 @@ The evaluation results are formatted to maintain compatibility with the existing
 
 ```python
 {
-    "email_analyzer": {
+    "classifier": {
         "intent_accuracy": 8,
         "information_extraction": 9,
         "segmentation_quality": 7,
         "reasoning": "..."
     },
-    "order_processor": { ... },
-    "inquiry_responder": { ... },
-    "response_composer": { ... },
+    "fulfiller": { ... },
+    "advisor": { ... },
+    "composer": { ... },
     "end_to_end": { ... }
 }
 ```

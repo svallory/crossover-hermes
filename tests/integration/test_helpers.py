@@ -150,7 +150,7 @@ def save_to_consolidated_yaml(email_id: str, stage: str, data: Any, is_input: bo
         email_results[email_id] = {"input": {}, "output": {}}
 
     # If it's email analyzer input, extract the raw email details for top-level input
-    if is_input and stage == "email_analyzer":
+    if is_input and stage == "classifier":
         if isinstance(data, dict):
             email_results[email_id]["input"] = {
                 "email_id": data.get("email_id", email_id),
@@ -253,11 +253,11 @@ class OutputSaver:
 
             # Check output type and handle it appropriately
             from src.hermes.agents.advisor import (
-                InquiryResponderOutput,
+                AdvisorOutput,
                 InquiryAnswers,
             )
 
-            if isinstance(output, InquiryResponderOutput):
+            if isinstance(output, AdvisorOutput):
                 save_to_consolidated_yaml(
                     email_id=email_id,
                     stage="inquiry-responder",
@@ -363,7 +363,7 @@ def patch_agent_functions():
     from src.hermes.agents.classifier import analyze_email
     from src.hermes.agents.fulfiller import process_order
     from src.hermes.agents.advisor import respond_to_inquiry
-    from src.hermes.agents.response_composer import compose_response
+    from src.hermes.agents.composer import compose_response
 
     original_funcs = {
         "analyze_email": analyze_email,
@@ -426,18 +426,18 @@ def apply_patches():
     Returns:
         A dictionary of original functions that can be restored after testing.
     """
-    import src.hermes.agents.classifier as email_analyzer_module
-    import src.hermes.agents.fulfiller as order_processor_module
-    import src.hermes.agents.advisor as inquiry_responder_module
-    import src.hermes.agents.response_composer as response_composer_module
+    import src.hermes.agents.classifier as classifier_module
+    import src.hermes.agents.fulfiller as fulfiller_module
+    import src.hermes.agents.advisor as advisor_module
+    import src.hermes.agents.composer as composer_module
 
     original_funcs, patched_funcs = patch_agent_functions()
 
     # Apply to relevant modules
-    email_analyzer_module.agent = patched_funcs["analyze_email"]
-    order_processor_module.process_order = patched_funcs["process_order"]
-    inquiry_responder_module.agent = patched_funcs["respond_to_inquiry"]
-    response_composer_module.compose_response = patched_funcs["compose_response"]
+    classifier_module.agent = patched_funcs["analyze_email"]
+    fulfiller_module.agent = patched_funcs["process_order"]
+    advisor_module.agent = patched_funcs["respond_to_inquiry"]
+    composer_module.agent = patched_funcs["compose_response"]
 
     return original_funcs
 
@@ -449,16 +449,16 @@ def restore_patches(original_funcs):
     Args:
         original_funcs: Dictionary of original functions from apply_patches()
     """
-    import src.hermes.agents.classifier as email_analyzer_module
-    import src.hermes.agents.fulfiller as order_processor_module
-    import src.hermes.agents.advisor as inquiry_responder_module
-    import src.hermes.agents.response_composer as response_composer_module
+    import src.hermes.agents.classifier as classifier_module
+    import src.hermes.agents.fulfiller as fulfiller_module
+    import src.hermes.agents.advisor as advisor_module
+    import src.hermes.agents.composer as composer_module
 
     # Restore original functions
-    email_analyzer_module.agent = original_funcs["analyze_email"]
-    order_processor_module.process_order = original_funcs["process_order"]
-    inquiry_responder_module.agent = original_funcs["respond_to_inquiry"]
-    response_composer_module.compose_response = original_funcs["compose_response"]
+    classifier_module.agent = original_funcs["analyze_email"]
+    fulfiller_module.agent = original_funcs["process_order"]
+    advisor_module.agent = original_funcs["respond_to_inquiry"]
+    composer_module.agent = original_funcs["compose_response"]
 
     # Clear the results dict
     email_results.clear()

@@ -11,7 +11,7 @@ from src.hermes.model.enums import Agents
 PROMPTS: Dict[str, PromptTemplate] = {}
 
 # Main Response Composer Prompt
-response_composer_prompt_template_str = """
+composer_prompt_template_str = """
 ### SYSTEM INSTRUCTIONS
 You are an expert AI system for a high-end fashion retail store called "Hermes", focused on composing natural, personalized customer email responses.
 Your task is to create the final email response that will be sent to the customer, combining information from all previous agents.
@@ -106,8 +106,8 @@ ProcessOrderResult:
 Please generate the ComposedResponse object with the final email to be sent to the customer.
 """
 
-PROMPTS[Agents.RESPONSE_COMPOSER] = PromptTemplate.from_template(
-    response_composer_prompt_template_str,
+PROMPTS[Agents.COMPOSER] = PromptTemplate.from_template(
+    composer_prompt_template_str,
     template_format="mustache",
     partial_variables={
         "inquiry_response": "The customer had no questions",

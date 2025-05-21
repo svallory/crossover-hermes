@@ -12,7 +12,7 @@ PROMPTS: Dict[str, PromptTemplate] = {}
 
 # Main Inquiry Responder Prompt
 markdown = str
-inquiry_responder_prompt_template_str: markdown = """
+advisor_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
 You are an expert AI system for a high-end fashion retail store, focused on extracting and answering product inquiries.
 Your task is to analyze a customer's email, extract questions, and provide objective, factual answers.
@@ -75,9 +75,7 @@ Retrieved Products Context:
 Please generate the InquiryResponse JSON object with factual answers to customer questions, using the provided context.
 """
 
-PROMPTS[Agents.INQUIRY_RESPONDER] = PromptTemplate.from_template(
-    inquiry_responder_prompt_template_str, template_format="mustache"
-)
+PROMPTS[Agents.ADVISOR] = PromptTemplate.from_template(advisor_prompt_template_str, template_format="mustache")
 
 
 def get_prompt(key: Agents) -> PromptTemplate:

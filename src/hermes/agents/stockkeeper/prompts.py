@@ -82,8 +82,8 @@ Respond with a JSON array of deduplicated product mentions. For each mention, in
 """
 
 # Create PromptTemplate objects and add them to the PROMPTS dictionary
-PROMPTS[f"{Agents.PRODUCT_RESOLVER}_disambiguation"] = PromptTemplate.from_template(DISAMBIGUATION_PROMPT_STR)
-PROMPTS[f"{Agents.PRODUCT_RESOLVER}_deduplication"] = PromptTemplate.from_template(DEDUPLICATION_PROMPT_STR)
+PROMPTS[f"{Agents.STOCKKEEPER}_disambiguation"] = PromptTemplate.from_template(DISAMBIGUATION_PROMPT_STR)
+PROMPTS[f"{Agents.STOCKKEEPER}_deduplication"] = PromptTemplate.from_template(DEDUPLICATION_PROMPT_STR)
 
 
 def get_prompt(key: str) -> PromptTemplate:
@@ -101,4 +101,4 @@ def get_prompt(key: str) -> PromptTemplate:
     """
     if key not in PROMPTS:
         raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")
-    return PROMPTS[key] 
+    return PROMPTS[key]

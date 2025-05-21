@@ -26,7 +26,7 @@ COLLECTION_NAME = "products_catalog"
 # Batch size for processing large catalogs
 BATCH_SIZE = 500
 
-# Embedding model dimensions (text-embedding-3-small is 1536, 
+# Embedding model dimensions (text-embedding-3-small is 1536,
 # text-embedding-ada-002 is 1536, update as needed)
 EMBEDDING_DIMENSIONS = {
     "text-embedding-3-small": 1536,
@@ -34,7 +34,8 @@ EMBEDDING_DIMENSIONS = {
     "text-embedding-3-large": 3072,
 }
 
-class VectorStore(metaclass=SingletonMeta['VectorStore']):
+
+class VectorStore(metaclass=SingletonMeta["VectorStore"]):
     """Singleton class for managing vector store operations."""
 
     _collection = None
@@ -42,7 +43,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
     def __init__(self, hermes_config: HermesConfig = HermesConfig()):
         """
         Initialize the VectorStore with a configuration.
-        
+
         Args:
             hermes_config: Hermes configuration with API keys and paths
         """
@@ -75,7 +76,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
         try:
             print("Initializing vector store...")
             storage_path = hermes_config.vector_store_path
-                  
+
             # Initialize ChromaDB client
             if storage_path == IN_MEMORY_SENTINEL:
                 chroma_client = chromadb.EphemeralClient()
@@ -85,7 +86,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
                 os.makedirs(storage_path, exist_ok=True)
                 chroma_client = chromadb.PersistentClient(path=storage_path)
                 print(f"Using persistent ChromaDB at {storage_path}")
-            
+
             # For in-memory mode, always create a new store
             if storage_path == IN_MEMORY_SENTINEL:
                 self._collection = self._create_vector_store(
@@ -96,7 +97,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
 
             # For persistent storage, check if database file exists
             db_file = os.path.join(storage_path, "chroma.sqlite3")
-            
+
             if os.path.exists(db_file):
                 print(f"Found existing ChromaDB at {db_file}")
                 try:
@@ -107,12 +108,12 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
                             api_base=hermes_config.openai_base_url,
                             model_name=hermes_config.embedding_model_name,
                             dimensions=EMBEDDING_DIMENSIONS.get(hermes_config.embedding_model_name, 1536),
-                        ) # type: ignore
+                        ),  # type: ignore
                     )
                     print(f"Successfully loaded existing vector store with {self._collection.count()} items.")
                 except Exception as e:
                     print(f"Error loading existing vector store: {e}")
-                    print(f"Creating new vector store instead...")
+                    print("Creating new vector store instead...")
                     self._collection = self._create_vector_store(
                         chroma_client=chroma_client,
                         hermes_config=hermes_config,
@@ -151,37 +152,37 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
         """
         # Load product data
         products_df = load_products_df(hermes_config.input_spreadsheet_id)
-        
+
         # Get or create the collection
         collection = chroma_client.get_or_create_collection(
-            name=collection_name, 
+            name=collection_name,
             embedding_function=OpenAIEmbeddingFunction(
                 api_key=hermes_config.openai_api_key,
                 api_base=hermes_config.openai_base_url,
                 model_name=hermes_config.embedding_model_name,
                 dimensions=EMBEDDING_DIMENSIONS.get(hermes_config.embedding_model_name, 1536),
-            ) # type: ignore
+            ),  # type: ignore
         )
-        
+
         # Process data in batches to handle large datasets
         total_rows = len(products_df)
         batch_count = (total_rows // BATCH_SIZE) + (1 if total_rows % BATCH_SIZE > 0 else 0)
-        
+
         print(f"Processing {total_rows} products in {batch_count} batches")
-        
+
         for batch_idx in range(batch_count):
             start_idx = batch_idx * BATCH_SIZE
             end_idx = min((batch_idx + 1) * BATCH_SIZE, total_rows)
-            
-            print(f"Processing batch {batch_idx+1}/{batch_count} (records {start_idx}-{end_idx})")
-            
+
+            print(f"Processing batch {batch_idx + 1}/{batch_count} (records {start_idx}-{end_idx})")
+
             batch_df = products_df.iloc[start_idx:end_idx]
-            
+
             # Prepare data for ChromaDB
             documents = []
             metadatas = []
             ids = []
-            
+
             for _, row in batch_df.iterrows():
                 ids.append(str(row["product_id"]))
                 documents.append(row.to_json())
@@ -189,7 +190,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
 
             # Add batch to the collection
             collection.upsert(documents=documents, metadatas=metadatas, ids=ids)
-            
+
         return collection
 
     def search_products_by_description(
@@ -213,9 +214,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
         """
         # Make sure we have a vector store
         if self._collection is None:
-            raise ValueError(
-                "Vector store has not been initialized yet."
-            )
+            raise ValueError("Vector store has not been initialized yet.")
 
         # Prepare filter criteria
         filter_criteria = {}
@@ -257,13 +256,22 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
                 break
             if season_str:
                 seasons_list.append(Season(season_str))
-        
+
         # Create additional metadata dict if any extra fields exist
         additional_metadata = {}
         for key, value in metadata.items():
-            if key not in ["product_id", "name", "description", "category", "product_type", "stock", "seasons", "price"]:
+            if key not in [
+                "product_id",
+                "name",
+                "description",
+                "category",
+                "product_type",
+                "stock",
+                "seasons",
+                "price",
+            ]:
                 additional_metadata[key] = value
-        
+
         # Create and return the Product
         return Product(
             product_id=metadata["product_id"],
@@ -296,9 +304,7 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
         """
         # Make sure we have a vector store
         if self._collection is None:
-            raise ValueError(
-                "Vector store has not been initialized yet."
-            )
+            raise ValueError("Vector store has not been initialized yet.")
 
         # Query the vector store
         results = self._collection.query(
@@ -309,14 +315,15 @@ class VectorStore(metaclass=SingletonMeta['VectorStore']):
 
         # Process results
         items_with_scores = []
-        if (results and "metadatas" in results and results["metadatas"] is not None and 
-                "distances" in results and results["distances"] is not None):
-            for i, (metadata_list, distance_list) in enumerate(
-                zip(results["metadatas"], results["distances"])
-            ):
-                for j, (metadata, distance) in enumerate(
-                    zip(metadata_list, distance_list)
-                ):
+        if (
+            results
+            and "metadatas" in results
+            and results["metadatas"] is not None
+            and "distances" in results
+            and results["distances"] is not None
+        ):
+            for i, (metadata_list, distance_list) in enumerate(zip(results["metadatas"], results["distances"])):
+                for j, (metadata, distance) in enumerate(zip(metadata_list, distance_list)):
                     # Convert distance to similarity score (1.0 = identical, 0.0 = completely different)
                     score = 1.0 - distance  # Assuming cosine distance
                     items_with_scores.append((cast(Dict[str, Any], metadata), score))

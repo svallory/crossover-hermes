@@ -8,7 +8,7 @@ from typing import List, Dict, Any, Optional
 # Apply nest_asyncio for Jupyter compatibility
 import nest_asyncio
 
-from src.hermes.agents.classifier.models import EmailAnalyzerInput
+from src.hermes.agents.classifier.models import ClassifierInput
 from src.hermes.agents.workflow.states import OverallState
 from src.hermes.agents.workflow.workflow import run_workflow
 from src.hermes.config import HermesConfig
@@ -38,23 +38,23 @@ async def dataframe_to_csv_async(df: pd.DataFrame, path: str, index: bool = True
 async def save_workflow_result_as_yaml(email_id: str, workflow_state: OverallState) -> None:
     """
     Save the workflow result for a given email as a YAML file.
-    
+
     Args:
         email_id: The ID of the email
         workflow_state: The final state of the workflow
     """
     # Create results directory if it doesn't exist
     await makedirs_async(RESULTS_DIR, exist_ok=True)
-    
+
     # Define the file path
     file_path = os.path.join(RESULTS_DIR, f"{email_id}.yml")
-    
+
     # Convert workflow state to a serializable dict
     if hasattr(workflow_state, "model_dump"):
         state_dict = workflow_state.model_dump()
     else:
         state_dict = workflow_state
-    
+
     # Write the YAML file
     try:
         # Use a simpler approach without async context manager
@@ -67,7 +67,7 @@ async def save_workflow_result_as_yaml(email_id: str, workflow_state: OverallSta
 
 def write_yaml_to_file(file_path: str, yaml_content: str) -> None:
     """Helper function to write YAML content to a file."""
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         f.write(yaml_content)
 
 
@@ -100,18 +100,15 @@ async def process_emails(
         print(f"\nProcessing email {i + 1}/{len(emails_to_process)}: ID {email_id}")
 
         try:
-            # Create EmailAnalyzerInput from email_data
-            input_state = EmailAnalyzerInput(
+            # Create ClassifierInput from email_data
+            input_state = ClassifierInput(
                 email_id=email_data.get("email_id", f"unknown_email_{i}"),
                 subject=email_data.get("subject", ""),
                 message=email_data.get("message", ""),
             )
 
             # Execute the LangGraph workflow
-            workflow_state: OverallState = await run_workflow(
-                input_state=input_state, 
-                hermes_config=config_obj
-            )
+            workflow_state: OverallState = await run_workflow(input_state=input_state, hermes_config=config_obj)
 
             # Save the workflow result as YAML file
             await save_workflow_result_as_yaml(email_id, workflow_state)
@@ -125,14 +122,14 @@ async def process_emails(
                 "response": None,
             }
 
-            # Extract classification from email_analyzer output
-            if workflow_state.email_analyzer and workflow_state.email_analyzer.email_analysis:
-                result["classification"] = workflow_state.email_analyzer.email_analysis.primary_intent
+            # Extract classification from classifier output
+            if workflow_state.classifier and workflow_state.classifier.email_analysis:
+                result["classification"] = workflow_state.classifier.email_analysis.primary_intent
                 print(f"  → Classification: {result['classification']}")
 
-            # Extract order status from order_processor output
-            if workflow_state.order_processor and workflow_state.order_processor.order_result:
-                order_result = workflow_state.order_processor.order_result
+            # Extract order status from fulfiller output
+            if workflow_state.fulfiller and workflow_state.fulfiller.order_result:
+                order_result = workflow_state.fulfiller.order_result
                 for item in order_result.ordered_items:
                     order_status = {
                         "email ID": email_id,
@@ -143,9 +140,9 @@ async def process_emails(
                     result["order_status"].append(order_status)
                 print(f"  → Processed {len(result['order_status'])} order items")
 
-            # Extract response from response_composer output
-            if workflow_state.response_composer:
-                result["response"] = workflow_state.response_composer.composed_response.response_body
+            # Extract response from composer output
+            if workflow_state.composer:
+                result["response"] = workflow_state.composer.composed_response.response_body
                 print(f"  → Generated response: {len(str(result['response']))} characters")
 
             # Store in results dictionary
@@ -176,33 +173,33 @@ async def create_output_csv(
     """Create CSV files with the assignment output."""
     # Create output directory if it doesn't exist
     await makedirs_async(output_dir, exist_ok=True)
-    
+
     # Define file paths
     email_classification_path = os.path.join(output_dir, "email-classification.csv")
     order_status_path = os.path.join(output_dir, "order-status.csv")
     order_response_path = os.path.join(output_dir, "order-response.csv")
     inquiry_response_path = os.path.join(output_dir, "inquiry-response.csv")
-    
+
     # Ensure dataframes have the correct column order
     email_classification_df = email_classification_df[["email ID", "category"]]
     order_status_df = order_status_df[["email ID", "product ID", "quantity", "status"]]
     order_response_df = order_response_df[["email ID", "response"]]
     inquiry_response_df = inquiry_response_df[["email ID", "response"]]
-    
+
     # Save DataFrames to CSV files with all values quoted
     await dataframe_to_csv_async(email_classification_df, email_classification_path, index=False)
     await dataframe_to_csv_async(order_status_df, order_status_path, index=False)
     await dataframe_to_csv_async(order_response_df, order_response_path, index=False)
     await dataframe_to_csv_async(inquiry_response_df, inquiry_response_path, index=False)
-    
+
     print(f"CSV files saved to {output_dir}")
-    
+
     # Return file paths
     return {
         "email-classification": email_classification_path,
         "order-status": order_status_path,
         "order-response": order_response_path,
-        "inquiry-response": inquiry_response_path
+        "inquiry-response": inquiry_response_path,
     }
 
 
@@ -229,7 +226,7 @@ async def create_output_spreadsheet(
     output_document = gc.create(output_name)
 
     # Create and populate sheets with correct column structure
-    
+
     # Email classification sheet
     email_classification_sheet = output_document.add_worksheet(title="email-classification", rows=50, cols=2)
     email_classification_sheet.update([["email ID", "category"]], "A1:B1")
@@ -271,11 +268,7 @@ async def create_output_spreadsheet(
     return shareable_link
 
 
-async def main(
-    spreadsheet_id: str,
-    use_csv_output: bool = False,
-    processing_limit: Optional[int] = None
-) -> str:
+async def main(spreadsheet_id: str, use_csv_output: bool = False, processing_limit: Optional[int] = None) -> str:
     """
     Main function implementing the assignment requirements.
 
@@ -315,58 +308,51 @@ async def main(
     )
 
     print(f"\nProcessed {len(processing_results)} emails successfully.")
-    
+
     # 5. Prepare DataFrames for the output
     email_classification_data = []
     order_status_data = []
     order_response_data = []
     inquiry_response_data = []
-    
+
     for email_id, result in processing_results.items():
         # Email classification data - ensure we have the proper category labels
         classification = result["classification"]
         if classification and classification in ["order request", "product inquiry"]:
-            email_classification_data.append({
-                "email ID": email_id,
-                "category": classification
-            })
-        
+            email_classification_data.append({"email ID": email_id, "category": classification})
+
         # Order status data - ensure we're capturing all required fields
         if classification == "order request" and result["order_status"]:
             for order_status in result["order_status"]:
-                order_status_data.append({
-                    "email ID": email_id,
-                    "product ID": order_status["product ID"],
-                    "quantity": order_status["quantity"],
-                    "status": order_status["status"]
-                })
-        
+                order_status_data.append(
+                    {
+                        "email ID": email_id,
+                        "product ID": order_status["product ID"],
+                        "quantity": order_status["quantity"],
+                        "status": order_status["status"],
+                    }
+                )
+
         # Determine which response sheet to populate based on classification
         if result["response"]:
             if classification == "order request":
-                order_response_data.append({
-                    "email ID": email_id,
-                    "response": result["response"]
-                })
+                order_response_data.append({"email ID": email_id, "response": result["response"]})
             elif classification == "product inquiry":
-                inquiry_response_data.append({
-                    "email ID": email_id,
-                    "response": result["response"]
-                })
-    
+                inquiry_response_data.append({"email ID": email_id, "response": result["response"]})
+
     # Create DataFrames with the required column names
     email_classification_df = pd.DataFrame(email_classification_data, columns=["email ID", "category"])
     order_status_df = pd.DataFrame(order_status_data, columns=["email ID", "product ID", "quantity", "status"])
     order_response_df = pd.DataFrame(order_response_data, columns=["email ID", "response"])
     inquiry_response_df = pd.DataFrame(inquiry_response_data, columns=["email ID", "response"])
-    
+
     # 6. Create and populate the output
     if use_csv_output:
-        output_paths = await create_output_csv(
+        await create_output_csv(
             email_classification_df=email_classification_df,
             order_status_df=order_status_df,
             order_response_df=order_response_df,
-            inquiry_response_df=inquiry_response_df
+            inquiry_response_df=inquiry_response_df,
         )
         return f"CSV files saved to: {OUTPUT_DIR}"
     else:
@@ -374,7 +360,7 @@ async def main(
             email_classification_df=email_classification_df,
             order_status_df=order_status_df,
             order_response_df=order_response_df,
-            inquiry_response_df=inquiry_response_df
+            inquiry_response_df=inquiry_response_df,
         )
         return shareable_link
 
@@ -382,11 +368,11 @@ async def main(
 if __name__ == "__main__":
     # For command-line execution, but this code will primarily be used in a notebook
     import sys
-    
+
     # Default values
     input_spreadsheet_id = "14fKHsblfqZfWj3iAaM2oA51TlYfQlFT4WKo52fVaQ9U"  # From assignment
     use_csv = "--csv" in sys.argv or os.getenv("OUTPUT_CSV") is not None
-    
+
     # Get limit from command-line argument or environment variable
     limit = None
     for arg in sys.argv:
@@ -399,10 +385,6 @@ if __name__ == "__main__":
     # Try to get limit from environment variable if not set by command-line
     if limit is None:
         limit = int(os.getenv("HERMES_PROCESSING_LIMIT", 0))
-        
-    result = asyncio.run(main(
-        spreadsheet_id=input_spreadsheet_id,
-        use_csv_output=use_csv,
-        processing_limit=limit
-    ))
+
+    result = asyncio.run(main(spreadsheet_id=input_spreadsheet_id, use_csv_output=use_csv, processing_limit=limit))
     print(f"Final result: {result}")

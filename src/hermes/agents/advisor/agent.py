@@ -10,8 +10,8 @@ from langsmith import traceable
 
 from .models import (
     InquiryAnswers,
-    InquiryResponderInput,
-    InquiryResponderOutput,
+    AdvisorInput,
+    AdvisorOutput,
 )
 from .prompts import get_prompt
 from ...config import HermesConfig
@@ -26,21 +26,21 @@ from ...data_processing.vector_store import VectorStore
 def format_resolved_products(products: List[Product]) -> str:
     """
     Format resolved products into a string for LLM context.
-    
+
     Args:
         products: A list of resolved Product objects
-        
+
     Returns:
         A formatted string containing all product information
     """
     if not products:
         return "No resolved products available."
-    
+
     formatted_products = []
     for product in products:
         # Format seasons correctly
         seasons_str = ", ".join([s if isinstance(s, str) else s.value for s in product.seasons])
-        
+
         # Format product details
         product_info = (
             f"Product: {product.name}\n"
@@ -54,7 +54,7 @@ def format_resolved_products(products: List[Product]) -> str:
             f"Confidence: High (Exact catalog match)\n"
         )
         formatted_products.append(product_info)
-    
+
     return "\n\n".join(formatted_products)
 
 
@@ -72,32 +72,30 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
         or a message indicating no products were found.
     """
     print(f"Vector store search called with queries: {queries}")
-    
+
     # Get the vector store instance using the singleton
     vector_store = VectorStore(hermes_config)
-    
+
     # Check if vector store is initialized
     if vector_store is None:
         print("WARNING: Vector store is not initialized! Using placeholder data.")
-        return "No relevant product information found in the catalog for the given queries (vector store not initialized)."
-    
+        return (
+            "No relevant product information found in the catalog for the given queries (vector store not initialized)."
+        )
+
     # Combine queries into a single search query (if multiple)
     search_query = ". ".join(queries) if queries else ""
     if not search_query:
         return "No specific queries provided for product search."
-    
+
     # Use the vector store instance's search method
     try:
-        results = vector_store.similarity_search_with_score(
-            query_text=search_query,
-            n_results=5,
-            filter_criteria=None
-        )
-        
+        results = vector_store.similarity_search_with_score(query_text=search_query, n_results=5, filter_criteria=None)
+
         # Format the results
         if not results:
             return "No relevant products found in the catalog for the given queries."
-        
+
         # Format the results for the LLM
         formatted_products = []
         for metadata, score in results:
@@ -108,7 +106,7 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
             price = metadata.get("price", "Price not available")
             stock = metadata.get("stock", "Stock unknown")
             description = metadata.get("description", "No description available")
-            
+
             # Handle seasons correctly - use valid Season enum values
             seasons_str = metadata.get("seasons", "")
             if seasons_str == "All seasons":
@@ -116,7 +114,7 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
                 seasons = "Spring, Summer, Autumn, Winter"
             else:
                 seasons = seasons_str or "Spring"  # Default to Spring if empty
-            
+
             # Format as a string
             product_info = (
                 f"Product: {product_name}\n"
@@ -129,9 +127,9 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
                 f"Relevance Score: {score:.2f}\n"
             )
             formatted_products.append(product_info)
-        
+
         return "\n\n".join(formatted_products)
-    
+
     except Exception as e:
         print(f"Error in vector store search: {e}")
         return f"Error searching product catalog: {str(e)}"
@@ -142,9 +140,9 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
     name="Inquiry Responder Agent",
 )
 async def respond_to_inquiry(
-    state: InquiryResponderInput,
+    state: AdvisorInput,
     runnable_config: Optional[RunnableConfig] = None,
-) -> WorkflowNodeOutput[Literal[Agents.INQUIRY_RESPONDER], InquiryResponderOutput]:
+) -> WorkflowNodeOutput[Literal[Agents.ADVISOR], AdvisorOutput]:
     """
     Extracts and answers customer inquiries with factual information about products.
     Uses RAG techniques to retrieve relevant product information.
@@ -154,23 +152,20 @@ async def respond_to_inquiry(
         runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
-        Dict[str, Any]: In the LangGraph workflow, returns {Agents.RESPOND_TO_INQUIRY: InquiryResponderOutput} or {"errors": Error}
+        Dict[str, Any]: In the LangGraph workflow, returns {Agents.RESPOND_TO_INQUIRY: AdvisorOutput} or {"errors": Error}
     """
     try:
         # Validate the input
-        if state.email_analyzer is None or state.email_analyzer.email_analysis is None:
-            return create_node_response(
-                Agents.INQUIRY_RESPONDER,
-                Exception("No email analysis available for inquiry response.")
-            )
-            
+        if state.classifier is None or state.classifier.email_analysis is None:
+            return create_node_response(Agents.ADVISOR, Exception("No email analysis available for inquiry response."))
+
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
         # Extract email_id from the analysis result - safely handle different formats
         email_id = "unknown_id"
 
         # The email_analysis object should be available now
-        email_analysis = state.email_analyzer.email_analysis
+        email_analysis = state.classifier.email_analysis
         email_id = email_analysis.email_id
 
         print(f"Generating factual answers for inquiry {email_id}")
@@ -184,7 +179,7 @@ async def respond_to_inquiry(
                         search_queries.append(segment.main_sentence)
                     for rel_sentence in segment.related_sentences:
                         search_queries.append(rel_sentence)
-                
+
                 # Add product mentions from all segments as search terms
                 for p_mention in segment.product_mentions:
                     query_parts = []
@@ -195,33 +190,33 @@ async def respond_to_inquiry(
                     if p_mention.product_description:
                         query_parts.append(p_mention.product_description)
                     if p_mention.product_category:
-                        query_parts.append(p_mention.product_category.value) # Assuming category is an Enum
-                    
+                        query_parts.append(p_mention.product_category.value)  # Assuming category is an Enum
+
                     if query_parts:
                         search_queries.append(" ".join(query_parts))
-        
+
         # Deduplicate queries
         unique_search_queries = sorted(list(set(q for q in search_queries if q)))
-        
+
         print(f"  Extracted search queries: {unique_search_queries}")
 
         # Format resolved products from the product resolver if available
         resolved_products_context = ""
-        if state.product_resolver and state.product_resolver.resolved_products:
-            resolved_products_context = format_resolved_products(state.product_resolver.resolved_products)
-            print(f"  Using {len(state.product_resolver.resolved_products)} resolved products")
+        if state.stockkeeper and state.stockkeeper.resolved_products:
+            resolved_products_context = format_resolved_products(state.stockkeeper.resolved_products)
+            print(f"  Using {len(state.stockkeeper.resolved_products)} resolved products")
 
         # Perform vector search for additional context
         retrieved_products_context = search_vector_store(unique_search_queries, hermes_config)
         print(f"  Retrieved additional products context (length: {len(retrieved_products_context)} chars)")
-        
+
         # Combine both sources of product information
         product_context = ""
         if resolved_products_context:
             product_context += "### EXACTLY MATCHED PRODUCTS (High Confidence):\n" + resolved_products_context + "\n\n"
         if retrieved_products_context:
             product_context += "### SIMILAR PRODUCTS (Vector Search Results):\n" + retrieved_products_context
-        
+
         # If no product context, provide a note
         if not product_context:
             product_context = "No specific product information available for this inquiry."
@@ -231,14 +226,14 @@ async def respond_to_inquiry(
         llm = get_llm_client(config=hermes_config, model_strength="strong", temperature=0.1)
 
         # Create the prompt and chain
-        inquiry_responder_prompt = get_prompt(Agents.INQUIRY_RESPONDER)
-        
+        advisor_prompt = get_prompt(Agents.ADVISOR)
+
         # Add instructions to use valid Season enum values
-        inquiry_responder_prompt = inquiry_responder_prompt.partial(
+        advisor_prompt = advisor_prompt.partial(
             seasons_instruction="IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter. Do not use 'All seasons'."
         )
-        
-        inquiry_response_chain = inquiry_responder_prompt | llm.with_structured_output(InquiryAnswers)
+
+        inquiry_response_chain = advisor_prompt | llm.with_structured_output(InquiryAnswers)
 
         try:
             # Prepare input data - convert Pydantic model to dict if necessary
@@ -247,11 +242,13 @@ async def respond_to_inquiry(
             )
 
             # Generate the inquiry response, now including combined product context
-            response_data = await inquiry_response_chain.ainvoke({
-                "email_analysis": email_analysis_data,
-                "retrieved_products_context": product_context,
-                "seasons_instruction": "IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter. Do not use 'All seasons'."
-            })
+            response_data = await inquiry_response_chain.ainvoke(
+                {
+                    "email_analysis": email_analysis_data,
+                    "retrieved_products_context": product_context,
+                    "seasons_instruction": "IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter. Do not use 'All seasons'.",
+                }
+            )
 
             # Ensure we get the right type by instantiating from the response
             if isinstance(response_data, InquiryAnswers):
@@ -261,10 +258,10 @@ async def respond_to_inquiry(
                 if isinstance(response_data, dict):
                     # Make sure email_id is included
                     response_data["email_id"] = email_id
-                    
+
                     # Make sure products have valid seasons values
                     response_data = fix_seasons_in_response(response_data)
-                    
+
                     inquiry_response = InquiryAnswers(**response_data)
                 else:
                     # Fallback if we got something unexpected
@@ -286,10 +283,7 @@ async def respond_to_inquiry(
             print(f"  Identified {len(inquiry_response.primary_products)} primary products")
             print(f"  Suggested {len(inquiry_response.related_products)} related products")
 
-            return create_node_response(
-                Agents.INQUIRY_RESPONDER,
-                InquiryResponderOutput(inquiry_answers=inquiry_response)
-            )
+            return create_node_response(Agents.ADVISOR, AdvisorOutput(inquiry_answers=inquiry_response))
 
         except Exception as e:
             print(f"Error generating inquiry response for {email_id}: {e}")
@@ -304,32 +298,30 @@ async def respond_to_inquiry(
                 unsuccessful_references=[],
             )
 
-            return create_node_response(
-                Agents.INQUIRY_RESPONDER,
-                InquiryResponderOutput(inquiry_answers=fallback_response)
-            )
-            
+            return create_node_response(Agents.ADVISOR, AdvisorOutput(inquiry_answers=fallback_response))
+
     except Exception as e:
         # Return errors in the format expected by LangGraph
-        return create_node_response(Agents.INQUIRY_RESPONDER, e)
+        return create_node_response(Agents.ADVISOR, e)
 
 
 def fix_seasons_in_response(response_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Fix invalid seasons values in response data.
     This ensures that all seasons in product objects are using valid Season enum values.
-    
+
     Args:
         response_data: The response data dictionary
-        
+
     Returns:
         The response data with fixed seasons values
     """
+
     # Helper function to fix seasons in a product object
     def fix_product_seasons(product: Dict[str, Any]) -> Dict[str, Any]:
         if "product" in product and "seasons" in product["product"]:
             seasons = product["product"]["seasons"]
-            
+
             if isinstance(seasons, list):
                 fixed_seasons = []
                 for season in seasons:
@@ -342,25 +334,25 @@ def fix_seasons_in_response(response_data: Dict[str, Any]) -> Dict[str, Any]:
                     else:
                         # Default to Spring
                         fixed_seasons.append("Spring")
-                
+
                 if not fixed_seasons:
                     fixed_seasons = ["Spring"]  # Default if list is empty
-                    
+
                 product["product"]["seasons"] = fixed_seasons
         return product
-    
+
     # Fix primary_products
     if "primary_products" in response_data and response_data["primary_products"]:
         fixed_primary = []
         for prod in response_data["primary_products"]:
             fixed_primary.append(fix_product_seasons(prod))
         response_data["primary_products"] = fixed_primary
-    
+
     # Fix related_products
     if "related_products" in response_data and response_data["related_products"]:
         fixed_related = []
         for prod in response_data["related_products"]:
             fixed_related.append(fix_product_seasons(prod))
         response_data["related_products"] = fixed_related
-    
+
     return response_data
