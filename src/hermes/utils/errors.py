@@ -1,6 +1,9 @@
 from typing import Dict, Any, Optional, Literal, TypeVar, Union
 
-from src.hermes.model import Agents, Error, ErrorReturn, WorkflowNodeOutput
+from src.hermes.model.Error import Error
+
+from src.hermes.model.enums import Agents
+from src.hermes.types import ErrorReturn, WorkflowNodeOutput
 
 SpecificAgent = TypeVar('SpecificAgent', bound=Agents)
 OutputType = TypeVar('OutputType')

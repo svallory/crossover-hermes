@@ -3,38 +3,10 @@ Pydantic models for the order processor agent.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Literal, Any, Union
-from enum import Enum
+from typing import List, Optional, Literal
 
 from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput, EmailAnalyzerOutput
-from src.hermes.state import AlternativeProduct
-
-
-class OrderItemStatus(str, Enum):
-    """Status of an order item."""
-
-    CREATED = "created"
-    OUT_OF_STOCK = "out_of_stock"
-
-
-class OrderedItem(BaseModel):
-    """A single item in a processed order."""
-
-    product_id: str = Field(description="The unique identifier for the product")
-    product_name: str = Field(description="The name of the product")
-    quantity: int = Field(ge=1, description="The quantity ordered")
-    status: OrderItemStatus = Field(description="The status of this order item")
-    price: Optional[float] = Field(default=None, description="Price per unit if available")
-    total_price: Optional[float] = Field(default=None, description="Total price for this item")
-    available_stock: int = Field(description="Current stock level for this product")
-    alternatives: List[AlternativeProduct] = Field(
-        default_factory=list,
-        description="Alternative products suggested if this item is out of stock",
-    )
-    promotion: Optional[Union[Dict[str, str], str]] = Field(
-        default=None,
-        description="Any promotion details associated with this product, either as a dictionary or a simple string",
-    )
+from .order import OrderedItem
 
 
 class ProcessedOrder(BaseModel):

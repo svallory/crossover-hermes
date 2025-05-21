@@ -13,7 +13,7 @@ The module exposes the main workflow and supporting functions for execution.
 
 from .states import OverallState, merge_errors
 from .graph import workflow, graph_builder
-from .run_workflow import run_workflow
+from .workflow import run_workflow
 
 __all__ = [
     "workflow",

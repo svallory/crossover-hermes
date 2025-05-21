@@ -28,9 +28,7 @@ async def run_workflow(
     Returns:
         The final state of the workflow.
     """
-    # First, ensure vector store is initialized
-    # This is crucial for the inquiry responder to work
-    print("Ensuring vector store is initialized before running workflow...")
+    # Initialize the vector store using the singleton
     VectorStore(hermes_config=hermes_config)
     
     # Prepare the runnable config

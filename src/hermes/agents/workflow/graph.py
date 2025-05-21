@@ -69,6 +69,57 @@ async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dic
     )
     return await analyze_email(state=email_analyzer_input, runnable_config=config)
 
+async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
+    """
+    Wrapper function for process_order that correctly extracts email_id and email_analyzer from state.
+    
+    Args:
+        state: The workflow state containing email_analyzer output
+        config: Runnable configuration for the agent
+    
+    Returns:
+        Result from process_order function in dictionary format
+    """
+    # Extract email_id from state
+    email_id = state.email_id
+    
+    # Extract email_analyzer from state - handle potential None case
+    email_analyzer = state.email_analyzer
+    
+    if email_analyzer is None:
+        # If email_analyzer is None, return an error
+        from src.hermes.utils.errors import create_node_response
+        from src.hermes.model import Agents
+        return create_node_response(
+            Agents.ORDER_PROCESSOR,
+            Exception("Email analyzer output is required for order processing")
+        )
+    
+    # Convert EmailAnalyzerOutput to dict for process_order
+    if hasattr(email_analyzer, "model_dump"):
+        email_analysis_dict = email_analyzer.model_dump()
+    else:
+        # Fallback if model_dump not available
+        email_analysis_dict = dict(email_analyzer)
+    
+    # Call process_order with the extracted information
+    processed_order = process_order(
+        email_analysis=email_analysis_dict,
+        email_id=email_id,
+        hermes_config=HermesConfig.from_runnable_config(config),
+    )
+    
+    # Convert the result to a dictionary for LangGraph
+    from src.hermes.utils.errors import create_node_response
+    from src.hermes.model import Agents
+    from hermes.agents.order_processor.models.agent import OrderProcessorOutput
+    
+    # Create the expected output type
+    order_processor_output = OrderProcessorOutput(order_result=processed_order)
+    
+    # Return in the format expected by LangGraph
+    return create_node_response(Agents.ORDER_PROCESSOR, order_processor_output)
+
 # Build the graph
 graph_builder = StateGraph(OverallState, input=EmailAnalyzerInput, config_schema=HermesConfig)
 
@@ -79,7 +130,7 @@ graph_builder.add_node(
 )
 graph_builder.add_node(
     Nodes.PROCESS, 
-    process_order,
+    process_order_node,  # Use the wrapper function to correctly pass email_id
 )
 graph_builder.add_node(
     Nodes.ANSWER, 

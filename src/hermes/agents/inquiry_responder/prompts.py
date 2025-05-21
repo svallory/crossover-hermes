@@ -5,7 +5,7 @@ Inquiry Responder prompts for use with LangChain.
 from typing import Dict
 from langchain_core.prompts import PromptTemplate
 
-from src.hermes.model import Agents
+from src.hermes.model.enums import Agents
 
 # Dictionary to store all prompt templates
 PROMPTS: Dict[str, PromptTemplate] = {}

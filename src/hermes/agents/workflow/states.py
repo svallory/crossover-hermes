@@ -3,15 +3,18 @@ from typing import (
     Optional,
     Annotated,
     List,
+    Any,
+    Union,
 )
-from pydantic import Field, BaseModel
+from src.hermes.model.Error import Error
+from pydantic import Field, BaseModel, create_model
 from typing_extensions import Hashable
 
 from src.hermes.agents.email_analyzer.models import EmailAnalyzerOutput
 from src.hermes.agents.inquiry_responder.models import InquiryResponderOutput
-from src.hermes.agents.order_processor.models import OrderProcessorOutput
+from hermes.agents.order_processor.models.agent import OrderProcessorOutput
 from src.hermes.agents.response_composer.models import ResponseComposerOutput
-from src.hermes.model import Agents, Error  # This should be fine
+from src.hermes.model import Agents  # This should be fine
 
 def merge_errors(dict1, dict2):
     """Merge two error dictionaries."""

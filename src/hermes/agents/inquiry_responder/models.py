@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 from src.hermes.agents.email_analyzer.models import EmailAnalysis, EmailAnalyzerOutput
-from src.hermes.model import Product
+from src.hermes.model.product import Product
 
 
 class ExtractedQuestion(BaseModel):

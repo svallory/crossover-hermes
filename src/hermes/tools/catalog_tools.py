@@ -18,6 +18,7 @@ Key functionalities include:
 from typing import Any, Dict, List, Optional, Union
 import os
 from pathlib import Path
+from src.hermes.model.product import Product
 import pandas as pd  # type: ignore
 import logging
 from pydantic import BaseModel, Field
@@ -25,11 +26,14 @@ from pydantic import BaseModel, Field
 # For fuzzy matching
 from thefuzz import process  # type: ignore
 
-# Import langchain_core.tools for newer versions
+# Import tool from langchain_core
 from langchain_core.tools import tool
 
 # Explicitly ignore import not found errors
-from src.hermes.model import Product, ProductCategory, Season
+from src.hermes.model import ProductCategory, Season
+
+# Import the load_products_df function
+from src.hermes.data_processing.load_data import load_products_df
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -42,26 +46,6 @@ vs_collection = None
 script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 data_dir = script_dir.parent.parent.parent / "data"
 product_file = data_dir / "product_catalog.csv"
-
-# Read product data into a DataFrame
-# Import first, then override if needed
-try:
-    # Try importing first (but likely to fail in normal execution)
-    from src.hermes.data_processing.load_data import products_df  # type: ignore[import-not-found]
-except ImportError:
-    products_df = None
-
-# If products_df is still None, try loading directly
-if products_df is None:
-    try:
-        if product_file.exists():
-            products_df = pd.read_csv(product_file)
-            logger.info(f"Loaded {len(products_df)} products from {product_file}")
-        else:
-            logger.warning(f"Product catalog file not found: {product_file}")
-    except Exception as e:
-        logger.error(f"Error loading product catalog: {e}")
-
 
 class ProductNotFound(BaseModel):
     """Indicates that a product was not found."""
@@ -78,9 +62,12 @@ class FuzzyMatchResult(BaseModel):
     similarity_score: float = Field(description="Similarity score between 0.0 and 1.0")
 
 
-@tool(name="find_product_by_id", description="Find a product by its ID")  # type: ignore[call-overload]
+
+@tool  # type: ignore[call-overload]
 def find_product_by_id(product_id: str) -> Union[Product, ProductNotFound]:
     """
+    Find a product by its ID.
+    
     Retrieve detailed product information by its exact Product ID.
     Use this when you have a precise Product ID (e.g., 'LTH0976', 'CSH1098').
 
@@ -93,6 +80,9 @@ def find_product_by_id(product_id: str) -> Union[Product, ProductNotFound]:
     # Standardize the product ID format (remove spaces and convert to uppercase)
     product_id = product_id.replace(" ", "").upper()
 
+    # Get products_df using the memoized function
+    products_df = load_products_df()
+    
     # Ensure products_df is not None before trying to index it
     if products_df is None:
         return ProductNotFound(
@@ -130,12 +120,13 @@ def find_product_by_id(product_id: str) -> Union[Product, ProductNotFound]:
         return ProductNotFound(message=f"Error during product retrieval: {str(e)}")
 
 
-@tool(name="find_product_by_name", description="Find products by name using fuzzy matching")  # type: ignore[call-overload]
+@tool  # type: ignore[call-overload]
 def find_product_by_name(
     product_name: str, *, threshold: float = 0.8, top_n: int = 3
 ) -> Union[List[FuzzyMatchResult], ProductNotFound]:
     """
     Find products by name using fuzzy matching.
+    
     Use this when the customer provides a product name that might have typos, be incomplete, or slightly different from the catalog.
 
     Args:
@@ -150,6 +141,9 @@ def find_product_by_name(
     # Make sure the input is a string
     product_name = str(product_name).strip()
 
+    # Get products_df using the memoized function
+    products_df = load_products_df()
+    
     # Check if product catalog is available
     if products_df is None:
         return ProductNotFound(
@@ -223,7 +217,7 @@ def create_filter_dict(
     return filters
 
 
-@tool(name="search_products_by_description", description="Search for products by description")  # type: ignore[call-overload]
+@tool  # type: ignore[call-overload]
 def search_products_by_description(
     query: str,
     *,
@@ -232,6 +226,8 @@ def search_products_by_description(
     season_filter: Optional[str] = None,
 ) -> Union[List[Product], ProductNotFound]:
     """
+    Search for products by description.
+    
     Search for products using semantic description matching.
     This tool is great for answering open-ended inquiries about products with specific features or characteristics.
 
@@ -245,6 +241,9 @@ def search_products_by_description(
         A list of matching Product objects or a ProductNotFound object if no products match.
     """
     try:
+        # Get products_df using the memoized function
+        products_df = load_products_df()
+        
         # First check if we have a DataFrame for direct searching
         if products_df is not None and not products_df.empty:
             # For demonstration, we'll implement a simplified search using the DataFrame
@@ -254,9 +253,9 @@ def search_products_by_description(
                 # Create a product from each row
                 product = Product(
                     product_id=str(row["product_id"]),
-                    product_name=str(row["name"]),
-                    product_description=str(row["description"]),
-                    product_category=ProductCategory(row["category"]),
+                    name=str(row["name"]),
+                    description=str(row["description"]),
+                    category=ProductCategory(row["category"]),
                     product_type=str(row.get("type", "")),
                     stock=int(row["stock"]),
                     price=float(row["price"]),
@@ -275,11 +274,13 @@ def search_products_by_description(
         return ProductNotFound(message=f"Error during product search: {str(e)}")
 
 
-@tool(name="find_related_products", description="Find products related to a given product ID")  # type: ignore[call-overload]
+@tool  # type: ignore[call-overload]
 def find_related_products(
     product_id: str, *, relationship_type: str = "complementary", limit: int = 2
 ) -> Union[List[Product], ProductNotFound]:
     """
+    Find products related to a given product ID.
+    
     Find products related to a given product ID, such as complementary items or alternatives from the same category.
 
     Args:
@@ -290,6 +291,9 @@ def find_related_products(
     Returns:
         Union[List[Product], ProductNotFound]: List of related Product objects, or ProductNotFound if none found.
     """
+    # Get products_df using the memoized function
+    products_df = load_products_df()
+    
     if products_df is None:
         return ProductNotFound(
             message="Product catalog data is not loaded.",
@@ -311,11 +315,11 @@ def find_related_products(
         main_product = main_product_result
 
         # Get all products in the same category
-        category_products = products_df[products_df["category"] == main_product.product_category]
+        category_products = products_df[products_df["category"] == main_product.category]
 
         if category_products.empty:
             return ProductNotFound(
-                message=f"No products found in category '{main_product.product_category}'.",
+                message=f"No products found in category '{main_product.category}'.",
                 query_product_id=product_id,
             )
 
@@ -384,18 +388,11 @@ def find_related_products(
         )
 
 
-@tool(name="resolve_product_reference", description="Resolve a product reference from a natural language query")  # type: ignore[call-overload]
+@tool  # type: ignore[call-overload]
 def resolve_product_reference(*, query: str) -> Union[Product, ProductNotFound]:
     """
-    Resolve a product reference dictionary to a Product object.
-
-    Args:
-        query (str): The natural language query describing the desired product.
-
-    Returns:
-        Union[Product, ProductNotFound]: The resolved Product object or ProductNotFound if not found.
-    """
-    """
+    Resolve a product reference from a natural language query.
+    
     Resolves a product reference dictionary to a specific product using a series of lookup strategies.
     It tries to find a product by ID, then by name, then by semantic description search.
 
@@ -416,7 +413,7 @@ def resolve_product_reference(*, query: str) -> Union[Product, ProductNotFound]:
     return ProductNotFound(message=f"Could not resolve product reference: {query}")
 
 
-@tool(name="filtered_product_search", description="Search and filter products based on various criteria")  # type: ignore[call-overload]
+@tool  # type: ignore[call-overload]
 def filtered_product_search(
     query: str,
     *,
@@ -430,6 +427,7 @@ def filtered_product_search(
 ) -> Union[List[Product], ProductNotFound]:
     """
     Search and filter products based on various criteria.
+    
     This is a comprehensive search tool that combines semantic search with metadata filtering.
 
     Args:
@@ -446,6 +444,9 @@ def filtered_product_search(
         A list of matching Product objects, or a ProductNotFound object if no matches are found.
     """
     try:
+        # Get products_df using the memoized function
+        products_df = load_products_df()
+        
         # First check if we have a DataFrame for direct searching
         if products_df is not None and not products_df.empty:
             # Start with all products
@@ -473,9 +474,9 @@ def filtered_product_search(
             for _, row in filtered_df.iterrows():
                 product = Product(
                     product_id=str(row["product_id"]),
-                    product_name=str(row["name"]),
-                    product_description=str(row["description"]),
-                    product_category=ProductCategory(row["category"]),
+                    name=str(row["name"]),
+                    description=str(row["description"]),
+                    category=ProductCategory(row["category"]),
                     product_type=str(row.get("type", "")),
                     stock=int(row["stock"]),
                     price=float(row["price"]),

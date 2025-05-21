@@ -2,22 +2,14 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Annotated
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages  # type: ignore
-import pandas as pd  # type: ignore  # For type hinting product_catalog_df
+import pandas as pd  # type: ignore
 from pydantic import BaseModel, Field
+
+# Import AlternativeProduct from model
+from src.hermes.model.product import AlternativeProduct
 
 # Forward declaration for type hints if models are in different files and imported later
 # from .common_models import EmailAnalysis, OrderProcessingResult, InquiryResolution
-
-
-class AlternativeProduct(BaseModel):
-    """Pydantic model for a recommended alternative product"""
-
-    product_id: str = Field(description="Product ID")
-    product_name: str = Field(description="Product name")
-    similarity_score: float = Field(description="Similarity score to the requested product")
-    availability: int = Field(description="Current stock level")
-    price: float = Field(description="Product price")
-    reason: str = Field(description="Reason this product is recommended as an alternative")
 
 
 @dataclass

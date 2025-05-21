@@ -16,7 +16,8 @@ from .prompts import get_prompt
 from ...config import HermesConfig
 from ...utils.llm_client import get_llm_client
 from ...data_processing.product_deduplication import get_product_mention_stats
-from ...model import WorkflowNodeOutput, Agents
+from ...model.enums import Agents
+from ...types import WorkflowNodeOutput
 from ...utils.errors import create_node_response
 
 

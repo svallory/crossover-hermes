@@ -4,6 +4,7 @@ Main function for responding to customer inquiries.
 
 from __future__ import annotations
 from typing import Literal, Optional, List, Dict, Any
+from ...model.product import Product
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
@@ -15,16 +16,17 @@ from .models import (
 from .prompts import get_prompt
 from ...config import HermesConfig
 from ...utils.llm_client import get_llm_client
-from ...model import WorkflowNodeOutput, Agents, Product, Season
+from ...types import WorkflowNodeOutput
+from ...model.enums import Agents, Season
 from ...utils.errors import create_node_response
 from ...agents.email_analyzer.models import SegmentType
-from ...data_processing.vector_store import similarity_search_with_score
+from ...data_processing.vector_store import VectorStore
 
 
-async def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
+def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
     """
     Search the vector store for products matching the queries.
-    Uses the already initialized vector_store in data_processing.load_data.
+    Uses the VectorStore singleton to ensure the vector store is initialized.
 
     Args:
         queries: A list of search terms (product names, descriptions, questions).
@@ -36,8 +38,8 @@ async def search_vector_store(queries: List[str], hermes_config: HermesConfig) -
     """
     print(f"Vector store search called with queries: {queries}")
     
-    # Import here to avoid circular imports
-    from ...data_processing.load_data import vector_store
+    # Get the vector store instance using the singleton
+    vector_store = VectorStore(hermes_config)
     
     # Check if vector store is initialized
     if vector_store is None:
@@ -49,14 +51,12 @@ async def search_vector_store(queries: List[str], hermes_config: HermesConfig) -
     if not search_query:
         return "No specific queries provided for product search."
     
-    # Use similarity_search_with_score instead of search_products_by_description
-    # This avoids the filter issue causing the ChromaDB error
+    # Use the vector store instance's search method
     try:
-        results = await similarity_search_with_score(
-            collection=vector_store,  
+        results = vector_store.similarity_search_with_score(
             query_text=search_query,
-            k=5,
-            filter=None  # Explicitly set filter to None to avoid the error
+            n_results=5,
+            filter_criteria=None
         )
         
         # Format the results
@@ -67,12 +67,12 @@ async def search_vector_store(queries: List[str], hermes_config: HermesConfig) -
         formatted_products = []
         for metadata, score in results:
             # Extract product details from metadata
-            product_name = metadata.get("product_name", "Unknown Product")
+            product_name = metadata.get("name", "Unknown Product")
             product_type = metadata.get("product_type", "Unknown Type")
-            product_category = metadata.get("product_category", "Unknown Category")
+            product_category = metadata.get("category", "Unknown Category")
             price = metadata.get("price", "Price not available")
             stock = metadata.get("stock", "Stock unknown")
-            description = metadata.get("document", "No description available")
+            description = metadata.get("description", "No description available")
             
             # Handle seasons correctly - use valid Season enum values
             seasons_str = metadata.get("seasons", "")
@@ -171,7 +171,7 @@ async def respond_to_inquiry(
         print(f"  Extracted search queries: {unique_search_queries}")
 
         # Perform vector search
-        retrieved_products_context = await search_vector_store(unique_search_queries, hermes_config)
+        retrieved_products_context = search_vector_store(unique_search_queries, hermes_config)
         print(f"  Retrieved products context (length: {len(retrieved_products_context)} chars)")
         # --- End RAG Step ---
 

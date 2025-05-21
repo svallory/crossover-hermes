@@ -8,7 +8,7 @@ from enum import Enum
 
 from src.hermes.agents.email_analyzer.models import EmailAnalyzerInput, EmailAnalyzerOutput
 from src.hermes.agents.inquiry_responder.models import InquiryResponderOutput
-from src.hermes.agents.order_processor.models import (
+from hermes.agents.order_processor.models.agent import (
     OrderProcessorOutput,
     ProcessedOrder,
 )

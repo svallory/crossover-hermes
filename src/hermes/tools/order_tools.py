@@ -13,16 +13,17 @@ Key functionalities include:
 - Updating stock quantities (decrementing when an order is fulfilled).
 - Finding suitable alternative products if a requested item is out of stock.
 - Extracting details of any ongoing promotions associated with a product.
+- Calculating discounted prices based on promotion text.
 """
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any
 from pydantic import BaseModel, Field
 import pandas as pd  # type: ignore
 import re
 from langchain_core.tools import tool
 
-from src.hermes.state import AlternativeProduct
-from src.hermes.data_processing.load_data import products_df
+from src.hermes.model.product import AlternativeProduct, Product
+from src.hermes.data_processing.load_data import load_products_df
 
 
 class ProductNotFound(BaseModel):
@@ -66,6 +67,18 @@ class PromotionDetails(BaseModel):
     limited_time: Optional[bool] = None
 
 
+class DiscountResult(BaseModel):
+    """Result of a discount calculation."""
+    
+    original_price: float = Field(description="Original price before discount")
+    discounted_price: float = Field(description="Price after applying the discount")
+    discount_amount: float = Field(description="Amount discounted")
+    discount_percentage: Optional[float] = Field(default=None, description="Percentage discount if applicable")
+    discount_applied: bool = Field(description="Whether a discount was applied")
+    discount_type: str = Field(description="Type of discount applied (percentage, bogo, etc.)")
+    explanation: str = Field(description="Explanation of how the discount was calculated")
+
+
 @tool
 def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStatus, ProductNotFound]:
     """
@@ -83,6 +96,7 @@ def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStat
     product_id = product_id.replace(" ", "").upper()
 
     # Look up the product in the DataFrame
+    products_df = load_products_df()
     if products_df is None:
         return ProductNotFound(
             message="Product catalog data is not loaded.",
@@ -147,6 +161,7 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResu
     product_id = product_id.replace(" ", "").upper()
 
     # Find the product
+    products_df = load_products_df()
     if products_df is None:
         return StockUpdateResult(
             product_id=product_id,
@@ -228,6 +243,7 @@ def find_alternatives_for_oos(
         A list of AlternativeProduct objects with suggested alternatives, or ProductNotFound if the original product ID is invalid.
     """
     # First, check if the original product exists
+    products_df = load_products_df()
     if products_df is None:
         return ProductNotFound(
             message="Product catalog data is not loaded.",
@@ -254,13 +270,22 @@ def find_alternatives_for_oos(
 
     # If no alternatives found, return empty result
     if alternatives_df.empty:
+        # Create an empty Product since we have no real alternative
+        empty_product = Product(
+            product_id="",
+            name="",
+            description="",
+            category=original_product["category"],
+            product_type="",
+            stock=0,
+            seasons=[],
+            price=0.0
+        )
+        
         return [
             AlternativeProduct(
-                product_id="",
-                product_name="",
+                product=empty_product,
                 similarity_score=0.0,
-                availability=0,
-                price=0.0,
                 reason="No alternatives with available stock found in the same category.",
             )
         ]
@@ -289,14 +314,23 @@ def find_alternatives_for_oos(
         # Generate reason for the alternative
         reason = f"Same category ({original_category}) with available stock ({alt_stock} items)."
 
+        # Create a Product object for the alternative
+        product = Product(
+            product_id=alt_product_id,
+            name=alt_name,
+            description=alt_row.get("description", ""),
+            category=alt_row["category"],
+            product_type=alt_row.get("product_type", ""),
+            stock=alt_stock,
+            seasons=alt_row.get("seasons", []),
+            price=alt_price,
+        )
+
         # Add to results
         results.append(
             AlternativeProduct(
-                product_id=alt_product_id,
-                product_name=alt_name,
+                product=product,
                 similarity_score=similarity_score,
-                availability=alt_stock,
-                price=alt_price,
                 reason=reason,
             )
         )
@@ -393,6 +427,158 @@ def extract_promotion(product_description: str, product_name: Optional[str] = No
     return result
 
 
+@tool
+def calculate_discount_price(original_price: float, promotion_text: str, quantity: int = 1) -> DiscountResult:
+    """
+    Calculate the discounted price based on the promotion text and original price.
+    
+    This tool handles various promotion types:
+    - Percentage discounts (e.g., "25% off")
+    - Buy-one-get-one (BOGO) offers
+    - Free item offers
+    - Bundle discounts
+    
+    Args:
+        original_price: The original unit price before any discount
+        promotion_text: The text describing the promotion
+        quantity: The number of items being ordered
+        
+    Returns:
+        A DiscountResult object with the calculated discount and explanation
+    """
+    discounted_price = original_price
+    discount_amount = 0.0
+    discount_percentage = None
+    discount_applied = False
+    discount_type = "none"
+    explanation = "No discount applied."
+    
+    if not promotion_text:
+        return DiscountResult(
+            original_price=original_price,
+            discounted_price=original_price,
+            discount_amount=0.0,
+            discount_percentage=None,
+            discount_applied=False,
+            discount_type="none",
+            explanation="No promotion text provided."
+        )
+    
+    # Convert to lowercase for case-insensitive matching
+    promo_lower = promotion_text.lower()
+    
+    # 1. Check for percentage discounts
+    percentage_patterns = [
+        r"(\d+)%\s+off",  # e.g., "25% off"
+        r"save\s+(\d+)%",  # e.g., "save 30%"
+        r"discount\s+of\s+(\d+)%",  # e.g., "discount of 15%"
+        r"(\d+)%\s+discount",  # e.g., "15% discount"
+    ]
+    
+    for pattern in percentage_patterns:
+        match = re.search(pattern, promo_lower)
+        if match:
+            try:
+                percentage = float(match.group(1))
+                if 0 < percentage < 100:  # Valid percentage
+                    discount_percentage = percentage
+                    discount_amount = (original_price * percentage) / 100
+                    discounted_price = original_price - discount_amount
+                    discount_applied = True
+                    discount_type = "percentage"
+                    explanation = f"Applied {percentage}% discount to original price ${original_price:.2f}."
+                    
+                    # Handle quantity correctly
+                    total_discount = discount_amount * quantity
+                    total_discounted_price = discounted_price * quantity
+                    
+                    return DiscountResult(
+                        original_price=original_price,
+                        discounted_price=discounted_price,
+                        discount_amount=discount_amount,
+                        discount_percentage=discount_percentage,
+                        discount_applied=discount_applied,
+                        discount_type=discount_type,
+                        explanation=explanation
+                    )
+            except (ValueError, IndexError):
+                pass  # Continue to next pattern if this one fails
+    
+    # 2. Check for BOGO offers
+    if any(phrase in promo_lower for phrase in ["buy one, get one", "bogo", "get one free", "buy 1 get 1"]):
+        if "50% off" in promo_lower or "half off" in promo_lower or "half price" in promo_lower:
+            # BOGO 50% off
+            if quantity >= 2:
+                # For every pair, one item is half price
+                full_price_items = (quantity + 1) // 2  # Rounds up for odd quantities
+                half_price_items = quantity // 2  # Rounds down for odd quantities
+                
+                total_original = original_price * quantity
+                total_discounted = (full_price_items * original_price) + (half_price_items * original_price * 0.5)
+                
+                # Calculate per-unit values
+                discount_amount = (total_original - total_discounted) / quantity
+                discounted_price = original_price - discount_amount
+                
+                discount_applied = True
+                discount_type = "bogo_half"
+                explanation = f"Buy one, get one 50% off applied. For {quantity} items, {full_price_items} at full price, {half_price_items} at half price."
+            else:
+                # Not enough quantity for discount
+                explanation = "Buy one, get one 50% off requires at least 2 items to apply."
+        else:
+            # Regular BOGO (second item free)
+            if quantity >= 2:
+                # For every pair, one item is free
+                paid_items = (quantity + 1) // 2  # Rounds up for odd quantities
+                free_items = quantity // 2  # Rounds down for odd quantities
+                
+                total_original = original_price * quantity
+                total_discounted = original_price * paid_items
+                
+                # Calculate per-unit values
+                discount_amount = (total_original - total_discounted) / quantity
+                discounted_price = original_price - discount_amount
+                
+                discount_applied = True
+                discount_type = "bogo_free"
+                explanation = f"Buy one, get one free applied. For {quantity} items, paying for {paid_items}, getting {free_items} free."
+            else:
+                # Not enough quantity for discount
+                explanation = "Buy one, get one free requires at least 2 items to apply."
+    
+    # 3. Check for bulk discounts on quantity thresholds
+    bulk_match = re.search(r"(\d+)\+\s+units", promo_lower)
+    if bulk_match:
+        try:
+            threshold = int(bulk_match.group(1))
+            # If we meet the threshold and there's a percentage in the promo
+            percent_match = re.search(r"(\d+)%", promo_lower)
+            if quantity >= threshold and percent_match:
+                percentage = float(percent_match.group(1))
+                discount_percentage = percentage
+                discount_amount = (original_price * percentage) / 100
+                discounted_price = original_price - discount_amount
+                discount_applied = True
+                discount_type = "bulk_discount"
+                explanation = f"Bulk discount of {percentage}% applied for ordering {quantity} items (minimum {threshold})."
+            elif quantity < threshold:
+                explanation = f"Bulk discount requires at least {threshold} items (only ordered {quantity})."
+        except (ValueError, IndexError):
+            pass
+    
+    # Return the result
+    return DiscountResult(
+        original_price=original_price,
+        discounted_price=discounted_price,
+        discount_amount=discount_amount,
+        discount_percentage=discount_percentage,
+        discount_applied=discount_applied,
+        discount_type=discount_type,
+        explanation=explanation
+    )
+
+
 def extract_promotion_text(description: str, match) -> str:
     """Helper function to extract the full sentence containing a promotion."""
     if not match:
@@ -440,11 +626,16 @@ The order tools provide essential functionality for inventory management and ord
      - Limited-time offers
    - The promotion information is included in customer responses
 
-4. **Error Handling**: Each tool includes comprehensive validation and returns structured error objects:
+4. **Promotion Calculation**:
+   - `calculate_discount_price`: Calculates the actual discounted price based on promotion text
+   - Handles various promotion types with different calculation methods
+   - Returns detailed explanations of how discounts were applied
+
+5. **Error Handling**: Each tool includes comprehensive validation and returns structured error objects:
    - `ProductNotFound`: When a requested product doesn't exist
    - Status codes in `StockUpdateResult`: For various operational outcomes
 
-5. **Helper Functions**: The `extract_promotion_text` helper extracts full sentences containing promotions for natural-sounding responses.
+6. **Helper Functions**: The `extract_promotion_text` helper extracts full sentences containing promotions for natural-sounding responses.
 
 These tools are designed to be called by the Order Processor agent when processing customer order requests, ensuring accurate inventory management and detailed order information.
 
