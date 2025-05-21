@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-import unittest
-import os
-import sys
 import json
-import tempfile
+import os
 import shutil
+import sys
+import tempfile
+import unittest
 
 # Add the parent directory to sys.path to import the tool module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -35,7 +35,7 @@ class TestMdPyToNotebook(unittest.TestCase):
         self.assertTrue(os.path.exists(output_file))
 
         # Load the generated notebook
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             notebook = json.load(f)
 
         # Check the notebook structure
@@ -70,7 +70,7 @@ class TestMdPyToNotebook(unittest.TestCase):
         self.assertTrue(os.path.exists(output_file))
 
         # Load the generated notebook
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             notebook = json.load(f)
 
         # Check the notebook structure
@@ -117,7 +117,7 @@ class TestMdPyToNotebook(unittest.TestCase):
         self.assertTrue(os.path.exists(expected_output))
 
         # Load the generated notebook
-        with open(expected_output, "r") as f:
+        with open(expected_output) as f:
             notebook = json.load(f)
 
         # The notebook should contain cells from both files plus headers

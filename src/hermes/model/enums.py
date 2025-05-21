@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 # Enum of nodes
 class Agents(str, Enum):
     """Names of our Agents (also nodes in the workflow graph)."""
@@ -15,11 +14,12 @@ class Agents(str, Enum):
 class Nodes(str, Enum):
     """Names of our Nodes (also nodes in the workflow graph)."""
 
-    CLASSIFIER = "classifier_node"
-    STOCKKEEPER = "stockkeeper_node"
-    FULFILLER = "fulfiller_node"
-    ADVISOR = "advisor_node"
-    COMPOSER = "composer_node"
+    # Note: these CANNOT be identical to the Agents names (due to LangGraph limitations)
+    CLASSIFIER = "Classifier"
+    STOCKKEEPER = "Stockkeeper"
+    FULFILLER = "Fulfiller"
+    ADVISOR = "Advisor"
+    COMPOSER = "Composer"
 
 
 class ProductCategory(str, Enum):

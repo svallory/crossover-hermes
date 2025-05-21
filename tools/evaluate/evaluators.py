@@ -1,20 +1,18 @@
 #!/usr/bin/env python
-"""
-Master Evaluator for Hermes.
+"""Master Evaluator for Hermes.
 
 This module provides a comprehensive evaluator for all Hermes components in a single pass,
 significantly reducing API calls and improving evaluation efficiency.
 """
 
 import json
-from typing import Dict, Any
+from typing import Any
 
 # Import LangChain evaluator tools
 from langchain.evaluation import load_evaluator
 
 # Import utility functions
 from .utils import read_prompt
-
 
 class HermesJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder that can handle Hermes custom types."""
@@ -34,14 +32,14 @@ class HermesJSONEncoder(json.JSONEncoder):
 
 
 def convert_to_serializable(obj):
-    """
-    Recursively convert an object to a serializable format.
+    """Recursively convert an object to a serializable format.
 
     Args:
         obj: Any Python object
 
     Returns:
         A JSON-serializable representation of the object
+
     """
     if isinstance(obj, dict):
         return {k: convert_to_serializable(v) for k, v in obj.items()}
@@ -68,8 +66,7 @@ def convert_to_serializable(obj):
 
 
 def create_evaluator(model, criteria, prompt_name):
-    """
-    Create an evaluator for a specific component.
+    """Create an evaluator for a specific component.
 
     Args:
         model: LLM model to use
@@ -78,6 +75,7 @@ def create_evaluator(model, criteria, prompt_name):
 
     Returns:
         LangChain evaluator
+
     """
     evaluation_template = read_prompt(prompt_name)
 
@@ -90,10 +88,9 @@ def create_evaluator(model, criteria, prompt_name):
 
 
 async def evaluate_master(
-    client, experiment_name: str, email_id: str, workflow_state: Dict[str, Any], model
-) -> Dict[str, Any]:
-    """
-    Comprehensive evaluator that evaluates all agent outputs in a single pass.
+    client, experiment_name: str, email_id: str, workflow_state: dict[str, Any], model
+) -> dict[str, Any]:
+    """Comprehensive evaluator that evaluates all agent outputs in a single pass.
 
     Args:
         client: LangSmith client
@@ -104,6 +101,7 @@ async def evaluate_master(
 
     Returns:
         Comprehensive evaluation results for all components
+
     """
     try:
         print(f"  Running comprehensive evaluation for email {email_id}...")

@@ -1,13 +1,12 @@
 #!/usr/bin/env python
-"""
-Utility functions for Hermes evaluation tools.
-"""
+"""Utility functions for Hermes evaluation tools."""
 
-import os
-import yaml
 import json
+import os
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
+
+import yaml
 
 # Define paths
 EVALUATE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -16,21 +15,21 @@ PROJECT_ROOT = Path(os.path.dirname(os.path.dirname(EVALUATE_DIR)))
 
 
 def read_prompt(prompt_name: str) -> str:
-    """
-    Read a prompt from a markdown file.
+    """Read a prompt from a markdown file.
 
     Args:
         prompt_name: Name of the prompt file (without .md extension)
 
     Returns:
         The prompt text
+
     """
     prompt_path = PROMPTS_DIR / f"{prompt_name}.md"
 
     if not prompt_path.exists():
         raise FileNotFoundError(f"Prompt file not found: {prompt_path}")
 
-    with open(prompt_path, "r") as f:
+    with open(prompt_path) as f:
         # Skip the first line (title) and return the rest
         lines = f.readlines()
         return "".join(lines[2:]) if len(lines) > 2 else "".join(lines)
@@ -60,15 +59,15 @@ yaml.add_multi_constructor("tag:yaml.org,2002:python/object/apply", custom_tag_c
 yaml.add_multi_constructor("tag:yaml.org,2002:python/object/new", custom_tag_constructor, Loader=SafeLoader)
 
 
-def format_evaluation_scores(report: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """
-    Format evaluation scores for LangSmith upload.
+def format_evaluation_scores(report: dict[str, Any]) -> list[dict[str, Any]]:
+    """Format evaluation scores for LangSmith upload.
 
     Args:
         report: Evaluation report containing scores
 
     Returns:
         List of formatted scores for LangSmith
+
     """
     summary_scores = []
 
@@ -157,15 +156,15 @@ def format_evaluation_scores(report: Dict[str, Any]) -> List[Dict[str, Any]]:
     return summary_scores
 
 
-def load_results_from_directory(directory: str) -> List[Dict[str, Any]]:
-    """
-    Load results from YAML files in the specified directory.
+def load_results_from_directory(directory: str) -> list[dict[str, Any]]:
+    """Load results from YAML files in the specified directory.
 
     Args:
         directory: Directory containing the YAML files
 
     Returns:
         List of result dictionaries
+
     """
     results = []
     output_dir = Path(directory)
@@ -174,7 +173,7 @@ def load_results_from_directory(directory: str) -> List[Dict[str, Any]]:
         if yaml_file.name.endswith("_report.json"):
             continue
 
-        with open(yaml_file, "r") as f:
+        with open(yaml_file) as f:
             try:
                 data = yaml.load(f, Loader=SafeLoader)
                 results.append(data)
@@ -184,9 +183,8 @@ def load_results_from_directory(directory: str) -> List[Dict[str, Any]]:
     return results
 
 
-def save_report(report: Dict[str, Any], output_dir: str, experiment_name: str) -> str:
-    """
-    Save a report to a JSON file.
+def save_report(report: dict[str, Any], output_dir: str, experiment_name: str) -> str:
+    """Save a report to a JSON file.
 
     Args:
         report: Report dictionary
@@ -195,6 +193,7 @@ def save_report(report: Dict[str, Any], output_dir: str, experiment_name: str) -
 
     Returns:
         Path to the saved report
+
     """
     report_path = os.path.join(output_dir, f"{experiment_name}_report.json")
     with open(report_path, "w") as f:

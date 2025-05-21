@@ -1,10 +1,9 @@
 import os
-from typing import Optional, Literal, cast
-from typing_extensions import Self
+from typing import Literal, Self, cast
+
+from dotenv import load_dotenv
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field, model_validator
-from dotenv import load_dotenv
-
 
 def load_app_env_vars():
     """Load environment variables from .env file and set LangSmith variables if tracing is enabled."""
@@ -56,21 +55,20 @@ DEFAULT_CHROMA_COLLECTION_NAME = "hermes_product_catalog"
 
 
 class HermesConfig(BaseModel):
-    """
-    Central configuration for the Hermes application.
+    """Central configuration for the Hermes application.
     Values are sourced from environment variables, with defaults provided.
     """
 
     llm_provider: Literal["OpenAI", "Gemini"] = Field(
         default_factory=lambda: cast(Literal["OpenAI", "Gemini"], os.getenv("LLM_PROVIDER", DEFAULT_LLM_PROVIDER))
     )
-    llm_api_key: Optional[str] = None
-    llm_base_url: Optional[str] = None
+    llm_api_key: str | None = None
+    llm_base_url: str | None = None
 
     # Model configurations
-    llm_strong_model_name: Optional[str] = None
-    llm_weak_model_name: Optional[str] = None
-    llm_model_name: Optional[str] = None  # For backward compatibility
+    llm_strong_model_name: str | None = None
+    llm_weak_model_name: str | None = None
+    llm_model_name: str | None = None  # For backward compatibility
 
     # Output verification with strong model
     llm_output_verification: bool = Field(
@@ -137,9 +135,8 @@ class HermesConfig(BaseModel):
         return {"configurable": {"hermes_config": self}}
 
     @classmethod
-    def from_runnable_config(cls, config: Optional[RunnableConfig] = None) -> Self:
-        """
-        Creates a HermesConfig instance from a LangChain RunnableConfig (or a dictionary).
+    def from_runnable_config(cls, config: RunnableConfig | None = None) -> Self:
+        """Creates a HermesConfig instance from a LangChain RunnableConfig (or a dictionary).
         This allows LangGraph components to access a structured configuration.
 
         Args:
@@ -147,6 +144,7 @@ class HermesConfig(BaseModel):
 
         Returns:
             An instance of HermesConfig.
+
         """
         if config is None:
             return cls()

@@ -1,32 +1,52 @@
-"""
-Main function for analyzing customer emails.
-"""
+"""Main function for analyzing customer emails."""
 
-from typing import Literal
-from langsmith import traceable
-from langchain_core.runnables import RunnableConfig
 import json
+from typing import Literal
 
-from .models import (
-    EmailAnalysis,
-    ClassifierInput,
-    ClassifierOutput,
-)
-from .prompts import get_prompt
+from langchain_core.runnables import RunnableConfig
+from langsmith import traceable
+
 from ...config import HermesConfig
-from ...utils.llm_client import get_llm_client
-from ...data_processing.product_deduplication import get_product_mention_stats
 from ...model.enums import Agents
 from ...types import WorkflowNodeOutput
 from ...utils.errors import create_node_response
+from ...utils.llm_client import get_llm_client
+from .models import (
+    ClassifierInput,
+    ClassifierOutput,
+    EmailAnalysis,
+    ProductMention,
+    Segment,
+    ProductCategory,
+    SegmentType
+)
+from .prompts import get_prompt
 
+async def get_product_mention_stats(email_analysis: EmailAnalysis) -> dict[str, int]:
+    """Analyzes product mentions from email analysis results to provide statistics."""
+    unique_product_ids: set[str] = set()
+    segments_with_products = 0
+    total_mentions = 0
+
+    for segment in email_analysis.segments:
+        if segment.product_mentions and len(segment.product_mentions) > 0:
+            segments_with_products += 1
+            for product in segment.product_mentions:
+                if product.product_id:
+                    unique_product_ids.add(product.product_id)
+                total_mentions += 1
+
+    return {
+        "unique_products": len(unique_product_ids),
+        "segments_with_products": segments_with_products,
+        "total_mentions": total_mentions,
+    }
 
 @traceable(run_type="chain")
 async def analyze_email(
     state: ClassifierInput, runnable_config: RunnableConfig
 ) -> WorkflowNodeOutput[Literal[Agents.CLASSIFIER], ClassifierOutput]:
-    """
-    Analyzes a customer email to extract structured information about intent, product references, and customer signals.
+    """Analyzes a customer email to extract structured information about intent, product references, and customer signals.
 
     Args:
         state (ClassifierInput): The input model containing email_id, subject, and message.
@@ -34,6 +54,7 @@ async def analyze_email(
 
     Returns:
         Dict[str, Any]: In the LangGraph workflow, returns {"classifier": ClassifierOutput} or {"errors": Error}
+
     """
     try:
         hermes_config = HermesConfig.from_runnable_config(runnable_config)

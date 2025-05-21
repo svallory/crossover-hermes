@@ -1,9 +1,10 @@
 """Integration tests for the Hermes email processing pipeline."""
 
-import unittest
-from unittest.mock import patch, MagicMock, AsyncMock
-import pandas as pd
 import asyncio
+import unittest
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pandas as pd
 
 # Set up a proper mock environment
 with patch.dict(
@@ -23,14 +24,12 @@ with patch.dict(
     pass
 
 # Import test fixtures first (doesn't depend on mocked modules)
+# Import the real configuration (not mocked)
+from src.hermes.config import HermesConfig
 from tests.fixtures import (
     get_test_cases,
     load_sample_data,
 )
-
-# Import the real configuration (not mocked)
-from src.hermes.config import HermesConfig
-
 
 # Mock required modules
 class MockHermesState:

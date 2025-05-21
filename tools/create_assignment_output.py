@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Script to generate the assignment output spreadsheet.
+"""Script to generate the assignment output spreadsheet.
 
 This script runs the main Hermes workflow from main.py and then
 generates the assignment submission in Google Sheets format,
@@ -10,23 +9,22 @@ Usage:
   python -m src.hermes.create_assignment_output [--limit N]
 """
 
-import os
-import asyncio
 import argparse
+import asyncio
+import os
 
 # Import the main function from main.py
-from src.hermes.main import main, create_output_spreadsheet
+from src.hermes.main import create_output_spreadsheet, main
 
 # Import the output data preparation function from test_helpers
 from tests.integration.test_helpers import prepare_output_data
 
-
 async def generate_assignment_output(limit: int = None):
-    """
-    Generate the assignment output in Google Sheets format.
+    """Generate the assignment output in Google Sheets format.
 
     Args:
         limit: Optional limit of emails to process
+
     """
     # Set environment variable for processing limit if specified
     if limit is not None:

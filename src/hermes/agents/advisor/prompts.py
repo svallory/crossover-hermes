@@ -1,14 +1,12 @@
-"""
-Inquiry Responder prompts for use with LangChain.
-"""
+"""Inquiry Responder prompts for use with LangChain."""
 
-from typing import Dict
+
 from langchain_core.prompts import PromptTemplate
 
 from src.hermes.model.enums import Agents
 
 # Dictionary to store all prompt templates
-PROMPTS: Dict[str, PromptTemplate] = {}
+PROMPTS: dict[str, PromptTemplate] = {}
 
 # Main Inquiry Responder Prompt
 markdown = str
@@ -79,8 +77,7 @@ PROMPTS[Agents.ADVISOR] = PromptTemplate.from_template(advisor_prompt_template_s
 
 
 def get_prompt(key: Agents) -> PromptTemplate:
-    """
-    Get a specific prompt template by key.
+    """Get a specific prompt template by key.
 
     Args:
         key: The key of the prompt template to retrieve.
@@ -90,6 +87,7 @@ def get_prompt(key: Agents) -> PromptTemplate:
 
     Raises:
         KeyError: If the key doesn't exist in the PROMPTS dictionary.
+
     """
     if key not in PROMPTS:
         raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")

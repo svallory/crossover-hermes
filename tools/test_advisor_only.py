@@ -1,22 +1,21 @@
 #!/usr/bin/env python
-"""
-Test script to run the inquiry responder in isolation.
+"""Test script to run the inquiry responder in isolation.
 This script initializes the vector store and directly calls the respond_to_inquiry function.
 """
 
 import asyncio
+
 from dotenv import load_dotenv
 
-from src.hermes.agents.classifier.models import EmailAnalysis, Segment, SegmentType, ProductMention
 from src.hermes.agents.advisor.agent import respond_to_inquiry, search_vector_store
 from src.hermes.agents.advisor.models import AdvisorInput, ClassifierOutput
+from src.hermes.agents.classifier.models import EmailAnalysis, ProductMention, Segment, SegmentType
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.vector_store import VectorStore
-from src.hermes.model import ProductCategory, Agents
-
+from src.hermes.model import Agents, ProductCategory
 
 async def test_vector_store_search():
-    """Test the search_vector_store function directly"""
+    """Test the search_vector_store function directly."""
     # Load environment variables
     load_dotenv()
 
@@ -41,7 +40,7 @@ async def test_vector_store_search():
 
 
 async def test_advisor():
-    """Test the full advisor function"""
+    """Test the full advisor function."""
     # Load environment variables
     load_dotenv()
 
@@ -123,7 +122,7 @@ async def test_advisor():
 
 
 async def main():
-    """Run the tests"""
+    """Run the tests."""
     print("TESTING INQUIRY RESPONDER COMPONENTS\n" + "-" * 40)
 
     # First test just the vector store search

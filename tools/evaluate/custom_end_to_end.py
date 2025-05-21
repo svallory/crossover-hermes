@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Custom end-to-end evaluator for Hermes workflow.
+"""Custom end-to-end evaluator for Hermes workflow.
 
 This module provides a simplified version of the evaluation that only runs
 the end-to-end evaluation with custom criteria focused on:
@@ -12,12 +11,12 @@ Usage:
   python -m tools.evaluate.custom_end_to_end --dataset-id UUID [--experiment-name NAME]
 """
 
-import sys
-import asyncio
 import argparse
-import uuid
+import asyncio
 import json
-from typing import Dict, List, Any, Optional
+import sys
+import uuid
+from typing import Any
 
 # Add project root to system path if necessary
 from .utils import PROJECT_ROOT, save_report
@@ -26,15 +25,16 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import Hermes config
+from langchain.evaluation import load_evaluator
+from langchain_openai import ChatOpenAI
+
+# LangSmith imports
+from langsmith import Client
+
 from src.hermes.config import load_app_env_vars
 
 # Import test output dir
 from tests.integration.test_agent_flow import OUTPUT_DIR_TEST
-
-# LangSmith imports
-from langsmith import Client
-from langchain_openai import ChatOpenAI
-from langchain.evaluation import load_evaluator
 
 # Import workflow runner
 from .workflow_runner import run_with_dataset
@@ -77,12 +77,11 @@ Provide your evaluation in the following format:
 
 
 async def run_custom_end_to_end_evaluation(
-    results: List[Dict[str, Any]],
-    experiment_name: Optional[str] = None,
-    output_dir: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Run only the end-to-end evaluation with custom criteria.
+    results: list[dict[str, Any]],
+    experiment_name: str | None = None,
+    output_dir: str | None = None,
+) -> dict[str, Any]:
+    """Run only the end-to-end evaluation with custom criteria.
 
     Args:
         results: Results from running the workflow
@@ -91,6 +90,7 @@ async def run_custom_end_to_end_evaluation(
 
     Returns:
         Evaluation report
+
     """
     # Use default output directory if none specified
     if not output_dir:
@@ -254,14 +254,14 @@ async def run_custom_end_to_end_evaluation(
         return report
 
 
-async def main_async(dataset_id: str, experiment_name: Optional[str] = None, limit: Optional[int] = None):
-    """
-    Main async function to run the workflow and custom end-to-end evaluation.
+async def main_async(dataset_id: str, experiment_name: str | None = None, limit: int | None = None):
+    """Main async function to run the workflow and custom end-to-end evaluation.
 
     Args:
         dataset_id: ID of the LangSmith dataset
         experiment_name: Custom name for the experiment
         limit: Maximum number of examples to process
+
     """
     # Ensure dataset_id is a string without uuid wrapper if necessary
     if not dataset_id:

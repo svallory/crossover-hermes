@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import unittest
-import os
-import sys
 import json
-import tempfile
-import shutil
+import os
 import re
+import shutil
+import sys
+import tempfile
+import unittest
 
 # Add the parent directory to sys.path to import the tool module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -38,7 +38,7 @@ class TestIpynbToMarkdown(unittest.TestCase):
         self.assertTrue(os.path.exists(output_file))
 
         # Read the content of the output markdown file
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             markdown_content = f.read()
 
         # Check for code block markers and {cell} attribute
@@ -71,10 +71,10 @@ class TestIpynbToMarkdown(unittest.TestCase):
         self.assertTrue(os.path.exists(output_notebook))
 
         # Load both the original and round-trip notebooks
-        with open(input_notebook, "r") as f:
+        with open(input_notebook) as f:
             original_notebook = json.load(f)
 
-        with open(output_notebook, "r") as f:
+        with open(output_notebook) as f:
             round_trip_notebook = json.load(f)
 
         # Check that both notebooks have the same format
@@ -107,14 +107,14 @@ class TestIpynbToMarkdown(unittest.TestCase):
         ipynb_to_markdown.convert_notebook_to_markdown(input_file, output_file)
 
         # Read the content of the output markdown file
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             markdown_content = f.read()
 
         # Count the code block markers (```python {cell})
         code_blocks = re.findall(r"```\w+\s+\{cell\}", markdown_content)
 
         # Load the original notebook to count code cells
-        with open(input_file, "r") as f:
+        with open(input_file) as f:
             notebook = json.load(f)
 
         code_cells = [cell for cell in notebook["cells"] if cell["cell_type"] == "code"]

@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Annotated
+from typing import Annotated, Any
+
+import pandas as pd  # type: ignore
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages  # type: ignore
-import pandas as pd  # type: ignore
 
 # Import AlternativeProduct from model
 
@@ -16,30 +17,30 @@ class HermesState:
 
     # Input email data
     email_id: str
-    email_subject: Optional[str] = None
+    email_subject: str | None = None
     email_message: str = ""
 
     # Agent outputs at each stage (stored as dictionaries for LangGraph state)
     # The actual Pydantic models for these are defined elsewhere (e.g., agents or common_models)
     # and would be instantiated from these dicts by the agents consuming them.
-    email_analysis: Optional[Dict[str, Any]] = None
+    email_analysis: dict[str, Any] | None = None
     # order_result: Optional[Dict[str, Any]] = None # Placeholder if order processing is added
     # inquiry_result: Optional[Dict[str, Any]] = None # Placeholder if inquiry resolution is added
-    final_response: Optional[str] = None  # Placeholder for final email response
+    final_response: str | None = None  # Placeholder for final email response
 
     # LangGraph message history for agent interactions
-    messages: Annotated[List[BaseMessage], add_messages] = field(default_factory=list)
+    messages: Annotated[list[BaseMessage], add_messages] = field(default_factory=list)
 
     # Error tracking
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     # Optional metadata that might be useful for tracking or debugging
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     # Resources available to agents through state
     # repr=False to avoid large dataframes in state representation if printed
-    product_catalog_df: Optional[pd.DataFrame] = field(default=None, repr=False)
-    vector_store: Optional[Any] = field(default=None, repr=False)  # ChromaDB client or similar
+    product_catalog_df: pd.DataFrame | None = field(default=None, repr=False)
+    vector_store: Any | None = field(default=None, repr=False)  # ChromaDB client or similar
 
     # Added from the email analyzer agent in the notebook
-    first_pass: Optional[Dict[str, Any]] = None
+    first_pass: dict[str, Any] | None = None

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Main entry point for Hermes evaluation tools.
+"""Main entry point for Hermes evaluation tools.
 
 This module provides the main functionality for running the Hermes agent flow
 and evaluating its performance using LangSmith. It can automatically upload
@@ -16,53 +15,55 @@ Options:
   --dataset-name     Custom name for the dataset when auto-uploading to LangSmith
 """
 
+import argparse
+import asyncio
+import datetime
 import os
 import sys
-import asyncio
-import argparse
 import uuid
-import datetime
+from typing import Any
+
 import requests
-from typing import Dict, List, Any, Optional
 
 # Add project root to system path if necessary
 from .utils import (
     PROJECT_ROOT,
+    format_evaluation_scores,
     load_results_from_directory,
     save_report,
-    format_evaluation_scores,
 )
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import Hermes config
+from langchain_openai import ChatOpenAI
+
+# LangSmith imports
+from langsmith import Client
+
 from src.hermes.config import load_app_env_vars
 
 # Import test output dir
 from tests.integration.test_agent_flow import OUTPUT_DIR_TEST
 
-# LangSmith imports
-from langsmith import Client
-from langchain_openai import ChatOpenAI
+from .evaluators import convert_to_serializable, evaluate_master
 
 # Import our modules
 from .workflow_runner import run_with_dataset
-from .evaluators import evaluate_master, convert_to_serializable
 
 # Load environment variables
 load_app_env_vars()
 
 
 def upload_experiment_to_langsmith(
-    results: List[Dict[str, Any]],
+    results: list[dict[str, Any]],
     dataset_name: str,
-    experiment_name: Optional[str] = None,
-    dataset_id: Optional[str] = None,
-    report: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
-    """
-    Upload experiment results to LangSmith.
+    experiment_name: str | None = None,
+    dataset_id: str | None = None,
+    report: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Upload experiment results to LangSmith.
 
     Args:
         results: List of processed email results
@@ -73,6 +74,7 @@ def upload_experiment_to_langsmith(
 
     Returns:
         Response JSON from LangSmith API
+
     """
     if not experiment_name:
         experiment_name = f"hermes_experiment_{uuid.uuid4().hex[:8]}"
@@ -163,14 +165,13 @@ def upload_experiment_to_langsmith(
 
 
 async def run_evaluation(
-    results: List[Dict[str, Any]],
-    experiment_name: Optional[str] = None,
-    output_dir: Optional[str] = None,
+    results: list[dict[str, Any]],
+    experiment_name: str | None = None,
+    output_dir: str | None = None,
     auto_upload: bool = True,
-    dataset_name: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Evaluate the results of running the Hermes agent flow using the master evaluator.
+    dataset_name: str | None = None,
+) -> dict[str, Any]:
+    """Evaluate the results of running the Hermes agent flow using the master evaluator.
 
     Args:
         results: Results from running the workflow
@@ -181,6 +182,7 @@ async def run_evaluation(
 
     Returns:
         Evaluation report
+
     """
     # Use default output directory if none specified
     if not output_dir:
@@ -347,15 +349,14 @@ async def run_evaluation(
 
 
 async def main_async(
-    dataset_id: Optional[str] = None,
-    experiment_name: Optional[str] = None,
-    result_dir: Optional[str] = None,
+    dataset_id: str | None = None,
+    experiment_name: str | None = None,
+    result_dir: str | None = None,
     auto_upload: bool = True,
-    dataset_name: Optional[str] = None,
-    limit: Optional[int] = None,
+    dataset_name: str | None = None,
+    limit: int | None = None,
 ):
-    """
-    Main async function to run the workflow and evaluation.
+    """Main async function to run the workflow and evaluation.
 
     Args:
         dataset_id: ID of the LangSmith dataset
@@ -364,6 +365,7 @@ async def main_async(
         auto_upload: Whether to automatically upload results to LangSmith
         dataset_name: Name for the dataset in LangSmith when auto-uploading
         limit: Maximum number of examples to process
+
     """
     # Determine whether to use existing dataset or load results
     results = []

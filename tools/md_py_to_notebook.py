@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 import argparse
 import json
-import re
 import os
+import re
 import sys
-from typing import List, Dict, Any, Optional
+from typing import Any
 
-
-def parse_markdown_file(file_path: str) -> List[Dict[str, Any]]:
-    """
-    Parse a markdown file into Jupyter notebook cells.
+def parse_markdown_file(file_path: str) -> list[dict[str, Any]]:
+    """Parse a markdown file into Jupyter notebook cells.
     - Code blocks with ``` and {cell} attribute become code cells
     - Code blocks with ~~~ remain as part of markdown
-    - Supports attributes like ```python {cell} for special handling
+    - Supports attributes like ```python {cell} for special handling.
     """
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
 
     cells = []
@@ -100,13 +98,12 @@ def parse_markdown_file(file_path: str) -> List[Dict[str, Any]]:
     return cells
 
 
-def parse_python_file(file_path: str) -> List[Dict[str, Any]]:
-    """
-    Parse a Python file into Jupyter notebook cells.
+def parse_python_file(file_path: str) -> list[dict[str, Any]]:
+    """Parse a Python file into Jupyter notebook cells.
     - Regular Python code becomes code cells
-    - Triple quotes with {cell} attribute become markdown cells
+    - Triple quotes with {cell} attribute become markdown cells.
     """
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
 
     # Find all triple-quote blocks with {cell} attribute for markdown cells
@@ -191,10 +188,8 @@ def parse_python_file(file_path: str) -> List[Dict[str, Any]]:
     return cells
 
 
-def create_notebook(cells: List[Dict[str, Any]], metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-    """
-    Create a Jupyter notebook structure with the given cells and metadata.
-    """
+def create_notebook(cells: list[dict[str, Any]], metadata: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Create a Jupyter notebook structure with the given cells and metadata."""
     if metadata is None:
         metadata = {
             "kernelspec": {
@@ -216,9 +211,7 @@ def create_notebook(cells: List[Dict[str, Any]], metadata: Optional[Dict[str, An
 
 
 def convert_file_to_notebook(input_path: str, output_path: str):
-    """
-    Convert a markdown or Python file to a Jupyter notebook.
-    """
+    """Convert a markdown or Python file to a Jupyter notebook."""
     _, ext = os.path.splitext(input_path)
 
     if ext.lower() in [".md", ".markdown"]:
@@ -236,9 +229,8 @@ def convert_file_to_notebook(input_path: str, output_path: str):
     print(f"Converted {input_path} to {output_path}")
 
 
-def find_md_py_files(directory: str) -> List[str]:
-    """
-    Recursively find all markdown and Python files in a directory.
+def find_md_py_files(directory: str) -> list[str]:
+    """Recursively find all markdown and Python files in a directory.
     Returns a sorted list of file paths.
     """
     result = []
@@ -252,9 +244,7 @@ def find_md_py_files(directory: str) -> List[str]:
 
 
 def process_input(input_path: str, output_dir: str):
-    """
-    Process a single input path (file or directory) and convert to notebook.
-    """
+    """Process a single input path (file or directory) and convert to notebook."""
     if os.path.isdir(input_path):
         # Handle directory - find all relevant files and process them
         files = find_md_py_files(input_path)

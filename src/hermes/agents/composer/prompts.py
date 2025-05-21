@@ -1,14 +1,12 @@
-"""
-Response Composer prompts for use with LangChain.
-"""
+"""Response Composer prompts for use with LangChain."""
 
-from typing import Dict
+
 from langchain_core.prompts import PromptTemplate
 
 from src.hermes.model.enums import Agents
 
 # Dictionary to store all prompt templates
-PROMPTS: Dict[str, PromptTemplate] = {}
+PROMPTS: dict[str, PromptTemplate] = {}
 
 # Main Response Composer Prompt
 composer_prompt_template_str = """
@@ -117,8 +115,7 @@ PROMPTS[Agents.COMPOSER] = PromptTemplate.from_template(
 
 
 def get_prompt(key: str) -> PromptTemplate:
-    """
-    Get a specific prompt template by key.
+    """Get a specific prompt template by key.
 
     Args:
         key: The key of the prompt template to retrieve.
@@ -128,6 +125,7 @@ def get_prompt(key: str) -> PromptTemplate:
 
     Raises:
         KeyError: If the key doesn't exist in the PROMPTS dictionary.
+
     """
     if key not in PROMPTS:
         raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")

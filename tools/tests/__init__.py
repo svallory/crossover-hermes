@@ -1,3 +1,1 @@
-"""
-Tests for Jupyter notebook conversion tools.
-"""
+"""Tests for Jupyter notebook conversion tools."""

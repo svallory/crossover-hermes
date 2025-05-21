@@ -1,13 +1,12 @@
-"""
-Pydantic models for the order processor agent.
-"""
+"""Pydantic models for the order processor agent."""
+
+from typing import Literal
 
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
 
 from src.hermes.agents.classifier.models import ClassifierInput, ClassifierOutput
-from .order import OrderedItem
 
+from .order import OrderedItem
 
 class ProcessedOrder(BaseModel):
     """Complete result of processing an order request."""
@@ -18,14 +17,14 @@ class ProcessedOrder(BaseModel):
         description="The overall status of this order"
     )
 
-    ordered_items: List[OrderedItem] = Field(
+    ordered_items: list[OrderedItem] = Field(
         default_factory=list,
         description="List of items in this order with their statuses",
     )
 
-    total_price: Optional[float] = Field(default=None, description="Total price for all available items in the order")
+    total_price: float | None = Field(default=None, description="Total price for all available items in the order")
 
-    message: Optional[str] = Field(
+    message: str | None = Field(
         default=None,
         description="Additional information about this order processing result",
     )

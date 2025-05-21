@@ -97,7 +97,24 @@ docstring-code-format = true
 docstring-code-line-length = 88
 
 [tool.ruff.lint]
-ignore = []
+ignore = [
+  "UP038"
+]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "DOC",  # Pydoclint
+    # "D",  # Pydocstyle
+    "ERA", # commented out code
+    "F",  # pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+    "C901", # too complex
+    "PD", # Pandas
+    "PERF", # performance
+    "PLR", # PyLint
+    # "TRY", # Tryceratops https://docs.astral.sh/ruff/rules/#tryceratops-try
+]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -109,3 +126,8 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.per-file-ignores]
 # Ignore `F403` (don't use import *) in all `__init__.py` files.
 "__init__.py" = ["F403"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "hermes"]
+case-sensitive = true
+lines-after-imports = 1

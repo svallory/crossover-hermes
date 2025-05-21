@@ -3,9 +3,8 @@
 import os
 import re
 
-
 def get_module_files(directory):
-    """Get all Python files in a directory excluding __init__.py"""
+    """Get all Python files in a directory excluding __init__.py."""
     py_files = []
     for file in os.listdir(directory):
         if file.endswith(".py") and file != "__init__.py":
@@ -14,12 +13,12 @@ def get_module_files(directory):
 
 
 def process_init_file(init_path):
-    """Process an __init__.py file to use wildcard imports"""
+    """Process an __init__.py file to use wildcard imports."""
     directory = os.path.dirname(init_path)
     module_files = get_module_files(directory)
 
     # Read the original content
-    with open(init_path, "r") as f:
+    with open(init_path) as f:
         content = f.read()
 
     # Extract docstring if present
@@ -43,7 +42,7 @@ def process_init_file(init_path):
 
 
 def main():
-    """Find and update all __init__.py files in the src/hermes directory"""
+    """Find and update all __init__.py files in the src/hermes directory."""
     for root, _, files in os.walk("src/hermes"):
         if "__init__.py" in files:
             init_path = os.path.join(root, "__init__.py")

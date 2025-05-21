@@ -1,30 +1,26 @@
-"""
-Functions for resolving product mentions to catalog products.
-"""
+"""Functions for resolving product mentions to catalog products."""
 
-from typing import Optional, Dict, Any, Literal, List, Tuple
-from langchain_core.runnables import RunnableConfig
-import time
 import json
+import time
+from typing import Any, Literal
+
+from langchain_core.runnables import RunnableConfig
 
 from src.hermes.agents.classifier.models import ClassifierOutput, ProductMention
 from src.hermes.agents.stockkeeper.models import ResolvedProductsOutput
 from src.hermes.agents.stockkeeper.prompts import get_prompt
+from src.hermes.config import HermesConfig
+from src.hermes.data_processing.load_data import load_products_df
+from src.hermes.data_processing.vector_store import VectorStore
+from src.hermes.model import ProductCategory, Season
+from src.hermes.model.enums import Agents
 from src.hermes.model.product import Product
 from src.hermes.types import WorkflowNodeOutput
-from src.hermes.model.enums import Agents
 from src.hermes.utils.errors import create_node_response
-from src.hermes.data_processing.vector_store import VectorStore
-from src.hermes.data_processing.load_data import load_products_df
-from src.hermes.model import ProductCategory, Season
 from src.hermes.utils.llm_client import get_llm_client
-from src.hermes.config import HermesConfig
 
-
-def traceable(run_type: str, name: Optional[str] = None):
-    """
-    Decorator for LangSmith tracing.
-    """
+def traceable(run_type: str, name: str | None = None):
+    """Decorator for LangSmith tracing."""
 
     def decorator(func):
         async def wrapper(*args, **kwargs):
@@ -46,15 +42,15 @@ SIMILAR_MATCH_THRESHOLD = 0.75  # Threshold for potential matches to consider
 AMBIGUITY_THRESHOLD = 0.15  # Maximum difference between top matches to consider ambiguous
 
 
-def build_resolution_query(mention: ProductMention) -> Dict[str, Any]:
-    """
-    Build a query for product resolution based on a product mention.
+def build_resolution_query(mention: ProductMention) -> dict[str, Any]:
+    """Build a query for product resolution based on a product mention.
 
     Args:
         mention: The product mention to resolve
 
     Returns:
         A query dictionary with all available identifying information
+
     """
     query = {}
 
@@ -76,15 +72,15 @@ def build_resolution_query(mention: ProductMention) -> Dict[str, Any]:
     return query
 
 
-def build_nl_query(query: Dict[str, Any]) -> str:
-    """
-    Build a natural language query from a query dictionary.
+def build_nl_query(query: dict[str, Any]) -> str:
+    """Build a natural language query from a query dictionary.
 
     Args:
         query: Query parameters to use for resolution
 
     Returns:
         A natural language query string
+
     """
     query_parts = []
 
@@ -109,15 +105,15 @@ def build_nl_query(query: Dict[str, Any]) -> str:
     return "Unknown product"
 
 
-def get_product_by_id(product_id: str) -> Optional[Product]:
-    """
-    Find a product by exact ID match.
+def get_product_by_id(product_id: str) -> Product | None:
+    """Find a product by exact ID match.
 
     Args:
         product_id: The product ID to search for
 
     Returns:
         A Product object if found, None otherwise
+
     """
     products_df = load_products_df()
     if products_df is None:
@@ -130,9 +126,8 @@ def get_product_by_id(product_id: str) -> Optional[Product]:
     return _create_product_from_row(product_data.iloc[0])
 
 
-def find_products_by_name(name: str, threshold: float = 0.8, top_n: int = 3) -> List[Tuple[Product, float]]:
-    """
-    Find products by name using fuzzy matching.
+def find_products_by_name(name: str, threshold: float = 0.8, top_n: int = 3) -> list[tuple[Product, float]]:
+    """Find products by name using fuzzy matching.
 
     Args:
         name: The product name to search for
@@ -141,8 +136,9 @@ def find_products_by_name(name: str, threshold: float = 0.8, top_n: int = 3) -> 
 
     Returns:
         A list of (Product, score) tuples sorted by descending score
+
     """
-    results: List[Tuple[Product, float]] = []
+    results: list[tuple[Product, float]] = []
     products_df = load_products_df()
 
     if products_df is None or name is None or not name.strip():
@@ -176,9 +172,8 @@ def find_products_by_name(name: str, threshold: float = 0.8, top_n: int = 3) -> 
     return results[:top_n]
 
 
-def resolve_product_reference(query: Dict[str, Any], max_results: int = 3) -> List[Tuple[Product, float]]:
-    """
-    Resolve a product reference using a cascading strategy.
+def resolve_product_reference(query: dict[str, Any], max_results: int = 3) -> list[tuple[Product, float]]:
+    """Resolve a product reference using a cascading strategy.
 
     Args:
         query: Query parameters to use for resolution
@@ -186,6 +181,7 @@ def resolve_product_reference(query: Dict[str, Any], max_results: int = 3) -> Li
 
     Returns:
         A list of (Product, confidence) tuples sorted by descending confidence
+
     """
     results = []
 
@@ -236,14 +232,14 @@ def resolve_product_reference(query: Dict[str, Any], max_results: int = 3) -> Li
 
 
 def _create_product_from_row(row: Any) -> Product:
-    """
-    Create a Product instance from a DataFrame row.
+    """Create a Product instance from a DataFrame row.
 
     Args:
         row: A row from the products DataFrame
 
     Returns:
         A Product instance with data from the row
+
     """
     # Handle seasons - convert from string or use default
     seasons_raw = row.get("season", "Spring")
@@ -268,9 +264,8 @@ def _create_product_from_row(row: Any) -> Product:
 
 async def run_deduplication_llm(
     mentions_text: str, email_context: str, hermes_config: HermesConfig
-) -> List[Dict[str, Any]]:
-    """
-    Run the LLM to deduplicate product mentions.
+) -> list[dict[str, Any]]:
+    """Run the LLM to deduplicate product mentions.
 
     Args:
         mentions_text: Formatted text of all the product mentions
@@ -279,6 +274,7 @@ async def run_deduplication_llm(
 
     Returns:
         A list of dictionaries representing deduplicated product mentions
+
     """
     # Prepare prompt variables
     prompt_vars = {
@@ -318,10 +314,9 @@ async def run_deduplication_llm(
 
 
 async def run_disambiguation_llm(
-    mention_info: Dict[str, Any], candidate_text: str, email_context: str, hermes_config: HermesConfig
-) -> Dict[str, Any]:
-    """
-    Run the LLM to disambiguate between product candidates.
+    mention_info: dict[str, Any], candidate_text: str, email_context: str, hermes_config: HermesConfig
+) -> dict[str, Any]:
+    """Run the LLM to disambiguate between product candidates.
 
     Args:
         mention_info: Dictionary with product mention information
@@ -331,6 +326,7 @@ async def run_disambiguation_llm(
 
     Returns:
         A dictionary with the LLM's decision (selected_product_id, confidence, reasoning)
+
     """
     # Prepare prompt variables
     prompt_vars = {
@@ -377,12 +373,11 @@ async def run_disambiguation_llm(
 
 
 async def deduplicate_mentions(
-    mentions: List[ProductMention],
+    mentions: list[ProductMention],
     email_context: str,
     hermes_config: HermesConfig,
-) -> List[ProductMention]:
-    """
-    Use an LLM to deduplicate product mentions from an email.
+) -> list[ProductMention]:
+    """Use an LLM to deduplicate product mentions from an email.
 
     Args:
         mentions: List of extracted product mentions
@@ -391,6 +386,7 @@ async def deduplicate_mentions(
 
     Returns:
         A list of deduplicated product mentions
+
     """
     if not mentions or len(mentions) <= 1:
         return mentions
@@ -446,12 +442,11 @@ async def deduplicate_mentions(
 
 async def disambiguate_with_llm(
     mention: ProductMention,
-    candidates: List[Tuple[Product, float]],
+    candidates: list[tuple[Product, float]],
     email_context: str,
     hermes_config: HermesConfig,
-) -> Dict[str, Any]:
-    """
-    Use an LLM to disambiguate between multiple potential product matches.
+) -> dict[str, Any]:
+    """Use an LLM to disambiguate between multiple potential product matches.
 
     Args:
         mention: The original product mention
@@ -461,6 +456,7 @@ async def disambiguate_with_llm(
 
     Returns:
         A dictionary with the LLM's decision
+
     """
     # Format candidate products for the prompt
     candidate_text = ""
@@ -497,10 +493,9 @@ async def disambiguate_with_llm(
 @traceable(run_type="chain", name="Product Resolution Agent")
 async def resolve_product_mentions(
     state: ClassifierOutput,
-    runnable_config: Optional[RunnableConfig] = None,
+    runnable_config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.STOCKKEEPER], ResolvedProductsOutput]:
-    """
-    Resolves ProductMention objects to actual Product objects from the catalog.
+    """Resolves ProductMention objects to actual Product objects from the catalog.
 
     Args:
         state: The email analyzer output containing product mentions
@@ -508,6 +503,7 @@ async def resolve_product_mentions(
 
     Returns:
         A WorkflowNodeOutput containing either resolved products or an error
+
     """
     try:
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
@@ -676,23 +672,22 @@ async def resolve_product_mentions(
 
                 # If LLM couldn't decide or we couldn't find the product, mark as unresolved
                 unresolved_mentions.append(mention)
+            # 5. If not ambiguous, use the highest confidence match if it's above threshold
+            elif candidates[0][1] >= SIMILAR_MATCH_THRESHOLD:
+                product, confidence = candidates[0]
+
+                # Add resolution metadata
+                if not product.metadata:
+                    product.metadata = {}
+                product.metadata["resolution_confidence"] = confidence
+                product.metadata["resolution_method"] = "highest_confidence"
+                product.metadata["requested_quantity"] = mention.quantity
+
+                resolved_products.append(product)
+                deterministic_resolutions += 1
             else:
-                # 5. If not ambiguous, use the highest confidence match if it's above threshold
-                if candidates[0][1] >= SIMILAR_MATCH_THRESHOLD:
-                    product, confidence = candidates[0]
-
-                    # Add resolution metadata
-                    if not product.metadata:
-                        product.metadata = {}
-                    product.metadata["resolution_confidence"] = confidence
-                    product.metadata["resolution_method"] = "highest_confidence"
-                    product.metadata["requested_quantity"] = mention.quantity
-
-                    resolved_products.append(product)
-                    deterministic_resolutions += 1
-                else:
-                    # Confidence too low, mark as unresolved
-                    unresolved_mentions.append(mention)
+                # Confidence too low, mark as unresolved
+                unresolved_mentions.append(mention)
 
         # Calculate total resolution time
         resolution_time_ms = int((time.time() - start_time) * 1000)

@@ -1,18 +1,17 @@
-"""
-Unit tests for the promotion_rulesets module.
+"""Unit tests for the promotion_rulesets module.
 
 These tests verify the functionality of the TypedDict-based promotion system
 and ensure that various promotion types can be created correctly.
 """
 
 import unittest
+
 from src.hermes.agents.fulfiller.promotion_rulesets import (
     Condition,
     Effect,
-    create_promotion,
     create_from_text,
+    create_promotion,
 )
-
 
 class TestPromotionRulesets(unittest.TestCase):
     """Test cases for the promotion ruleset system."""

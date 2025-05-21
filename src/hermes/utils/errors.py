@@ -1,8 +1,7 @@
 from typing import TypeVar
 
-from src.hermes.model.error import Error
-
 from src.hermes.model.enums import Agents
+from src.hermes.model.error import Error
 from src.hermes.types import WorkflowNodeOutput
 
 SpecificAgent = TypeVar("SpecificAgent", bound=Agents)
@@ -12,8 +11,7 @@ OutputType = TypeVar("OutputType")
 def create_node_response(
     agent: SpecificAgent, output_or_error: OutputType | Exception
 ) -> WorkflowNodeOutput[SpecificAgent, OutputType]:
-    """
-    Creates a standardized response dictionary for a workflow node (agent).
+    """Creates a standardized response dictionary for a workflow node (agent).
 
     Args:
         agent (SpecificAgent): The specific agent enum member producing the response.
@@ -25,6 +23,7 @@ def create_node_response(
 
     Raises:
         TypeError: If output_or_error is neither OutputType nor Exception.
+
     """
     if isinstance(output_or_error, Exception):
         # Error case

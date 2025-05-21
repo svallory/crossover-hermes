@@ -1,29 +1,28 @@
 """Tests for the Response Composer Agent."""
 
-import unittest
 import asyncio
-from unittest.mock import patch, AsyncMock
-from typing import Dict, Any, Optional
-
-from src.hermes.agents.composer import compose_response_node
-from src.hermes.state import (
-    EmailAnalysis,
-    ProductReference,
-    CustomerSignal,
-    OrderProcessingResult,
-    OrderItem,
-    InquiryResponse,
-    ProductInformation,
-)
-from src.hermes.state import HermesState
-from src.hermes.config import HermesConfig
-from tests.fixtures import get_test_product, get_test_cases
-from tests.__init__ import mock_openai
+import unittest
+from typing import Any
+from unittest.mock import AsyncMock, patch
 
 # For mocking LLM client
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
+from src.hermes.agents.composer import compose_response_node
+from src.hermes.config import HermesConfig
+from src.hermes.state import (
+    CustomerSignal,
+    EmailAnalysis,
+    HermesState,
+    InquiryResponse,
+    OrderItem,
+    OrderProcessingResult,
+    ProductInformation,
+    ProductReference,
+)
+from tests.__init__ import mock_openai
+from tests.fixtures import get_test_cases, get_test_product
 
 class MockRunnableLLMComposer(RunnableSerializable):
     """A mock Runnable LLM for response composer tests."""
@@ -40,12 +39,12 @@ class MockRunnableLLMComposer(RunnableSerializable):
         else:
             self.mock_raw_string_output = str(output)
 
-    async def ainvoke(self, input_data: Any, config: Optional[Dict[str, Any]] = None, **kwargs: Any) -> AIMessage:
+    async def ainvoke(self, input_data: Any, config: dict[str, Any] | None = None, **kwargs: Any) -> AIMessage:
         if self.output_type == "json":
             return AIMessage(content=self.mock_output_json_string)
         return AIMessage(content=self.mock_raw_string_output)  # StrOutputParser expects string content
 
-    def invoke(self, input_data: Any, config: Optional[Dict[str, Any]] = None, **kwargs: Any) -> AIMessage:
+    def invoke(self, input_data: Any, config: dict[str, Any] | None = None, **kwargs: Any) -> AIMessage:
         if self.output_type == "json":
             return AIMessage(content=self.mock_output_json_string)
         return AIMessage(content=self.mock_raw_string_output)

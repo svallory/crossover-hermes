@@ -1,13 +1,12 @@
+import pytest
 from dotenv import load_dotenv
 
-import pytest
 from src.hermes.agents.advisor.agent import respond_to_inquiry
 from src.hermes.agents.advisor.models import AdvisorInput
-from src.hermes.agents.classifier.models import EmailAnalysis, ClassifierOutput, Segment, SegmentType
-from src.hermes.model import Agents
+from src.hermes.agents.classifier.models import ClassifierOutput, EmailAnalysis, Segment, SegmentType
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.vector_store import VectorStore
-
+from src.hermes.model import Agents
 
 @pytest.mark.asyncio
 async def test_advisor_with_vector_store():

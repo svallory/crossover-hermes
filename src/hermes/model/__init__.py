@@ -1,6 +1,4 @@
-"""
-Model package for Hermes.
-"""
+"""Model package for Hermes."""
 
 from .enums import *
 from .error import *

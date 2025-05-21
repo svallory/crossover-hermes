@@ -1,5 +1,4 @@
-from typing import TypedDict, Optional
-
+from typing import TypedDict
 
 class OrderItem(TypedDict):
     """Dictionary representing an item in an order."""
@@ -19,4 +18,4 @@ class OrderResult(TypedDict):
     unit_price: float
     total_price: float
     promotion_applied: bool
-    promotion_description: Optional[str]
+    promotion_description: str | None

@@ -1,15 +1,15 @@
-import pandas as pd  # type: ignore
-from typing import Optional
-from chromadb.api.models.Collection import Collection
-from src.hermes.config import HermesConfig
 
+import pandas as pd  # type: ignore
+from chromadb.api.models.Collection import Collection
+
+from src.hermes.config import HermesConfig
 
 # Use the default from config instead of duplicating it
 INPUT_SPREADSHEET_ID_DEFAULT = HermesConfig().input_spreadsheet_id
 
 # Module-level ("global") variables, initialized to None
-_products_df: Optional[pd.DataFrame] = None
-vector_store: Optional[Collection] = None
+_products_df: pd.DataFrame | None = None
+vector_store: Collection | None = None
 # emails_df can also be made global here if widely needed, or loaded specifically by main.py
 
 
@@ -28,14 +28,14 @@ def load_emails_df(spreadsheet_id: str = INPUT_SPREADSHEET_ID_DEFAULT) -> pd.Dat
 
 
 def load_products_df(spreadsheet_id: str = INPUT_SPREADSHEET_ID_DEFAULT) -> pd.DataFrame:
-    """
-    Loads the products DataFrame from Google Sheets with memoization.
+    """Loads the products DataFrame from Google Sheets with memoization.
 
     Args:
         spreadsheet_id: The Google Spreadsheet ID
 
     Returns:
         DataFrame with product data
+
     """
     global _products_df
 

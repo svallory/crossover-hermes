@@ -1,34 +1,30 @@
-"""
-Main function for processing customer order requests.
-"""
+"""Main function for processing customer order requests."""
 
-from typing import Optional, Dict, Any, Literal
 import json
+from typing import Any, Literal
 
 from src.hermes.config import HermesConfig
-from src.hermes.utils.llm_client import get_llm_client
 from src.hermes.model.enums import Agents
+from src.hermes.tools.catalog_tools import Product, find_product_by_id
 from src.hermes.tools.order_tools import (
-    check_stock,
-    update_stock,
-    find_alternatives_for_oos,
-    StockStatus,
-    ProductNotFound,
-    StockUpdateResult,
-    extract_promotion,
-    PromotionDetails,
-    calculate_discount_price,
     DiscountResult,
+    ProductNotFound,
+    PromotionDetails,
+    StockStatus,
+    StockUpdateResult,
+    calculate_discount_price,
+    check_stock,
+    extract_promotion,
+    find_alternatives_for_oos,
+    update_stock,
 )
-from src.hermes.tools.catalog_tools import find_product_by_id, Product
+from src.hermes.utils.llm_client import get_llm_client
 
-from .models import ProcessedOrder, OrderedItemStatus
+from .models import OrderedItemStatus, ProcessedOrder
 from .prompts import get_prompt
 
-
 def calculate_promotion_discount(llm, original_price: float, promotion_text: str, quantity: int = 1) -> float:
-    """
-    Calculate the discounted price using the dedicated tool or fallback to LLM.
+    """Calculate the discounted price using the dedicated tool or fallback to LLM.
 
     Args:
         llm: The LLM client to use if needed
@@ -38,6 +34,7 @@ def calculate_promotion_discount(llm, original_price: float, promotion_text: str
 
     Returns:
         The discounted unit price
+
     """
     try:
         # First try using the dedicated calculation tool
@@ -85,14 +82,13 @@ def calculate_promotion_discount(llm, original_price: float, promotion_text: str
 
 
 def process_order(
-    email_analysis: Dict[str, Any],
+    email_analysis: dict[str, Any],
     email_id: str = "unknown",
     model_strength: Literal["weak", "strong"] = "strong",
     temperature: float = 0.0,
-    hermes_config: Optional[HermesConfig] = None,
+    hermes_config: HermesConfig | None = None,
 ) -> ProcessedOrder:
-    """
-    Processes a customer order request based on the email analysis.
+    """Processes a customer order request based on the email analysis.
     Simplified version for notebook usage.
 
     Args:
@@ -104,6 +100,7 @@ def process_order(
 
     Returns:
         ProcessedOrder object with the order processing results
+
     """
     try:
         print(f"Processing order request for email {email_id}")
@@ -130,14 +127,13 @@ def process_order(
             else:
                 # Use the dict directly
                 analysis_dict = email_analysis
+        # If it's an OverallState object or something with model_dump
+        elif hasattr(email_analysis, "model_dump"):
+            analysis_dict = email_analysis.model_dump()
+        elif hasattr(email_analysis, "email_analysis") and hasattr(email_analysis.email_analysis, "model_dump"):
+            analysis_dict = email_analysis.email_analysis.model_dump()
         else:
-            # If it's an OverallState object or something with model_dump
-            if hasattr(email_analysis, "model_dump"):
-                analysis_dict = email_analysis.model_dump()
-            elif hasattr(email_analysis, "email_analysis") and hasattr(email_analysis.email_analysis, "model_dump"):
-                analysis_dict = email_analysis.email_analysis.model_dump()
-            else:
-                raise ValueError(f"Cannot extract email analysis from object of type {type(email_analysis)}")
+            raise ValueError(f"Cannot extract email analysis from object of type {type(email_analysis)}")
 
         # Create processing chain including error handling
         order_processing_chain = fulfiller_prompt | llm.with_structured_output(ProcessedOrder)
@@ -148,23 +144,22 @@ def process_order(
         # Handle the response properly with type checking
         if isinstance(response_data, ProcessedOrder):
             processed_order = response_data
+        # If we got a dict, convert it to ProcessedOrder with required fields
+        elif isinstance(response_data, dict):
+            # Make sure required fields are included
+            response_data["email_id"] = email_id
+            if "overall_status" not in response_data:
+                response_data["overall_status"] = "processed"
+            processed_order = ProcessedOrder(**response_data)
         else:
-            # If we got a dict, convert it to ProcessedOrder with required fields
-            if isinstance(response_data, dict):
-                # Make sure required fields are included
-                response_data["email_id"] = email_id
-                if "overall_status" not in response_data:
-                    response_data["overall_status"] = "processed"
-                processed_order = ProcessedOrder(**response_data)
-            else:
-                # Fallback if we got something unexpected
-                processed_order = ProcessedOrder(
-                    email_id=email_id,
-                    overall_status="no_valid_products",
-                    ordered_items=[],
-                    message="Unexpected response type from order processing",
-                    stock_updated=False,
-                )
+            # Fallback if we got something unexpected
+            processed_order = ProcessedOrder(
+                email_id=email_id,
+                overall_status="no_valid_products",
+                ordered_items=[],
+                message="Unexpected response type from order processing",
+                stock_updated=False,
+            )
 
         # Make sure the email_id is set correctly in the result
         if processed_order.email_id != email_id:

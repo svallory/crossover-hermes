@@ -1,24 +1,22 @@
-"""
-Entry point for running the Hermes workflow.
+"""Entry point for running the Hermes workflow.
 This initializes the vector store and runs the workflow.
 """
 
-from typing import Dict, Any
+from typing import Any
+
 from langchain_core.runnables import RunnableConfig
 
 from src.hermes.agents.classifier.models import ClassifierInput
 from src.hermes.agents.workflow.graph import workflow
-from src.hermes.config import HermesConfig
 from src.hermes.agents.workflow.states import OverallState
+from src.hermes.config import HermesConfig
 from src.hermes.data_processing.vector_store import VectorStore
-
 
 async def run_workflow(
     input_state: ClassifierInput,
     hermes_config: HermesConfig,
 ) -> OverallState:
-    """
-    Run the workflow with the given input state and configuration.
+    """Run the workflow with the given input state and configuration.
     Ensures the vector store is initialized before running.
 
     Args:
@@ -27,6 +25,7 @@ async def run_workflow(
 
     Returns:
         The final state of the workflow.
+
     """
     # First, ensure vector store is initialized
     # This is crucial for the inquiry responder to work
@@ -34,7 +33,7 @@ async def run_workflow(
     VectorStore(hermes_config=hermes_config)
 
     # Prepare the runnable config
-    config: Dict[str, Dict[str, Any]] = {
+    config: dict[str, dict[str, Any]] = {
         "configurable": {
             "hermes_config": hermes_config,
         }

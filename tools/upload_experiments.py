@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Upload existing Hermes experiment results to LangSmith.
+"""Upload existing Hermes experiment results to LangSmith.
 
 This script takes experiment results from the output directory and uploads them
 to LangSmith using the /datasets/upload-experiment endpoint.
@@ -9,30 +8,31 @@ Usage:
   python -m tools.upload_experiments --dataset-name NAME [--experiment-name NAME]
 """
 
+import argparse
+import datetime
 import os
 import sys
-import argparse
-import yaml
 import uuid
-import datetime
 from pathlib import Path
+from typing import Any
+
 import requests
-from typing import Dict, List, Any, Optional
-from tests.integration.test_agent_flow import OUTPUT_DIR_TEST
+import yaml
+
 from src.hermes.config import load_app_env_vars
+from tests.integration.test_agent_flow import OUTPUT_DIR_TEST
 
 # Load environment variables
 load_app_env_vars()
 
 
 def upload_experiment_to_langsmith(
-    results: List[Dict[str, Any]],
+    results: list[dict[str, Any]],
     dataset_name: str,
-    experiment_name: Optional[str] = None,
-    dataset_id: Optional[str] = None,
-) -> Dict[str, Any]:
-    """
-    Upload experiment results to LangSmith.
+    experiment_name: str | None = None,
+    dataset_id: str | None = None,
+) -> dict[str, Any]:
+    """Upload experiment results to LangSmith.
 
     Args:
         results: List of processed email results
@@ -42,6 +42,7 @@ def upload_experiment_to_langsmith(
 
     Returns:
         Response JSON from LangSmith API
+
     """
     if not experiment_name:
         experiment_name = f"hermes_experiment_{uuid.uuid4().hex[:8]}"
@@ -146,15 +147,15 @@ yaml.add_multi_constructor("tag:yaml.org,2002:python/object/apply", custom_tag_c
 yaml.add_multi_constructor("tag:yaml.org,2002:python/object/new", custom_tag_constructor, Loader=SafeLoader)
 
 
-def load_results_from_directory(directory: str) -> List[Dict[str, Any]]:
-    """
-    Load results from the output directory.
+def load_results_from_directory(directory: str) -> list[dict[str, Any]]:
+    """Load results from the output directory.
 
     Args:
         directory: Directory containing the YAML files
 
     Returns:
         List of result dictionaries
+
     """
     results = []
     output_dir = Path(directory)
@@ -163,7 +164,7 @@ def load_results_from_directory(directory: str) -> List[Dict[str, Any]]:
         if yaml_file.name.endswith("_report.json"):
             continue
 
-        with open(yaml_file, "r") as f:
+        with open(yaml_file) as f:
             try:
                 data = yaml.load(f, Loader=SafeLoader)
                 results.append(data)

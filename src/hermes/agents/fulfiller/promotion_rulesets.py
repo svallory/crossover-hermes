@@ -1,18 +1,15 @@
-"""
-Rule-based promotion system for Hermes.
+"""Rule-based promotion system for Hermes.
 
 This module provides a flexible, declarative approach to defining promotions
 through combinations of conditions and effects. This allows for creating complex
 promotion rules without requiring code changes when new promotion types are introduced.
 """
 
-from typing import Dict
 
 from .models import PromotionSpec
 
-
 # Example promotions defined as dictionaries
-EXAMPLE_PROMOTIONS: Dict[str, PromotionSpec] = {
+EXAMPLE_PROMOTIONS: dict[str, PromotionSpec] = {
     # Standard percentage discount (e.g. "Get 25% off!")
     "percentage_discount": {
         "conditions": {"min_quantity": 1},

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-StateGraph-based workflow for Hermes agent system using LangGraph.
+"""StateGraph-based workflow for Hermes agent system using LangGraph.
 
 This module defines the agent flow for processing customer emails:
 1. Email Analyzer to classify and segment the email
@@ -11,38 +10,35 @@ This module defines the agent flow for processing customer emails:
 The workflow is implemented as a LangGraph StateGraph.
 """
 
-from typing import (
-    List,
-)
-from typing_extensions import Hashable
+
+from collections.abc import Hashable
+
+from langchain_core.runnables import RunnableConfig
+from langgraph.constants import END, START
 
 # LangGraph imports
 from langgraph.graph import StateGraph
-from langgraph.constants import END, START
-from langchain_core.runnables import RunnableConfig
+
+from src.hermes.agents.advisor.agent import respond_to_inquiry
+
+# Import agent functions directly
+from src.hermes.agents.classifier.agent import analyze_email
 
 # Import agent models
 from src.hermes.agents.classifier.models import (
     ClassifierInput,
 )
-from src.hermes.config import HermesConfig
-
-# Import agent functions directly
-from src.hermes.agents.classifier.agent import analyze_email
-from src.hermes.agents.stockkeeper.agent import resolve_product_mentions
-from src.hermes.agents.fulfiller.agent import process_order
-from src.hermes.agents.advisor.agent import respond_to_inquiry
 from src.hermes.agents.composer.agent import compose_response
-from src.hermes.model import Nodes
-
+from src.hermes.agents.fulfiller.agent import process_order
+from src.hermes.agents.stockkeeper.agent import resolve_product_mentions
 from src.hermes.agents.workflow.states import OverallState
-
+from src.hermes.config import HermesConfig
+from src.hermes.model import Nodes
 
 def route_resolver_result(
     state: OverallState,
-) -> List[Hashable] | Hashable:
+) -> list[Hashable] | Hashable:
     """Route after product resolution based on email intents."""
-
     classifier = state.classifier
 
     if classifier is not None:
@@ -66,8 +62,7 @@ async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dic
 
 
 async def resolve_products_node(state: OverallState, config: RunnableConfig) -> dict:
-    """
-    Wrapper function for resolve_product_mentions that passes the classifier output.
+    """Wrapper function for resolve_product_mentions that passes the classifier output.
 
     Args:
         state: The workflow state containing classifier output
@@ -75,14 +70,15 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
 
     Returns:
         Result from resolve_product_mentions function
+
     """
     # Extract classifier from state
     classifier = state.classifier
 
     if classifier is None:
         # If classifier is None, return an error
-        from src.hermes.utils.errors import create_node_response
         from src.hermes.model.enums import Agents
+        from src.hermes.utils.errors import create_node_response
 
         return create_node_response(
             Agents.STOCKKEEPER, Exception("Email analyzer output is required for product resolution")
@@ -93,8 +89,7 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
 
 
 async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
-    """
-    Wrapper function for process_order that correctly extracts email_id and classifier from state.
+    """Wrapper function for process_order that correctly extracts email_id and classifier from state.
 
     Args:
         state: The workflow state containing classifier output
@@ -102,6 +97,7 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
 
     Returns:
         Result from process_order function in dictionary format
+
     """
     # Extract email_id from state
     email_id = state.email_id
@@ -111,8 +107,8 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
 
     if classifier is None:
         # If classifier is None, return an error
-        from src.hermes.utils.errors import create_node_response
         from src.hermes.model import Agents
+        from src.hermes.utils.errors import create_node_response
 
         return create_node_response(
             Agents.FULFILLER, Exception("Email analyzer output is required for order processing")
@@ -141,9 +137,9 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
     )
 
     # Convert the result to a dictionary for LangGraph
-    from src.hermes.utils.errors import create_node_response
-    from src.hermes.model import Agents
     from src.hermes.agents.fulfiller.models.agent import FulfillerOutput
+    from src.hermes.model import Agents
+    from src.hermes.utils.errors import create_node_response
 
     # Create the expected output type
     fulfiller_output = FulfillerOutput(order_result=processed_order)

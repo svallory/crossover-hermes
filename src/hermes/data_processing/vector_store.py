@@ -1,20 +1,20 @@
-"""
-Module for vector store operations in Hermes using a singleton pattern.
+"""Module for vector store operations in Hermes using a singleton pattern.
 This handles creating, updating, and querying the vector database (ChromaDB).
 """
 
 import os
-from typing import Optional, List, Dict, Any, Tuple, cast
+from typing import Any, cast
 
 import chromadb
 from chromadb.api.models.Collection import Collection
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 
-# Import Hermes models
-from src.hermes.model.product import Product
-from src.hermes.model.enums import ProductCategory, Season
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.load_data import load_products_df
+from src.hermes.model.enums import ProductCategory, Season
+
+# Import Hermes models
+from src.hermes.model.product import Product
 from src.hermes.types import SingletonMeta
 
 # Sentinel for in-memory storage
@@ -41,11 +41,11 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
     _collection = None
 
     def __init__(self, hermes_config: HermesConfig = HermesConfig()):
-        """
-        Initialize the VectorStore with a configuration.
+        """Initialize the VectorStore with a configuration.
 
         Args:
             hermes_config: Hermes configuration with API keys and paths
+
         """
         if self._collection is None:
             self._get_vector_store(hermes_config)
@@ -54,8 +54,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
         self,
         hermes_config: HermesConfig,
     ) -> Collection:
-        """
-        Get the vector store from cache or initialize it.
+        """Get the vector store from cache or initialize it.
         This method first checks if a vector store is already loaded in memory.
         If not, it attempts to load an existing one from disk or creates a new one.
 
@@ -67,6 +66,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
 
         Raises:
             Exception: If there's an error creating or loading the vector store
+
         """
         # If vector store is already initialized, return it
         if self._collection is not None:
@@ -138,8 +138,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
         hermes_config: HermesConfig,
         collection_name: str = COLLECTION_NAME,
     ) -> Collection:
-        """
-        Create a new vector store using ChromaDB from a dataframe of products.
+        """Create a new vector store using ChromaDB from a dataframe of products.
         Optimized for large catalogs by using batch processing.
 
         Args:
@@ -149,6 +148,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
 
         Returns:
             The created ChromaDB collection
+
         """
         # Load product data
         products_df = load_products_df(hermes_config.input_spreadsheet_id)
@@ -197,11 +197,10 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
         self,
         query: str,
         top_k: int = 5,
-        category_filter: Optional[str] = None,
-        filters: Optional[Dict[str, Any]] = None,
-    ) -> List[Product]:
-        """
-        Search products by description using the vector store.
+        category_filter: str | None = None,
+        filters: dict[str, Any] | None = None,
+    ) -> list[Product]:
+        """Search products by description using the vector store.
 
         Args:
             query: Search query
@@ -211,6 +210,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
 
         Returns:
             List of Product objects matching the search
+
         """
         # Make sure we have a vector store
         if self._collection is None:
@@ -235,14 +235,13 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
         if results and "metadatas" in results and results["metadatas"]:
             for metadata_list in results["metadatas"]:
                 for metadata in metadata_list:
-                    product = self.convert_to_product_model(cast(Dict[str, Any], metadata))
+                    product = self.convert_to_product_model(cast(dict[str, Any], metadata))
                     products.append(product)
 
         return products
 
-    def convert_to_product_model(self, metadata: Dict[str, Any]) -> Product:
-        """
-        Convert a metadata dictionary from ChromaDB to a Product model.
+    def convert_to_product_model(self, metadata: dict[str, Any]) -> Product:
+        """Convert a metadata dictionary from ChromaDB to a Product model.
         Assumes all required fields are present in the metadata.
         """
         # Convert seasons from string to list of Season enums
@@ -289,10 +288,9 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
         self,
         query_text: str,
         n_results: int = 5,
-        filter_criteria: Optional[Dict[str, Any]] = None,
-    ) -> List[Tuple[Dict[str, Any], float]]:
-        """
-        Perform a similarity search with scores.
+        filter_criteria: dict[str, Any] | None = None,
+    ) -> list[tuple[dict[str, Any], float]]:
+        """Perform a similarity search with scores.
 
         Args:
             query_text: The query text
@@ -301,6 +299,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
 
         Returns:
             List of (metadata, score) tuples sorted by relevance
+
         """
         # Make sure we have a vector store
         if self._collection is None:
@@ -326,7 +325,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
                 for j, (metadata, distance) in enumerate(zip(metadata_list, distance_list)):
                     # Convert distance to similarity score (1.0 = identical, 0.0 = completely different)
                     score = 1.0 - distance  # Assuming cosine distance
-                    items_with_scores.append((cast(Dict[str, Any], metadata), score))
+                    items_with_scores.append((cast(dict[str, Any], metadata), score))
 
         # Sort by similarity score (highest first)
         items_with_scores.sort(key=lambda x: x[1], reverse=True)

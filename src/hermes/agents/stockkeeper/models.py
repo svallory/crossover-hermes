@@ -1,28 +1,26 @@
-"""
-Pydantic models for the product resolver agent.
-"""
+"""Pydantic models for the product resolver agent."""
+
+from typing import Any
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
 
 from src.hermes.agents.classifier.models import ProductMention
 from src.hermes.model.product import Product
 
-
 class ResolvedProductsOutput(BaseModel):
     """Output model for the product resolver function."""
 
-    resolved_products: List[Product] = Field(
+    resolved_products: list[Product] = Field(
         default_factory=list,
         description="Products that were successfully resolved from mentions",
     )
 
-    unresolved_mentions: List[ProductMention] = Field(
+    unresolved_mentions: list[ProductMention] = Field(
         default_factory=list,
         description="Product mentions that could not be resolved to catalog products",
     )
 
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Metadata about the resolution process",
     )

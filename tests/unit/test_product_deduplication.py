@@ -1,6 +1,4 @@
-"""
-Tests for the product deduplication functionality.
-"""
+"""Tests for the product deduplication functionality."""
 
 from src.hermes.agents.classifier.models import (
     EmailAnalysis,
@@ -11,7 +9,6 @@ from src.hermes.data_processing.product_deduplication import (
     deduplicate_product_mentions,
     get_product_mention_stats,
 )
-
 
 def create_test_analysis_result() -> EmailAnalysis:
     """Create a sample EmailAnalysisResult with duplicate products for testing."""

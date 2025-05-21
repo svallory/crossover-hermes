@@ -1,21 +1,19 @@
-"""
-Order Processor prompts for use with LangChain.
-"""
+"""Order Processor prompts for use with LangChain."""
 
-from typing import Dict
+
 from langchain_core.prompts import PromptTemplate
 
 from src.hermes.model import Agents
 
 # Dictionary to store all prompt templates
-PROMPTS: Dict[str, PromptTemplate] = {}
+PROMPTS: dict[str, PromptTemplate] = {}
 
 # Main Order Processor Prompt
 markdown = str
 fulfiller_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
 You are an efficient Order Processing Agent for a fashion retail store.
-Your primary role is to process customer order requests based on the information provided 
+Your primary role is to process customer order requests based on the information provided
 by the Email Analyzer Agent and the available product catalog.
 
 You will receive the email analysis containing product references and a product catalog.
@@ -168,8 +166,7 @@ PROMPTS["PROMOTION_CALCULATOR"] = PromptTemplate.from_template(
 
 
 def get_prompt(key: str) -> PromptTemplate:
-    """
-    Get a specific prompt template by key.
+    """Get a specific prompt template by key.
 
     Args:
         key: The key of the prompt template to retrieve.
@@ -179,6 +176,7 @@ def get_prompt(key: str) -> PromptTemplate:
 
     Raises:
         KeyError: If the key doesn't exist in the PROMPTS dictionary.
+
     """
     if key not in PROMPTS:
         raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")

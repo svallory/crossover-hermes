@@ -1,7 +1,5 @@
-"""
-Hermes data processing package for post-processing and transformation operations.
-"""
+"""Hermes data processing package for post-processing and transformation operations."""
 
-from .vector_store import *
-from .product_deduplication import *
 from .load_data import *
+from .product_deduplication import *
+from .vector_store import *

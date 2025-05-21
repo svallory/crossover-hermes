@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class SignalCategory(str, Enum):
     """Customer signal categories, aligned with prompt examples."""
 

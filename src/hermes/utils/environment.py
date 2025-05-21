@@ -1,17 +1,15 @@
-"""
-Environment configuration utilities for the Hermes application.
+"""Environment configuration utilities for the Hermes application.
 Import this module first to configure environment variables before other imports.
 """
 
-import os
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
 
 def configure_environment():
-    """
-    Configure environment variables for optimal operation.
+    """Configure environment variables for optimal operation.
     Call this function before importing other modules.
     """
     # No longer need to disable tokenizers parallelism since we are using OpenAI embeddings exclusively

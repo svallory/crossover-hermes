@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-"""
-Test script for the Inquiry Responder agent in isolation.
+"""Test script for the Inquiry Responder agent in isolation.
 
 This script initializes the vector store, creates a test inquiry, and runs
 the respond_to_inquiry function to verify it works correctly.
 """
 
+import asyncio
 import sys
 from pathlib import Path
-import asyncio
+
 from dotenv import load_dotenv
 
 # Add the project root to the path so we can import the modules
@@ -17,13 +17,12 @@ sys.path.insert(0, str(project_root))
 
 # Import modules after adding project root to path to avoid circular imports
 # or importing modules that don't exist in the Python path
-from src.hermes.agents.classifier.models import EmailAnalysis, Segment, SegmentType, ProductMention  # noqa: E402
 from src.hermes.agents.advisor.agent import respond_to_inquiry  # noqa: E402
 from src.hermes.agents.advisor.models import AdvisorInput, ClassifierOutput  # noqa: E402
+from src.hermes.agents.classifier.models import EmailAnalysis, ProductMention, Segment, SegmentType  # noqa: E402
 from src.hermes.config import HermesConfig  # noqa: E402
 from src.hermes.data_processing.vector_store import VectorStore  # noqa: E402
-from src.hermes.model import ProductCategory, Agents  # noqa: E402
-
+from src.hermes.model import Agents, ProductCategory  # noqa: E402
 
 async def main():
     """Test the inquiry responder independently."""

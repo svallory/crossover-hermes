@@ -1,7 +1,7 @@
 # %%
 # Regular Python code cell
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Regular comments stay with the code
 x = np.linspace(0, 10, 100)

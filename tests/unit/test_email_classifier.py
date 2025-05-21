@@ -7,13 +7,10 @@ from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
 from src.hermes.agents.classifier import analyze_email_node
-from src.hermes.state import EmailAnalysis, ProductReference, CustomerSignal
-from src.hermes.state import HermesState
 from src.hermes.config import HermesConfig
-
-from tests.fixtures import get_test_cases
+from src.hermes.state import CustomerSignal, EmailAnalysis, HermesState, ProductReference
 from tests.__init__ import mock_openai
-
+from tests.fixtures import get_test_cases
 
 @mock_openai()
 class TestEmailClassifier(unittest.IsolatedAsyncioTestCase):

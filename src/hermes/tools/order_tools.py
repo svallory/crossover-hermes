@@ -1,5 +1,4 @@
-"""
-Order and Inventory Tools
+"""Order and Inventory Tools.
 
 This module provides tools for managing product inventory and processing orders.
 These tools are essential for the Order Processor agent to verify stock availability,
@@ -16,21 +15,20 @@ Key functionalities include:
 - Calculating discounted prices based on promotion text.
 """
 
-from typing import List, Optional, Union
-from pydantic import BaseModel, Field
-import pandas as pd  # type: ignore
 import re
+
+import pandas as pd  # type: ignore
 from langchain_core.tools import tool
+from pydantic import BaseModel, Field
 
-from src.hermes.model.product import AlternativeProduct, Product
 from src.hermes.data_processing.load_data import load_products_df
-
+from src.hermes.model.product import AlternativeProduct, Product
 
 class ProductNotFound(BaseModel):
     """Indicates that a product was not found."""
 
     message: str
-    query_product_id: Optional[str] = None
+    query_product_id: str | None = None
 
 
 class StockStatus(BaseModel):
@@ -41,7 +39,7 @@ class StockStatus(BaseModel):
     current_stock: int
     is_available: bool = Field(description="True if current_stock >= requested_quantity")
     requested_quantity: int = Field(description="The quantity requested by the customer")
-    expected_restock_date: Optional[str] = Field(default=None, description="Expected date of restock if available")
+    expected_restock_date: str | None = Field(default=None, description="Expected date of restock if available")
 
 
 class StockUpdateResult(BaseModel):
@@ -53,18 +51,18 @@ class StockUpdateResult(BaseModel):
     new_stock: int
     quantity_changed: int  # Negative for decrement, positive for increment
     status: str  # "success", "insufficient_stock", "product_not_found"
-    message: Optional[str] = None
+    message: str | None = None
 
 
 class PromotionDetails(BaseModel):
     """Details of an extracted promotion."""
 
     has_promotion: bool
-    promotion_text: Optional[str] = None
-    discount_percentage: Optional[float] = None
-    buy_one_get_one: Optional[bool] = None
-    free_item_name: Optional[str] = None
-    limited_time: Optional[bool] = None
+    promotion_text: str | None = None
+    discount_percentage: float | None = None
+    buy_one_get_one: bool | None = None
+    free_item_name: str | None = None
+    limited_time: bool | None = None
 
 
 class DiscountResult(BaseModel):
@@ -73,16 +71,15 @@ class DiscountResult(BaseModel):
     original_price: float = Field(description="Original price before discount")
     discounted_price: float = Field(description="Price after applying the discount")
     discount_amount: float = Field(description="Amount discounted")
-    discount_percentage: Optional[float] = Field(default=None, description="Percentage discount if applicable")
+    discount_percentage: float | None = Field(default=None, description="Percentage discount if applicable")
     discount_applied: bool = Field(description="Whether a discount was applied")
     discount_type: str = Field(description="Type of discount applied (percentage, bogo, etc.)")
     explanation: str = Field(description="Explanation of how the discount was calculated")
 
 
 @tool
-def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStatus, ProductNotFound]:
-    """
-    Check if a product is in stock and has enough inventory to fulfill an order.
+def check_stock(product_id: str, requested_quantity: int = 1) -> StockStatus | ProductNotFound:
+    """Check if a product is in stock and has enough inventory to fulfill an order.
     This tool validates stock levels before processing an order.
 
     Args:
@@ -91,6 +88,7 @@ def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStat
 
     Returns:
         A StockStatus object with availability information, or ProductNotFound if the product ID is invalid.
+
     """
     # Standardize the product ID format
     product_id = product_id.replace(" ", "").upper()
@@ -134,8 +132,7 @@ def check_stock(product_id: str, requested_quantity: int = 1) -> Union[StockStat
 
 @tool
 def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResult:
-    """
-    Update the stock level for a product by decrementing the specified quantity.
+    """Update the stock level for a product by decrementing the specified quantity.
     This should be called when an order is confirmed to be fulfilled. IMPORTANT: This tool modifies the DataFrame in place.
 
     Args:
@@ -144,6 +141,7 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResu
 
     Returns:
         A StockUpdateResult object detailing the outcome of the stock update.
+
     """
     # Validation
     if quantity_to_decrement <= 0:
@@ -230,9 +228,8 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResu
 @tool
 def find_alternatives_for_oos(
     original_product_id: str, limit: int = 2
-) -> Union[List[AlternativeProduct], ProductNotFound]:
-    """
-    Find and suggest in-stock alternative products if a requested item is out of stock.
+) -> list[AlternativeProduct] | ProductNotFound:
+    """Find and suggest in-stock alternative products if a requested item is out of stock.
     This helps provide customers with options when their desired item isn't available.
 
     Args:
@@ -241,6 +238,7 @@ def find_alternatives_for_oos(
 
     Returns:
         A list of AlternativeProduct objects with suggested alternatives, or ProductNotFound if the original product ID is invalid.
+
     """
     # First, check if the original product exists
     products_df = load_products_df()
@@ -339,9 +337,8 @@ def find_alternatives_for_oos(
 
 
 @tool
-def extract_promotion(product_description: str, product_name: Optional[str] = None) -> PromotionDetails:
-    """
-    Extract details of any special promotions mentioned in a product's description.
+def extract_promotion(product_description: str, product_name: str | None = None) -> PromotionDetails:
+    """Extract details of any special promotions mentioned in a product's description.
     This helps identify discounts, BOGO offers, free items, etc. to include in customer responses.
 
     Args:
@@ -350,6 +347,7 @@ def extract_promotion(product_description: str, product_name: Optional[str] = No
 
     Returns:
         A PromotionDetails object indicating if a promotion is found and its details.
+
     """
     # Default result if no promotion found
     result = PromotionDetails(has_promotion=False)
@@ -429,8 +427,7 @@ def extract_promotion(product_description: str, product_name: Optional[str] = No
 
 @tool
 def calculate_discount_price(original_price: float, promotion_text: str, quantity: int = 1) -> DiscountResult:
-    """
-    Calculate the discounted price based on the promotion text and original price.
+    """Calculate the discounted price based on the promotion text and original price.
 
     This tool handles various promotion types:
     - Percentage discounts (e.g., "25% off")
@@ -445,6 +442,7 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
 
     Returns:
         A DiscountResult object with the calculated discount and explanation
+
     """
     discounted_price = original_price
     discount_amount = 0.0
@@ -526,26 +524,25 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
             else:
                 # Not enough quantity for discount
                 explanation = "Buy one, get one 50% off requires at least 2 items to apply."
+        # Regular BOGO (second item free)
+        elif quantity >= 2:
+            # For every pair, one item is free
+            paid_items = (quantity + 1) // 2  # Rounds up for odd quantities
+            free_items = quantity // 2  # Rounds down for odd quantities
+
+            total_original = original_price * quantity
+            total_discounted = original_price * paid_items
+
+            # Calculate per-unit values
+            discount_amount = (total_original - total_discounted) / quantity
+            discounted_price = original_price - discount_amount
+
+            discount_applied = True
+            discount_type = "bogo_free"
+            explanation = f"Buy one, get one free applied. For {quantity} items, paying for {paid_items}, getting {free_items} free."
         else:
-            # Regular BOGO (second item free)
-            if quantity >= 2:
-                # For every pair, one item is free
-                paid_items = (quantity + 1) // 2  # Rounds up for odd quantities
-                free_items = quantity // 2  # Rounds down for odd quantities
-
-                total_original = original_price * quantity
-                total_discounted = original_price * paid_items
-
-                # Calculate per-unit values
-                discount_amount = (total_original - total_discounted) / quantity
-                discounted_price = original_price - discount_amount
-
-                discount_applied = True
-                discount_type = "bogo_free"
-                explanation = f"Buy one, get one free applied. For {quantity} items, paying for {paid_items}, getting {free_items} free."
-            else:
-                # Not enough quantity for discount
-                explanation = "Buy one, get one free requires at least 2 items to apply."
+            # Not enough quantity for discount
+            explanation = "Buy one, get one free requires at least 2 items to apply."
 
     # 3. Check for bulk discounts on quantity thresholds
     bulk_match = re.search(r"(\d+)\+\s+units", promo_lower)
@@ -612,7 +609,7 @@ def extract_promotion_text(description: str, match) -> str:
 
 The order tools provide essential functionality for inventory management and order processing:
 
-1. **Stock Management**: 
+1. **Stock Management**:
    - `check_stock`: Verifies if a product has enough inventory for a requested quantity
    - `update_stock`: Decrements stock when an order is fulfilled, with validation to prevent errors
 

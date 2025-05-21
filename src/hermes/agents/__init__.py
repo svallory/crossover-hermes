@@ -1,5 +1,4 @@
-"""
-Agents for the Hermes system.
+"""Agents for the Hermes system.
 
 This package contains agent implementations for various email processing tasks.
 """

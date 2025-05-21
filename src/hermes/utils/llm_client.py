@@ -1,22 +1,20 @@
-"""
-Utility for creating and configuring LangChain LLM clients.
-"""
+"""Utility for creating and configuring LangChain LLM clients."""
 
-from typing import Literal, Optional
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
+from typing import Literal
+
 from langchain_core.language_models import BaseChatModel
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
-from ..config import HermesConfig  # Relative import
 
+from ..config import HermesConfig  # Relative import
 
 def get_llm_client(
     config: HermesConfig,
-    model_strength: Optional[Literal["weak", "strong"]] = "weak",
+    model_strength: Literal["weak", "strong"] | None = "weak",
     temperature: float = 0.0,
 ) -> BaseChatModel:
-    """
-    Initializes and returns an LLM client based on the provided configuration.
+    """Initializes and returns an LLM client based on the provided configuration.
 
     Args:
         config: The HermesConfig instance containing LLM settings.
@@ -32,6 +30,7 @@ def get_llm_client(
         ValueError: If the llm_api_key is not set for the chosen provider.
         ValueError: If the model name in the config is not set for the chosen provider.
         ValueError: If the llm_provider in HermesConfig is not 'OpenAI' or 'Gemini'.
+
     """
     if not config.llm_provider or config.llm_provider not in ["OpenAI", "Gemini"]:
         raise ValueError("The llm_provider in HermesConfig must be 'OpenAI' or 'Gemini'.")

@@ -1,13 +1,19 @@
-"""
-Main function for composing final customer responses.
-"""
+"""Main function for composing final customer responses."""
 
-from typing import Optional, Literal
+from typing import Literal
+
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
 from src.hermes.utils.errors import create_node_response
 
+from ...agents.advisor.models import InquiryAnswers
+from ...agents.classifier.models import EmailAnalysis
+from ...config import HermesConfig
+from ...model.enums import Agents
+from ...types import WorkflowNodeOutput
+from ...utils import get_llm_client
+from ..fulfiller.models.agent import ProcessedOrder
 from .models import (
     ComposedResponse,
     ComposerInput,
@@ -15,22 +21,13 @@ from .models import (
     ResponseTone,
 )
 from .prompts import get_prompt
-from ...config import HermesConfig
-from ...utils import get_llm_client
-from ...model.enums import Agents
-from ...types import WorkflowNodeOutput
-from ...agents.classifier.models import EmailAnalysis
-from ...agents.advisor.models import InquiryAnswers
-from ..fulfiller.models.agent import ProcessedOrder
-
 
 @traceable(run_type="chain", name="Response Composer Agent")  # type: ignore
 async def compose_response(
     state: ComposerInput,
-    runnable_config: Optional[RunnableConfig] = None,
+    runnable_config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.COMPOSER], ComposerOutput]:
-    """
-    Composes a natural, personalized customer email response by combining information
+    """Composes a natural, personalized customer email response by combining information
     from the Email Analyzer, Inquiry Responder, and Order Processor agents.
 
     Args:
@@ -39,9 +36,10 @@ async def compose_response(
 
     Returns:
         Dict[str, Any]: In the LangGraph workflow, returns {"composer": ComposerOutput} or {"errors": Error}
+
     """
     try:
-        email_analysis_data: Optional[EmailAnalysis] = None
+        email_analysis_data: EmailAnalysis | None = None
         if state.classifier and state.classifier.email_analysis:
             email_analysis_data = state.classifier.email_analysis
 
@@ -57,11 +55,11 @@ async def compose_response(
         print(f"Composing final customer response for email {email_id}")
 
         # Prepare data for the prompt
-        inquiry_answers_data: Optional[InquiryAnswers] = None
+        inquiry_answers_data: InquiryAnswers | None = None
         if state.advisor and state.advisor.inquiry_answers:
             inquiry_answers_data = state.advisor.inquiry_answers
 
-        order_result_data: Optional[ProcessedOrder] = None
+        order_result_data: ProcessedOrder | None = None
         if state.fulfiller and state.fulfiller.order_result:
             order_result_data = state.fulfiller.order_result
 
@@ -91,22 +89,21 @@ async def compose_response(
             # Properly handle the response with type checking
             if isinstance(response_data, ComposedResponse):
                 response = response_data
+            # If we got a dict, convert it to ComposedResponse
+            elif isinstance(response_data, dict):
+                # Make sure email_id is included
+                response_data["email_id"] = email_id
+                response = ComposedResponse(**response_data)
             else:
-                # If we got a dict, convert it to ComposedResponse
-                if isinstance(response_data, dict):
-                    # Make sure email_id is included
-                    response_data["email_id"] = email_id
-                    response = ComposedResponse(**response_data)
-                else:
-                    # Fallback if we got something unexpected
-                    response = ComposedResponse(
-                        email_id=email_id,
-                        subject="Re: Your Recent Inquiry",
-                        response_body="Thank you for contacting us. We're processing your request.",
-                        language="en",
-                        tone=ResponseTone.PROFESSIONAL,
-                        response_points=[],
-                    )
+                # Fallback if we got something unexpected
+                response = ComposedResponse(
+                    email_id=email_id,
+                    subject="Re: Your Recent Inquiry",
+                    response_body="Thank you for contacting us. We're processing your request.",
+                    language="en",
+                    tone=ResponseTone.PROFESSIONAL,
+                    response_points=[],
+                )
 
             # Make sure the email_id is set correctly
             response.email_id = email_id

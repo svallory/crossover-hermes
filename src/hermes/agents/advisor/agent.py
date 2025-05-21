@@ -1,37 +1,36 @@
-"""
-Main function for responding to customer inquiries.
-"""
+"""Main function for responding to customer inquiries."""
 
 from __future__ import annotations
-from typing import Literal, Optional, List, Dict, Any
-from ...model.product import Product
+
+from typing import Any, Literal
+
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
+from ...config import HermesConfig
+from ...data_processing.vector_store import VectorStore
+from ...model.enums import Agents, Season
+from ...model.product import Product
+from ...types import WorkflowNodeOutput
+from ...utils.errors import create_node_response
+from ...utils.llm_client import get_llm_client
+from ..classifier.models import SegmentType
 from .models import (
-    InquiryAnswers,
     AdvisorInput,
     AdvisorOutput,
+    InquiryAnswers,
 )
 from .prompts import get_prompt
-from ...config import HermesConfig
-from ...utils.llm_client import get_llm_client
-from ...types import WorkflowNodeOutput
-from ...model.enums import Agents, Season
-from ...utils.errors import create_node_response
-from ..classifier.models import SegmentType
-from ...data_processing.vector_store import VectorStore
 
-
-def format_resolved_products(products: List[Product]) -> str:
-    """
-    Format resolved products into a string for LLM context.
+def format_resolved_products(products: list[Product]) -> str:
+    """Format resolved products into a string for LLM context.
 
     Args:
         products: A list of resolved Product objects
 
     Returns:
         A formatted string containing all product information
+
     """
     if not products:
         return "No resolved products available."
@@ -58,9 +57,8 @@ def format_resolved_products(products: List[Product]) -> str:
     return "\n\n".join(formatted_products)
 
 
-def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
-    """
-    Search the vector store for products matching the queries.
+def search_vector_store(queries: list[str], hermes_config: HermesConfig) -> str:
+    """Search the vector store for products matching the queries.
     Uses the VectorStore singleton to ensure the vector store is initialized.
 
     Args:
@@ -70,6 +68,7 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
     Returns:
         A string containing formatted product information relevant to the queries,
         or a message indicating no products were found.
+
     """
     print(f"Vector store search called with queries: {queries}")
 
@@ -141,10 +140,9 @@ def search_vector_store(queries: List[str], hermes_config: HermesConfig) -> str:
 )
 async def respond_to_inquiry(
     state: AdvisorInput,
-    runnable_config: Optional[RunnableConfig] = None,
+    runnable_config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.ADVISOR], AdvisorOutput]:
-    """
-    Extracts and answers customer inquiries with factual information about products.
+    """Extracts and answers customer inquiries with factual information about products.
     Uses RAG techniques to retrieve relevant product information.
 
     Args:
@@ -153,6 +151,7 @@ async def respond_to_inquiry(
 
     Returns:
         Dict[str, Any]: In the LangGraph workflow, returns {Agents.RESPOND_TO_INQUIRY: AdvisorOutput} or {"errors": Error}
+
     """
     try:
         # Validate the input
@@ -171,7 +170,7 @@ async def respond_to_inquiry(
         print(f"Generating factual answers for inquiry {email_id}")
 
         # --- RAG Step: Query Extraction and Vector Search ---
-        search_queries: List[str] = []
+        search_queries: list[str] = []
         if email_analysis.segments:
             for segment in email_analysis.segments:
                 if segment.segment_type == SegmentType.INQUIRY:
@@ -253,26 +252,25 @@ async def respond_to_inquiry(
             # Ensure we get the right type by instantiating from the response
             if isinstance(response_data, InquiryAnswers):
                 inquiry_response = response_data
+            # If we got a dict, convert it to InquiryAnswers
+            elif isinstance(response_data, dict):
+                # Make sure email_id is included
+                response_data["email_id"] = email_id
+
+                # Make sure products have valid seasons values
+                response_data = fix_seasons_in_response(response_data)
+
+                inquiry_response = InquiryAnswers(**response_data)
             else:
-                # If we got a dict, convert it to InquiryAnswers
-                if isinstance(response_data, dict):
-                    # Make sure email_id is included
-                    response_data["email_id"] = email_id
-
-                    # Make sure products have valid seasons values
-                    response_data = fix_seasons_in_response(response_data)
-
-                    inquiry_response = InquiryAnswers(**response_data)
-                else:
-                    # Fallback if we got something unexpected
-                    inquiry_response = InquiryAnswers(
-                        email_id=email_id,
-                        primary_products=[],
-                        answered_questions=[],
-                        unanswered_questions=["Unable to process inquiry due to unexpected response type."],
-                        related_products=[],
-                        unsuccessful_references=[],
-                    )
+                # Fallback if we got something unexpected
+                inquiry_response = InquiryAnswers(
+                    email_id=email_id,
+                    primary_products=[],
+                    answered_questions=[],
+                    unanswered_questions=["Unable to process inquiry due to unexpected response type."],
+                    related_products=[],
+                    unsuccessful_references=[],
+                )
 
             # Make sure email_id is set correctly in the response
             inquiry_response.email_id = email_id
@@ -305,9 +303,8 @@ async def respond_to_inquiry(
         return create_node_response(Agents.ADVISOR, e)
 
 
-def fix_seasons_in_response(response_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Fix invalid seasons values in response data.
+def fix_seasons_in_response(response_data: dict[str, Any]) -> dict[str, Any]:
+    """Fix invalid seasons values in response data.
     This ensures that all seasons in product objects are using valid Season enum values.
 
     Args:
@@ -315,10 +312,11 @@ def fix_seasons_in_response(response_data: Dict[str, Any]) -> Dict[str, Any]:
 
     Returns:
         The response data with fixed seasons values
+
     """
 
     # Helper function to fix seasons in a product object
-    def fix_product_seasons(product: Dict[str, Any]) -> Dict[str, Any]:
+    def fix_product_seasons(product: dict[str, Any]) -> dict[str, Any]:
         if "product" in product and "seasons" in product["product"]:
             seasons = product["product"]["seasons"]
 

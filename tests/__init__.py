@@ -2,7 +2,7 @@
 
 import os
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
@@ -10,8 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 # Mock OpenAI API calls for testing
 def mock_openai():
-    """
-    Create a mock patch for OpenAI API calls.
+    """Create a mock patch for OpenAI API calls.
     This allows tests to run without making actual API calls.
     """
     mock_client = MagicMock()

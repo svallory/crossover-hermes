@@ -1,26 +1,25 @@
 """Tests for the Order Processor Agent."""
 
-import unittest
 import asyncio
-from unittest.mock import patch, MagicMock
-from typing import Dict, Any
+import unittest
+from typing import Any
+from unittest.mock import MagicMock, patch
+
 import pandas as pd
-
-from src.hermes.model.product import AlternativeProduct, Product
-from src.hermes.model import EmailAnalysis, ProductReference
-from src.hermes.state import HermesState
-from src.hermes.config import HermesConfig
-from src.hermes.tools.order_tools import PromotionDetails
-from src.hermes.tools.catalog_tools import ProductNotFound
-from src.hermes.agents.workflow.graph import process_order_node
-
-from tests.fixtures import get_test_product, get_test_cases
-from tests.__init__ import mock_openai
 
 # For mocking LLM client
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
+from src.hermes.agents.workflow.graph import process_order_node
+from src.hermes.config import HermesConfig
+from src.hermes.model import EmailAnalysis, ProductReference
+from src.hermes.model.product import AlternativeProduct, Product
+from src.hermes.state import HermesState
+from src.hermes.tools.catalog_tools import ProductNotFound
+from src.hermes.tools.order_tools import PromotionDetails
+from tests.__init__ import mock_openai
+from tests.fixtures import get_test_cases, get_test_product
 
 class MockRunnableLLMOrder(RunnableSerializable):
     """A mock Runnable LLM for order processor tests."""
@@ -449,7 +448,7 @@ class TestFulfiller(unittest.TestCase):
         )
 
         # Mocking resolve_product_reference to handle multiple calls
-        async def resolve_product_side_effect(product_ref: Dict[str, Any], catalog_df, llm):
+        async def resolve_product_side_effect(product_ref: dict[str, Any], catalog_df, llm):
             pid = product_ref.get("product_id")
             if pid == "CLF2109":
                 return Product(**self._transform_fixture_to_product_input(clf2109_data))
@@ -625,7 +624,7 @@ class TestFulfiller(unittest.TestCase):
         mock_update_stock.assert_called_once()
 
     # Helper to transform fixture (if needed, or ensure fixtures match Product model)
-    def _transform_fixture_to_product_input(self, fixture_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _transform_fixture_to_product_input(self, fixture_data: dict[str, Any]) -> dict[str, Any]:
         transformed = fixture_data.copy()
         if "product ID" in transformed:
             transformed["product_id"] = transformed.pop("product ID")

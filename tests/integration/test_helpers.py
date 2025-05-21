@@ -1,5 +1,4 @@
-"""
-Helper functions for integration testing the Hermes agent system.
+"""Helper functions for integration testing the Hermes agent system.
 
 This module provides utilities for:
 1. Saving test inputs and outputs to YAML files
@@ -8,11 +7,12 @@ This module provides utilities for:
 4. Preparing output data for assignment submission
 """
 
-import os
-import yaml
 import json
+import os
+from typing import Any
+
 import pandas as pd
-from typing import Any, Dict, Tuple
+import yaml
 from pydantic import BaseModel
 
 # Default output directory for tests
@@ -27,16 +27,16 @@ email_results = {}
 
 # Function to prepare output data for assignment format
 async def prepare_output_data(
-    results: Dict[str, Dict[str, Any]],
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """
-    Prepare the assignment output data frames from processing results.
+    results: dict[str, dict[str, Any]],
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Prepare the assignment output data frames from processing results.
 
     Args:
         results: Dictionary of processing results by email_id
 
     Returns:
         Tuple of DataFrames: (email_classification, order_status, order_response, inquiry_response)
+
     """
     # Prepare email classification data
     classification_data = []
@@ -81,13 +81,13 @@ async def prepare_output_data(
     )
 
 
-def save_results_locally(results: Dict[str, Dict[str, Any]], output_dir: str = OUTPUT_DIR_TEST):
-    """
-    Save processing results locally as JSON files.
+def save_results_locally(results: dict[str, dict[str, Any]], output_dir: str = OUTPUT_DIR_TEST):
+    """Save processing results locally as JSON files.
 
     Args:
         results: Dictionary mapping email_id to processed results
         output_dir: Directory to save results
+
     """
     # Create output directory if it doesn't exist
     if not os.path.exists(output_dir):
@@ -353,17 +353,17 @@ class OutputSaver:
 
 
 def patch_agent_functions():
-    """
-    Patch the agent functions in the main module to capture and save outputs.
+    """Patch the agent functions in the main module to capture and save outputs.
 
     Returns:
         A tuple containing (original_funcs, patched_funcs) that can be used
         to restore the original functions after testing.
+
     """
-    from src.hermes.agents.classifier import analyze_email
-    from src.hermes.agents.fulfiller import process_order
     from src.hermes.agents.advisor import respond_to_inquiry
+    from src.hermes.agents.classifier import analyze_email
     from src.hermes.agents.composer import compose_response
+    from src.hermes.agents.fulfiller import process_order
 
     original_funcs = {
         "analyze_email": analyze_email,
@@ -420,16 +420,16 @@ def patch_agent_functions():
 
 
 def apply_patches():
-    """
-    Apply patches to the main module for testing.
+    """Apply patches to the main module for testing.
 
     Returns:
         A dictionary of original functions that can be restored after testing.
+
     """
-    import src.hermes.agents.classifier as classifier_module
-    import src.hermes.agents.fulfiller as fulfiller_module
     import src.hermes.agents.advisor as advisor_module
+    import src.hermes.agents.classifier as classifier_module
     import src.hermes.agents.composer as composer_module
+    import src.hermes.agents.fulfiller as fulfiller_module
 
     original_funcs, patched_funcs = patch_agent_functions()
 
@@ -443,16 +443,16 @@ def apply_patches():
 
 
 def restore_patches(original_funcs):
-    """
-    Restore the original functions after testing.
+    """Restore the original functions after testing.
 
     Args:
         original_funcs: Dictionary of original functions from apply_patches()
+
     """
-    import src.hermes.agents.classifier as classifier_module
-    import src.hermes.agents.fulfiller as fulfiller_module
     import src.hermes.agents.advisor as advisor_module
+    import src.hermes.agents.classifier as classifier_module
     import src.hermes.agents.composer as composer_module
+    import src.hermes.agents.fulfiller as fulfiller_module
 
     # Restore original functions
     classifier_module.agent = original_funcs["analyze_email"]

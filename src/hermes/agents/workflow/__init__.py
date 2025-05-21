@@ -1,5 +1,4 @@
-"""
-Hermes Workflow Module
+"""Hermes Workflow Module.
 
 This module provides a LangGraph-based workflow for processing customer emails through
 a sequence of agents:
@@ -12,6 +11,6 @@ The module exposes the main workflow and supporting functions for execution.
 """
 
 from .graph import *
-from .workflow import *
-from .states import *
 from .run_workflow import *
+from .states import *
+from .workflow import *

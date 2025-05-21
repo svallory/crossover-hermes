@@ -1,12 +1,16 @@
 import asyncio
-import os
-import pandas as pd  # type: ignore
 import csv  # Add csv import
-import yaml  # Add YAML import
-from typing import List, Dict, Any, Optional
+import os
+from typing import Any
 
 # Apply nest_asyncio for Jupyter compatibility
 import nest_asyncio
+import pandas as pd  # type: ignore
+import yaml  # Add YAML import
+
+# Set the event loop policy back to the default asyncio policy
+# This is needed because uvloop is incompatible with nest_asyncio
+asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 from src.hermes.agents.classifier.models import ClassifierInput
 from src.hermes.agents.workflow.states import OverallState
@@ -28,20 +32,19 @@ async def makedirs_async(directory: str, exist_ok: bool = False) -> None:
 
 
 async def dataframe_to_csv_async(df: pd.DataFrame, path: str, index: bool = True) -> None:
-    """
-    Async wrapper for pandas DataFrame.to_csv.
+    """Async wrapper for pandas DataFrame.to_csv.
     Uses QUOTE_ALL to ensure all values are quoted in the CSV.
     """
     await asyncio.to_thread(df.to_csv, path, index=index, quoting=csv.QUOTE_ALL)
 
 
 async def save_workflow_result_as_yaml(email_id: str, workflow_state: OverallState) -> None:
-    """
-    Save the workflow result for a given email as a YAML file.
+    """Save the workflow result for a given email as a YAML file.
 
     Args:
         email_id: The ID of the email
         workflow_state: The final state of the workflow
+
     """
     # Create results directory if it doesn't exist
     await makedirs_async(RESULTS_DIR, exist_ok=True)
@@ -72,12 +75,11 @@ def write_yaml_to_file(file_path: str, yaml_content: str) -> None:
 
 
 async def process_emails(
-    emails_to_process: List[Dict[str, str]],
+    emails_to_process: list[dict[str, str]],
     config_obj: HermesConfig,
-    limit_processing: Optional[int] = None,
-) -> Dict[str, Dict[str, Any]]:
-    """
-    Process a batch of emails using the Hermes workflow.
+    limit_processing: int | None = None,
+) -> dict[str, dict[str, Any]]:
+    """Process a batch of emails using the Hermes workflow.
 
     Args:
         emails_to_process: List of email dictionaries with email_id, subject, and message
@@ -86,6 +88,7 @@ async def process_emails(
 
     Returns:
         Dictionary mapping email_id to processed results
+
     """
     results = {}
     processed_count = 0
@@ -114,7 +117,7 @@ async def process_emails(
             await save_workflow_result_as_yaml(email_id, workflow_state)
 
             # Extract results for the assignment output format
-            result: Dict[str, Any] = {
+            result: dict[str, Any] = {
                 "email_id": email_id,
                 "workflow_state": workflow_state,
                 "classification": None,
@@ -169,7 +172,7 @@ async def create_output_csv(
     order_response_df: pd.DataFrame,
     inquiry_response_df: pd.DataFrame,
     output_dir: str = OUTPUT_DIR,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Create CSV files with the assignment output."""
     # Create output directory if it doesn't exist
     await makedirs_async(output_dir, exist_ok=True)
@@ -212,9 +215,9 @@ async def create_output_spreadsheet(
 ) -> str:
     """Create the Google Spreadsheet with the assignment output."""
     # Import Google Colab dependencies
-    from google.colab import auth
     import gspread
     from google.auth import default
+    from google.colab import auth
     from gspread_dataframe import set_with_dataframe
 
     # Authenticate with Google
@@ -268,9 +271,8 @@ async def create_output_spreadsheet(
     return shareable_link
 
 
-async def main(spreadsheet_id: str, use_csv_output: bool = False, processing_limit: Optional[int] = None) -> str:
-    """
-    Main function implementing the assignment requirements.
+async def main(spreadsheet_id: str, use_csv_output: bool = False, processing_limit: int | None = None) -> str:
+    """Main function implementing the assignment requirements.
 
     Args:
         spreadsheet_id: ID of the Google Spreadsheet with input data
@@ -279,6 +281,7 @@ async def main(spreadsheet_id: str, use_csv_output: bool = False, processing_lim
 
     Returns:
         Shareable link to the output spreadsheet or path to CSV files
+
     """
     # 1. Load app config
     hermes_config = HermesConfig()

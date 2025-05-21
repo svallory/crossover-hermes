@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-"""
-Module for running the Hermes workflow against examples.
-"""
+"""Module for running the Hermes workflow against examples."""
 
 import sys
 import uuid
-from typing import Dict, List, Any, Optional
+from typing import Any
 
 # Add project root to system path if necessary
 from .utils import PROJECT_ROOT
@@ -20,15 +18,13 @@ from langsmith import Client
 from src.hermes.agents.workflow.run_workflow import run_workflow
 from src.hermes.config import HermesConfig
 
-
 async def run_with_dataset(
     dataset_id: str,
-    experiment_name: Optional[str] = None,
+    experiment_name: str | None = None,
     hermes_config=None,
-    limit: Optional[int] = None,
-) -> List[Dict[str, Any]]:
-    """
-    Run the hermes_workflow directly on examples from a LangSmith dataset.
+    limit: int | None = None,
+) -> list[dict[str, Any]]:
+    """Run the hermes_workflow directly on examples from a LangSmith dataset.
 
     Args:
         dataset_id: ID of the LangSmith dataset containing emails
@@ -38,6 +34,7 @@ async def run_with_dataset(
 
     Returns:
         List of workflow result dictionaries
+
     """
     print(f"Running Hermes workflow with dataset {dataset_id}...")
 

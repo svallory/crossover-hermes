@@ -1,21 +1,21 @@
-import pytest
 from typing import Any, cast
 
-from src.hermes.agents.classifier.models import ProductMention, EmailAnalysis, ClassifierOutput, Segment, SegmentType
+import pytest
+
+from src.hermes.agents.classifier.models import ClassifierOutput, EmailAnalysis, ProductMention, Segment, SegmentType
 from src.hermes.agents.stockkeeper.agent import (
+    build_resolution_query,
+    deduplicate_mentions,
+    disambiguate_with_llm,
     resolve_product_mentions,
     resolve_product_reference,
-    build_resolution_query,
-    disambiguate_with_llm,
-    deduplicate_mentions,
     run_deduplication_llm,
 )
 from src.hermes.agents.stockkeeper.prompts import get_prompt
-from src.hermes.model.enums import ProductCategory, Agents
-from src.hermes.model.product import Product
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.vector_store import VectorStore
-
+from src.hermes.model.enums import Agents, ProductCategory
+from src.hermes.model.product import Product
 
 class TestStockkeeper:
     """Integration tests for the product resolver."""

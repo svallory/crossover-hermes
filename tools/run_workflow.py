@@ -1,16 +1,16 @@
+import argparse
 import asyncio
 import os
-import argparse
+
 import pandas as pd
 import yaml
-
 from dotenv import load_dotenv
 
 # Assuming the HermesConfig and ClassifierInput are structured like this based on workflow.py
 # You might need to adjust imports based on your actual project structure
 from src.hermes.agents.classifier.models import ClassifierInput
-from src.hermes.config import HermesConfig  # Adjust import if HermesConfig is elsewhere
 from src.hermes.agents.workflow.workflow import run_workflow
+from src.hermes.config import HermesConfig  # Adjust import if HermesConfig is elsewhere
 from src.hermes.data_processing.vector_store import VectorStore
 
 # Default output directory
@@ -30,12 +30,12 @@ def write_yaml_to_file(file_path: str, yaml_content: str) -> None:
 
 
 async def save_workflow_result_as_yaml(email_id: str, workflow_state) -> None:
-    """
-    Save the workflow result for a given email as a YAML file.
+    """Save the workflow result for a given email as a YAML file.
 
     Args:
         email_id: The ID of the email
         workflow_state: The final state of the workflow
+
     """
     # Create results directory if it doesn't exist
     await makedirs_async(RESULTS_DIR, exist_ok=True)
@@ -74,7 +74,9 @@ async def process_email(email_data, hermes_config):
 
         # Run the workflow
         print(f"Running the Hermes workflow for email {email_id}...")
-        result = await run_workflow(input_state=input_state, hermes_config=hermes_config)
+        result = await run_workflow(
+            input_state=input_state, hermes_config=hermes_config
+        )
 
         # Save the workflow result
         await save_workflow_result_as_yaml(email_id, result)
@@ -106,9 +108,13 @@ async def process_email(email_data, hermes_config):
 
 
 async def main():
-    parser = argparse.ArgumentParser(description="Run the Hermes workflow for specific email IDs")
+    parser = argparse.ArgumentParser(
+        description="Run the Hermes workflow for specific email IDs"
+    )
     parser.add_argument(
-        "--email-ids", type=str, help="Comma-separated list of email IDs to process (e.g., E001,E002,E003)"
+        "--email-ids",
+        type=str,
+        help="Comma-separated list of email IDs to process (e.g., E001,E002,E003)",
     )
     args = parser.parse_args()
 

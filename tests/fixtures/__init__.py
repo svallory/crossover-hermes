@@ -2,19 +2,20 @@
 
 import os
 import sys
+from typing import Any, Dict, Tuple
+
 import pandas as pd
-from typing import Dict, Any, Tuple
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 
-def load_sample_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Load the sample data from the CSV files.
+def load_sample_data() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load the sample data from the CSV files.
 
     Returns:
         Tuple of (products_df, emails_df)
+
     """
     # Path to sample data files
     sample_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "sample-data"))
@@ -28,15 +29,15 @@ def load_sample_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     return products_df, emails_df
 
 
-def get_test_email(email_id: str) -> Dict[str, Any]:
-    """
-    Get a specific test email by ID.
+def get_test_email(email_id: str) -> dict[str, Any]:
+    """Get a specific test email by ID.
 
     Args:
         email_id: The ID of the email to retrieve (e.g., 'E009')
 
     Returns:
         Dictionary with email_id, email_subject, and email_body
+
     """
     _, emails_df = load_sample_data()
     email_row = emails_df[emails_df["email_id"] == email_id]
@@ -52,15 +53,15 @@ def get_test_email(email_id: str) -> Dict[str, Any]:
     }
 
 
-def get_test_product(product_id: str) -> Dict[str, Any]:
-    """
-    Get a specific test product by ID.
+def get_test_product(product_id: str) -> dict[str, Any]:
+    """Get a specific test product by ID.
 
     Args:
         product_id: The ID of the product to retrieve (e.g., 'RSG8901')
 
     Returns:
         Dictionary with product details
+
     """
     products_df, _ = load_sample_data()
     product_row = products_df[products_df["product_id"] == product_id]
@@ -72,12 +73,12 @@ def get_test_product(product_id: str) -> Dict[str, Any]:
     return product.to_dict()
 
 
-def get_test_cases() -> Dict[str, Dict[str, Any]]:
-    """
-    Get predefined test cases based on the hidden-evaluation-criteria.md.
+def get_test_cases() -> dict[str, dict[str, Any]]:
+    """Get predefined test cases based on the hidden-evaluation-criteria.md.
 
     Returns:
         Dictionary mapping test case name to test data
+
     """
     test_cases = {
         # Email Classifier Test Cases

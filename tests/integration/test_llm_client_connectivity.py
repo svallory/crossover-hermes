@@ -1,7 +1,8 @@
+import os
 import unittest
+
 from src.hermes.config import HermesConfig
 from src.hermes.llm_client import get_llm_client
-import os
 
 # --- Configuration for the test ---
 # Replace with the actual API key provided for the assignment

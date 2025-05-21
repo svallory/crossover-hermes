@@ -1,33 +1,32 @@
 """Tests for the Inquiry Responder Agent."""
 
-import unittest
 import asyncio
-from unittest.mock import patch, MagicMock
-from typing import Dict, Any, Optional
-
-from src.hermes.agents.advisor import process_inquiry_node
-from src.hermes.state import (
-    EmailAnalysis,
-    ProductReference,
-    CustomerSignal,
-    InquiryResponse,
-    ProductInformation,
-    QuestionAnswer,
-)
-from src.hermes.state import HermesState
-from src.hermes.config import HermesConfig
-from src.hermes.tools.catalog_tools import Product, ProductNotFound
-from tests.fixtures import (
-    get_test_product,
-    get_test_cases,
-    load_sample_data,
-)
-from tests.__init__ import mock_openai
+import unittest
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 # For mocking LLM client
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableSerializable
 
+from src.hermes.agents.advisor import process_inquiry_node
+from src.hermes.config import HermesConfig
+from src.hermes.state import (
+    CustomerSignal,
+    EmailAnalysis,
+    HermesState,
+    InquiryResponse,
+    ProductInformation,
+    ProductReference,
+    QuestionAnswer,
+)
+from src.hermes.tools.catalog_tools import Product, ProductNotFound
+from tests.__init__ import mock_openai
+from tests.fixtures import (
+    get_test_cases,
+    get_test_product,
+    load_sample_data,
+)
 
 class MockRunnableLLMInquiry(RunnableSerializable):
     """A mock Runnable LLM for inquiry responder tests."""
@@ -36,13 +35,13 @@ class MockRunnableLLMInquiry(RunnableSerializable):
     mock_output_json_string: str = "{}"  # Default empty JSON
 
     # Store the actual Pydantic model instance used to create the JSON string
-    _mock_pydantic_object: Optional[Any] = None
+    _mock_pydantic_object: Any | None = None
 
     def set_mock_output(self, pydantic_model_instance: Any):
         self._mock_pydantic_object = pydantic_model_instance
         self.mock_output_json_string = pydantic_model_instance.model_dump_json()
 
-    async def ainvoke(self, input_data: Any, config: Optional[Dict[str, Any]] = None, **kwargs: Any) -> AIMessage:
+    async def ainvoke(self, input_data: Any, config: dict[str, Any] | None = None, **kwargs: Any) -> AIMessage:
         # In a more sophisticated mock, you might inspect input_data or config
         # For PydanticOutputParser, the content of AIMessage should be a JSON string
         # that the parser can validate against its pydantic_object.
@@ -51,7 +50,7 @@ class MockRunnableLLMInquiry(RunnableSerializable):
         # The actual object that was used to create this JSON string can be accessed via self._mock_pydantic_object if needed
         return AIMessage(content=self.mock_output_json_string)
 
-    def invoke(self, input_data: Any, config: Optional[Dict[str, Any]] = None, **kwargs: Any) -> AIMessage:
+    def invoke(self, input_data: Any, config: dict[str, Any] | None = None, **kwargs: Any) -> AIMessage:
         return AIMessage(content=self.mock_output_json_string)
 
 
@@ -59,7 +58,7 @@ class MockRunnableLLMInquiry(RunnableSerializable):
 class TestAdvisor(unittest.TestCase):
     """Test cases for the Inquiry Responder Agent."""
 
-    def _transform_fixture_to_product_input(self, fixture_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _transform_fixture_to_product_input(self, fixture_data: dict[str, Any]) -> dict[str, Any]:
         """Transforms a product fixture dict to match Product model fields."""
         transformed = fixture_data.copy()
         if "product ID" in transformed:

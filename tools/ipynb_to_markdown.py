@@ -1,15 +1,13 @@
 import json
-import sys
 import os
-
+import sys
 
 def convert_notebook_to_markdown(ipynb_file_path: str, output_file_path: str | None = None) -> None:
-    """
-    Converts a Jupyter notebook (.ipynb file) to a Markdown file.
+    """Converts a Jupyter notebook (.ipynb file) to a Markdown file.
     If output_file_path is not provided, it defaults to the input filename with a .md extension.
     """
     try:
-        with open(ipynb_file_path, "r", encoding="utf-8") as f:
+        with open(ipynb_file_path, encoding="utf-8") as f:
             notebook_content = f.read()
 
         notebook = json.loads(notebook_content)

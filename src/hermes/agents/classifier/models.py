@@ -1,13 +1,11 @@
-"""
-Pydantic models for the email analyzer agent.
-"""
+"""Pydantic models for the email analyzer agent."""
+
+from enum import Enum
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Optional, Literal, Any
-from enum import Enum
 
 from src.hermes.model.enums import ProductCategory
-
 
 class SegmentType(str, Enum):
     """Types of segments in an email analysis."""
@@ -20,12 +18,12 @@ class SegmentType(str, Enum):
 class ProductMention(BaseModel):
     """A mention of a product in a customer email."""
 
-    product_id: Optional[str] = None
-    product_name: Optional[str] = None
-    product_description: Optional[str] = None
-    product_category: Optional[ProductCategory] = None
-    product_type: Optional[str] = Field(default=None, description="Fundamental product type in the general category")
-    quantity: Optional[int] = Field(default=1, ge=1)
+    product_id: str | None = None
+    product_name: str | None = None
+    product_description: str | None = None
+    product_category: ProductCategory | None = None
+    product_type: str | None = Field(default=None, description="Fundamental product type in the general category")
+    quantity: int | None = Field(default=1, ge=1)
     confidence: float = Field(
         default=1.0,
         ge=0.0,
@@ -39,8 +37,8 @@ class Segment(BaseModel):
 
     segment_type: SegmentType
     main_sentence: str
-    related_sentences: List[str] = Field(default_factory=list)
-    product_mentions: List[ProductMention] = Field(default_factory=list)
+    related_sentences: list[str] = Field(default_factory=list)
+    product_mentions: list[ProductMention] = Field(default_factory=list)
 
 
 class EmailAnalysis(BaseModel):
@@ -53,12 +51,12 @@ class EmailAnalysis(BaseModel):
         description="The main purpose of the customer's email"
     )
 
-    customer_pii: Dict[str, Any] = Field(
+    customer_pii: dict[str, Any] = Field(
         default_factory=dict,
         description="Personal identifiable information like name, email, phone, etc.",
     )
 
-    segments: List[Segment] = Field(default_factory=list)
+    segments: list[Segment] = Field(default_factory=list)
 
     def has_order(self) -> bool:
         """Determine if the email contains an order segment."""
@@ -74,20 +72,16 @@ class EmailAnalysis(BaseModel):
 
 
 class ClassifierInput(BaseModel):
-    """
-    Input model for the email analyzer.
-    """
+    """Input model for the email analyzer."""
 
     email_id: str = Field(description="The unique identifier for the email")
 
-    subject: Optional[str] = Field(description="The subject of the email")
+    subject: str | None = Field(description="The subject of the email")
 
     message: str = Field(description="The body of the email")
 
 
 class ClassifierOutput(BaseModel):
-    """
-    Output model for the email analyzer function.
-    """
+    """Output model for the email analyzer function."""
 
     email_analysis: EmailAnalysis = Field(description="The initial email analysis result")
