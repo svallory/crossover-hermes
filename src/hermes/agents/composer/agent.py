@@ -13,7 +13,7 @@ from ...config import HermesConfig
 from ...model.enums import Agents
 from ...types import WorkflowNodeOutput
 from ...utils import get_llm_client
-from ..fulfiller.models.agent import ProcessedOrder
+from ..fulfiller.models.models import ProcessedOrder
 from .models import (
     ComposedResponse,
     ComposerInput,
@@ -32,7 +32,8 @@ async def compose_response(
 
     Args:
         state (OverallState): The current overall state of the workflow.
-        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
+        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'],
+            HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
         Dict[str, Any]: In the LangGraph workflow, returns {"composer": ComposerOutput} or {"errors": Error}
@@ -121,7 +122,10 @@ async def compose_response(
             response = ComposedResponse(
                 email_id=email_id,
                 subject="Re: Your Recent Inquiry",
-                response_body=f"Thank you for your message. We're experiencing technical difficulties processing your request. Error: {str(e)}",
+                response_body=(
+                    f"Thank you for your message. We're experiencing technical difficulties "
+                    f"processing your request. Error: {str(e)}"
+                ),
                 language="en",
                 tone=ResponseTone.PROFESSIONAL,
                 response_points=[],

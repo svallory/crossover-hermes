@@ -1,0 +1,13 @@
+This file, `agent.py`, contains the core logic for the Stockkeeper agent, which is responsible for resolving product mentions found in customer emails to actual products in the catalog. Its primary function, `resolve_product_mentions`, takes identified product mentions and attempts to find corresponding product data.
+
+Key components and responsibilities:
+-   **Product Resolution Strategy:** Implements a cascading resolution strategy in `resolve_product_reference`. It first attempts an exact match by `product_id`. If not found, it performs a fuzzy search by `product_name` using a simple word-overlap similarity (`find_products_by_name`). It includes helper functions like `get_product_by_id` and `_create_product_from_row` for accessing and structuring product data from a DataFrame loaded by `load_products_df`.
+-   **Ambiguity and Deduplication Handling:** Addresses cases where product mentions might refer to the same product or are ambiguous. It uses LLMs (`run_deduplication_llm`, `run_disambiguation_llm`) to handle complex scenarios like deduplicating product mentions (`deduplicate_mentions`) and disambiguating between multiple potential product matches based on the email context (`disambiguate_with_llm`). This indicates the agent uses LLMs for more nuanced resolution tasks beyond simple lookup or fuzzy matching.
+-   **Confidence Scoring:** Assigns confidence scores to resolved products based on the resolution method (e.g., exact ID match has highest confidence).
+-   **Output Generation:** Processes the resolved product information and packages it into a `StockkeeperOutput` object, which includes a list of successfully resolved `Product` objects and potentially information about unresolved or ambiguous mentions.
+-   **Integration with Workflow:** The `resolve_product_mentions` function is designed as a node in the LangGraph workflow, accepting `StockkeeperInput` (which includes product mentions from the Classifier) and returning `StockkeeperOutput` or an error, conforming to the `WorkflowNodeOutput` type.
+-   **Configuration:** Uses configurable thresholds (`EXACT_MATCH_THRESHOLD`, `SIMILAR_MATCH_THRESHOLD`, `AMBIGUITY_THRESHOLD`) to control the resolution and ambiguity detection process.
+
+Architecturally, the Stockkeeper agent acts as a critical bridge between the natural language processing (identifying product mentions) and the structured product catalog data. It employs both traditional lookup/matching techniques and LLM-based reasoning to accurately identify the products a customer is referring to, which is essential for subsequent agents like the Advisor and Fulfiller.
+
+[Link to source file](../../../../src/hermes/agents/stockkeeper/agent.py) 

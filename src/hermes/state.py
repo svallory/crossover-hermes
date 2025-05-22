@@ -7,8 +7,7 @@ from langgraph.graph.message import add_messages  # type: ignore
 
 # Import AlternativeProduct from model
 
-# Forward declaration for type hints if models are in different files and imported later
-# from .common_models import EmailAnalysis, OrderProcessingResult, InquiryResolution
+
 
 
 @dataclass
@@ -24,8 +23,6 @@ class HermesState:
     # The actual Pydantic models for these are defined elsewhere (e.g., agents or common_models)
     # and would be instantiated from these dicts by the agents consuming them.
     email_analysis: dict[str, Any] | None = None
-    # order_result: Optional[Dict[str, Any]] = None # Placeholder if order processing is added
-    # inquiry_result: Optional[Dict[str, Any]] = None # Placeholder if inquiry resolution is added
     final_response: str | None = None  # Placeholder for final email response
 
     # LangGraph message history for agent interactions

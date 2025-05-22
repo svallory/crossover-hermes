@@ -257,8 +257,9 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
                 seasons_list.append(Season(season_str))
 
         # Create additional metadata dict if any extra fields exist
-        additional_metadata = {}
-        for key, value in metadata.items():
+        additional_metadata = {
+            key: value
+            for key, value in metadata.items()
             if key not in [
                 "product_id",
                 "name",
@@ -268,8 +269,8 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
                 "stock",
                 "seasons",
                 "price",
-            ]:
-                additional_metadata[key] = value
+            ]
+        }
 
         # Create and return the Product
         return Product(

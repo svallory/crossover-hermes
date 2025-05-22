@@ -8,8 +8,8 @@ import tempfile
 import unittest
 
 # Add the parent directory to sys.path to import the tool module
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-import ipynb_to_markdown
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from tools.ipynb_to_markdown import convert_notebook_to_markdown
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -32,7 +32,7 @@ class TestIpynbToMarkdown(unittest.TestCase):
         output_file = os.path.join(self.temp_dir, "output.md")
 
         # Convert the notebook to markdown
-        ipynb_to_markdown.convert_notebook_to_markdown(input_file, output_file)
+        convert_notebook_to_markdown(input_file, output_file)
 
         # Verify the output file exists
         self.assertTrue(os.path.exists(output_file))
@@ -56,14 +56,14 @@ class TestIpynbToMarkdown(unittest.TestCase):
         input_notebook = os.path.join(FIXTURES_DIR, "notebook_from_cell_attr_expected.ipynb")
         intermediate_markdown = os.path.join(self.temp_dir, "intermediate.md")
 
-        ipynb_to_markdown.convert_notebook_to_markdown(input_notebook, intermediate_markdown)
+        convert_notebook_to_markdown(input_notebook, intermediate_markdown)
 
         # Now convert the markdown back to a notebook
         output_notebook = os.path.join(self.temp_dir, "round_trip.ipynb")
 
         # Import the md_py_to_notebook module for the second conversion
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-        import md_py_to_notebook
+        # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+        from tools import md_py_to_notebook
 
         md_py_to_notebook.convert_file_to_notebook(intermediate_markdown, output_notebook)
 
@@ -104,7 +104,7 @@ class TestIpynbToMarkdown(unittest.TestCase):
         output_file = os.path.join(self.temp_dir, "output.md")
 
         # Convert the notebook to markdown
-        ipynb_to_markdown.convert_notebook_to_markdown(input_file, output_file)
+        convert_notebook_to_markdown(input_file, output_file)
 
         # Read the content of the output markdown file
         with open(output_file) as f:

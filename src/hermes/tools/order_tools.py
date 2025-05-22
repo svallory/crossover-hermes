@@ -15,6 +15,7 @@ Key functionalities include:
 - Calculating discounted prices based on promotion text.
 """
 
+import json
 import re
 
 import pandas as pd  # type: ignore
@@ -22,13 +23,10 @@ from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 from src.hermes.data_processing.load_data import load_products_df
+from src.hermes.data_processing.vector_store import VectorStore
+from src.hermes.model.errors import ProductNotFound
 from src.hermes.model.product import AlternativeProduct, Product
-
-class ProductNotFound(BaseModel):
-    """Indicates that a product was not found."""
-
-    message: str
-    query_product_id: str | None = None
+from src.hermes.config import HermesConfig
 
 
 class StockStatus(BaseModel):
@@ -54,17 +52,6 @@ class StockUpdateResult(BaseModel):
     message: str | None = None
 
 
-class PromotionDetails(BaseModel):
-    """Details of an extracted promotion."""
-
-    has_promotion: bool
-    promotion_text: str | None = None
-    discount_percentage: float | None = None
-    buy_one_get_one: bool | None = None
-    free_item_name: str | None = None
-    limited_time: bool | None = None
-
-
 class DiscountResult(BaseModel):
     """Result of a discount calculation."""
 
@@ -78,18 +65,24 @@ class DiscountResult(BaseModel):
 
 
 @tool
-def check_stock(product_id: str, requested_quantity: int = 1) -> StockStatus | ProductNotFound:
+def check_stock(tool_input: str) -> StockStatus | ProductNotFound:
     """Check if a product is in stock and has enough inventory to fulfill an order.
     This tool validates stock levels before processing an order.
 
     Args:
-        product_id: The Product ID to check availability for.
-        requested_quantity: The number of items the customer wants to order. Defaults to 1.
+        tool_input: JSON string with product_id and requested_quantity (optional) fields.
 
     Returns:
         A StockStatus object with availability information, or ProductNotFound if the product ID is invalid.
 
     """
+    try:
+        input_data = json.loads(tool_input)
+        product_id = input_data.get("product_id", "")
+        requested_quantity = input_data.get("requested_quantity", 1)
+    except (json.JSONDecodeError, AttributeError):
+        return ProductNotFound(message=f"Invalid input format: {tool_input}")
+
     # Standardize the product ID format
     product_id = product_id.replace(" ", "").upper()
 
@@ -131,18 +124,33 @@ def check_stock(product_id: str, requested_quantity: int = 1) -> StockStatus | P
 
 
 @tool
-def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResult:
+def update_stock(tool_input: str) -> StockUpdateResult:
     """Update the stock level for a product by decrementing the specified quantity.
-    This should be called when an order is confirmed to be fulfilled. IMPORTANT: This tool modifies the DataFrame in place.
+    This should be called when an order is confirmed to be fulfilled.
+    IMPORTANT: This tool modifies the DataFrame in place.
 
     Args:
-        product_id: The Product ID for which to update stock.
-        quantity_to_decrement: The number of items to decrement from stock (must be positive).
+        tool_input: JSON string with product_id and quantity_to_decrement fields.
 
     Returns:
         A StockUpdateResult object detailing the outcome of the stock update.
 
     """
+    try:
+        input_data = json.loads(tool_input)
+        product_id = input_data.get("product_id", "")
+        quantity_to_decrement = input_data.get("quantity_to_decrement", 0)
+    except (json.JSONDecodeError, AttributeError):
+        return StockUpdateResult(
+            product_id="unknown",
+            product_name="Unknown",
+            previous_stock=0,
+            new_stock=0,
+            quantity_changed=0,
+            status="error_invalid_input",
+            message=f"Invalid input format: {tool_input}",
+        )
+
     # Validation
     if quantity_to_decrement <= 0:
         return StockUpdateResult(
@@ -193,8 +201,6 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResu
             current_stock = int(float(str(current_stock_val)))
         except (ValueError, TypeError):  # Catch error if not convertible
             current_stock = 0  # Default to 0 if conversion fails
-            # Optionally, log an error here:
-            # logger.warning(f"Stock value '{current_stock_val}' for product {product_name} is not a valid number. Defaulting to 0.")
     else:
         current_stock = 0  # Handles NaN
 
@@ -226,20 +232,25 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateResu
 
 
 @tool
-def find_alternatives_for_oos(
-    original_product_id: str, limit: int = 2
-) -> list[AlternativeProduct] | ProductNotFound:
+def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | ProductNotFound:
     """Find and suggest in-stock alternative products if a requested item is out of stock.
     This helps provide customers with options when their desired item isn't available.
 
     Args:
-        original_product_id: The Product ID for which to find alternatives.
-        limit: Maximum number of alternatives to suggest. Defaults to 2.
+        tool_input: JSON string with original_product_id and limit (optional) fields.
 
     Returns:
-        A list of AlternativeProduct objects with suggested alternatives, or ProductNotFound if the original product ID is invalid.
+        A list of AlternativeProduct objects with suggested alternatives,
+        or ProductNotFound if the original product ID is invalid.
 
     """
+    try:
+        input_data = json.loads(tool_input)
+        original_product_id = input_data.get("original_product_id", "")
+        limit = input_data.get("limit", 2)
+    except (json.JSONDecodeError, AttributeError):
+        return ProductNotFound(message=f"Invalid input format: {tool_input}")
+
     # First, check if the original product exists
     products_df = load_products_df()
     if products_df is None:
@@ -259,174 +270,76 @@ def find_alternatives_for_oos(
     # Get the category for filtering
     original_category = original_product["category"]
 
-    # Find products in the same category with stock > 0
-    alternatives_df = products_df[
-        (products_df["category"] == original_category)
-        & (products_df["product_id"] != original_product_id)
-        & (products_df["stock"] > 0)
+    # Get all products in the same category
+    category_products = products_df[products_df["category"] == original_category]
+    
+    # Filter out the original product and items that are out of stock
+    filtered_products = category_products[
+        (category_products["product_id"] != original_product_id) & 
+        (category_products["stock"] > 0)
     ]
 
-    # If no alternatives found, return empty result
-    if alternatives_df.empty:
-        # Create an empty Product since we have no real alternative
-        empty_product = Product(
-            product_id="",
-            name="",
-            description="",
-            category=original_product["category"],
-            product_type="",
-            stock=0,
-            seasons=[],
-            price=0.0,
+    if filtered_products.empty:
+        return ProductNotFound(
+            message=f"No in-stock alternatives found for product '{original_product_id}'.",
+            query_product_id=original_product_id,
         )
 
-        return [
-            AlternativeProduct(
-                product=empty_product,
-                similarity_score=0.0,
-                reason="No alternatives with available stock found in the same category.",
-            )
-        ]
-
-    # Sort alternatives by relevance - here we're using stock amount as a simple proxy
-    # In a real system, this could use more sophisticated similarity metrics
-    alternatives_df = alternatives_df.sort_values(by="stock", ascending=False)
-
-    # Take top alternatives up to the limit
-    results = []
-    for _, alt_row in alternatives_df.head(limit).iterrows():
-        alt_product_id = alt_row["product_id"]
-        alt_name = alt_row["name"]
-        alt_stock = int(alt_row["stock"])
-        alt_price = 0.0
-        if "price" in alt_row and pd.notna(alt_row["price"]):
-            alt_price = float(alt_row["price"])
-
-        # Calculate similarity score (using stock as a proxy here)
-        # In a real system, this would use description or other features
-        # For now, a simple score based on stock relative to original product's potential need
-        # This is a placeholder; a proper similarity score is needed.
-        # For simplicity, let's assign a placeholder score.
-        similarity_score = 0.5
-
-        # Generate reason for the alternative
-        reason = f"Same category ({original_category}) with available stock ({alt_stock} items)."
-
-        # Create a Product object for the alternative
-        product = Product(
-            product_id=alt_product_id,
-            name=alt_name,
-            description=alt_row.get("description", ""),
-            category=alt_row["category"],
-            product_type=alt_row.get("product_type", ""),
-            stock=alt_stock,
-            seasons=alt_row.get("seasons", []),
-            price=alt_price,
-        )
-
-        # Add to results
-        results.append(
-            AlternativeProduct(
-                product=product,
-                similarity_score=similarity_score,
-                reason=reason,
-            )
-        )
-
-    return results
-
-
-@tool
-def extract_promotion(product_description: str, product_name: str | None = None) -> PromotionDetails:
-    """Extract details of any special promotions mentioned in a product's description.
-    This helps identify discounts, BOGO offers, free items, etc. to include in customer responses.
-
-    Args:
-        product_description: The full text description of the product.
-        product_name: Optional name of the product for context.
-
-    Returns:
-        A PromotionDetails object indicating if a promotion is found and its details.
-
-    """
-    # Default result if no promotion found
-    result = PromotionDetails(has_promotion=False)
-
-    # Exit early if no description
-    if not product_description:
-        return result
-
-    # Lowercase for case-insensitive matching
-    description_lower = product_description.lower()
-
-    # Check for common promotion patterns
-    # 1. Discount percentages
-    discount_patterns = [
-        r"(\d+)%\s+off",  # e.g., "25% off"
-        r"save\s+(\d+)%",  # e.g., "save 30%"
-        r"discount\s+of\s+(\d+)%",  # e.g., "discount of 15%"
-    ]
-
-    for pattern in discount_patterns:
-        discount_match = re.search(pattern, description_lower)
-        if discount_match:
-            result.has_promotion = True
-            result.discount_percentage = float(discount_match.group(1))
-            result.promotion_text = extract_promotion_text(product_description, discount_match)
-            break
-
-    # 2. BOGO offers
-    bogo_patterns = [
-        r"buy\s+one\s*,?\s*get\s+one",  # e.g., "buy one, get one"
-        r"bogo",
-        r"two\s+for\s+the\s+price\s+of\s+one",  # e.g., "two for the price of one"
-    ]
-
-    for pattern in bogo_patterns:
-        if re.search(pattern, description_lower):
-            result.has_promotion = True
-            result.buy_one_get_one = True
-            if not result.promotion_text:  # Don't overwrite if we already found a discount
-                result.promotion_text = extract_promotion_text(
-                    product_description, re.search(pattern, description_lower)
-                )
-            break
-
-    # 3. Free items
-    free_item_pattern = r"free\s+([\w\s]+)"  # e.g., "free matching beanie"
-    free_match = re.search(free_item_pattern, description_lower)
-    if free_match:
-        result.has_promotion = True
-        result.free_item_name = free_match.group(1).strip()
-        if not result.promotion_text:
-            result.promotion_text = extract_promotion_text(product_description, free_match)
-
-    # 4. Limited time offers
-    limited_patterns = [
-        r"limited[\s-]time",
-        r"for\s+a\s+limited\s+time",
-        r"limited\s+offer",
-        r"sale\s+ends",
-    ]
-
-    for pattern in limited_patterns:
-        if re.search(pattern, description_lower):
-            result.has_promotion = True
-            result.limited_time = True
-            break
-
-    # If we found a promotion but couldn't extract text, use a generic message
-    if result.has_promotion and not result.promotion_text:
-        if product_name:
-            result.promotion_text = f"Special promotion available for {product_name}!"
+    # Calculate price similarity
+    original_price = float(original_product["price"])
+    
+    # Add price similarity as a column
+    filtered_products["price_similarity"] = filtered_products["price"].apply(
+        lambda x: 1.0 - abs(float(x) - original_price) / max(original_price, float(x))
+    )
+    
+    # Sort by price similarity, descending
+    sorted_products = filtered_products.sort_values("price_similarity", ascending=False)
+    
+    # Take top alternatives
+    top_alternatives = sorted_products.head(limit)
+    
+    # Convert to AlternativeProduct objects
+    result = []
+    for _, row in top_alternatives.iterrows():
+        # Create the product object
+        product_dict = {
+            "product_id": str(row["product_id"]),
+            "name": str(row["name"]),
+            "description": str(row["description"]),
+            "category": str(row["category"]),
+            "product_type": str(row.get("type", "")),
+            "stock": int(row["stock"]),
+            "price": float(row["price"]),
+            "seasons": [s.strip() for s in str(row.get("season", "")).split(",") if s.strip()],
+        }
+        
+        product = Product(**product_dict)
+        
+        # Calculate similarity score (normalized between 0-1)
+        similarity_score = float(row["price_similarity"])
+        
+        # Generate a reason based on price and availability
+        if similarity_score > 0.9:
+            reason = f"Very similar price (${float(row['price']):.2f} vs ${original_price:.2f}) and currently in stock"
+        elif similarity_score > 0.7:
+            reason = f"Similar price range and currently in stock ({int(row['stock'])} available)"
         else:
-            result.promotion_text = "Special promotion available for this product!"
-
+            reason = f"Same category alternative that's currently available ({int(row['stock'])} in stock)"
+        
+        # Create and add the AlternativeProduct
+        alternative = AlternativeProduct(
+            product=product,
+            similarity_score=similarity_score,
+            reason=reason
+        )
+        result.append(alternative)
+    
     return result
 
 
 @tool
-def calculate_discount_price(original_price: float, promotion_text: str, quantity: int = 1) -> DiscountResult:
+def calculate_discount_price(tool_input: str) -> DiscountResult:
     """Calculate the discounted price based on the promotion text and original price.
 
     This tool handles various promotion types:
@@ -436,14 +349,27 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
     - Bundle discounts
 
     Args:
-        original_price: The original unit price before any discount
-        promotion_text: The text describing the promotion
-        quantity: The number of items being ordered
+        tool_input: JSON string with original_price, promotion_text, and quantity (optional) fields.
 
     Returns:
         A DiscountResult object with the calculated discount and explanation
 
     """
+    try:
+        input_data = json.loads(tool_input)
+        original_price = float(input_data.get("original_price", 0.0))
+        promotion_text = input_data.get("promotion_text", "")
+        quantity = int(input_data.get("quantity", 1))
+    except (json.JSONDecodeError, AttributeError, ValueError, TypeError):
+        return DiscountResult(
+            original_price=0.0,
+            discounted_price=0.0,
+            discount_amount=0.0,
+            discount_applied=False, 
+            discount_type="error",
+            explanation=f"Invalid input format: {tool_input}"
+        )
+
     discounted_price = original_price
     discount_amount = 0.0
     discount_percentage = None
@@ -478,7 +404,8 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
         if match:
             try:
                 percentage = float(match.group(1))
-                if 0 < percentage < 100:  # Valid percentage
+                MAX_PERCENTAGE = 100
+                if 0 < percentage < MAX_PERCENTAGE:  # Valid percentage
                     discount_percentage = percentage
                     discount_amount = (original_price * percentage) / 100
                     discounted_price = original_price - discount_amount
@@ -503,10 +430,12 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                 pass  # Continue to next pattern if this one fails
 
     # 2. Check for BOGO offers
+    MIN_BOGO_QUANTITY = 2  # Minimum quantity for buy-one-get-one offers
     if any(phrase in promo_lower for phrase in ["buy one, get one", "bogo", "get one free", "buy 1 get 1"]):
         if "50% off" in promo_lower or "half off" in promo_lower or "half price" in promo_lower:
             # BOGO 50% off
-            if quantity >= 2:
+            MIN_BOGO_QUANTITY = 2
+            if quantity >= MIN_BOGO_QUANTITY:
                 # For every pair, one item is half price
                 full_price_items = (quantity + 1) // 2  # Rounds up for odd quantities
                 half_price_items = quantity // 2  # Rounds down for odd quantities
@@ -525,7 +454,7 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
                 # Not enough quantity for discount
                 explanation = "Buy one, get one 50% off requires at least 2 items to apply."
         # Regular BOGO (second item free)
-        elif quantity >= 2:
+        elif quantity >= MIN_BOGO_QUANTITY:
             # For every pair, one item is free
             paid_items = (quantity + 1) // 2  # Rounds up for odd quantities
             free_items = quantity // 2  # Rounds down for odd quantities
@@ -578,32 +507,6 @@ def calculate_discount_price(original_price: float, promotion_text: str, quantit
     )
 
 
-def extract_promotion_text(description: str, match) -> str:
-    """Helper function to extract the full sentence containing a promotion."""
-    if not match:
-        return ""
-
-    # Find the sentence containing the matched promotion
-    start_pos = match.start()
-    end_pos = match.end()
-
-    # Look for sentence boundaries
-    sentence_start = max(0, description.rfind(".", 0, start_pos) + 1)
-    if sentence_start == 0:  # No period found, try exclamation
-        sentence_start = max(0, description.rfind("!", 0, start_pos) + 1)
-
-    sentence_end = description.find(".", end_pos)
-    if sentence_end == -1:  # No period found, try exclamation
-        sentence_end = description.find("!", end_pos)
-    if sentence_end == -1:  # Still not found, use end of string
-        sentence_end = len(description)
-
-    # Extract and clean the sentence
-    promotion_text = description[sentence_start : sentence_end + 1].strip()
-
-    return promotion_text
-
-
 """ {cell}
 ### Order Tools Implementation Notes
 
@@ -636,7 +539,12 @@ The order tools provide essential functionality for inventory management and ord
 
 6. **Helper Functions**: The `extract_promotion_text` helper extracts full sentences containing promotions for natural-sounding responses.
 
-These tools are designed to be called by the Order Processor agent when processing customer order requests, ensuring accurate inventory management and detailed order information.
+These tools are designed to be called by the Order Processor agent when processing customer order requests,
+ensuring accurate inventory management and detailed order information.
 
-**Scalability Note**: While pandas DataFrames are suitable for the current scale of this project, for significantly larger product catalogs (e.g., 100,000+ products), direct DataFrame operations for every lookup/update, especially stock updates, might become a performance bottleneck. In such production scenarios, a dedicated database (SQL or NoSQL) for structured product data and stock management, used in conjunction with the vector store, would be a more scalable approach.
+**Scalability Note**: While pandas DataFrames are suitable for the current scale of this project,
+for significantly larger product catalogs (e.g., 100,000+ products), direct DataFrame operations
+for every lookup/update, especially stock updates, might become a performance bottleneck.
+In such production scenarios, a dedicated database (SQL or NoSQL) for structured product data
+and stock management, used in conjunction with the vector store, would be a more scalable approach.
 """

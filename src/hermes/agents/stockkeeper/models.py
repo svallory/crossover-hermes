@@ -4,10 +4,16 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from src.hermes.agents.classifier.models import ProductMention
+from src.hermes.agents.classifier.models import ClassifierOutput, ProductMention
 from src.hermes.model.product import Product
 
-class ResolvedProductsOutput(BaseModel):
+class StockkeeperInput(BaseModel):
+    """Input model for the product resolver function."""
+
+    classifier: ClassifierOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
+
+
+class StockkeeperOutput(BaseModel):
     """Output model for the product resolver function."""
 
     resolved_products: list[Product] = Field(

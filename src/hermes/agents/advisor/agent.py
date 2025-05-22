@@ -79,7 +79,8 @@ def search_vector_store(queries: list[str], hermes_config: HermesConfig) -> str:
     if vector_store is None:
         print("WARNING: Vector store is not initialized! Using placeholder data.")
         return (
-            "No relevant product information found in the catalog for the given queries (vector store not initialized)."
+            "No relevant product information found in the catalog for the given queries "
+            "(vector store not initialized)."
         )
 
     # Combine queries into a single search query (if multiple)
@@ -89,7 +90,9 @@ def search_vector_store(queries: list[str], hermes_config: HermesConfig) -> str:
 
     # Use the vector store instance's search method
     try:
-        results = vector_store.similarity_search_with_score(query_text=search_query, n_results=5, filter_criteria=None)
+        results = vector_store.similarity_search_with_score(
+            query_text=search_query, n_results=5, filter_criteria=None
+        )
 
         # Format the results
         if not results:
@@ -147,16 +150,20 @@ async def respond_to_inquiry(
 
     Args:
         state (OverallState): The input model containing the EmailAnalysisResult from the Email Analyzer.
-        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
+        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'],
+        HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
-        Dict[str, Any]: In the LangGraph workflow, returns {Agents.RESPOND_TO_INQUIRY: AdvisorOutput} or {"errors": Error}
+        Dict[str, Any]: In the LangGraph workflow, returns {Agents.RESPOND_TO_INQUIRY: AdvisorOutput}
+        or {"errors": Error}
 
     """
     try:
         # Validate the input
         if state.classifier is None or state.classifier.email_analysis is None:
-            return create_node_response(Agents.ADVISOR, Exception("No email analysis available for inquiry response."))
+            return create_node_response(
+                Agents.ADVISOR, Exception("No email analysis available for inquiry response.")
+            )
 
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
@@ -176,8 +183,7 @@ async def respond_to_inquiry(
                 if segment.segment_type == SegmentType.INQUIRY:
                     if segment.main_sentence:
                         search_queries.append(segment.main_sentence)
-                    for rel_sentence in segment.related_sentences:
-                        search_queries.append(rel_sentence)
+                    search_queries.extend(segment.related_sentences)
 
                 # Add product mentions from all segments as search terms
                 for p_mention in segment.product_mentions:
@@ -228,9 +234,11 @@ async def respond_to_inquiry(
         advisor_prompt = get_prompt(Agents.ADVISOR)
 
         # Add instructions to use valid Season enum values
-        advisor_prompt = advisor_prompt.partial(
-            seasons_instruction="IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter. Do not use 'All seasons'."
+        season_instruction = (
+            "IMPORTANT: When specifying product seasons, only use the values: "
+            "Spring, Summer, Autumn, Winter. Do not use 'All seasons'."
         )
+        advisor_prompt = advisor_prompt.partial(seasons_instruction=season_instruction)
 
         inquiry_response_chain = advisor_prompt | llm.with_structured_output(InquiryAnswers)
 
@@ -245,7 +253,7 @@ async def respond_to_inquiry(
                 {
                     "email_analysis": email_analysis_data,
                     "retrieved_products_context": product_context,
-                    "seasons_instruction": "IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter. Do not use 'All seasons'.",
+                    "seasons_instruction": season_instruction,
                 }
             )
 
@@ -341,16 +349,14 @@ def fix_seasons_in_response(response_data: dict[str, Any]) -> dict[str, Any]:
 
     # Fix primary_products
     if "primary_products" in response_data and response_data["primary_products"]:
-        fixed_primary = []
-        for prod in response_data["primary_products"]:
-            fixed_primary.append(fix_product_seasons(prod))
-        response_data["primary_products"] = fixed_primary
+        response_data["primary_products"] = [
+            fix_product_seasons(prod) for prod in response_data["primary_products"]
+        ]
 
     # Fix related_products
     if "related_products" in response_data and response_data["related_products"]:
-        fixed_related = []
-        for prod in response_data["related_products"]:
-            fixed_related.append(fix_product_seasons(prod))
-        response_data["related_products"] = fixed_related
+        response_data["related_products"] = [
+            fix_product_seasons(prod) for prod in response_data["related_products"]
+        ]
 
     return response_data

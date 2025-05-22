@@ -1,9 +1,12 @@
 import os
-from typing import Literal, Self, cast
+from typing import Literal, TypeVar, cast, List
+from typing_extensions import Self
 
 from dotenv import load_dotenv
 from langchain_core.runnables import RunnableConfig
 from pydantic import BaseModel, Field, model_validator
+
+from src.hermes.model.promotions import PromotionSpec
 
 def load_app_env_vars():
     """Load environment variables from .env file and set LangSmith variables if tracing is enabled."""
@@ -53,12 +56,18 @@ DEFAULT_OUTPUT_SPREADSHEET_NAME = "Hermes - Email Analyzer Test Output"
 DEFAULT_VECTOR_STORE_PATH = "./chroma_db"
 DEFAULT_CHROMA_COLLECTION_NAME = "hermes_product_catalog"
 
+# Define a TypeVar for the 'from_runnable_config' classmethod return type
+T = TypeVar('T', bound='HermesConfig')
 
 class HermesConfig(BaseModel):
     """Central configuration for the Hermes application.
     Values are sourced from environment variables, with defaults provided.
     """
 
+    promotion_specs: List[PromotionSpec] = Field(
+        default_factory=list, 
+        description="List of promotion specifications for the application"
+    )
     llm_provider: Literal["OpenAI", "Gemini"] = Field(
         default_factory=lambda: cast(Literal["OpenAI", "Gemini"], os.getenv("LLM_PROVIDER", DEFAULT_LLM_PROVIDER))
     )

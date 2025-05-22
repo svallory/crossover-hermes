@@ -15,10 +15,6 @@ from .models import (
     ClassifierInput,
     ClassifierOutput,
     EmailAnalysis,
-    ProductMention,
-    Segment,
-    ProductCategory,
-    SegmentType
 )
 from .prompts import get_prompt
 
@@ -46,11 +42,13 @@ async def get_product_mention_stats(email_analysis: EmailAnalysis) -> dict[str, 
 async def analyze_email(
     state: ClassifierInput, runnable_config: RunnableConfig
 ) -> WorkflowNodeOutput[Literal[Agents.CLASSIFIER], ClassifierOutput]:
-    """Analyzes a customer email to extract structured information about intent, product references, and customer signals.
+    """Analyzes a customer email to extract structured information about intent, product references,
+    and customer signals.
 
     Args:
         state (ClassifierInput): The input model containing email_id, subject, and message.
-        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'], HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
+        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'],
+            HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
         Dict[str, Any]: In the LangGraph workflow, returns {"classifier": ClassifierOutput} or {"errors": Error}
@@ -75,7 +73,10 @@ async def analyze_email(
             # Manually parse the JSON output
             if not isinstance(raw_llm_output.content, str) or not raw_llm_output.content.strip():
                 # Handle empty or non-string output from LLM
-                error_message = f"Expected LLM output content to be a non-empty string, but got {type(raw_llm_output.content)} with content: '{raw_llm_output.content[:100]}...'"
+                error_message = (
+                    f"Expected LLM output content to be a non-empty string, but got "
+                    f"{type(raw_llm_output.content)} with content: '{raw_llm_output.content[:100]}...'"
+                )
                 print(f"Error analyzing email {state.email_id}: {error_message}")
                 # Return an error response indicating LLM output issue
                 return create_node_response(Agents.CLASSIFIER, ValueError(error_message))
@@ -87,7 +88,10 @@ async def analyze_email(
                 parsed_output = json.loads(json_string)
             except json.JSONDecodeError as e:
                 # Handle JSON parsing errors
-                error_message = f"Failed to parse LLM output as JSON for email {state.email_id}: {e}. Raw output: '{raw_llm_output.content[:200]}...'"
+                error_message = (
+                    f"Failed to parse LLM output as JSON for email {state.email_id}: {e}. "
+                    f"Raw output: '{raw_llm_output.content[:200]}...'"
+                )
                 print(f"Error analyzing email {state.email_id}: {error_message}")
                 # Return an error response indicating JSON parsing failure
                 return create_node_response(Agents.CLASSIFIER, ValueError(error_message))
@@ -106,7 +110,8 @@ async def analyze_email(
                 except json.JSONDecodeError:
                     # Handle cases where it's a string but not valid JSON, maybe log a warning
                     print(
-                        f"Warning: customer_pii for email {state.email_id} is a string but not valid JSON: {email_analysis.customer_pii}"
+                        f"Warning: customer_pii for email {state.email_id} is a string but not valid JSON: "
+                        f"{email_analysis.customer_pii}"
                     )
                     email_analysis.customer_pii = {}
 
@@ -116,7 +121,8 @@ async def analyze_email(
             # Get stats about product mentions
             product_stats = await get_product_mention_stats(email_analysis)
             print(
-                f"  Analysis for {state.email_id} complete. Found {product_stats['total_mentions']} product mentions across {product_stats['segments_with_products']} segments."
+                f"  Analysis for {state.email_id} complete. Found {product_stats['total_mentions']} "
+                f"product mentions across {product_stats['segments_with_products']} segments."
             )
 
             return create_node_response(

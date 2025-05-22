@@ -8,15 +8,15 @@ import nest_asyncio
 import pandas as pd  # type: ignore
 import yaml  # Add YAML import
 
-# Set the event loop policy back to the default asyncio policy
-# This is needed because uvloop is incompatible with nest_asyncio
-asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
-
 from src.hermes.agents.classifier.models import ClassifierInput
 from src.hermes.agents.workflow.states import OverallState
 from src.hermes.agents.workflow.workflow import run_workflow
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.load_data import load_emails_df
+
+# Set the event loop policy back to the default asyncio policy
+# This is needed because uvloop is incompatible with nest_asyncio
+asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 # Apply nest_asyncio after imports
 nest_asyncio.apply()
@@ -326,15 +326,15 @@ async def main(spreadsheet_id: str, use_csv_output: bool = False, processing_lim
 
         # Order status data - ensure we're capturing all required fields
         if classification == "order request" and result["order_status"]:
-            for order_status in result["order_status"]:
-                order_status_data.append(
-                    {
-                        "email ID": email_id,
-                        "product ID": order_status["product ID"],
-                        "quantity": order_status["quantity"],
-                        "status": order_status["status"],
-                    }
-                )
+            order_status_data.extend([
+                {
+                    "email ID": email_id,
+                    "product ID": order_status["product ID"],
+                    "quantity": order_status["quantity"],
+                    "status": order_status["status"],
+                }
+                for order_status in result["order_status"]
+            ])
 
         # Determine which response sheet to populate based on classification
         if result["response"]:

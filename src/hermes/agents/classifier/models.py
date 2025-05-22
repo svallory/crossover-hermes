@@ -7,14 +7,6 @@ from pydantic import BaseModel, Field
 
 from src.hermes.model.enums import ProductCategory
 
-class SegmentType(str, Enum):
-    """Types of segments in an email analysis."""
-
-    ORDER = "order"
-    INQUIRY = "inquiry"
-    PERSONAL_STATEMENT = "personal_statement"
-
-
 class ProductMention(BaseModel):
     """A mention of a product in a customer email."""
 
@@ -30,6 +22,13 @@ class ProductMention(BaseModel):
         le=1.0,
         description="Confidence level in this product mention",
     )
+
+class SegmentType(str, Enum):
+    """Types of segments in an email analysis."""
+
+    ORDER = "order"
+    INQUIRY = "inquiry"
+    PERSONAL_STATEMENT = "personal_statement"
 
 
 class Segment(BaseModel):

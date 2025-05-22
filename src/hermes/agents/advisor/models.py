@@ -4,7 +4,7 @@
 from pydantic import BaseModel, Field
 
 from src.hermes.agents.classifier.models import ClassifierOutput
-from src.hermes.agents.stockkeeper.models import ResolvedProductsOutput
+from src.hermes.agents.stockkeeper.models import StockkeeperOutput
 from src.hermes.model.product import Product
 
 class ExtractedQuestion(BaseModel):
@@ -33,21 +33,11 @@ class QuestionAnswer(BaseModel):
     )
 
 
-class ProductInformation(BaseModel):
-    """Detailed product information for customer response."""
-
-    product: Product
-    is_available: bool = Field(description="Whether the product is in stock")
-    stock_amount: int = Field(description="Current stock level")
-    has_promotion: bool = Field(default=False, description="Whether the product has an active promotion")
-    promotion_text: str | None = Field(default=None, description="Description of the active promotion if any")
-
-
 class InquiryAnswers(BaseModel):
     """Objective factual response to a customer inquiry."""
 
     email_id: str = Field(description="The unique identifier for the email")
-    primary_products: list[ProductInformation] = Field(
+    primary_products: list[Product] = Field(
         default_factory=list, description="Products directly mentioned by the customer"
     )
     answered_questions: list[QuestionAnswer] = Field(
@@ -58,7 +48,7 @@ class InquiryAnswers(BaseModel):
         default_factory=list,
         description="Questions that couldn't be answered with available information",
     )
-    related_products: list[ProductInformation] = Field(
+    related_products: list[Product] = Field(
         default_factory=list,
         description="Objectively related products based on customer inquiries",
     )
@@ -71,7 +61,7 @@ class AdvisorInput(BaseModel):
     """Input model for the inquiry responder."""
 
     classifier: ClassifierOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
-    stockkeeper: ResolvedProductsOutput | None = Field(
+    stockkeeper: StockkeeperOutput | None = Field(
         default=None, description="Resolved products from the product resolver"
     )
 

@@ -1,10 +1,14 @@
-"""Order Processor Agent - Handles product order requests from customers.
+"""Fulfiller agent package."""
 
-This agent verifies stock availability, updates inventory, suggests alternatives
-for out-of-stock items, and processes product promotions.
-"""
+from ...model.order import OrderLineStatus
+from .agent import process_order
+from .models import FulfillerInput, FulfillerOutput
+from ...model.order import OrderLine
 
-from .agent import *
-from .models import *
-from .promotion_rulesets import *
-from .prompts import *
+__all__ = [
+    "process_order",
+    "FulfillerInput",
+    "FulfillerOutput",
+    "OrderLine",
+    "OrderLineStatus",
+]

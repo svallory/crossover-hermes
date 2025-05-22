@@ -31,6 +31,7 @@ from src.hermes.agents.classifier.models import (
 from src.hermes.agents.composer.agent import compose_response
 from src.hermes.agents.fulfiller.agent import process_order
 from src.hermes.agents.stockkeeper.agent import resolve_product_mentions
+from src.hermes.agents.stockkeeper.models import StockkeeperInput
 from src.hermes.agents.workflow.states import OverallState
 from src.hermes.config import HermesConfig
 from src.hermes.model import Nodes
@@ -84,8 +85,11 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
             Agents.STOCKKEEPER, Exception("Email analyzer output is required for product resolution")
         )
 
-    # Call resolve_product_mentions with the email analyzer output
-    return await resolve_product_mentions(state=classifier, runnable_config=config)
+    # Create StockkeeperInput from classifier
+    stockkeeper_input = StockkeeperInput(classifier=classifier)
+
+    # Call resolve_product_mentions with the StockkeeperInput
+    return await resolve_product_mentions(state=stockkeeper_input, runnable_config=config)
 
 
 async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
@@ -104,19 +108,20 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
 
     # Extract classifier from state - handle potential None case
     classifier = state.classifier
+    stockkeeper_output_data = state.stockkeeper
 
-    if classifier is None:
-        # If classifier is None, return an error
+    if classifier is None or stockkeeper_output_data is None:
+        # If classifier or stockkeeper_output is None, return an error
         from src.hermes.model import Agents
         from src.hermes.utils.errors import create_node_response
 
-        return create_node_response(
-            Agents.FULFILLER, Exception("Email analyzer output is required for order processing")
-        )
+        error_message = "Email analyzer output is required for order processing" \
+                        if classifier is None else "Stockkeeper output is required for order processing"
+        return create_node_response(Agents.FULFILLER, Exception(error_message))
 
     # Get resolved products if available
-    resolved_products = state.stockkeeper.resolved_products if state.stockkeeper else []
-    unresolved_mentions = state.stockkeeper.unresolved_mentions if state.stockkeeper else []
+    # resolved_products = state.stockkeeper.resolved_products if state.stockkeeper else [] # No longer directly needed here
+    # unresolved_mentions = state.stockkeeper.unresolved_mentions if state.stockkeeper else [] # No longer directly needed here
 
     # Convert ClassifierOutput to dict for process_order
     if hasattr(classifier, "model_dump"):
@@ -125,27 +130,33 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
         # Fallback if model_dump not available
         email_analysis_dict = dict(classifier)
 
-    # Add resolved products to the email analysis dict
-    email_analysis_dict["resolved_products"] = resolved_products
-    email_analysis_dict["unresolved_mentions"] = unresolved_mentions
+    # Add resolved products to the email analysis dict (process_order expects this within email_analysis)
+    # This was how it was previously, but process_order signature is (email_analysis, stockkeeper_output, ...)
+    # email_analysis_dict["resolved_products"] = resolved_products
+    # email_analysis_dict["unresolved_mentions"] = unresolved_mentions
+
+    hermes_config_instance = HermesConfig.from_runnable_config(config)
+    promotion_specs_data = hermes_config_instance.promotion_specs
 
     # Call process_order with the extracted information
-    processed_order = process_order(
-        email_analysis=email_analysis_dict,
+    processed_order_result = process_order(
+        email_analysis=email_analysis_dict, # This should be the raw classifier output / email analysis part
+        stockkeeper_output=stockkeeper_output_data, # Pass the full StockkeeperOutput
+        promotion_specs=promotion_specs_data,
         email_id=email_id,
-        hermes_config=HermesConfig.from_runnable_config(config),
+        hermes_config=hermes_config_instance,
     )
 
     # Convert the result to a dictionary for LangGraph
-    from src.hermes.agents.fulfiller.models.agent import FulfillerOutput
+    from src.hermes.agents.fulfiller.models import FulfillerOutput
     from src.hermes.model import Agents
     from src.hermes.utils.errors import create_node_response
 
     # Create the expected output type
-    fulfiller_output = FulfillerOutput(order_result=processed_order)
+    fulfiller_output_response = FulfillerOutput(order_result=processed_order_result)
 
     # Return in the format expected by LangGraph
-    return create_node_response(Agents.FULFILLER, fulfiller_output)
+    return create_node_response(Agents.FULFILLER, fulfiller_output_response)
 
 
 # Build the graph
@@ -170,12 +181,6 @@ graph_builder.add_node(
 # Add edges to create the workflow
 graph_builder.add_edge(START, Nodes.CLASSIFIER)
 graph_builder.add_edge(Nodes.CLASSIFIER, Nodes.STOCKKEEPER)
-
-# graph_builder.add_conditional_edges(
-#     Nodes.ANALYZE,
-#     lambda state: END if len(state.errors.keys()) > 0 else Nodes.PROCESS,
-#     [Nodes.RESOLVE, END],
-# )
 
 graph_builder.add_conditional_edges(
     Nodes.STOCKKEEPER,

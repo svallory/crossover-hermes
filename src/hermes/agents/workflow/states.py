@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field
 from src.hermes.agents.advisor.models import AdvisorOutput
 from src.hermes.agents.classifier.models import ClassifierOutput
 from src.hermes.agents.composer.models import ComposerOutput
-from src.hermes.agents.fulfiller.models.agent import FulfillerOutput
-from src.hermes.agents.stockkeeper.models import ResolvedProductsOutput
+from src.hermes.agents.fulfiller.models import FulfillerOutput
+from src.hermes.agents.stockkeeper.models import StockkeeperOutput
 from src.hermes.model import Agents  # This should be fine
 from src.hermes.model.error import Error
 
@@ -28,7 +28,7 @@ class OverallState(BaseModel):
 
     # Use properly quoted string literals for forward references
     classifier: ClassifierOutput | None = None
-    stockkeeper: ResolvedProductsOutput | None = None
+    stockkeeper: StockkeeperOutput | None = None
     fulfiller: FulfillerOutput | None = None
     advisor: AdvisorOutput | None = None
     composer: ComposerOutput | None = None
