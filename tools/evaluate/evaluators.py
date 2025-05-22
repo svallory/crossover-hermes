@@ -126,19 +126,19 @@ async def evaluate_master(
 
         # Create comprehensive evaluator with all criteria
         criteria = {
-            # Email Analyzer criteria
+            # Classifier agent criteria
             "classifier_intent": "Did the agent correctly identify the primary intent of the email?",
             "classifier_extraction": "Did the agent extract all relevant entities and details?",
             "classifier_segmentation": "Did the agent properly segment the email?",
-            # Order Processor criteria (if applicable)
+            # Fulfiller agent criteria (if applicable)
             "fulfiller_identification": "Did the agent correctly identify all ordered items?",
             "fulfiller_inventory": "Did the agent correctly handle inventory checks?",
             "fulfiller_response": "Did the agent provide appropriate order status info?",
-            # Inquiry Responder criteria (if applicable)
+            # Advisor agent criteria (if applicable)
             "advisor_questions": "Did the agent correctly identify all customer questions?",
             "advisor_accuracy": "Are the answers factually correct based on available information?",
             "advisor_completeness": "Did the agent address all aspects of the questions?",
-            # Response Composer criteria
+            # Composer agent criteria
             "composer_tone": "Is the tone suitable for the customer's situation?",
             "composer_completeness": "Does the response address all aspects of the customer's email?",
             "composer_clarity": "Is the response clear, well-structured, and professional?",

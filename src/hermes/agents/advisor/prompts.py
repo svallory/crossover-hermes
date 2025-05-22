@@ -1,4 +1,4 @@
-"""Inquiry Responder prompts for use with LangChain."""
+"""Advisor agent prompts for use with LangChain."""
 
 
 from langchain_core.prompts import PromptTemplate
@@ -8,7 +8,7 @@ from src.hermes.model.enums import Agents
 # Dictionary to store all prompt templates
 PROMPTS: dict[str, PromptTemplate] = {}
 
-# Main Inquiry Responder Prompt
+# Main Advisor agent Prompt
 markdown = str
 advisor_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
@@ -76,7 +76,7 @@ IMPORTANT NOTES:
 - Do NOT attempt to craft customer-friendly responses or adjust tone.
 - Do NOT include phrases like "I hope this helps" or "Let me know if you need anything else".
 - Keep answers concise and data-focused.
-- Do NOT create response_points (this will be handled by the Response Composer).
+- Do NOT create response_points (this will be handled by the Composer agent).
 - Avoid using first-person or second-person language in answers.
 
 ### USER REQUEST

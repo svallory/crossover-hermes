@@ -1,4 +1,4 @@
-"""Email Analyzer prompts for use with LangChain."""
+"""Classifier agent prompts for use with LangChain."""
 
 
 from langchain_core.prompts import PromptTemplate
@@ -8,7 +8,7 @@ from src.hermes.model.enums import Agents
 # Dictionary to store all prompt templates
 PROMPTS: dict[str, PromptTemplate] = {}
 
-# Main Email Analyzer Prompt
+# Main Classifier agent Prompt
 markdown = str
 classifier_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS

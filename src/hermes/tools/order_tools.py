@@ -1,7 +1,7 @@
 """Order and Inventory Tools.
 
 This module provides tools for managing product inventory and processing orders.
-These tools are essential for the Order Processor agent to verify stock availability,
+These tools are essential for the Fulfiller agent agent to verify stock availability,
 update stock levels as orders are processed, and handle situations where items
 may be out of stock by suggesting alternatives. Additionally, a tool for extracting
 promotional information from product descriptions is included here, as promotions
@@ -539,7 +539,7 @@ The order tools provide essential functionality for inventory management and ord
 
 6. **Helper Functions**: The `extract_promotion_text` helper extracts full sentences containing promotions for natural-sounding responses.
 
-These tools are designed to be called by the Order Processor agent when processing customer order requests,
+These tools are designed to be called by the Fulfiller agent agent when processing customer order requests,
 ensuring accurate inventory management and detailed order information.
 
 **Scalability Note**: While pandas DataFrames are suitable for the current scale of this project,

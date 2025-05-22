@@ -2,10 +2,10 @@
 """StateGraph-based workflow for Hermes agent system using LangGraph.
 
 This module defines the agent flow for processing customer emails:
-1. Email Analyzer to classify and segment the email
-2. Product Resolver to resolve product mentions to catalog products
-3. Conditional routing to Order Processor and/or Inquiry Responder
-4. Response Composer for generating the final response
+1. Classifier agent to classify and segment the email
+2. Stockkeeper to resolve product mentions to catalog products
+3. Conditional routing to Fulfiller agent and/or Advisor agent
+4. Composer agent for generating the final response
 
 The workflow is implemented as a LangGraph StateGraph.
 """

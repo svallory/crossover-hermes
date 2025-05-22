@@ -22,13 +22,13 @@ from .models import (
 )
 from .prompts import get_prompt
 
-@traceable(run_type="chain", name="Response Composer Agent")  # type: ignore
+@traceable(run_type="chain", name="Composer agent Agent")  # type: ignore
 async def compose_response(
     state: ComposerInput,
     runnable_config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.COMPOSER], ComposerOutput]:
     """Composes a natural, personalized customer email response by combining information
-    from the Email Analyzer, Inquiry Responder, and Order Processor agents.
+    from the Classifier agent, Advisor agent, and Fulfiller agent agents.
 
     Args:
         state (OverallState): The current overall state of the workflow.

@@ -1,4 +1,4 @@
-"""Order Processor prompts for use with LangChain."""
+"""Fulfiller agent prompts for use with LangChain."""
 
 
 from langchain_core.prompts import PromptTemplate
@@ -8,13 +8,13 @@ from src.hermes.model import Agents
 # Dictionary to store all prompt templates
 PROMPTS: dict[str, PromptTemplate] = {}
 
-# Main Order Processor Prompt
+# Main Fulfiller agent Prompt
 markdown = str
 fulfiller_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
 You are an efficient Order Processing Agent for a fashion retail store.
 Your primary role is to process customer order requests based on the information provided
-by the Email Analyzer Agent, the Stockkeeper Agent, and the available product catalog.
+by the Classifier agent Agent, the Stockkeeper Agent, and the available product catalog.
 
 You will receive the email analysis containing product references and the stockkeeper output 
 with resolved products. Your goal is to:
@@ -26,7 +26,7 @@ with resolved products. Your goal is to:
 6. Suggest suitable alternatives for out-of-stock items
 7. Compile all information into a structured order processing result
 
-The output will be used directly by the Response Composer Agent to communicate with the customer.
+The output will be used directly by the Composer agent Agent to communicate with the customer.
 
 IMPORTANT GUIDELINES:
 1. Use the stockkeeper output to get resolved products, not the raw product references from email analysis

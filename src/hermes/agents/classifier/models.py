@@ -8,7 +8,21 @@ from pydantic import BaseModel, Field
 from src.hermes.model.enums import ProductCategory
 
 class ProductMention(BaseModel):
-    """A mention of a product in a customer email."""
+    """A mention of a product in a customer email.
+    
+    This model captures product references that may be incomplete or ambiguous
+    in customer communications. It stores both definitive information (like product_id)
+    and descriptive information that requires resolution against the product catalog.
+    
+    Attributes:
+        product_id: Unique identifier if the product was explicitly referenced
+        product_name: The name or title of the product mentioned
+        product_description: Any descriptive text about the product from the email
+        product_category: The category classification if mentioned
+        product_type: Specific type within a general category (e.g., "shirt" within "Men's Clothing")
+        quantity: Number of items requested, defaults to 1
+        confidence: Confidence level in this product mention (0.0-1.0)
+    """
 
     product_id: str | None = None
     product_name: str | None = None

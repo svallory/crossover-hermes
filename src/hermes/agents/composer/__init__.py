@@ -1,7 +1,7 @@
-"""Response Composer Agent package.
+"""Composer agent Agent package.
 
 This agent creates the final customer response by combining outputs from the
-Email Analyzer, Inquiry Responder, and Order Processor agents.
+Classifier agent, Advisor agent, and Fulfiller agent agents.
 """
 
 from .agent import *

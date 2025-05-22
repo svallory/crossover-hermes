@@ -52,7 +52,7 @@ DEFAULT_LLM_OUTPUT_VERIFICATION = True
 
 DEFAULT_OPENAI_BASE_URL = "https://47v4us7kyypinfb5lcligtc3x40ygqbs.lambda-url.us-east-1.on.aws/v1/"
 DEFAULT_INPUT_SPREADSHEET_ID = "14fKHsblfqZfWj3iAaM2oA51TlYfQlFT4WKo52fVaQ9U"
-DEFAULT_OUTPUT_SPREADSHEET_NAME = "Hermes - Email Analyzer Test Output"
+DEFAULT_OUTPUT_SPREADSHEET_NAME = "Hermes - Classifier agent Test Output"
 DEFAULT_VECTOR_STORE_PATH = "./chroma_db"
 DEFAULT_CHROMA_COLLECTION_NAME = "hermes_product_catalog"
 

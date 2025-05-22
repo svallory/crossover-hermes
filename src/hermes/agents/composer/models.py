@@ -6,9 +6,7 @@ from pydantic import BaseModel, Field
 
 from src.hermes.agents.advisor.models import AdvisorOutput
 from src.hermes.agents.classifier.models import ClassifierInput, ClassifierOutput
-from src.hermes.agents.fulfiller.models.models import (
-    FulfillerOutput,
-)
+from src.hermes.agents.fulfiller.models import FulfillerOutput
 
 
 class ResponseTone(str, Enum):
@@ -58,10 +56,10 @@ class ComposerInput(ClassifierInput):
 
     classifier: ClassifierOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
     advisor: AdvisorOutput | None = Field(
-        default=None, description="Results from the Inquiry Responder, if applicable"
+        default=None, description="Results from the Advisor agent, if applicable"
     )
     fulfiller: FulfillerOutput | None = Field(
-        default=None, description="Results from the Order Processor, if applicable"
+        default=None, description="Results from the Fulfiller agent, if applicable"
     )
 
 

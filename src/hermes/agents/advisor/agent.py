@@ -139,7 +139,7 @@ def search_vector_store(queries: list[str], hermes_config: HermesConfig) -> str:
 
 @traceable(
     run_type="chain",
-    name="Inquiry Responder Agent",
+    name="Advisor agent Agent",
 )
 async def respond_to_inquiry(
     state: AdvisorInput,
@@ -149,7 +149,7 @@ async def respond_to_inquiry(
     Uses RAG techniques to retrieve relevant product information.
 
     Args:
-        state (OverallState): The input model containing the EmailAnalysisResult from the Email Analyzer.
+        state (OverallState): The input model containing the EmailAnalysisResult from the Classifier agent.
         runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'],
         HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 

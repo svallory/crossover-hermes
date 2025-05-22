@@ -1,4 +1,4 @@
-"""Response Composer prompts for use with LangChain."""
+"""Composer agent prompts for use with LangChain."""
 
 
 from langchain_core.prompts import PromptTemplate
@@ -8,7 +8,7 @@ from src.hermes.model.enums import Agents
 # Dictionary to store all prompt templates
 PROMPTS: dict[str, PromptTemplate] = {}
 
-# Main Response Composer Prompt
+# Main Composer agent Prompt
 composer_prompt_template_str = """
 ### SYSTEM INSTRUCTIONS
 You are an expert AI system for a high-end fashion retail store called "Hermes", focused on composing

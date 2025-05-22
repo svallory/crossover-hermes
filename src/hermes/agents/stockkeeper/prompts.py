@@ -1,4 +1,4 @@
-"""Product Resolver prompts for use with LangChain."""
+"""Stockkeeper prompts for use with LangChain."""
 
 
 from langchain_core.prompts import PromptTemplate
