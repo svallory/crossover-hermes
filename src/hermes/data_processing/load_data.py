@@ -1,4 +1,3 @@
-
 import pandas as pd  # type: ignore
 from chromadb.api.models.Collection import Collection
 
@@ -16,9 +15,9 @@ vector_store: Collection | None = None
 def read_data_from_gsheet(document_id: str, sheet_name: str) -> pd.DataFrame:
     """Reads a sheet from a Google Spreadsheet into a pandas DataFrame."""
     export_link = f"https://docs.google.com/spreadsheets/d/{document_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
-    df = pd.read_csv(export_link)
-    print(f"Successfully read {len(df)} rows from sheet: {sheet_name}")
-    return df
+    dataframe = pd.read_csv(export_link)
+    print(f"Successfully read {len(dataframe)} rows from sheet: {sheet_name}")
+    return dataframe
 
 
 def load_emails_df(spreadsheet_id: str = INPUT_SPREADSHEET_ID_DEFAULT) -> pd.DataFrame:

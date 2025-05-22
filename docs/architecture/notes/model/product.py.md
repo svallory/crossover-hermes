@@ -1,0 +1,3 @@
+This file defines the data structures for products within the Hermes system. The `Product` class represents a single product with details like ID, name, description, category, stock, seasons, and price. It also includes optional fields for promotion information. The `AlternativeProduct` class is used to represent recommended alternative products, including the product itself, a similarity score, and a reason for the recommendation. These models are fundamental to how products are represented and managed throughout the Hermes workflow.
+
+[Link to file](../../../../src/hermes/model/product.py) 

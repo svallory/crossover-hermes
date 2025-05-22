@@ -1,0 +1,10 @@
+This file, `order.py`, defines the Pydantic data models used to represent customer orders and their line items within the Hermes system. These models are crucial for structuring the data processed by agents involved in order fulfillment, particularly the Fulfiller agent.
+
+Key models defined:
+-   `OrderLineStatus`: An enumeration (`Enum`) to track the processing status of individual items within an order, such as `CREATED` or `OUT_OF_STOCK`.
+-   `OrderLine`: Represents a single item in a customer order. It includes fields for identifying the product (`product_id`, `description`), specifying the `quantity`, and capturing detailed information after processing, such as `base_price`, calculated `unit_price` and `total_price`, current `stock` level, `status` (using `OrderLineStatus`), details about any applied `promotion` (`promotion_applied`, `promotion_description`, `promotion`), and a list of suggested `alternatives` if the item is unavailable. This model serves as a flexible structure accommodating both initial order requests and enriched processing results.
+-   `Order`: Represents the complete customer order. It includes the `email_id` from which the order originated, an `overall_status` reflecting the status of the entire order (e.g., `created`, `out_of_stock`, `partially_fulfilled`), a list of `OrderLine` objects (`lines`) representing all items, and summary fields like `total_price` and `total_discount`. It also includes a flag `stock_updated` to indicate if inventory levels were modified.
+
+Architecturally, these models serve as the standardized data format for exchanging order information within the Hermes workflow. They define the structure for how order details are parsed from emails, how processing results (like stock checks, pricing, and promotions) are stored and communicated, and how the final state of the order is represented. This structured approach is vital for reliable data flow between agents and ensures that all necessary information for fulfilling or responding to an order request is consistently available.
+
+[Link to source file](../../../../src/hermes/model/order.py) 

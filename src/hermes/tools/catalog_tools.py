@@ -18,6 +18,7 @@ import logging
 import os
 from pathlib import Path
 from typing import Any
+import json
 
 import pandas as pd  # type: ignore
 
@@ -31,9 +32,13 @@ from thefuzz import process  # type: ignore
 # Import the load_products_df function
 from src.hermes.data_processing.load_data import load_products_df
 
+# Import VectorStore
+from src.hermes.data_processing.vector_store import VectorStore
+
 # Explicitly ignore import not found errors
 from src.hermes.model import ProductCategory, Season
 from src.hermes.model.product import Product
+from src.hermes.model.errors import ProductNotFound
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -48,14 +53,6 @@ data_dir = script_dir.parent.parent.parent / "data"
 product_file = data_dir / "product_catalog.csv"
 
 
-class ProductNotFound(BaseModel):
-    """Indicates that a product was not found."""
-
-    message: str
-    query_product_id: str | None = None
-    query_product_name: str | None = None
-
-
 class FuzzyMatchResult(BaseModel):
     """Result of a fuzzy name match."""
 
@@ -64,19 +61,25 @@ class FuzzyMatchResult(BaseModel):
 
 
 @tool  # type: ignore[call-overload]
-def find_product_by_id(product_id: str) -> Product | ProductNotFound:
+def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
     """Find a product by its ID.
 
     Retrieve detailed product information by its exact Product ID.
     Use this when you have a precise Product ID (e.g., 'LTH0976', 'CSH1098').
 
     Args:
-        product_id: The exact Product ID to search for (case-sensitive).
+        tool_input: JSON string with product_id field.
 
     Returns:
         A Product object if found, or a ProductNotFound object if no product matches the ID.
 
     """
+    try:
+        input_data = json.loads(tool_input)
+        product_id = input_data.get("product_id", "")
+    except (json.JSONDecodeError, AttributeError):
+        return ProductNotFound(message=f"Invalid input format: {tool_input}")
+
     # Standardize the product ID format (remove spaces and convert to uppercase)
     product_id = product_id.replace(" ", "").upper()
 
@@ -126,7 +129,8 @@ def find_product_by_name(
 ) -> list[FuzzyMatchResult] | ProductNotFound:
     """Find products by name using fuzzy matching.
 
-    Use this when the customer provides a product name that might have typos, be incomplete, or slightly different from the catalog.
+    Use this when the customer provides a product name that might have typos, be incomplete,
+    or slightly different from the catalog.
 
     Args:
         product_name: The product name to search for.
@@ -218,79 +222,93 @@ def create_filter_dict(
 
 
 @tool  # type: ignore[call-overload]
-def search_products_by_description(
-    query: str,
-    *,
-    top_k: int = 3,
-    category_filter: str | None = None,
-    season_filter: str | None = None,
-) -> list[Product] | ProductNotFound:
+def search_products_by_description(tool_input: str) -> list[Product] | ProductNotFound:
     """Search for products by description.
 
     Search for products using semantic description matching.
     This tool is great for answering open-ended inquiries about products with specific features or characteristics.
 
     Args:
-        query: The search text describing the product features or characteristics.
-        top_k: Maximum number of results to return.
-        category_filter: Optional category to narrow down results (e.g., "Dresses", "Accessories").
-        season_filter: Optional season to narrow down results (e.g., "Summer", "Winter").
+        tool_input: JSON string with query, top_k (optional), category_filter (optional), 
+                   and season_filter (optional) fields.
 
     Returns:
         A list of matching Product objects or a ProductNotFound object if no products match.
 
     """
     try:
+        input_data = json.loads(tool_input)
+        query = input_data.get("query", "")
+        top_k = input_data.get("top_k", 3)
+        category_filter = input_data.get("category_filter")
+        season_filter = input_data.get("season_filter")
+    except (json.JSONDecodeError, AttributeError):
+        return ProductNotFound(message=f"Invalid input format: {tool_input}")
+
+    try:
         # Get products_df using the memoized function
         products_df = load_products_df()
 
         # First check if we have a DataFrame for direct searching
         if products_df is not None and not products_df.empty:
-            # For demonstration, we'll implement a simplified search using the DataFrame
-            # In a real system, this would use the vector store
-            results = []
-            for _, row in products_df.iterrows():
-                # Create a product from each row
-                product = Product(
-                    product_id=str(row["product_id"]),
-                    name=str(row["name"]),
-                    description=str(row["description"]),
-                    category=ProductCategory(row["category"]),
-                    product_type=str(row.get("type", "")),
-                    stock=int(row["stock"]),
-                    price=float(row["price"]),
-                    seasons=[Season.SPRING],  # Default season
+            # Initialize VectorStore (it's a singleton, so config is optional if already initialized)
+            vector_store = VectorStore()
+            
+            # Prepare filters for vector store
+            vs_filters: dict[str, Any] = {}
+            if category_filter:
+                vs_filters["category"] = category_filter
+            if season_filter:
+                # Assuming season is stored as a string in metadata and can be filtered directly.
+                # If seasons are stored as a list, the vector store's filtering capabilities
+                # or the metadata structure might need adjustment for multi-select or contains logic.
+                # For now, we'll assume a direct match or that the vector store handles list containment if configured.
+                vs_filters["season"] = season_filter # This might need adjustment based on how seasons are indexed.
+
+            products = vector_store.search_products_by_description(
+                query=query,
+                top_k=top_k,
+                filters=vs_filters if vs_filters else None,
+                # category_filter is handled by the filters dict now
+            )
+
+            if not products:
+                return ProductNotFound(
+                    message=(
+                        f"No products found matching description query: '{query}' "
+                        f"with category '{category_filter}' and season '{season_filter}'."
+                    )
                 )
-                results.append(product)
-
-            # Return top_k products (in a real system this would be semantically filtered)
-            return results[:top_k]
-
-        # If DataFrame search didn't work, let user know search is unavailable
-        return ProductNotFound(message="Product search is unavailable. Could not find products matching: '{query}'")
+            return products
+        else:
+            return ProductNotFound(message="Product catalog data is not loaded.")
 
     except Exception as e:
-        # Handle errors in search
+        logger.error(f"Error during product description search: {e}", exc_info=True)
         return ProductNotFound(message=f"Error during product search: {str(e)}")
 
 
 @tool  # type: ignore[call-overload]
-def find_related_products(
-    product_id: str, *, relationship_type: str = "complementary", limit: int = 2
-) -> list[Product] | ProductNotFound:
+def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
     """Find products related to a given product ID.
 
     Find products related to a given product ID, such as complementary items or alternatives from the same category.
 
     Args:
-        product_id (str): The ID of the product to find related items for.
-        relationship_type (str): Type of relationship to search for ('complementary' or 'alternative').
-        limit (int): Maximum number of related products to return.
+        tool_input: JSON string with product_id, relationship_type (optional), and limit (optional) fields.
 
     Returns:
         Union[List[Product], ProductNotFound]: List of related Product objects, or ProductNotFound if none found.
 
     """
+    try:
+        input_data = json.loads(tool_input)
+        product_id = input_data.get("product_id", "")
+        relationship_type = input_data.get("relationship_type", "complementary")
+        limit = input_data.get("limit", 2)
+    except (json.JSONDecodeError, AttributeError):
+        return ProductNotFound(message=f"Invalid input format: {tool_input}")
+
     # Get products_df using the memoized function
     products_df = load_products_df()
 
@@ -301,7 +319,9 @@ def find_related_products(
         )
     try:
         # First verify that the main product exists
-        main_product_result = find_product_by_id(product_id=product_id)
+        main_product_result = find_product_by_id(
+            json.dumps({"product_id": product_id})
+        )
         if isinstance(main_product_result, ProductNotFound):
             return main_product_result
 
@@ -389,24 +409,32 @@ def find_related_products(
 
 
 @tool  # type: ignore[call-overload]
-def resolve_product_reference(*, query: str) -> Product | ProductNotFound:
+def resolve_product_reference(tool_input: str) -> Product | ProductNotFound:
     """Resolve a product reference from a natural language query.
 
     Resolves a product reference dictionary to a specific product using a series of lookup strategies.
     It tries to find a product by ID, then by name, then by semantic description search.
 
     Args:
-        query: A string containing product reference information.
+        tool_input: JSON string with query field for product reference.
 
     Returns:
         A Product object if a match is found, otherwise a ProductNotFound object.
 
     """
-    # Check that query is not None before accessing it
-    if query is None:
-        return ProductNotFound(message="Product reference query is None")
+    try:
+        input_data = json.loads(tool_input)
+        query = input_data.get("query", "")
+    except (json.JSONDecodeError, AttributeError):
+        return ProductNotFound(message=f"Invalid input format: {tool_input}")
 
-    search_results_data = search_products_by_description(query=query, top_k=1)
+    # Check that query is not None before accessing it
+    if not query:
+        return ProductNotFound(message="Product reference query is empty")
+
+    search_results_data = search_products_by_description(
+        json.dumps({"query": query, "top_k": 1})
+    )
     if isinstance(search_results_data, list) and search_results_data:
         return search_results_data[0]
 

@@ -6,9 +6,10 @@ from pydantic import BaseModel, Field
 
 from src.hermes.agents.advisor.models import AdvisorOutput
 from src.hermes.agents.classifier.models import ClassifierInput, ClassifierOutput
-from src.hermes.agents.fulfiller.models.agent import (
+from src.hermes.agents.fulfiller.models.models import (
     FulfillerOutput,
 )
+
 
 class ResponseTone(str, Enum):
     """Tone options for customer responses."""
@@ -36,6 +37,19 @@ class ResponsePoint(BaseModel):
     related_to: str | None = Field(default=None, description="Product ID or question this point relates to, if any")
 
 
+class ComposedResponse(BaseModel):
+    """The final composed response to be sent to the customer."""
+
+    email_id: str = Field(description="The ID of the email being responded to")
+    subject: str = Field(description="Subject line for the response email")
+    response_body: str = Field(description="Full text of the response")
+    language: str = Field(description="Language code of the response (should match customer's language)")
+    tone: ResponseTone = Field(description="Detected tone used in the response")
+    response_points: list[ResponsePoint] = Field(
+        default_factory=list, description="Structured breakdown of response elements"
+    )
+
+
 class ComposerInput(ClassifierInput):
     """Input model for the response composer function.
 
@@ -48,19 +62,6 @@ class ComposerInput(ClassifierInput):
     )
     fulfiller: FulfillerOutput | None = Field(
         default=None, description="Results from the Order Processor, if applicable"
-    )
-
-
-class ComposedResponse(BaseModel):
-    """The final composed response to be sent to the customer."""
-
-    email_id: str = Field(description="The ID of the email being responded to")
-    subject: str = Field(description="Subject line for the response email")
-    response_body: str = Field(description="Full text of the response")
-    language: str = Field(description="Language code of the response (should match customer's language)")
-    tone: ResponseTone = Field(description="Detected tone used in the response")
-    response_points: list[ResponsePoint] = Field(
-        default_factory=list, description="Structured breakdown of response elements"
     )
 
 

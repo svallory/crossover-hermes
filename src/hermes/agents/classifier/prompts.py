@@ -12,7 +12,8 @@ PROMPTS: dict[str, PromptTemplate] = {}
 markdown = str
 classifier_prompt_template_str: markdown = """
 ### SYSTEM INSTRUCTIONS
-You are an AI agent that preprocesses customer emails for an e-commerce store. Your task is to analyze customer emails and extract structured information for further processing.
+You are an AI agent that preprocesses customer emails for an e-commerce store. Your
+task is to analyze customer emails and extract structured information for further processing.
 
 Extract the following information:
 1. Break down the email into meaningful segments (orders, inquiries, personal statements)
@@ -35,7 +36,8 @@ Return a JSON structure with the following format:
     "name": "Customer name if provided",
     "address": "Customer address if provided",
     // Other PII fields as found
-  }, // Always return a JSON object (dictionary) for customer_pii, e.g., {"name": "John Doe", "email": "john.doe@example.com"} or {} if no PII is found.
+  }, // Always return a JSON object (dictionary) for customer_pii, e.g.,
+  // {"name": "John Doe", "email": "john.doe@example.com"} or {} if no PII is found.
   "segments": [
     {
       "segment_type": "order|inquiry|personal_statement",
@@ -46,9 +48,11 @@ Return a JSON structure with the following format:
       ],
       "product_mentions": [
         {
-          "product_category": "Accessories|Bags|Kid's Clothing|Loungewear|Men's Accessories|Men's Clothing|Men's Shoes|Women's Clothing|Women's Shoes", // or null if not mentioned or unknown
+          "product_category": "Accessories|Bags|Kid's Clothing|Loungewear|Men's Accessories|Men's Clothing|
+          Men's Shoes|Women's Clothing|Women's Shoes", // or null if not mentioned or unknown
           "product_type": "Fundamental product type in the general category", // or null if not clear
-          "product_name": "The exact branded name without additional descriptors (e.g., 'Alpine Explorer', 'Sunset Breeze', 'Urban Nomad')", // or null if only generic type is mentioned
+          "product_name": "The exact branded name without additional descriptors (e.g., 'Alpine Explorer',
+          'Sunset Breeze', 'Urban Nomad')", // or null if only generic type is mentioned
           "product_id": "XYZ4321", // or null if not specified
           "product_description": "Customer's description", // or null if not provided
           "quantity": 2, // defaults to 1 if not specified
@@ -73,19 +77,26 @@ GUIDELINES:
 - Assign confidence scores to product mentions based on certainty (exact product IDs have 1.0)
 - Preserve the original intent and meaning of the customer's message
 - Product IDs follow a pattern of 3 letters followed by 4 numbers (e.g., XYZ4321)
-- Be cautious with numbers in general text - only extract as product IDs when context clearly indicates a product (avoid false positives)
+- Be cautious with numbers in general text - only extract as product IDs when context clearly indicates
+  a product (avoid false positives)
 - Extract product IDs as they appear, even if formatted differently (in brackets, with spaces, etc.)
 - Set lower confidence scores for IDs that don't strictly follow the 3-letter/4-number pattern
-- When a specific product name or ID is not mentioned, extract the product type and description into the `product_type` and `product_description` fields.
+- When a specific product name or ID is not mentioned, extract the product type and description
+  into the `product_type` and `product_description` fields.
 
 PRODUCT NAME EXTRACTION RULES:
-- The product_name field should contain ONLY the distinctive branded name without generic category words, unless those words are part of the official product name
+- The product_name field should contain ONLY the distinctive branded name without generic category words,
+  unless those words are part of the official product name
 - Examples of correct product names: "Alpine Explorer", "Sunset Breeze", "Urban Nomad", "Midnight Symphony"
-- If a customer refers to a product with additional descriptors (e.g., "Alpine Explorer backpack"), extract only the actual product name ("Alpine Explorer")
-- When a customer mentions a generic product without a specific branded name (e.g., "a shoulder bag", "some polarized glasses"), use null for product_name and fill in only the product_type field
-- For product names that include the product type as part of their official name (e.g., "Cosmic Runners", "Crystal Hoop Earrings"), keep the full name intact
+- If a customer refers to a product with additional descriptors (e.g., "Alpine Explorer backpack"),
+  extract only the actual product name ("Alpine Explorer")
+- When a customer mentions a generic product without a specific branded name (e.g., "a shoulder bag",
+  "some polarized glasses"), use null for product_name and fill in only the product_type field
+- For product names that include the product type as part of their official name (e.g., "Cosmic Runners",
+  "Crystal Hoop Earrings"), keep the full name intact
 - Maintain exact capitalization in product names when possible (e.g., "Alpine Explorer" not "alpine explorer")
-- When in doubt about whether a word is part of the product name or just a descriptor, favor putting it in the product_type field instead of the product_name
+- When in doubt about whether a word is part of the product name or just a descriptor, favor putting
+  it in the product_type field instead of the product_name
 
 ### USER REQUEST
 CUSTOMER EMAIL:

@@ -1,106 +1,54 @@
 """Main function for processing customer order requests."""
 
 import json
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
+from src.hermes.agents.stockkeeper.models import StockkeeperOutput
 from src.hermes.config import HermesConfig
 from src.hermes.model.enums import Agents
+from src.hermes.model.order import OrderLine, Order, OrderLineStatus
+from src.hermes.model.promotions import (
+    PromotionSpec, 
+    PromotionConditions, 
+    PromotionEffects,
+    DiscountSpec
+)
 from src.hermes.tools.catalog_tools import Product, find_product_by_id
 from src.hermes.tools.order_tools import (
-    DiscountResult,
     ProductNotFound,
-    PromotionDetails,
     StockStatus,
     StockUpdateResult,
-    calculate_discount_price,
     check_stock,
-    extract_promotion,
-    find_alternatives_for_oos,
     update_stock,
+    find_alternatives_for_oos,
 )
+from src.hermes.tools.promotion_tools import apply_promotion
 from src.hermes.utils.llm_client import get_llm_client
 
-from .models import OrderedItemStatus, ProcessedOrder
 from .prompts import get_prompt
-
-def calculate_promotion_discount(llm, original_price: float, promotion_text: str, quantity: int = 1) -> float:
-    """Calculate the discounted price using the dedicated tool or fallback to LLM.
-
-    Args:
-        llm: The LLM client to use if needed
-        original_price: The original unit price
-        promotion_text: The promotion text
-        quantity: The number of items
-
-    Returns:
-        The discounted unit price
-
-    """
-    try:
-        # First try using the dedicated calculation tool
-        result = calculate_discount_price(
-            tool_input=json.dumps(
-                {"original_price": original_price, "promotion_text": promotion_text, "quantity": quantity}
-            )
-        )
-
-        if isinstance(result, DiscountResult) and result.discount_applied:
-            # The tool successfully applied a discount
-            return result.discounted_price
-
-        # If there was no discount or the tool didn't work properly,
-        # try using the LLM as a fallback
-        promotion_prompt = get_prompt("PROMOTION_CALCULATOR")
-        prompt_data = {
-            "original_price": f"{original_price:.2f}",
-            "promotion_text": promotion_text,
-            "quantity": quantity,
-        }
-
-        promotion_response = llm.invoke(promotion_prompt.format(**prompt_data))
-        promotion_response_text = str(promotion_response).strip()
-
-        # Try to extract a numeric value from the response
-        try:
-            # Remove any non-numeric characters except decimal point
-            clean_response = "".join(c for c in promotion_response_text if c.isdigit() or c == ".")
-            if clean_response and "." in clean_response:
-                discounted_price = float(clean_response)
-                # Only apply if it's a valid discount
-                if 0 < discounted_price < original_price:
-                    return round(discounted_price, 2)
-        except (ValueError, TypeError):
-            pass
-
-        # If we couldn't extract a valid discounted price, return the original
-        return original_price
-
-    except Exception as e:
-        print(f"Error calculating discount: {e}")
-        # Return the original price if any error occurs
-        return original_price
-
 
 def process_order(
     email_analysis: dict[str, Any],
+    stockkeeper_output: StockkeeperOutput,
+    promotion_specs: list[PromotionSpec],
     email_id: str = "unknown",
     model_strength: Literal["weak", "strong"] = "strong",
     temperature: float = 0.0,
     hermes_config: HermesConfig | None = None,
-) -> ProcessedOrder:
-    """Processes a customer order request based on the email analysis.
-    Simplified version for notebook usage.
+) -> Order:
+    """Processes a customer order request based on the email analysis and stockkeeper results.
 
     Args:
         email_analysis: Dictionary containing the email analysis
+        stockkeeper_output: Output from the stockkeeper agent with resolved products
+        promotion_specs: List of promotion specifications to apply
         email_id: ID of the email being processed
         model_strength: Strength of the LLM to use ('strong' or 'weak')
         temperature: Temperature setting for the LLM
         hermes_config: Optional HermesConfig instance
 
     Returns:
-        ProcessedOrder object with the order processing results
-
+        Order object with the order processing results
     """
     try:
         print(f"Processing order request for email {email_id}")
@@ -136,29 +84,33 @@ def process_order(
             raise ValueError(f"Cannot extract email analysis from object of type {type(email_analysis)}")
 
         # Create processing chain including error handling
-        order_processing_chain = fulfiller_prompt | llm.with_structured_output(ProcessedOrder)
+        order_processing_chain = fulfiller_prompt | llm.with_structured_output(Order)
 
         # Generate order processing result
-        response_data = order_processing_chain.invoke({"email_analysis": json.dumps(analysis_dict, indent=2)})
+        response_data = order_processing_chain.invoke({
+            "email_analysis": json.dumps(analysis_dict, indent=2),
+            "resolved_products": json.dumps(stockkeeper_output.model_dump(), indent=2)
+        })
 
         # Handle the response properly with type checking
-        if isinstance(response_data, ProcessedOrder):
+        if isinstance(response_data, Order):
             processed_order = response_data
-        # If we got a dict, convert it to ProcessedOrder with required fields
+        # If we got a dict, convert it to Order with required fields
         elif isinstance(response_data, dict):
             # Make sure required fields are included
             response_data["email_id"] = email_id
             if "overall_status" not in response_data:
                 response_data["overall_status"] = "processed"
-            processed_order = ProcessedOrder(**response_data)
+            processed_order = Order(**response_data)
         else:
             # Fallback if we got something unexpected
-            processed_order = ProcessedOrder(
+            processed_order = Order(
                 email_id=email_id,
                 overall_status="no_valid_products",
-                ordered_items=[],
+                lines=[],
                 message="Unexpected response type from order processing",
                 stock_updated=False,
+                total_discount=0.0
             )
 
         # Make sure the email_id is set correctly in the result
@@ -166,129 +118,155 @@ def process_order(
             processed_order.email_id = email_id
 
         # Process the ordered items - check actual stock and set status
-        if processed_order.ordered_items:
+        if processed_order.lines:
             # Reset total price to recalculate with correct promotions
             total_price = 0.0
+            order_items = []
 
-            for item in processed_order.ordered_items:
+            for line in processed_order.lines:
                 # Check actual stock
                 try:
                     # Call the stock checking tool
                     stock_result = check_stock(
-                        tool_input=json.dumps({"product_id": item.product_id, "requested_quantity": item.quantity})
+                        tool_input=json.dumps({"product_id": line.product_id, "requested_quantity": line.quantity})
                     )
 
-                    # Get product details including any promotions
-                    product_result = find_product_by_id(tool_input=json.dumps({"product_id": item.product_id}))
-
-                    # Extract promotion information if available and product result is valid
-                    if isinstance(product_result, Product):
-                        # Use the extract_promotion tool to get promotion details
-                        try:
-                            promotion_result = extract_promotion(
-                                tool_input=json.dumps(
-                                    {
-                                        "product_description": product_result.description,
-                                        "product_name": product_result.name,
-                                    }
-                                )
-                            )
-
-                            # If promotion exists and has valid data
-                            if isinstance(promotion_result, PromotionDetails) and promotion_result.has_promotion:
-                                # Update or set the promotion text
-                                if promotion_result.promotion_text:
-                                    item.promotion = promotion_result.promotion_text
-                        except Exception as e:
-                            print(f"Error extracting promotion for {item.product_id}: {e}")
+                    # Get product details
+                    product_result = find_product_by_id(tool_input=json.dumps({"product_id": line.product_id}))
 
                     # Handle response based on type
                     if isinstance(stock_result, StockStatus):
                         # In stock - update status and decrement stock
                         if stock_result.is_available:
-                            item.status = OrderedItemStatus.CREATED
-                            item.stock = stock_result.current_stock
+                            line.status = OrderLineStatus.CREATED
+                            line.stock = stock_result.current_stock
+
+                            # Create an order item dictionary for promotion processing
+                            if isinstance(product_result, Product):
+                                order_item = {
+                                    "product_id": line.product_id,
+                                    "description": line.description,
+                                    "base_price": line.base_price or 0.0,
+                                    "quantity": line.quantity
+                                }
+                                order_items.append(order_item)
 
                             # Update the stock
                             update_result = update_stock(
                                 tool_input=json.dumps(
-                                    {"product_id": item.product_id, "quantity_to_decrement": item.quantity}
+                                    {"product_id": line.product_id, "quantity_to_decrement": line.quantity}
                                 )
                             )
 
                             if isinstance(update_result, StockUpdateResult) and update_result.status == "success":
                                 processed_order.stock_updated = True
+                                
+                            # Add to the total price (before promotions)
+                            if line.total_price is not None:
+                                total_price += line.total_price
+                                
                         else:
                             # Out of stock - set status and available stock
-                            item.status = OrderedItemStatus.OUT_OF_STOCK
-                            item.stock = stock_result.current_stock
+                            line.status = OrderLineStatus.OUT_OF_STOCK
+                            line.stock = stock_result.current_stock
 
                             # Find alternatives
                             alternatives_result = find_alternatives_for_oos(
-                                tool_input=json.dumps({"original_product_id": item.product_id, "limit": 2})
+                                tool_input=json.dumps({"original_product_id": line.product_id, "limit": 2})
                             )
 
                             if isinstance(alternatives_result, list) and alternatives_result:
-                                item.alternatives = alternatives_result
+                                line.alternatives = alternatives_result
                     elif isinstance(stock_result, ProductNotFound):
                         # Product not found - set to out of stock
-                        item.status = OrderedItemStatus.OUT_OF_STOCK
-                        item.stock = 0
+                        line.status = OrderLineStatus.OUT_OF_STOCK
+                        line.stock = 0
                     else:
                         # Unexpected result - set to out of stock
-                        item.status = OrderedItemStatus.OUT_OF_STOCK
-                        item.stock = 0
-
-                    # Process promotions for this item if available
-                    if item.promotion and item.price is not None and item.status == OrderedItemStatus.CREATED:
-                        promotion_text = item.promotion
-                        if isinstance(promotion_text, dict) and "text" in promotion_text:
-                            promotion_text = promotion_text["text"]
-                        elif not isinstance(promotion_text, str):
-                            promotion_text = str(promotion_text)
-
-                        # Calculate the discounted price using our helper function
-                        original_price = item.price
-                        discounted_price = calculate_promotion_discount(
-                            llm=llm,
-                            original_price=original_price,
-                            promotion_text=promotion_text,
-                            quantity=item.quantity,
-                        )
-
-                        # Only update if we got a valid discounted price
-                        if discounted_price < original_price:
-                            item.price = discounted_price
-
-                    # Recalculate item total price based on potentially updated item price
-                    if item.price is not None and item.status == OrderedItemStatus.CREATED:
-                        item.total_price = round(item.price * item.quantity, 2)
-                        total_price += item.total_price
+                        line.status = OrderLineStatus.OUT_OF_STOCK
+                        line.stock = 0
 
                 except Exception as e:
-                    print(f"Error processing order item {item.product_id}: {e}")
-                    # Default to out of stock if there's an error
-                    item.status = OrderedItemStatus.OUT_OF_STOCK
-                    item.stock = 0
+                    print(f"Error processing item {line.product_id}: {e}")
+                    # Set to out of stock in case of error
+                    line.status = OrderLineStatus.OUT_OF_STOCK
+                    line.stock = 0
 
-            # Update the total price with our recalculated value
-            processed_order.total_price = round(total_price, 2)
+            # Apply promotions if we have items in stock
+            if order_items:
+                try:
+                    # Call the apply_promotion tool
+                    order_result = apply_promotion(
+                        tool_input=json.dumps({
+                            "ordered_items": order_items,
+                            "promotion_specs": [p.model_dump() for p in promotion_specs],
+                            "email_id": email_id
+                        })
+                    )
+                    
+                    # Update the ordered items with promotion information from the result
+                    if isinstance(order_result, Order):
+                        # Update the lines with promotion information
+                        for line in processed_order.lines:
+                            for order_line in order_result.lines:
+                                if line.product_id == order_line.product_id:
+                                    # Add promotion information to the item
+                                    if order_line.promotion_applied:
+                                        promotion_desc = order_line.promotion_description
+                                        if promotion_desc is not None:
+                                            # Always create a PromotionSpec object since that's what OrderLine expects
+                                            # Create a simple PromotionSpec with the promotion description
+                                            line.promotion = PromotionSpec(
+                                                conditions=PromotionConditions(min_quantity=1),
+                                                effects=PromotionEffects(
+                                                    free_gift=promotion_desc
+                                                )
+                                            )
+                                    
+                                    # Update price with promotional pricing
+                                    if order_line.unit_price is not None:
+                                        line.unit_price = order_line.unit_price
+                                    if order_line.total_price is not None:
+                                        line.total_price = order_line.total_price
+                                    break
+                        
+                        # Update overall order with discount information
+                        processed_order.total_discount = order_result.total_discount
+                        processed_order.total_price = sum(
+                            line.total_price for line in processed_order.lines 
+                            if line.status == OrderLineStatus.CREATED and line.total_price is not None
+                        )
+                except Exception as e:
+                    print(f"Error applying promotions: {e}")
+                    # Use original prices if promotion application fails
+                    processed_order.total_price = total_price
+            else:
+                # No items in stock, set total price to 0
+                processed_order.total_price = 0.0
 
-        print(f"  Order processing for {email_id} complete.")
-        print(f"  Status: {processed_order.overall_status}")
-        print(f"  Items: {len(processed_order.ordered_items)}")
-        print(f"  Total price: {processed_order.total_price}")
+            # Determine overall status based on item statuses
+            in_stock_count = sum(1 for line in processed_order.lines if line.status == OrderLineStatus.CREATED)
+            total_count = len(processed_order.lines)
+            
+            if total_count == 0:
+                processed_order.overall_status = "no_valid_products"
+            elif in_stock_count == 0:
+                processed_order.overall_status = "out_of_stock"
+            elif in_stock_count < total_count:
+                processed_order.overall_status = "partially_fulfilled"
+            else:
+                processed_order.overall_status = "created"
 
         return processed_order
 
     except Exception as e:
-        # Return a basic ProcessedOrder with error information
-        error_message = f"Error processing order: {str(e)}"
-        print(error_message)
-        return ProcessedOrder(
+        print(f"Error processing order: {e}")
+        # Return a basic error response
+        return Order(
             email_id=email_id,
             overall_status="no_valid_products",
-            ordered_items=[],
-            message=error_message,
+            lines=[],
+            message=f"Error processing order: {str(e)}",
             stock_updated=False,
+            total_discount=0.0
         )

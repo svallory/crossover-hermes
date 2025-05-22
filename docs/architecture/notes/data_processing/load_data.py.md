@@ -1,0 +1,3 @@
+The `load_data.py` file is responsible for fetching data from Google Sheets and loading it into pandas DataFrames. It provides functions to read data from a specified sheet in a given document ID and specifically functions to load email data and product data. The `load_products_df` function includes memoization to avoid redundant loading if the data has already been fetched during the current session. This file serves as the initial data loading layer for the Hermes system, providing the raw information needed by other components.
+
+[Link to file](../../../../src/hermes/data_processing/load_data.py) 

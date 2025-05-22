@@ -1,4 +1,4 @@
-from typing import Any, Generic, Literal, TypeVar, Union
+from typing import Any, Generic, Literal, TypeVar
 
 from .model.enums import Agents
 from .model.error import Error
@@ -11,7 +11,7 @@ OutputType = TypeVar("OutputType")
 ErrorReturn = dict[Literal["errors"], dict[SpecificAgent, Error]]
 
 # Generic agent output type that combines success and error cases
-WorkflowNodeOutput = Union[dict[SpecificAgent, OutputType], ErrorReturn[SpecificAgent]]
+WorkflowNodeOutput = dict[SpecificAgent, OutputType] | ErrorReturn[SpecificAgent]
 
 # Type variable for singleton metaclass
 T = TypeVar("T")

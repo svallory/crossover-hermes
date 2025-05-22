@@ -5,10 +5,11 @@ import shutil
 import sys
 import tempfile
 import unittest
+from tools.md_py_to_notebook import convert_file_to_notebook
 
 # Add the parent directory to sys.path to import the tool module
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-import md_py_to_notebook
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from tools import md_py_to_notebook
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -131,6 +132,48 @@ class TestMdPyToNotebook(unittest.TestCase):
             if cell["cell_type"] == "markdown" and "source" in cell and "# File:" in cell["source"]
         ]
         self.assertEqual(len(headers), 2)
+
+    def test_converting_markdown_file(self):
+        # Test converting a markdown file
+        md_file = os.path.join(self.temp_dir, "test_markdown.md")
+        notebook_file_md = os.path.join(self.temp_dir, "test_markdown.ipynb")
+        with open(md_file, "w") as f:
+            f.write("# Test Markdown\n\n```python {cell}\nprint('Hello, World!')\n```")
+
+        convert_file_to_notebook(md_file, notebook_file_md)
+
+        self.assertTrue(os.path.exists(notebook_file_md))
+        with open(notebook_file_md) as f:
+            notebook = json.load(f)
+
+        # Check the notebook structure
+        self.assertEqual(notebook["nbformat"], 4)
+        self.assertTrue("cells" in notebook)
+
+        # Check that we have the expected number of cells
+        cells = notebook["cells"]
+        self.assertGreater(len(cells), 0)
+
+    def test_converting_python_file(self):
+        # Test converting a Python file
+        py_file = os.path.join(self.temp_dir, "test_python.py")
+        notebook_file_py = os.path.join(self.temp_dir, "test_python.ipynb")
+        with open(py_file, "w") as f:
+            f.write("\"\"\" {cell}\n# Test Python\n\"\"\"\n\nprint('Hello from Python')")
+
+        convert_file_to_notebook(py_file, notebook_file_py)
+
+        self.assertTrue(os.path.exists(notebook_file_py))
+        with open(notebook_file_py) as f:
+            notebook = json.load(f)
+
+        # Check the notebook structure
+        self.assertEqual(notebook["nbformat"], 4)
+        self.assertTrue("cells" in notebook)
+
+        # Check that we have the expected number of cells
+        cells = notebook["cells"]
+        self.assertGreater(len(cells), 0)
 
 
 if __name__ == "__main__":

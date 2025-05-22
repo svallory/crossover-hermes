@@ -7,7 +7,7 @@ from typing import Any, Literal
 from langchain_core.runnables import RunnableConfig
 
 from src.hermes.agents.classifier.models import ClassifierOutput, ProductMention
-from src.hermes.agents.stockkeeper.models import ResolvedProductsOutput
+from src.hermes.agents.stockkeeper.models import StockkeeperInput, StockkeeperOutput
 from src.hermes.agents.stockkeeper.prompts import get_prompt
 from src.hermes.config import HermesConfig
 from src.hermes.data_processing.load_data import load_products_df
@@ -40,6 +40,7 @@ def traceable(run_type: str, name: str | None = None):
 EXACT_MATCH_THRESHOLD = 0.95  # Threshold for automatic resolution
 SIMILAR_MATCH_THRESHOLD = 0.75  # Threshold for potential matches to consider
 AMBIGUITY_THRESHOLD = 0.15  # Maximum difference between top matches to consider ambiguous
+MIN_CANDIDATES_FOR_AMBIGUITY_CHECK = 2  # Minimum number of candidates needed to check for ambiguity
 
 
 def build_resolution_query(mention: ProductMention) -> dict[str, Any]:
@@ -492,13 +493,13 @@ async def disambiguate_with_llm(
 
 @traceable(run_type="chain", name="Product Resolution Agent")
 async def resolve_product_mentions(
-    state: ClassifierOutput,
+    state: StockkeeperInput,
     runnable_config: RunnableConfig | None = None,
-) -> WorkflowNodeOutput[Literal[Agents.STOCKKEEPER], ResolvedProductsOutput]:
+) -> WorkflowNodeOutput[Literal[Agents.STOCKKEEPER], StockkeeperOutput]:
     """Resolves ProductMention objects to actual Product objects from the catalog.
 
     Args:
-        state: The email analyzer output containing product mentions
+        state: The input model containing the email analyzer output with product mentions
         runnable_config: Configuration for the runnable
 
     Returns:
@@ -515,11 +516,14 @@ async def resolve_product_mentions(
         email_context = ""
         all_product_mentions = []
 
+        # For compatibility, access the classifier output
+        classifier_output = state.classifier
+
         # Generate email context for disambiguation
-        if state.email_analysis and state.email_analysis.segments:
+        if classifier_output.email_analysis and classifier_output.email_analysis.segments:
             # Build email context for disambiguation and deduplication
             context_parts = []
-            for segment in state.email_analysis.segments:
+            for segment in classifier_output.email_analysis.segments:
                 # Add segment text to context
                 parts = [segment.main_sentence]
                 if segment.related_sentences:
@@ -535,12 +539,12 @@ async def resolve_product_mentions(
         # BACKWARD COMPATIBILITY: Special handling for tests
         # For tests, we need to extract the unique_products from the state object
         if not all_product_mentions:
-            # Check if the state has unique_products attribute directly
-            if hasattr(state, "unique_products"):  # type: ignore
-                all_product_mentions = getattr(state, "unique_products", [])  # type: ignore
+            # Check if the classifier_output has unique_products attribute directly
+            if hasattr(classifier_output, "unique_products"):  # type: ignore
+                all_product_mentions = getattr(classifier_output, "unique_products", [])  # type: ignore
             else:
                 # Try to get the unique_products from the raw __dict__
-                raw_dict = getattr(state, "__dict__", {})
+                raw_dict = getattr(classifier_output, "__dict__", {})
 
                 # Look for unique_products in various places
                 if "unique_products" in raw_dict:
@@ -550,14 +554,14 @@ async def resolve_product_mentions(
                     all_product_mentions = raw_dict["_obj"].unique_products
 
                 # Try to access via the Pydantic internals
-                if not all_product_mentions and hasattr(state, "model_dump"):
-                    state_dict = state.model_dump(exclude_unset=False)
+                if not all_product_mentions and hasattr(classifier_output, "model_dump"):
+                    state_dict = classifier_output.model_dump(exclude_unset=False)
                     if "unique_products" in state_dict:
                         all_product_mentions = state_dict["unique_products"]
 
                 # Last attempt - try direct dictionary access for non-Pydantic objects
-                if not all_product_mentions and isinstance(state, dict):
-                    all_product_mentions = state.get("unique_products", [])
+                if not all_product_mentions and isinstance(classifier_output, dict):
+                    all_product_mentions = classifier_output.get("unique_products", [])
 
         # Print log for debugging
         print(f"Found {len(all_product_mentions) if all_product_mentions else 0} product mentions for resolution")
@@ -617,7 +621,7 @@ async def resolve_product_mentions(
             # 3. If multiple close candidates, check if they're ambiguous
             # Ambiguity check: the difference between top matches is small
             is_ambiguous = False
-            if len(candidates) >= 2:
+            if len(candidates) >= MIN_CANDIDATES_FOR_AMBIGUITY_CHECK:
                 top_score = candidates[0][1]
                 second_score = candidates[1][1]
                 score_diff = top_score - second_score
@@ -693,7 +697,7 @@ async def resolve_product_mentions(
         resolution_time_ms = int((time.time() - start_time) * 1000)
 
         # Build output with metadata
-        output = ResolvedProductsOutput(
+        output = StockkeeperOutput(
             resolved_products=resolved_products,
             unresolved_mentions=unresolved_mentions,
             metadata={

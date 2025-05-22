@@ -3,40 +3,6 @@
 from collections import defaultdict
 from typing import Any
 
-# Removed import: from src.hermes.agents.classifier.models import EmailAnalysis
-
-# Removed function: async def get_product_mention_stats(email_analysis: EmailAnalysis) -> dict[str, int]:
-#     """Analyzes product mentions from email analysis results to provide statistics.
-#
-#     Args:
-#         email_analysis: An EmailAnalysisResult object containing segments with product mentions.
-#
-#     Returns:
-#         A dictionary with statistics about product mentions:
-#         - unique_products: Number of unique products mentioned
-#         - segments_with_products: Number of segments containing product mentions
-#         - total_mentions: Total count of all product mentions across all segments
-#
-#     """
-#     unique_product_ids: set[str] = set()
-#     segments_with_products = 0
-#     total_mentions = 0
-#
-#     for segment in email_analysis.segments:
-#         if segment.product_mentions and len(segment.product_mentions) > 0:
-#             segments_with_products += 1
-#             for product in segment.product_mentions:
-#                 if product.product_id:
-#                     unique_product_ids.add(product.product_id)
-#                 total_mentions += 1
-#
-#     return {
-#         "unique_products": len(unique_product_ids),
-#         "segments_with_products": segments_with_products,
-#         "total_mentions": total_mentions,
-#     }
-
-
 async def deduplicate_product_mentions(product_mentions: list[Any]) -> list[Any]:
     """Deduplicates product mentions by merging mentions of the same product.
 
@@ -58,8 +24,6 @@ async def deduplicate_product_mentions(product_mentions: list[Any]) -> list[Any]
         product_groups[product_id].append(mention)
 
     # Return deduplicated list
-    deduplicated_mentions = []
-    for mentions in product_groups.values():
-        deduplicated_mentions.append(mentions[0])
+    deduplicated_mentions = [mentions[0] for mentions in product_groups.values()]
 
     return deduplicated_mentions
