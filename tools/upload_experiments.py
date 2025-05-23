@@ -19,7 +19,7 @@ from typing import Any
 import requests
 import yaml
 
-from src.hermes.config import load_app_env_vars
+from hermes.config import load_app_env_vars
 from tests.integration.test_agent_flow import OUTPUT_DIR_TEST
 
 # Load environment variables

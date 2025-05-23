@@ -10,7 +10,7 @@ classifier:
         you have in stock.
       product_mentions:
       - confidence: 1.0
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Men's Accessories
         product_description: null
         product_id: LTH0976
@@ -20,7 +20,7 @@ classifier:
       related_sentences:
       - I'm opening up a small boutique shop and these would be perfect for my inventory.
       - Thank you!
-      segment_type: !!python/object/apply:src.hermes.agents.classifier.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.classifier.models.SegmentType
       - order
 composer:
   composed_response:
@@ -94,7 +94,7 @@ composer:
       priority: 6
       related_to: null
     subject: Regarding your inquiry for LTH0976 Leather Bifold Wallets
-    tone: !!python/object/apply:src.hermes.agents.composer.models.ResponseTone
+    tone: !!python/object/apply:hermes.agents.composer.models.ResponseTone
     - apologetic
 email_id: E001
 errors: {}
@@ -123,7 +123,7 @@ stockkeeper:
     similar_match_threshold: 0.75
     total_mentions: 1
   resolved_products:
-  - category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Accessories
     description: Upgrade your everyday carry with our leather bifold wallet. Crafted
       from premium, full-grain leather, this sleek wallet features multiple card slots,
@@ -138,7 +138,7 @@ stockkeeper:
     product_id: LTH0976
     product_type: ''
     seasons:
-    - !!python/object/apply:src.hermes.model.enums.Season
+    - !!python/object/apply:hermes.model.enums.Season
       - Spring
     stock: 4
   unresolved_mentions: []

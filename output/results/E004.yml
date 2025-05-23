@@ -8,7 +8,7 @@ email_analyzer:
     - main_sentence: I'd like to order three to four SFT1098 Infinity Scarves please.
       product_mentions:
       - confidence: 1.0
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Women's Clothing
         product_description: null
         product_id: SFT1098
@@ -17,11 +17,11 @@ email_analyzer:
         quantity: 3
       related_sentences:
       - My wife loves collecting scarves in different colors and patterns.
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - order
   unique_products:
   - confidence: 1.0
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Women's Clothing
     product_description: null
     product_id: SFT1098
@@ -45,7 +45,7 @@ order_processor:
       product_name: Infinity Scarf
       promotion: null
       quantity: 3
-      status: !!python/object/apply:src.hermes.agents.order_processor.models.OrderItemStatus
+      status: !!python/object/apply:hermes.agents.order_processor.models.OrderItemStatus
       - out_of_stock
       total_price: 75.0
     overall_status: created
@@ -110,6 +110,6 @@ response_composer:
       priority: 1
       related_to: null
     subject: Update on your Hermes Infinity Scarf Order (SFT1098)
-    tone: !!python/object/apply:src.hermes.agents.response_composer.models.ResponseTone
+    tone: !!python/object/apply:hermes.agents.response_composer.models.ResponseTone
     - friendly
 subject: Buy Infinity Scarves Order

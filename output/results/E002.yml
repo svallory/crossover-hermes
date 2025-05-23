@@ -12,7 +12,7 @@ email_analyzer:
     - main_sentence: I'm looking to buy the VBT2345 Vibrant Tote bag.
       product_mentions:
       - confidence: 1.0
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: null
         product_id: VBT2345
@@ -20,12 +20,12 @@ email_analyzer:
         product_type: tote bag
         quantity: 1
       related_sentences: []
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - order
     - main_sentence: I love tote bags, they're so convenient for carrying all my stuff.
       product_mentions:
       - confidence: 0.8
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: really cute
         product_id: null
@@ -33,7 +33,7 @@ email_analyzer:
         product_type: straw tote
         quantity: 1
       - confidence: 0.8
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: free gift with purchase
         product_id: null
@@ -44,11 +44,11 @@ email_analyzer:
       - Last summer I bought this really cute straw tote that I used at the beach.
       - Oh, and a few years ago I got this nylon tote as a free gift with purchase
         that I still use for groceries.
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - personal_statement
   unique_products:
   - confidence: 1.0
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: null
     product_id: VBT2345
@@ -56,7 +56,7 @@ email_analyzer:
     product_type: tote bag
     quantity: 1
   - confidence: 0.8
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: really cute
     product_id: null
@@ -64,7 +64,7 @@ email_analyzer:
     product_type: straw tote
     quantity: 1
   - confidence: 0.8
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: free gift with purchase
     product_id: null
@@ -91,7 +91,7 @@ order_processor:
       product_name: Vibrant Tote
       promotion: 'Summer Sale: 15% off all tote bags!'
       quantity: 1
-      status: !!python/object/apply:src.hermes.agents.order_processor.models.OrderItemStatus
+      status: !!python/object/apply:hermes.agents.order_processor.models.OrderItemStatus
       - out_of_stock
       total_price: 60.0
     overall_status: created
@@ -152,6 +152,6 @@ response_composer:
       priority: 5
       related_to: null
     subject: Your Hermes Order Inquiry - VBT2345 Vibrant Tote
-    tone: !!python/object/apply:src.hermes.agents.response_composer.models.ResponseTone
+    tone: !!python/object/apply:hermes.agents.response_composer.models.ResponseTone
     - friendly
 subject: Buy Vibrant Tote with noise

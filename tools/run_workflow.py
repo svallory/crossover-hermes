@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 
 # Assuming the HermesConfig and ClassifierInput are structured like this based on workflow.py
 # You might need to adjust imports based on your actual project structure
-from src.hermes.agents.classifier.models import ClassifierInput
-from src.hermes.agents.workflow.workflow import run_workflow
-from src.hermes.config import HermesConfig  # Adjust import if HermesConfig is elsewhere
-from src.hermes.data_processing.vector_store import VectorStore
+from hermes.agents.classifier.models import ClassifierInput
+from hermes.agents.workflow.run import run_workflow
+from hermes.config import HermesConfig  # Adjust import if HermesConfig is elsewhere
+from hermes.data_processing.vector_store import VectorStore
 
 # Default output directory
 OUTPUT_DIR = "output"

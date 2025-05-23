@@ -8,7 +8,7 @@ email_analyzer:
     - main_sentence: At $22, is the material good enough quality to use as a lap blanket?
       product_mentions:
       - confidence: 1.0
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Women's Clothing
         product_description: Lightweight blanket, possibly thick wrapping scarf
         product_id: CSH1098
@@ -20,11 +20,11 @@ email_analyzer:
         as a lightweight blanket.
       - Or is it more like a thick wrapping scarf?
       - I'm considering buying it as a gift for my grandmother.
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - inquiry
   unique_products:
   - confidence: 1.0
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Women's Clothing
     product_description: Lightweight blanket, possibly thick wrapping scarf
     product_id: CSH1098
@@ -120,6 +120,6 @@ response_composer:
       priority: 4
       related_to: null
     subject: Regarding your inquiry about the Cozy Shawl (CSH1098)
-    tone: !!python/object/apply:src.hermes.agents.response_composer.models.ResponseTone
+    tone: !!python/object/apply:hermes.agents.response_composer.models.ResponseTone
     - apologetic
 subject: Inquiry on Cozy Shawl Details

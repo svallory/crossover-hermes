@@ -89,7 +89,7 @@ notebooks/hermes/
 
 ### Step 2.10: Main Workflow (`src/hermes/main.py`)
 - **Initialization**:
-    - Import and call `load_dotenv_vars()` from `src.hermes.config`.
+    - Import and call `load_dotenv_vars()` from `hermes.config`.
     - Instantiate `HermesConfig`.
     - Apply `nest_asyncio.apply()` at the beginning.
 - **Data Loading**:
@@ -119,7 +119,7 @@ notebooks/hermes/
 - Create directories and files one by one.
 - Copy code from cells to the appropriate files.
 - Add `__init__.py` files to make directories importable as packages.
-- Adjust imports: use relative imports within the `src.hermes` package (e.g., `from .config import HermesConfig`, `from ..utils.gsheet import read_data_from_gsheet`).
+- Adjust imports: use relative imports within the `hermes` package (e.g., `from .config import HermesConfig`, `from ..utils.gsheet import read_data_from_gsheet`).
 - Remove Jupyter-specific code (`display`, `%pip`, etc.).
 - Test by trying to run `python src/hermes/main.py`. Debug import errors and other issues.
 

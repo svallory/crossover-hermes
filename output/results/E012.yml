@@ -17,13 +17,13 @@ email_analyzer:
       - Speaking of broken things, I also need to get my lawnmower fixed before spring.
       - Oh and we also need to make dinner reservations for our anniversary next month.
       - Maybe a nice Italian place downtown.
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - personal_statement
     - main_sentence: What were some of the other messenger bag or briefcase style
         options you have?
       product_mentions:
       - confidence: 0.8
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: null
         product_id: null
@@ -31,7 +31,7 @@ email_analyzer:
         product_type: messenger bag
         quantity: 1
       - confidence: 0.8
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: slightly smaller than my previous one
         product_id: null
@@ -41,11 +41,11 @@ email_analyzer:
       related_sentences:
       - I could go for something slightly smaller than my previous one.
       - Let me know what you'd recommend.
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - inquiry
   unique_products:
   - confidence: 0.8
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: null
     product_id: null
@@ -53,7 +53,7 @@ email_analyzer:
     product_type: messenger bag
     quantity: 1
   - confidence: 0.8
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: slightly smaller than my previous one
     product_id: null
@@ -87,7 +87,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Carry your essentials in style with our leather messenger bag.
           Crafted from premium, full-grain leather, this bag features a spacious main
@@ -99,13 +99,13 @@ inquiry_responder:
         product_id: context_prod_001
         product_type: Messenger Bag
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 4
       promotion_text: null
@@ -114,7 +114,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Keep your essentials close with our chic crossbody bag. Compact
           yet spacious, this stylish bag features multiple compartments and adjustable
@@ -125,13 +125,13 @@ inquiry_responder:
         product_id: context_prod_002
         product_type: Crossbody Bag
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 7
       promotion_text: null
@@ -139,7 +139,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Channel vintage charm with our saddle bag. This compact crossbody
           features a classic saddle shape and a trendy, minimalist design. Perfect
@@ -150,13 +150,13 @@ inquiry_responder:
         product_id: context_prod_003
         product_type: Saddle Bag
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 1
       promotion_text: null
@@ -164,7 +164,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Upgrade your daily carry with our leather backpack. Crafted from
           premium leather, this stylish backpack features multiple compartments, a
@@ -176,13 +176,13 @@ inquiry_responder:
         product_id: context_prod_004
         product_type: Backpack
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 7
       promotion_text: null
@@ -190,7 +190,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Elevate your everyday carry with our leather tote bag. Crafted
           from premium, full-grain leather, this bag features a spacious interior,
@@ -202,13 +202,13 @@ inquiry_responder:
         product_id: context_prod_005
         product_type: Tote Bag
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 6
       promotion_text: null
@@ -244,6 +244,6 @@ response_composer:
       \ input_value=11.0, input_type=float]\n    For further information visit https://errors.pydantic.dev/2.11/v/less_than_equal"
     response_points: []
     subject: 'Re: Your Recent Inquiry'
-    tone: !!python/object/apply:src.hermes.agents.response_composer.models.ResponseTone
+    tone: !!python/object/apply:hermes.agents.response_composer.models.ResponseTone
     - professional
 subject: Rambling About a New Work Bag

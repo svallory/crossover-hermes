@@ -42,7 +42,7 @@ from langchain_openai import ChatOpenAI
 # LangSmith imports
 from langsmith import Client
 
-from src.hermes.config import load_app_env_vars
+from hermes.config import load_app_env_vars
 
 # Import test output dir
 from tests.integration.test_agent_flow import OUTPUT_DIR_TEST

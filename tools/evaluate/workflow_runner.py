@@ -15,8 +15,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from langsmith import Client
 
 # Import Hermes workflow
-from src.hermes.agents.workflow.run_workflow import run_workflow
-from src.hermes.config import HermesConfig
+from hermes.agents.workflow import run_workflow
+from hermes.config import HermesConfig
 
 async def run_with_dataset(
     dataset_id: str,

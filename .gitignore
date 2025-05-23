@@ -9,3 +9,5 @@
 .langgraph_api
 
 chroma_db/
+
+.mypy_cache/**/*

@@ -1,3 +1,0 @@
-The `product_deduplication.py` file contains a utility function `deduplicate_product_mentions` intended to identify and merge duplicate product mentions within a list. However, the docstring indicates that this function is deprecated and will be moved to the Product Resolver agent, suggesting that the responsibility for deduplication is shifting within the architecture. Currently, it groups mentions by product ID or name and keeps only the first mention from each group. This file represents a component that is likely undergoing refactoring as the agent architecture evolves.
-
-[Link to file](../../../../src/hermes/data_processing/product_deduplication.py) 

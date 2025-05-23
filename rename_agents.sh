@@ -26,8 +26,6 @@ declare -a mappings=(
   # "RESPONSE_COMPOSER:COMPOSER"
   # "ResponseComposer:Composer"
   "\\.compose_response:.agent"
-
-  "from hermes:from src.hermes"
 )
 
 # The directories to search in

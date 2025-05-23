@@ -3,7 +3,7 @@ name = "hermes"
 version = "0.1.0"
 description = "Humanlike Email Responses for Magically Empathic Sales"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11.12"
 dependencies = [
     "poethepoet>=0.34.0",
     "pandas>=2.2.0",
@@ -35,30 +35,45 @@ dependencies = [
     "tabulate>=0.9.0",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.23.3",
+    "typing-extensions>=4.13.2",
+    "dotenv>=0.9.9",
 ]
 
+[project.scripts]
+hermes = "hermes.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["hermes*"]
+exclude = ["data*", "output*", "chroma_db*", "notebooks*", "docs*", "tests*", "tools*"]
+
 [tool.poe.tasks]
-dev = "langgraph dev"
-start = "uv poe load_env && python -m src.hermes.main"
+load_env = { shell = "source .env && export $(grep -v '^#' .env | xargs)", interpreter = "bash" }
+dev-graph = "langgraph dev"
+hermes = "python -m hermes"
+run-workflow = "poe load_env && python -m tools.run_workflow"
+
+check = "poe lint && poe load_env && poe test"
 lint = "ruff check ."
 format = "ruff format ."
-load_env = "set -a; source .env; set +a"
-# Add --limit N as needed, e.g., poe test-flow -- --limit 5
-test-flow = "python -m tests.integration.test_agent_flow"
-test = "pytest -v"  # Generic test command that can be used with specific test files
-test-inquirer="uv run python -m tools.test_inquiry_responder_only"
+
+test = "pytest -v"
 evaluate = "python -m tools.evaluate.main --dataset-id b43d1e52-72ae-47c8-9a49-55198eb6dd87 --auto-upload"
-# Process specific emails with --email-ids argument, e.g., poe run-workflow -- --email-ids E001,E003,E012
-run-workflow = "python -m tools.run_workflow"
-run-main = { cmd = "python -m src.hermes.main", env = { "OUTPUT_CSV" = "output", "HERMES_PROCESSING_LIMIT" = "2" } }
 
 [dependency-groups]
 dev = [
     "basedpyright>=1.29.1",
+    "ipykernel>=6.29.5",
+    "ipython>=9.2.0",
+    "ipywidgets>=8.1.7",
+    "markdown>=3.8",
     "mypy>=1.15.0",
+    "pygments>=2.19.1",
     "pytest>=8.3.5",
     "ruff>=0.11.10",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 exclude = [

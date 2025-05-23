@@ -12,7 +12,7 @@ email_analyzer:
     - main_sentence: Does one have more organizational pockets than the other?
       product_mentions:
       - confidence: 0.95
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: null
         product_id: LTH1098
@@ -20,7 +20,7 @@ email_analyzer:
         product_type: Leather Backpack
         quantity: 1
       - confidence: 0.9
-        product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: null
         product_id: null
@@ -32,11 +32,11 @@ email_analyzer:
       - I'm having a hard time deciding which would be better - the LTH1098 Leather
         Backpack or the Leather Tote?
       - Any insight would be appreciated!
-      segment_type: !!python/object/apply:src.hermes.agents.email_analyzer.models.SegmentType
+      segment_type: !!python/object/apply:hermes.agents.email_analyzer.models.SegmentType
       - inquiry
   unique_products:
   - confidence: 0.95
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: null
     product_id: LTH1098
@@ -44,7 +44,7 @@ email_analyzer:
     product_type: Leather Backpack
     quantity: 1
   - confidence: 0.9
-    product_category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: null
     product_id: null
@@ -72,7 +72,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Upgrade your daily carry with our leather backpack. Crafted from
           premium leather, this stylish backpack features multiple compartments, a
@@ -84,13 +84,13 @@ inquiry_responder:
         product_id: LTH1098
         product_type: Leather Backpack
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 7
       promotion_text: null
@@ -98,7 +98,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Elevate your everyday carry with our leather tote bag. Crafted
           from premium, full-grain leather, this bag features a spacious interior,
@@ -110,13 +110,13 @@ inquiry_responder:
         product_id: TEMP_ID_LEATHER_TOTE_E003
         product_type: Leather Tote
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 6
       promotion_text: null
@@ -125,7 +125,7 @@ inquiry_responder:
     - has_promotion: false
       is_available: true
       product:
-        category: !!python/object/apply:src.hermes.model.enums.ProductCategory
+        category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         description: Carry your essentials in style with our leather messenger bag.
           Crafted from premium, full-grain leather, this bag features a spacious main
@@ -137,13 +137,13 @@ inquiry_responder:
         product_id: CTX_P3_MESSENGER_E003
         product_type: Leather Messenger Bag
         seasons:
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Spring
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Summer
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Autumn
-        - !!python/object/apply:src.hermes.model.enums.Season
+        - !!python/object/apply:hermes.model.enums.Season
           - Winter
         stock: 4
       promotion_text: null
@@ -250,6 +250,6 @@ response_composer:
       priority: 4
       related_to: null
     subject: Helping you choose the perfect work bag!
-    tone: !!python/object/apply:src.hermes.agents.response_composer.models.ResponseTone
+    tone: !!python/object/apply:hermes.agents.response_composer.models.ResponseTone
     - friendly
 subject: Need your help
