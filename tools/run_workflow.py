@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from hermes.agents.classifier.models import ClassifierInput
 from hermes.agents.workflow.run import run_workflow
 from hermes.config import HermesConfig  # Adjust import if HermesConfig is elsewhere
-from hermes.data_processing.vector_store import VectorStore
+from hermes.data.vector_store import VectorStore
 
 # Default output directory
 OUTPUT_DIR = "output"

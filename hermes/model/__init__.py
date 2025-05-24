@@ -5,6 +5,7 @@ from .errors import ProductNotFound, Error
 from .product import Product, AlternativeProduct
 from .order import Order, OrderLine, OrderLineStatus
 from .promotions import PromotionSpec, PromotionConditions, PromotionEffects, DiscountSpec
+from .signal_processing import SignalCategory
 from .vector import (
     ProductQueryBase,
     ProductSearchQuery,
@@ -34,4 +35,5 @@ __all__ = [
     "SimilarProductQuery",
     "ProductSearchResult",
     "ProductRecommendationResponse",
+    "SignalCategory",
 ]

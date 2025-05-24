@@ -1,11 +1,10 @@
 """Unit tests for the vector store module."""
 
-import os
 import pytest
 from unittest.mock import patch, MagicMock
 
 from hermes.config import HermesConfig
-from hermes.data_processing.vector_store import VectorStore, IN_MEMORY_SENTINEL
+from hermes.data.vector_store import VectorStore, IN_MEMORY_SENTINEL
 from hermes.model.vector import ProductSearchQuery, SimilarProductQuery, ProductSearchResult
 
 
@@ -14,7 +13,7 @@ def mock_collection():
     """Create a mock ChromaDB collection."""
     mock = MagicMock()
     mock.count.return_value = 10
-    
+
     # Mock query responses
     mock.query.return_value = {
         "ids": [["product1", "product2"]],
@@ -42,7 +41,7 @@ def mock_collection():
             }
         ]]
     }
-    
+
     # Mock get response for similar product search
     mock.get.return_value = {
         "ids": ["product1"],
@@ -58,7 +57,7 @@ def mock_collection():
             "price": "29.99"
         }]
     }
-    
+
     return mock
 
 
@@ -78,17 +77,17 @@ def test_search_products_by_description(vector_store, mock_collection):
         n_results=5,
         filter_criteria={"category": "Men's Clothing"}
     )
-    
+
     # Perform the search
     results = vector_store.search_products_by_description(query)
-    
+
     # Verify mock was called correctly
     mock_collection.query.assert_called_once_with(
         query_texts=["blue shirt"],
         n_results=5,
         where={"category": "Men's Clothing"}
     )
-    
+
     # Check results
     assert len(results) == 2
     assert results[0].product_id == "product1"
@@ -105,22 +104,22 @@ def test_find_similar_products(vector_store, mock_collection):
         n_results=3,
         exclude_reference=True
     )
-    
+
     # Perform the search
     results = vector_store.find_similar_products(query)
-    
+
     # Verify mocks were called correctly
     mock_collection.get.assert_called_once_with(
         ids=["product1"],
         include=["embeddings", "metadatas"]
     )
-    
+
     mock_collection.query.assert_called_with(
         query_embeddings=[[0.1, 0.2, 0.3]],
         n_results=4,  # n_results + 1 because exclude_reference=True
         where=None
     )
-    
+
     # Only 1 product should be returned since we exclude the reference
     assert len(results) <= 3
 
@@ -132,17 +131,17 @@ def test_similarity_search_with_score(vector_store, mock_collection):
         query_text="summer dress",
         n_results=5
     )
-    
+
     # Perform the search
     results = vector_store.similarity_search_with_score(query)
-    
+
     # Verify mock was called correctly
     mock_collection.query.assert_called_with(
         query_texts=["summer dress"],
         n_results=5,
         where=None
     )
-    
+
     # Check results
     assert len(results) == 2
     assert isinstance(results[0], ProductSearchResult)
@@ -152,6 +151,6 @@ def test_similarity_search_with_score(vector_store, mock_collection):
     assert results[1].product_id == "product2"
     assert results[1].product_name == "Test Product 2"
     assert results[1].similarity_score == 0.8  # 1.0 - 0.2
-    
+
     # Results should be sorted by similarity score
-    assert results[0].similarity_score > results[1].similarity_score 
+    assert results[0].similarity_score > results[1].similarity_score

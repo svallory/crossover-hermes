@@ -11,7 +11,7 @@ from ..config import HermesConfig  # Relative import
 
 def get_llm_client(
     config: HermesConfig,
-    model_strength: Literal["weak", "strong"] | None = "weak",
+    model_strength: Literal["weak", "strong"] | None = "strong",
     temperature: float = 0.0,
 ) -> BaseChatModel:
     """Initializes and returns an LLM client based on the provided configuration.
@@ -47,7 +47,7 @@ def get_llm_client(
 
     if not model_name:
         raise ValueError(
-            f"LLM model name for {model_strength} strength is not configured for {config.llm_provider} in HermesConfig."
+            f"LLM model name for {model_strength or 'default'} strength is not configured for {config.llm_provider} in HermesConfig."
         )
 
     if config.llm_provider == "OpenAI":

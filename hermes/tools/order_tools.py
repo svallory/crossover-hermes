@@ -22,8 +22,8 @@ import pandas as pd  # type: ignore
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from hermes.data_processing.load_data import load_products_df
-from hermes.data_processing.vector_store import VectorStore
+from hermes.data.load_data import load_products_df
+from hermes.data.vector_store import VectorStore
 from hermes.model.errors import ProductNotFound
 from hermes.model.product import AlternativeProduct, Product, Season
 from hermes.config import HermesConfig
@@ -272,10 +272,10 @@ def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | Pro
 
     # Get all products in the same category
     category_products = products_df[products_df["category"] == original_category]
-    
+
     # Filter out the original product and items that are out of stock
     filtered_products = category_products[
-        (category_products["product_id"] != original_product_id) & 
+        (category_products["product_id"] != original_product_id) &
         (category_products["stock"] > 0)
     ]
 
@@ -287,18 +287,18 @@ def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | Pro
 
     # Calculate price similarity
     original_price = float(original_product["price"])
-    
+
     # Add price similarity as a column
     filtered_products["price_similarity"] = filtered_products["price"].apply(
         lambda x: 1.0 - abs(float(x) - original_price) / max(original_price, float(x))
     )
-    
+
     # Sort by price similarity, descending
     sorted_products = filtered_products.sort_values("price_similarity", ascending=False)
-    
+
     # Take top alternatives
     top_alternatives = sorted_products.head(limit)
-    
+
     # Convert to AlternativeProduct objects
     result = []
     for _, row in top_alternatives.iterrows():
@@ -313,7 +313,7 @@ def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | Pro
             "price": float(row["price"]),
             "seasons": [],
         }
-        
+
         # Process seasons correctly to handle 'Fall' vs 'Autumn'
         seasons_str = str(row.get("season", ""))
         if seasons_str:
@@ -329,16 +329,16 @@ def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | Pro
                         except ValueError:
                             # If not a valid season, use a default
                             product_dict["seasons"].append(Season.SPRING)
-        
+
         # If no seasons were added, default to Spring
         if not product_dict["seasons"]:
             product_dict["seasons"] = [Season.SPRING]
 
         product = Product(**product_dict)
-        
+
         # Calculate similarity score (normalized between 0-1)
         similarity_score = float(row["price_similarity"])
-        
+
         # Generate a reason based on price and availability
         if similarity_score > 0.9:
             reason = f"Very similar price (${float(row['price']):.2f} vs ${original_price:.2f}) and currently in stock"
@@ -346,7 +346,7 @@ def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | Pro
             reason = f"Similar price range and currently in stock ({int(row['stock'])} available)"
         else:
             reason = f"Same category alternative that's currently available ({int(row['stock'])} in stock)"
-        
+
         # Create and add the AlternativeProduct
         alternative = AlternativeProduct(
             product=product,
@@ -354,7 +354,7 @@ def find_alternatives_for_oos(tool_input: str) -> list[AlternativeProduct] | Pro
             reason=reason
         )
         result.append(alternative)
-    
+
     return result
 
 
@@ -385,7 +385,7 @@ def calculate_discount_price(tool_input: str) -> DiscountResult:
             original_price=0.0,
             discounted_price=0.0,
             discount_amount=0.0,
-            discount_applied=False, 
+            discount_applied=False,
             discount_type="error",
             explanation=f"Invalid input format: {tool_input}"
         )
@@ -438,7 +438,7 @@ def calculate_discount_price(tool_input: str) -> DiscountResult:
 
             discount_applied = True
             explanation = f"Buy one, get one 50% off applied. For {quantity} items, {full_price_items} at full price, {half_price_items} at half price."
-            
+
             return DiscountResult(
                 original_price=original_price,
                 discounted_price=discounted_price,

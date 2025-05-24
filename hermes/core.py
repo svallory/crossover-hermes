@@ -4,9 +4,9 @@ import os
 from typing import Any
 
 # Apply nest_asyncio for Jupyter compatibility
-from hermes.utils.ouput import create_output_csv
-from hermes.utils.ouput import write_yaml_to_file
-from hermes.utils.ouput import save_workflow_result_as_yaml
+from hermes.utils.output import create_output_csv
+from hermes.utils.output import write_yaml_to_file
+from hermes.utils.output import save_workflow_result_as_yaml
 from hermes.utils.gsheets import create_output_spreadsheet
 import nest_asyncio
 import pandas as pd  # type: ignore
@@ -16,7 +16,7 @@ from hermes.agents.classifier.models import ClassifierInput
 from hermes.agents.workflow.states import OverallState
 from hermes.agents.workflow.run import run_workflow
 from hermes.config import HermesConfig
-from hermes.data_processing.load_data import load_emails_df, load_products_df
+from hermes.data import load_emails_df, load_products_df
 
 # Set the event loop policy back to the default asyncio policy
 # This is needed because uvloop is incompatible with nest_asyncio
@@ -49,10 +49,11 @@ async def process_emails(
     """
     results = {}
     processed_count = 0
-    limit_processing = 0 if limit_processing is None else limit_processing
+    # limit_processing = 0 if limit_processing is None else limit_processing # Original logic
 
     for i, email_data in enumerate(emails_to_process):
-        if limit_processing > 0 and processed_count >= limit_processing:
+        # Corrected logic: if limit_processing is not None and we've reached it, break.
+        if limit_processing is not None and processed_count >= limit_processing:
             print(f"Reached processing limit of {limit_processing} emails.")
             break
 
@@ -128,6 +129,7 @@ async def run_email_processing(
     emails_source: str,
     output_spreadsheet_id: str | None = None,
     processing_limit: int | None = None,
+    target_email_ids: list[str] | None = None,
     output_dir: str = "output"
 ) -> str:
     """Core function implementing the email processing workflow.
@@ -138,6 +140,7 @@ async def run_email_processing(
         output_spreadsheet_id: ID of the Google Spreadsheet for output data.
                                If None, results are only saved as CSVs.
         processing_limit: Optional limit on the number of emails to process.
+        target_email_ids: Optional list of specific email IDs to process.
         output_dir: Directory to save output CSV files.
 
     Returns:
@@ -183,6 +186,26 @@ async def run_email_processing(
         print(f"Attempting to load emails from source: {emails_source}")
         emails_df = load_emails_df(source=emails_source)
         print(f"Successfully loaded {len(emails_df)} emails.")
+
+        # Filter emails if target_email_ids are provided
+        if target_email_ids:
+            print(f"Filtering for specific email IDs: {target_email_ids}")
+            # Ensure 'email_id' column exists. Adjust column name if different in your actual data.
+            if "email_id" not in emails_df.columns:
+                raise ValueError("DataFrame does not contain an 'email_id' column for filtering.")
+
+            # Convert all email IDs in DataFrame to string for consistent comparison
+            emails_df["email_id"] = emails_df["email_id"].astype(str)
+
+            initial_count = len(emails_df)
+            emails_df = emails_df[emails_df["email_id"].isin(target_email_ids)]
+            filtered_count = len(emails_df)
+            print(f"Filtered emails: {initial_count} -> {filtered_count}")
+            if filtered_count == 0:
+                print("Warning: No emails matched the provided target email IDs. No emails will be processed.")
+                # Early exit or specific handling might be desired here
+                # For now, it will proceed with an empty batch, resulting in no processing.
+
     except Exception as e:
         raise ValueError(f"Error loading emails from source '{emails_source}': {e}")
 
@@ -191,10 +214,10 @@ async def run_email_processing(
         print(f"Attempting to load products from source: {products_source}")
         # The actual loading will only happen if _products_df is None or source changes
         # and is handled within load_products_df
-        load_products_df(source=products_source) 
+        load_products_df(source=products_source)
         # No need to assign to a variable here if it's only used by other modules via the global _products_df
         # However, if HermesConfig needs it, it should be set there.
-        print(f"Products loaded/ensured available.") 
+        print(f"Products loaded/ensured available.")
     except Exception as e:
         raise ValueError(f"Error loading products from source '{products_source}': {e}")
 
@@ -269,7 +292,7 @@ async def run_email_processing(
     # Upload to Google Sheets if output_spreadsheet_id is provided
     if gsheet_output_target:
         shareable_link = await create_output_spreadsheet(
-            spreadsheet_id=gsheet_output_target, 
+            spreadsheet_id=gsheet_output_target,
             email_classification_df=email_classification_df,
             order_status_df=order_status_df,
             order_response_df=order_response_df,
@@ -277,4 +300,4 @@ async def run_email_processing(
         )
         return f"{csv_message}\\nGoogle Sheet updated: {shareable_link}"
     else:
-        return csv_message 
+        return csv_message

@@ -1,8 +1,4 @@
-# emails_df can also be made global here if widely needed, or loaded specifically by main.py
-
-
 import pandas as pd
-
 
 def read_data_from_gsheet(document_id: str, sheet_name: str) -> pd.DataFrame:
     """Reads a sheet from a Google Spreadsheet into a pandas DataFrame."""

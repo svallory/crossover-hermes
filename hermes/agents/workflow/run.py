@@ -10,7 +10,7 @@ from hermes.agents.classifier.models import ClassifierInput
 from hermes.agents.workflow.graph import workflow
 from hermes.agents.workflow.states import OverallState
 from hermes.config import HermesConfig
-from hermes.data_processing.vector_store import VectorStore
+from hermes.data.vector_store import VectorStore
 
 async def run_workflow(
     input_state: ClassifierInput,
@@ -20,24 +20,19 @@ async def run_workflow(
     Ensures the vector store is initialized before running.
 
     Args:
-        input_state: The input state for the workflow.
-        hermes_config: The configuration for the workflow.
+        input_state: The initial input for the workflow, typically ClassifierInput.
+        hermes_config: The Hermes configuration object.
 
     Returns:
-        The final state of the workflow.
-
+        A dictionary containing the final state of the workflow.
     """
     # First, ensure vector store is initialized
     # This is crucial for the inquiry responder to work
     print("Ensuring vector store is initialized before running workflow...")
     VectorStore(hermes_config=hermes_config)
 
-    # Prepare the runnable config
-    config: dict[str, dict[str, Any]] = {
-        "configurable": {
-            "hermes_config": hermes_config,
-        }
-    }
+    # Ensure the configuration includes HermesConfig under the 'configurable' key
+    runnable_config_obj = RunnableConfig(configurable={"hermes_config": hermes_config})
 
     # Create a typed config for the LangGraph StateGraph
     runnable_config: RunnableConfig = config  # type: ignore

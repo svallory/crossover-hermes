@@ -7,10 +7,10 @@ from typing import Any, List, Sequence, cast
 
 import chromadb
 from chromadb.api.models.Collection import Collection
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from chromadb.utils import embedding_functions 
 
 from hermes.config import HermesConfig
-from hermes.data_processing.load_data import load_products_df
+from hermes.data.load_data import load_products_df
 from hermes.model.enums import ProductCategory, Season
 
 # Import Hermes models
@@ -108,7 +108,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
                 try:
                     self._collection = chroma_client.get_collection(
                         name=COLLECTION_NAME,
-                        embedding_function=OpenAIEmbeddingFunction(
+                        embedding_function=embedding_functions.OpenAIEmbeddingFunction(
                             api_key=hermes_config.openai_api_key,
                             api_base=hermes_config.openai_base_url,
                             model_name=hermes_config.embedding_model_name,
@@ -161,7 +161,7 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
         # Get or create the collection
         collection = chroma_client.get_or_create_collection(
             name=collection_name,
-            embedding_function=OpenAIEmbeddingFunction(
+            embedding_function=embedding_functions.OpenAIEmbeddingFunction(
                 api_key=hermes_config.openai_api_key,
                 api_base=hermes_config.openai_base_url,
                 model_name=hermes_config.embedding_model_name,
@@ -413,13 +413,14 @@ class VectorStore(metaclass=SingletonMeta["VectorStore"]):
                 for j, (metadata, distance) in enumerate(zip(metadata_list, distance_list)):
                     # Convert distance to similarity score (1.0 = identical, 0.0 = completely different)
                     score = 1.0 - distance  # Assuming cosine distance
+                    clamped_score = max(0.0, min(1.0, score)) # Clamp score to [0.0, 1.0]
                     
                     # Create ProductSearchResult with proper type handling
                     search_result = ProductSearchResult(
-                        product_id=str(metadata["product_id"]),
-                        product_name=str(metadata["name"]),
+                        product_id=str(metadata.get("product_id", "UNKNOWN_ID")),
+                        product_name=str(metadata.get("name", "Unknown Product")),
                         product_metadata=cast(dict[str, Any], metadata),
-                        similarity_score=score,
+                        similarity_score=clamped_score, # Use clamped score
                     )
                     search_results.append(search_result)
 

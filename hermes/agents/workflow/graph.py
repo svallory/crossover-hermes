@@ -79,7 +79,7 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
     if classifier is None:
         # If classifier is None, return an error
         from hermes.model.enums import Agents
-        from hermes.utils.errors import create_node_response
+        from hermes.utils.response import create_node_response
 
         return create_node_response(
             Agents.STOCKKEEPER, Exception("Email analyzer output is required for product resolution")
@@ -113,7 +113,7 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
     if classifier is None or stockkeeper_output_data is None:
         # If classifier or stockkeeper_output is None, return an error
         from hermes.model import Agents
-        from hermes.utils.errors import create_node_response
+        from hermes.utils.response import create_node_response
 
         error_message = "Email analyzer output is required for order processing" \
                         if classifier is None else "Stockkeeper output is required for order processing"
@@ -150,7 +150,7 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
     # Convert the result to a dictionary for LangGraph
     from hermes.agents.fulfiller.models import FulfillerOutput
     from hermes.model import Agents
-    from hermes.utils.errors import create_node_response
+    from hermes.utils.response import create_node_response
 
     # Create the expected output type
     fulfiller_output_response = FulfillerOutput(order_result=processed_order_result)

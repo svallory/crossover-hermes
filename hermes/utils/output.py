@@ -5,8 +5,6 @@ import yaml
 
 from ..agents.workflow.states import OverallState
 
-# Removed: from ..core import OUTPUT_DIR, RESULTS_DIR
-
 async def create_output_csv(
     email_classification_df: pd.DataFrame,
     order_status_df: pd.DataFrame,
@@ -51,7 +49,7 @@ def write_yaml_to_file(file_path: str, yaml_content: str) -> None:
     """Helper function to write YAML content to a file."""
     with open(file_path, "w") as f:
         f.write(yaml_content)
-        
+
 
 async def save_workflow_result_as_yaml(email_id: str, workflow_state: OverallState, results_dir: str) -> None:
     """Save the workflow result for a given email as a YAML file.

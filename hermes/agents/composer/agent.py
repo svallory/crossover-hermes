@@ -5,7 +5,7 @@ from typing import Literal
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
-from hermes.utils.errors import create_node_response
+from hermes.utils.response import create_node_response
 
 from ...agents.advisor.models import InquiryAnswers
 from ...agents.classifier.models import EmailAnalysis

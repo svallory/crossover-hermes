@@ -8,11 +8,11 @@ from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
 from ...config import HermesConfig
-from ...data_processing.vector_store import VectorStore
+from ...data.vector_store import VectorStore
 from ...model.enums import Agents, Season
 from ...model.product import Product
 from ...custom_types import WorkflowNodeOutput
-from ...utils.errors import create_node_response
+from ...utils.response import create_node_response
 from ...utils.llm_client import get_llm_client
 from ..classifier.models import SegmentType
 from .models import (

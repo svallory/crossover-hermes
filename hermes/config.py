@@ -71,12 +71,12 @@ class HermesConfig(BaseModel):
     llm_base_url: str | None = None
 
     # Model configurations
-    llm_strong_model_name: str | None = None
-    llm_weak_model_name: str | None = None
-    llm_model_name: str | None = None  # For backward compatibility
+    llm_strong_model_name: str | None = Field(default=None)
+    llm_weak_model_name: str | None = Field(default=None)
+    llm_model_name: str | None = Field(default=None)
 
     embedding_model_name: str = Field(default_factory=lambda: os.getenv("EMBEDDING_MODEL", DEFAULT_EMBEDDING_MODEL))
-    openai_api_key: str = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
+    openai_api_key: str | None = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY") or None)
     openai_base_url: str = Field(default_factory=lambda: os.getenv("OPENAI_BASE_URL", DEFAULT_OPENAI_BASE_URL))
 
     vector_store_path: str = Field(default_factory=lambda: os.getenv("VECTOR_STORE_PATH", DEFAULT_VECTOR_STORE_PATH))
@@ -97,37 +97,49 @@ class HermesConfig(BaseModel):
     def set_provider_specific_defaults(self) -> Self:
         if self.llm_provider == "OpenAI":
             if self.llm_api_key is None:
-                self.llm_api_key = os.getenv("OPENAI_API_KEY", "")
+                self.llm_api_key = os.getenv("OPENAI_API_KEY") or None
             if self.llm_base_url is None:
                 self.llm_base_url = os.getenv("OPENAI_BASE_URL", DEFAULT_OPENAI_BASE_URL)
 
             # Set strong model
             if self.llm_strong_model_name is None:
-                self.llm_strong_model_name = os.getenv("OPENAI_STRONG_MODEL", DEFAULT_OPENAI_STRONG_MODEL)
+                env_strong_model = os.getenv("OPENAI_STRONG_MODEL")
+                self.llm_strong_model_name = env_strong_model if env_strong_model else DEFAULT_OPENAI_STRONG_MODEL
 
             # Set weak model
             if self.llm_weak_model_name is None:
-                self.llm_weak_model_name = os.getenv("OPENAI_WEAK_MODEL", DEFAULT_OPENAI_WEAK_MODEL)
+                env_weak_model = os.getenv("OPENAI_WEAK_MODEL")
+                self.llm_weak_model_name = env_weak_model if env_weak_model else DEFAULT_OPENAI_WEAK_MODEL
 
             # For backward compatibility, set llm_model_name if not already set
             if self.llm_model_name is None:
-                self.llm_model_name = os.getenv("OPENAI_MODEL_NAME", self.llm_strong_model_name)
+                env_model_name = os.getenv("OPENAI_MODEL_NAME")
+                self.llm_model_name = env_model_name if env_model_name else self.llm_strong_model_name
 
         elif self.llm_provider == "Gemini":
             if self.llm_api_key is None:
-                self.llm_api_key = os.getenv("GEMINI_API_KEY", "")
+                self.llm_api_key = os.getenv("GEMINI_API_KEY") or None
 
             # Set strong model
             if self.llm_strong_model_name is None:
-                self.llm_strong_model_name = os.getenv("GEMINI_STRONG_MODEL", DEFAULT_GEMINI_STRONG_MODEL)
+                env_strong_model = os.getenv("GEMINI_STRONG_MODEL")
+                self.llm_strong_model_name = env_strong_model if env_strong_model else DEFAULT_GEMINI_STRONG_MODEL
 
             # Set weak model
             if self.llm_weak_model_name is None:
-                self.llm_weak_model_name = os.getenv("GEMINI_WEAK_MODEL", DEFAULT_GEMINI_WEAK_MODEL)
+                env_weak_model = os.getenv("GEMINI_WEAK_MODEL")
+                self.llm_weak_model_name = env_weak_model if env_weak_model else DEFAULT_GEMINI_WEAK_MODEL
 
             # For backward compatibility, set llm_model_name if not already set
             if self.llm_model_name is None:
-                self.llm_model_name = os.getenv("GEMINI_MODEL_NAME", self.llm_strong_model_name)
+                env_model_name = os.getenv("GEMINI_MODEL_NAME")
+                self.llm_model_name = env_model_name if env_model_name else self.llm_strong_model_name
+        
+        # Ensure API keys are None if they are empty strings
+        if self.llm_api_key == "":
+            self.llm_api_key = None
+        if self.openai_api_key == "":
+            self.openai_api_key = None
 
         return self
 

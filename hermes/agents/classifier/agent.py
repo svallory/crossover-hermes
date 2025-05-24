@@ -9,7 +9,7 @@ from langsmith import traceable
 from ...config import HermesConfig
 from ...model.enums import Agents
 from ...custom_types import WorkflowNodeOutput
-from ...utils.errors import create_node_response
+from ...utils.response import create_node_response
 from ...utils.llm_client import get_llm_client
 from .models import (
     ClassifierInput,

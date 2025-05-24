@@ -30,10 +30,10 @@ from pydantic import BaseModel, Field
 from thefuzz import process  # type: ignore
 
 # Import the load_products_df function
-from hermes.data_processing.load_data import load_products_df
+from hermes.data.load_data import load_products_df
 
 # Import VectorStore
-from hermes.data_processing.vector_store import VectorStore
+from hermes.data.vector_store import VectorStore
 
 # Import our new vector store models
 from hermes.model.vector import (
@@ -53,11 +53,6 @@ logger = logging.getLogger(__name__)
 
 # Define a variable to store vector_store collection
 vs_collection = None
-
-# Check for product data file
-script_dir = Path(os.path.dirname(os.path.abspath(__file__)))
-data_dir = script_dir.parent.parent.parent / "data"
-product_file = data_dir / "product_catalog.csv"
 
 
 class FuzzyMatchResult(BaseModel):
@@ -124,7 +119,7 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
         "seasons": [],
         "metadata": None,
     }
-    
+
     # Process seasons correctly to handle 'Fall' vs 'Autumn'
     seasons_str = str(product_row.get("season", "Spring"))
     if seasons_str:
@@ -140,7 +135,7 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
                     except ValueError:
                         # If not a valid season, use a default
                         product_dict["seasons"].append(Season.SPRING)
-    
+
     # If no seasons were added, default to Spring
     if not product_dict["seasons"]:
         product_dict["seasons"] = [Season.SPRING]
@@ -221,7 +216,7 @@ def find_product_by_name(
                 "price": float(product_row["price"]) if pd.notna(product_row["price"]) else 0.0,
                 "metadata": None,
             }
-            
+
             # Process seasons correctly to handle 'Fall' vs 'Autumn'
             seasons_str = str(product_row.get("season", "Spring"))
             if seasons_str:
@@ -237,7 +232,7 @@ def find_product_by_name(
                             except ValueError:
                                 # If not a valid season, use a default
                                 product_dict["seasons"].append(Season.SPRING)
-            
+
             # If no seasons were added, default to Spring
             if not product_dict["seasons"]:
                 product_dict["seasons"] = [Season.SPRING]
@@ -275,7 +270,7 @@ def search_products_by_description(tool_input: str) -> list[Product] | ProductNo
     This tool is great for answering open-ended inquiries about products with specific features or characteristics.
 
     Args:
-        tool_input: JSON string with query, top_k (optional), category_filter (optional), 
+        tool_input: JSON string with query, top_k (optional), category_filter (optional),
                    and season_filter (optional) fields.
 
     Returns:
@@ -299,21 +294,21 @@ def search_products_by_description(tool_input: str) -> list[Product] | ProductNo
         if products_df is not None and not products_df.empty:
             # Initialize VectorStore (it's a singleton, so config is optional if already initialized)
             vector_store = VectorStore()
-            
+
             # Prepare filters
             filter_criteria = {}
             if category_filter:
                 filter_criteria["category"] = category_filter
             if season_filter:
                 filter_criteria["season"] = season_filter
-            
+
             # Create a ProductSearchQuery
             search_query = ProductSearchQuery(
                 query_text=query,
                 n_results=top_k,
                 filter_criteria=filter_criteria if filter_criteria else None
             )
-            
+
             # Use the updated method with our new query model
             products = vector_store.search_products_by_description(search_query)
 
@@ -378,12 +373,12 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
             )
 
         main_product = main_product_result
-        
+
         # Use the VectorStore for finding similar products
         if relationship_type == "similar":
             try:
                 vector_store = VectorStore()
-                
+
                 # Create query for similar products
                 similar_query = SimilarProductQuery(
                     product_id=product_id,
@@ -391,10 +386,10 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
                     exclude_reference=True,
                     filter_criteria={"category": str(main_product.category)} if relationship_type == "similar" else None
                 )
-                
+
                 # Find similar products
                 similar_products = vector_store.find_similar_products(similar_query)
-                
+
                 if similar_products:
                     return similar_products
             except Exception as e:
@@ -429,7 +424,7 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
                     "seasons": [],
                     "metadata": None,
                 }
-                
+
                 # Process seasons correctly to handle 'Fall' vs 'Autumn'
                 seasons_str = str(row.get("season", "Spring"))
                 if seasons_str:
@@ -445,11 +440,11 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
                                 except ValueError:
                                     # If not a valid season, use a default
                                     related_dict["seasons"].append(Season.SPRING)
-                
+
                 # If no seasons were added, default to Spring
                 if not related_dict["seasons"]:
                     related_dict["seasons"] = [Season.SPRING]
-                
+
                 try:
                     related_products.append(Product(**related_dict))
                 except Exception as e:
@@ -470,7 +465,7 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
                     "seasons": [],
                     "metadata": None,
                 }
-                
+
                 # Process seasons correctly to handle 'Fall' vs 'Autumn'
                 seasons_str = str(row.get("season", "Spring"))
                 if seasons_str:
@@ -486,11 +481,11 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
                                 except ValueError:
                                     # If not a valid season, use a default
                                     alt_dict["seasons"].append(Season.SPRING)
-                
+
                 # If no seasons were added, default to Spring
                 if not alt_dict["seasons"]:
                     alt_dict["seasons"] = [Season.SPRING]
-                
+
                 try:
                     related_products.append(Product(**alt_dict))
                 except Exception as e:
@@ -550,17 +545,17 @@ def resolve_product_reference(tool_input: str) -> Product | ProductNotFound:
         query_text=query,
         n_results=1
     )
-    
+
     try:
         # Initialize VectorStore
         vector_store = VectorStore()
-        
+
         # Search for products using the new models
         search_results = vector_store.search_products_by_description(search_query)
-        
+
         if search_results:
             return search_results[0]
-        
+
         return ProductNotFound(message=f"Could not resolve product reference: {query}")
     except Exception as e:
         logger.error(f"Error resolving product reference: {e}")
@@ -615,7 +610,7 @@ def filtered_product_search(
             return ProductNotFound(message="Product catalog data is not loaded.")
 
         results = []
-        
+
         # Different search methods based on search_type
         if search_type == "name":
             # Name-based search directly from the dataframe
@@ -623,13 +618,13 @@ def filtered_product_search(
                 # Filter products where name contains the query (case-insensitive)
                 name_filter = products_df["name"].str.lower().str.contains(query.lower())
                 matching_products = products_df[name_filter]
-                
+
                 # Convert matching rows to Product objects
                 for _, row in matching_products.iterrows():
                     try:
                         product_dict = {
                             "product_id": str(row["product_id"]),
-                            "name": str(row["name"]), 
+                            "name": str(row["name"]),
                             "description": str(row["description"]),
                             "category": ProductCategory(str(row["category"])),
                             "product_type": str(row.get("type", "")),
@@ -638,7 +633,7 @@ def filtered_product_search(
                             "price": float(row["price"]) if pd.notna(row["price"]) else 0.0,
                             "metadata": None,
                         }
-                        
+
                         # Process seasons correctly to handle 'Fall' vs 'Autumn'
                         seasons_str = str(row.get("season", "Spring"))
                         if seasons_str:
@@ -654,37 +649,37 @@ def filtered_product_search(
                                         except ValueError:
                                             # If not a valid season, use a default
                                             product_dict["seasons"].append(Season.SPRING)
-                        
+
                         # If no seasons were added, default to Spring
                         if not product_dict["seasons"]:
                             product_dict["seasons"] = [Season.SPRING]
-                        
+
                         product = Product(**product_dict)
                         results.append(product)
                     except Exception as e:
                         logger.error(f"Error creating product: {e}", exc_info=True)
-                
+
                 if not results:
                     return ProductNotFound(message=f"No products found with name matching '{query}'")
             except Exception as e:
                 logger.error(f"Error during name-based product search: {e}", exc_info=True)
                 return ProductNotFound(message=f"Error during name-based product search: {str(e)}")
-        
+
         elif search_type == "description":
             # Semantic search using vector store
             try:
                 vector_store = VectorStore()
-                
+
                 # Attempt to initialize the vector store if needed
                 if vector_store._collection is None:
                     # This will trigger vector store initialization with the products dataframe
                     from hermes.config import HermesConfig
                     vector_store._get_vector_store(HermesConfig())
-                    
+
                 # If still not initialized, handle the error
                 if vector_store._collection is None:
                     raise ValueError("Unable to initialize vector store")
-                    
+
                 # Create a ProductSearchQuery for the vector store
                 search_query = ProductSearchQuery(
                     query_text=query,
@@ -694,13 +689,13 @@ def filtered_product_search(
 
                 # Get initial results from vector store
                 results = vector_store.search_products_by_description(search_query)
-                
+
                 if not results:
                     return ProductNotFound(message=f"No products found matching description '{query}'")
             except Exception as e:
                 logger.error(f"Error during semantic product search: {e}", exc_info=True)
                 return ProductNotFound(message=f"Error during semantic product search: {str(e)}")
-        
+
         # Apply additional filters that apply to both search types
         filtered_results = []
         for product in results:
@@ -713,10 +708,10 @@ def filtered_product_search(
                 continue
             if max_price is not None and product.price > max_price:
                 continue
-            
+
             # Apply category filter if provided
             if category is not None:
-                # Try to match category name case-insensitively 
+                # Try to match category name case-insensitively
                 product_category_str = str(product.category).lower()
                 filter_category = category.lower()
                 if filter_category not in product_category_str:
