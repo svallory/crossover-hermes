@@ -3,7 +3,7 @@ This file, `README.md`, provides a high-level overview and documentation for the
 Key aspects covered:
 -   **Overview:** Briefly describes the agent's role as the final step in the pipeline, combining outputs from previous agents to create a customer response.
 -   **Purpose:** Lists the primary goals, such as generating personalized responses, adapting tone, ensuring completeness, and providing a quality customer experience.
--   **Components:** Mentions the key files within the `composer` directory (`models.py`, `prompts.py`, `compose_response.py` - noting that the function is actually in `agent.py` based on the code I read earlier, this might be a slight inaccuracy in the README), and their respective roles.
+-   **Components:** Mentions the key files within the `composer` directory (`models.py`, `prompts.py`, `compose_response.py`), and their respective roles.
 -   **Usage:** Provides a Python code example demonstrating how to instantiate `ComposerInput` with outputs from upstream agents and call the `compose_response` function.
 -   **Response Structure:** Details the elements of the final composed response (`Subject Line`, `Response Body`, `Language`, `Tone`, `Response Points`).
 -   **Customization:** Offers suggestions on how developers can modify the agent's behavior, primarily through changing the prompt, adjusting LLM parameters, or extending the output model.

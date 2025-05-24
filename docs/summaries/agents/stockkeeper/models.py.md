@@ -1,13 +1,16 @@
-This file, `models.py`, defines the Pydantic data structures used by the Stockkeeper agent (Product Resolver) within the Hermes workflow. These models represent the expected input and the structured output of the Stockkeeper's processing logic.
+# Summary of src/hermes/agents/stockkeeper/models.py
 
-Key models include:
--   `StockkeeperInput`: Defines the input structure for the Stockkeeper agent. It requires the `ClassifierOutput`, indicating that the Stockkeeper operates on the results of the initial email analysis, specifically relying on the identified `ProductMention` objects contained within.
--   `StockkeeperOutput`: Defines the output structure produced by the Stockkeeper agent. It contains three main fields:
-    -   `resolved_products`: A list of `Product` objects that were successfully matched to product mentions in the email.
-    -   `unresolved_mentions`: A list of `ProductMention` objects that the Stockkeeper could not confidently resolve to a product in the catalog.
-    -   `metadata`: A dictionary for storing additional information about the resolution process.
-    -   It also includes a `@property` `resolution_rate` to calculate the percentage of product mentions that were successfully resolved.
+This file, `models.py`, defines the Pydantic data structures that specify the input and output for the Stockkeeper agent (also known as the Product Resolver) within the Hermes workflow.
 
-Architecturally, these models establish clear data contracts for the Stockkeeper agent. `StockkeeperInput` specifies its dependency on the Classifier's output, while `StockkeeperOutput` defines the structured format in which the Stockkeeper provides its results (resolved products and unresolved mentions) to subsequent agents in the workflow (like the Advisor or Fulfiller). This promotes modularity and ensures data consistency across the pipeline.
+Key components and responsibilities:
+-   **`StockkeeperInput`**: This model defines the input structure required by the Stockkeeper agent.
+    -   It mandates a `classifier: ClassifierOutput` field, indicating a direct dependency on the output of the Classifier agent. This `ClassifierOutput` contains the `EmailAnalysis`, which includes the list of `ProductMention` objects that the Stockkeeper needs to process.
+-   **`StockkeeperOutput`**: This model defines the structured output produced by the Stockkeeper agent after it has attempted to resolve product mentions.
+    -   `resolved_products: list[Product]`: A list of `Product` objects (presumably from `hermes.model.product`) that were successfully matched to product mentions from the input.
+    -   `unresolved_mentions: list[ProductMention]`: A list of `ProductMention` objects that the Stockkeeper could not confidently resolve to a specific product in the catalog.
+    -   `metadata: dict | None`: An optional dictionary for storing any additional metadata related to the resolution process (e.g., confidence scores, resolution methods used).
+    -   It also features a useful `@property` named `resolution_rate`, which calculates the percentage of input product mentions that were successfully resolved into products.
+
+Architecturally, `models.py` for the Stockkeeper agent establishes clear data contracts essential for modularity and data integrity within the Hermes pipeline. `StockkeeperInput` explicitly declares its reliance on the Classifier's output. `StockkeeperOutput` provides a well-defined structure for passing the results of product resolution—both successful matches and unresolved mentions—to downstream agents such as the Advisor (for inquiries) and the Fulfiller (for orders). This ensures that subsequent processing steps have access to accurate and consistently formatted product information.
 
 [Link to source file](../../../../src/hermes/agents/stockkeeper/models.py) 

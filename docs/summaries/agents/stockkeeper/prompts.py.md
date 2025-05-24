@@ -1,12 +1,25 @@
-This file, `prompts.py`, manages the various large language model (LLM) prompt templates used by the Stockkeeper agent to perform specific product resolution sub-tasks. Unlike agents that might use a single core prompt, the Stockkeeper utilizes different prompts tailored for ambiguity resolution, mention deduplication, and suggesting alternatives for out-of-stock items.
+# Summary of src/hermes/agents/stockkeeper/prompts.py
 
-Key prompt templates defined are:
--   `DISAMBIGUATION_PROMPT_STR`: Guides the LLM to analyze an original product mention from the email context and compare it against a list of candidate products to determine the most likely match, or state if it's undecidable. The response is expected in a JSON format including the selected product ID, confidence, and reasoning.
--   `DEDUPLICATION_PROMPT_STR`: Instructs the LLM to review a list of extracted product mentions within the email context and identify/merge those referring to the same product. The output should be a JSON array of deduplicated and potentially enhanced product mentions, including summed quantities if duplicates were merged.
--   `ALTERNATIVE_SUGGESTION_PROMPT_STR`: Used for suggesting alternative products when a requested item is out of stock or unavailable. It provides details of the original product and a list of available candidates, asking the LLM to select the best alternatives based on similarity and features, returning them in a JSON array with reasoning.
+This file, `prompts.py`, is responsible for defining and managing a suite of large language model (LLM) prompt templates utilized by the Stockkeeper agent. Unlike agents with a single primary prompt, the Stockkeeper employs distinct prompts for specialized sub-tasks within product resolution, such as disambiguation, deduplication, and suggesting alternatives.
 
-These templates are stored in the `PROMPTS` dictionary, accessible via the `get_prompt` function.
+Key components and responsibilities:
+-   **Disambiguation Prompt (`DISAMBIGUATION_PROMPT_STR`):**
+    -   Guides the LLM to analyze an original product mention from an email and compare it against a list of candidate products.
+    -   The goal is to determine the most likely match or to indicate if the mention is undecidable based on the provided context.
+    -   Expects a JSON response containing the selected product ID, a confidence score, and the reasoning behind the selection.
+-   **Deduplication Prompt (`DEDUPLICATION_PROMPT_STR`):**
+    -   Instructs the LLM to review a list of extracted product mentions from the email context.
+    -   The task is to identify and merge mentions that refer to the same underlying product.
+    -   The output should be a JSON array of deduplicated product mentions, potentially enhanced with summed quantities if duplicates were merged.
+-   **Alternative Suggestion Prompt (`ALTERNATIVE_SUGGESTION_PROMPT_STR`):**
+    -   Used when a requested product is out of stock or unavailable.
+    -   Provides the LLM with details of the original product and a list of available candidate products.
+    -   Asks the LLM to select the best alternative(s) based on similarity in features and other relevant criteria.
+    -   Expects a JSON array of suggested alternatives, including the reasoning for each suggestion.
+-   **Prompt Management:**
+    -   These string templates are compiled into `PromptTemplate` objects and stored in a `PROMPTS` dictionary, keyed by descriptive strings (e.g., `"DISAMBIGUATION"`, `"DEDUPLICATION"`).
+    -   A `get_prompt(key: str)` function is provided to retrieve the compiled prompts by their keys, raising a `KeyError` if a key is not found.
 
-Architecturally, this file demonstrates how a single agent's complex responsibilities can be broken down into distinct sub-tasks, each guided by a specialized LLM prompt. By separating concerns into different prompts, the Stockkeeper agent can leverage the LLM's capabilities for more nuanced reasoning tasks (like disambiguation and deduplication) beyond simple data retrieval, making the product resolution process more robust and intelligent.
+Architecturally, `prompts.py` for the Stockkeeper agent showcases a modular approach to leveraging LLMs. By breaking down the complex product resolution process into distinct, LLM-driven sub-tasks (disambiguation, deduplication, alternative suggestion), each guided by a specialized prompt, the agent can perform more nuanced and intelligent operations than simple lookups. This design allows for targeted LLM guidance, making the overall product resolution more robust and accurate, which is vital for the subsequent Advisor and Fulfiller agents.
 
 [Link to source file](../../../../src/hermes/agents/stockkeeper/prompts.py) 

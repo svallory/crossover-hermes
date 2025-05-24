@@ -1,16 +1,13 @@
-This file, `enums.py`, defines several enumeration classes used throughout the Hermes system to represent fixed sets of values. These enumerations provide clarity, type safety, and prevent the use of arbitrary strings for concepts that have a defined list of possibilities.
+# Summary of src/hermes/model/enums.py
+
+This file, `enums.py`, defines several Python `Enum` classes used throughout the Hermes system to represent fixed sets of named values. These enumerations enhance code clarity, provide type safety, and prevent the use of arbitrary string literals for concepts that have a well-defined, limited set of possibilities, thus reducing errors and improving maintainability.
 
 Key enumerations defined:
--   `Agents`: Lists the names of the main agents in the Hermes system (`CLASSIFIER`, `STOCKKEEPER`, `FULFILLER`, `ADVISOR`, `COMPOSER`). These are used to identify the different agents programmatically.
--   `Nodes`: Lists names for the nodes in the LangGraph workflow graph. These cannot be identical to the `Agents` names due to LangGraph limitations, so they use capitalized versions (`Classifier`, `Stockkeeper`, `Fulfiller`, `Advisor`, `Composer`). This highlights a distinction between the agent's logical name and its name within the specific workflow implementation.
--   `ProductCategory`: Defines the standard categories for products available in the store:
-    - `ACCESSORIES`, `BAGS`, `KIDS_CLOTHING`, `LOUNGEWEAR`
-    - `MENS_ACCESSORIES`, `MENS_CLOTHING`, `MENS_SHOES`
-    - `WOMENS_CLOTHING`, `WOMENS_SHOES`
-    - `SHIRTS` (additional testing category)
-    This is used in the `Product` model and by agents interacting with product data.
--   `Season`: Defines the four seasons relevant to product availability or suitability (`SPRING`, `SUMMER`, `AUTUMN`, `WINTER`). This is also used in the `Product` model.
+-   **`Agents`**: Lists the symbolic names for the main functional agents within the Hermes system (e.g., `CLASSIFIER`, `STOCKKEEPER`, `FULFILLER`, `ADVISOR`, `COMPOSER`). These are primarily used for internal logic, configuration, and potentially for routing or identifying agent-specific behaviors or outputs.
+-   **`Nodes`**: Lists the names used to identify nodes within the LangGraph workflow graph (e.g., `Classifier`, `Stockkeeper`, `Fulfiller`, `Advisor`, `Composer`). These names might differ slightly (e.g., in capitalization) from the `Agents` enum due to specific requirements or conventions of the LangGraph framework, such as naming restrictions for graph nodes. This distinction highlights the separation between the conceptual agent and its concrete representation in the workflow execution engine.
+-   **`ProductCategory`**: Defines a standard set of categories for products available in the store. Examples include `ACCESSORIES`, `BAGS`, `KIDS_CLOTHING`, `LOUNGEWEAR`, `MENS_ACCESSORIES`, `MENS_CLOTHING`, `MENS_SHOES`, `WOMENS_CLOTHING`, `WOMENS_SHOES`, and potentially a `SHIRTS` category (noted as an additional testing category). This enum is crucial for structuring product data, filtering, and ensuring consistency in how product types are handled by various agents and data models (like the `Product` model).
+-   **`Season`**: Defines the seasons relevant to product attributes, such as availability or suitability (e.g., `SPRING`, `SUMMER`, `AUTUMN`, `WINTER`). This is used in the `Product` model to categorize items and can be used by agents for filtering or making recommendations based on seasonal relevance.
 
-Architecturally, `enums.py` centralizes the definition of important categorical data used across multiple parts of the system. This approach makes the codebase more maintainable by avoiding hardcoded strings, improving readability, and ensuring consistency. The separation of `Agents` and `Nodes` also subtly indicates the relationship between the logical agent components and their representation within the workflow execution framework (LangGraph).
+Architecturally, `enums.py` acts as a centralized repository for defining important categorical constants. By consolidating these definitions, it promotes consistency across the entire Hermes codebase, makes the system easier to understand and modify, and reduces the risk of errors caused by typos or variations in string literals. The separation of `Agents` and `Nodes`, for instance, clearly delineates between the abstract concept of an agent and its specific implementation detail within the LangGraph framework, contributing to a cleaner system design.
 
 [Link to source file](../../../src/hermes/model/enums.py) 
