@@ -1,0 +1,192 @@
+input:
+  email_id: E007
+  subject: "Order for Beanies, Slippers"
+  message: "Hi, this is Liz. Please send me 5 CLF2109 Cable Knit Beanies and 2 pairs\
+    \ of FZZ1098 Fuzzy Slippers. I'm prepping some holiday gift baskets."
+classifier:
+  email_analysis:
+    email_id: E007
+    language: english
+    primary_intent: order request
+    customer_pii:
+      name: Liz
+    segments:
+      - segment_type: order
+        main_sentence: Please send me 5 CLF2109 Cable Knit Beanies and 2 pairs of
+          FZZ1098 Fuzzy Slippers.
+        related_sentences:
+          - "Hi, this is Liz."
+          - I'm prepping some holiday gift baskets.
+        product_mentions:
+          - product_id: CLF2109
+            product_name: Cable Knit Beanies
+            product_description: null
+            product_category: Accessories
+            product_type: Beanie
+            quantity: 5
+            confidence: 1.0
+          - product_id: FZZ1098
+            product_name: Fuzzy Slippers
+            product_description: null
+            product_category: Accessories
+            product_type: Slippers
+            quantity: 2
+            confidence: 1.0
+stockkeeper:
+  resolved_products:
+    - product_id: CLF2109
+      name: Cable Knit Beanie
+      description: Bundle up in our cable knit beanie. Knitted from premium wool,
+        this classic beanie features a timeless cable knit pattern and a soft, stretchy
+        fit. A versatile accessory for adding a touch of warmth and texture to your
+        cold-weather looks.
+      category: Accessories
+      product_type: Beanie
+      stock: 2
+      price: 16.00
+      seasons:
+        - Winter
+      attributes: {}
+    - product_id: FZZ1098
+      name: Fuzzy Slippers
+      description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+        a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+        comfort. An ideal choice for lounging at home or running errands on chilly
+        days.
+      category: Accessories
+      product_type: Slippers
+      stock: 2
+      price: 29.00
+      seasons:
+        - Fall
+        - Winter
+      attributes: {}
+  unresolved_mentions: []
+  metadata: {}
+advisor: null
+fulfiller:
+  order_result:
+    email_id: E007
+    overall_status: partially_fulfilled
+    ordered_items:
+      - product_id: CLF2109
+        name: Cable Knit Beanie
+        description: Bundle up in our cable knit beanie. Knitted from premium wool,
+          this classic beanie features a timeless cable knit pattern and a soft, stretchy
+          fit. A versatile accessory for adding a touch of warmth and texture to your
+          cold-weather looks.
+        category: Accessories
+        product_type: Beanie
+        seasons:
+          - Winter
+        price: 16.00
+        quantity: 5
+        status: out_of_stock # Requested 5, only 2 in stock
+        total_price: null
+        available_stock: 2
+        alternatives:
+          - product:
+              product_id: CHN0987
+              name: Chunky Knit Beanie
+              description: Keep your head toasty with our chunky knit beanie. Knitted
+                from thick, cozy yarn, this trendy beanie offers a slouchy, oversized
+                fit and a touch of rustic charm. A versatile accessory to elevate your
+                cold-weather looks.
+              category: Accessories
+              product_type: Beanie
+              stock: 2 # Assuming stock for CHN0987, needs to be consistent if used elsewhere
+              price: 22.00
+              seasons:
+                - Fall
+                - Winter
+            similarity_score: 0.85 # Example score
+            reason: Similar chunky knit style, also suitable for winter.
+        promotion: null
+      - product_id: FZZ1098
+        name: Fuzzy Slippers
+        description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+          a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+          comfort. An ideal choice for lounging at home or running errands on chilly
+          days.
+        category: Accessories
+        product_type: Slippers
+        seasons:
+          - Fall
+          - Winter
+        price: 29.00
+        quantity: 2
+        status: created
+        total_price: 58.00
+        available_stock: 0 # 2 initial - 2 ordered
+        alternatives: []
+        promotion: null
+    total_price: 58.00 # Only includes fulfilled items
+    message: Your order is partially fulfilled. CLF2109 Cable Knit Beanies are out
+      of stock for the requested quantity (5 units requested, 2 available).
+    stock_updated: true
+composer:
+  composed_response:
+    email_id: E007
+    subject: Update on Your Order for Beanies and Slippers
+    response_body: |
+      Hi Liz,
+
+      Thank you for your order! We're processing your request for holiday gift basket items.
+
+      Here's an update on your order:
+      - FZZ1098 Fuzzy Slippers (2 pairs): These are in stock and your order for them has been created! (Total: $58.00)
+      - CLF2109 Cable Knit Beanies: You requested 5 units. Unfortunately, we only have 2 units of the CLF2109 Cable Knit Beanie in stock at the moment. We can fulfill 2 units, or you might consider our CHN0987 Chunky Knit Beanie as an alternative, which has a similar cozy feel and is also great for winter.
+
+      Please let us know if you'd like to proceed with the 2 available Cable Knit Beanies, or if you'd like to explore alternatives. We can adjust your order accordingly.
+
+      We'll wait for your confirmation before finalizing this part of your order.
+
+      Best regards,
+      Hermes - Delivering divine fashion
+    language: english
+    tone: professional
+    response_points:
+      - content_type: greeting
+        content: Hi Liz,
+        priority: 10
+        related_to: null
+      - content_type: acknowledgement
+        content: Thank you for your order! We're processing your request for holiday
+          gift basket items.
+        priority: 9
+        related_to: null
+      - content_type: order_status_intro
+        content: "Here's an update on your order:"
+        priority: 10
+        related_to: null
+      - content_type: order_item_confirmed
+        content: FZZ1098 Fuzzy Slippers (2 pairs) These are in stock and your order
+          for them has been created! (Total $58.00)
+        priority: 9
+        related_to: FZZ1098
+      - content_type: order_item_issue
+        content: "CLF2109 Cable Knit Beanies: You requested 5 units. Unfortunately,\
+          \ we only have 2 units of the CLF2109 Cable Knit Beanie in stock at the\
+          \ moment. We can fulfill 2 units, or you might consider our CHN0987 Chunky\
+          \ Knit Beanie as an alternative, which has a similar cozy feel and is also\
+          \ great for winter."
+        priority: 10
+        related_to: CLF2109
+      - content_type: action_request
+        content: Please let us know if you'd like to proceed with the 2 available Cable
+          Knit Beanies, or if you'd like to explore alternatives. We can adjust your
+          order accordingly.
+        priority: 8
+        related_to: CLF2109
+      - content_type: next_steps
+        content: We'll wait for your confirmation before finalizing this part of your
+          order.
+        priority: 7
+        related_to: null
+      - content_type: closing
+        content: |
+          Best regards,
+          Hermes - Delivering divine fashion
+        priority: 10
+        related_to: null
+errors: null

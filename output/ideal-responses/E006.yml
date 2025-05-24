@@ -1,0 +1,116 @@
+input:
+  email_id: E006
+  subject: null
+  message: "Hey there, I was thinking of ordering a pair of CBT8901 Chelsea Boots,\
+    \ but I'll wait until Fall to actually place the order. My name is Sam and I\
+    \ need some new boots for the colder months."
+classifier:
+  email_analysis:
+    email_id: E006
+    language: english
+    primary_intent: product inquiry # Intent is not to order *now*
+    customer_pii:
+      name: Sam
+    segments:
+      - segment_type: inquiry # Closer to an inquiry/future interest than a current order
+        main_sentence: I was thinking of ordering a pair of CBT8901 Chelsea Boots, but
+          I'll wait until Fall to actually place the order.
+        related_sentences:
+          - My name is Sam and I need some new boots for the colder months.
+        product_mentions:
+          - product_id: CBT8901
+            product_name: Chelsea Boots
+            product_description: null
+            product_category: Men's Shoes
+            product_type: Boots
+            quantity: 1
+            confidence: 1.0
+      - segment_type: personal_statement
+        main_sentence: My name is Sam and I need some new boots for the colder months.
+        related_sentences: []
+        product_mentions: []
+stockkeeper:
+  resolved_products:
+    - product_id: CBT8901
+      name: Chelsea Boots
+      description: Elevate your casual looks with our Chelsea boots. These stylish
+        ankle boots feature a sleek leather construction, elastic side panels, and
+        a sturdy lug sole. An essential for completing modern, edgy outfits.
+      category: Men's Shoes
+      product_type: Boots
+      stock: 2
+      price: 65.00
+      seasons:
+        - Fall
+        - Winter
+      attributes: {}
+  unresolved_mentions: []
+  metadata: {}
+advisor:
+  inquiry_answers:
+    email_id: E006
+    primary_products:
+      - product_id: CBT8901
+        name: Chelsea Boots
+        description: Elevate your casual looks with our Chelsea boots. These stylish
+          ankle boots feature a sleek leather construction, elastic side panels, and
+          a sturdy lug sole. An essential for completing modern, edgy outfits.
+        category: Men's Shoes
+        product_type: Boots
+        stock: 2
+        price: 65.00
+        seasons:
+          - Fall
+          - Winter
+        attributes: {}
+    answered_questions: [] # No direct questions asked
+    unanswered_questions: []
+    related_products: []
+    unsuccessful_references: []
+fulfiller: null # Not an order for immediate processing
+composer:
+  composed_response:
+    email_id: E006
+    subject: Regarding your interest in CBT8901 Chelsea Boots
+    response_body: |
+      Hey Sam,
+
+      Thanks for reaching out and for your interest in our CBT8901 Chelsea Boots! We understand you're thinking of ordering them for the Fall, which is a great choice as they are perfect for the colder months.
+
+      The CBT8901 Chelsea Boots are a stylish option, featuring a sleek leather construction and a sturdy lug sole, ideal for modern, edgy outfits. They are indeed designed for Fall and Winter.
+
+      We'll have them ready for you when you decide to place your order. Feel free to reach out then, or if you have any questions in the meantime!
+
+      Best regards,
+      Hermes - Delivering divine fashion
+    language: english
+    tone: friendly
+    response_points:
+      - content_type: greeting
+        content: Hey Sam,
+        priority: 10
+        related_to: null
+      - content_type: acknowledgement
+        content: Thanks for reaching out and for your interest in our CBT8901 Chelsea
+          Boots! We understand you're thinking of ordering them for the Fall, which
+          is a great choice as they are perfect for the colder months.
+        priority: 9
+        related_to: CBT8901
+      - content_type: product_info
+        content: The CBT8901 Chelsea Boots are a stylish option, featuring a sleek leather
+          construction and a sturdy lug sole, ideal for modern, edgy outfits. They
+          are indeed designed for Fall and Winter.
+        priority: 8
+        related_to: CBT8901
+      - content_type: future_action
+        content: We'll have them ready for you when you decide to place your order. Feel
+          free to reach out then, or if you have any questions in the meantime!
+        priority: 7
+        related_to: null
+      - content_type: closing
+        content: |
+          Best regards,
+          Hermes - Delivering divine fashion
+        priority: 10
+        related_to: null
+errors: null

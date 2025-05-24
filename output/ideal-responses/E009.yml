@@ -1,0 +1,145 @@
+input:
+  email_id: E009
+  subject: Pregunta Sobre Gorro de Punto Grueso
+  message: Hola, tengo una pregunta sobre el DHN0987 Gorro de punto grueso. ¿De qué
+    material está hecho? ¿Es lo suficientemente cálido para usar en invierno? Gracias
+    de antemano.
+classifier:
+  email_analysis:
+    email_id: E009
+    language: spanish
+    primary_intent: product inquiry
+    customer_pii: {}
+    segments:
+    - segment_type: inquiry
+      main_sentence: tengo una pregunta sobre el DHN0987 Gorro de punto grueso.
+      related_sentences:
+      - ¿De qué material está hecho?
+      - ¿Es lo suficientemente cálido para usar en invierno?
+      - Gracias de antemano.
+      product_mentions:
+      - product_id: DHN0987
+        product_name: Gorro de punto grueso
+        product_description: null
+        product_category: Accessories
+        product_type: Gorro
+        quantity: 1
+        confidence: 0.9
+stockkeeper:
+  resolved_products:
+  - product_id: CHN0987
+    name: Chunky Knit Beanie
+    description: Keep your head toasty with our chunky knit beanie. Knitted from thick,
+      cozy yarn, this trendy beanie offers a slouchy, oversized fit and a touch of
+      rustic charm. A versatile accessory to elevate your cold-weather looks.
+    category: Accessories
+    product_type: Beanie
+    stock: 2
+    price: 22.00
+    seasons:
+    - Fall
+    - Winter
+    attributes:
+      material: thick, cozy yarn
+      fit: slouchy, oversized
+  unresolved_mentions: []
+  metadata:
+    notes: Customer mentioned product ID DHN0987 (Gorro de punto grueso), which was
+      resolved to CHN0987 (Chunky Knit Beanie) based on description and likely product
+      type.
+advisor:
+  inquiry_answers:
+    email_id: E009
+    primary_products:
+    - product_id: CHN0987
+      name: Chunky Knit Beanie
+      description: Keep your head toasty with our chunky knit beanie. Knitted from
+        thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a
+        touch of rustic charm. A versatile accessory to elevate your cold-weather
+        looks.
+      category: Accessories
+      product_type: Beanie
+      stock: 2
+      price: 22.00
+      seasons:
+      - Fall
+      - Winter
+      attributes:
+        material: thick, cozy yarn
+        fit: slouchy, oversized
+    answered_questions:
+    - question: ¿De qué material está hecho?
+      answer: El gorro CHN0987 Chunky Knit Beanie está tejido con un hilo grueso y
+        acogedor.
+      confidence: 1.0
+      reference_product_ids:
+      - CHN0987
+      answer_type: factual
+    - question: ¿Es lo suficientemente cálido para usar en invierno?
+      answer: Sí, el gorro CHN0987 Chunky Knit Beanie es adecuado para el invierno.
+        Está diseñado para las temporadas de otoño e invierno y su descripción menciona
+        que mantiene la cabeza abrigada ("Keep your head toasty").
+      confidence: 1.0
+      reference_product_ids:
+      - CHN0987
+      answer_type: factual
+    unanswered_questions: []
+    related_products: []
+    unsuccessful_references: []
+fulfiller: null
+composer:
+  composed_response:
+    email_id: E009
+    subject: Respuesta a su consulta sobre el Gorro de Punto Grueso (CHN0987)
+    response_body: |
+      Hola,
+
+      Gracias por su consulta sobre nuestro Gorro de Punto Grueso (modelo CHN0987 - Chunky Knit Beanie).
+
+      Con gusto respondemos a sus preguntas:
+      - Material: El gorro está tejido con un hilo grueso y acogedor, lo que le da una textura confortable.
+      - Calidez para el invierno: Sí, este gorro es ideal para el invierno. Está diseñado específicamente para las temporadas de otoño e invierno y le ayudará a mantener la cabeza abrigada.
+
+      Esperamos que esta información le sea de utilidad. Si tiene alguna otra pregunta, no dude en consultarnos.
+
+      Saludos cordiales,
+      Hermes - Delivering divine fashion
+    language: spanish
+    tone: friendly
+    response_points:
+    - content_type: greeting
+      content: Hola,
+      priority: 10
+      related_to: null
+    - content_type: acknowledgement
+      content: Gracias por su consulta sobre nuestro Gorro de Punto Grueso (modelo
+        CHN0987 - Chunky Knit Beanie).
+      priority: 9
+      related_to: CHN0987
+    - content_type: answer_intro
+      content: Con gusto respondemos a sus preguntas:
+      priority: 8
+      related_to: CHN0987
+    - content_type: answer
+      content: '- Material: El gorro está tejido con un hilo grueso y acogedor, lo
+        que le da una textura confortable.'
+      priority: 10
+      related_to: CHN0987
+    - content_type: answer
+      content: '- Calidez para el invierno: Sí, este gorro es ideal para el invierno.
+        Está diseñado específicamente para las temporadas de otoño e invierno y le
+        ayudará a mantener la cabeza abrigada.'
+      priority: 10
+      related_to: CHN0987
+    - content_type: further_assistance
+      content: Esperamos que esta información le sea de utilidad. Si tiene alguna
+        otra pregunta, no dude en consultarnos.
+      priority: 7
+      related_to: null
+    - content_type: closing
+      content: |-
+        Saludos cordiales,
+        Hermes - Delivering divine fashion
+      priority: 10
+      related_to: null
+errors: null

@@ -1,0 +1,125 @@
+input:
+  email_id: E004
+  subject: Buy Infinity Scarves Order
+  message: "Hi, I'd like to order three to four SFT1098 Infinity Scarves please.\
+    \ My wife loves collecting scarves in different colors and patterns."
+classifier:
+  email_analysis:
+    email_id: E004
+    language: english
+    primary_intent: order request
+    customer_pii: {}
+    segments:
+      - segment_type: order
+        main_sentence: I'd like to order three to four SFT1098 Infinity Scarves please.
+        related_sentences:
+          - My wife loves collecting scarves in different colors and patterns.
+        product_mentions:
+          - product_id: SFT1098
+            product_name: Infinity Scarves
+            product_description: null
+            product_category: Accessories
+            product_type: Scarf
+            quantity: 4 # Assuming customer wants the higher end of the range
+            confidence: 1.0
+stockkeeper:
+  resolved_products:
+    - product_id: SFT1098
+      name: Infinity Scarf
+      description: Stay cozy and stylish with our infinity scarf. This versatile accessory
+        features a soft, chunky knit construction and an endless loop design for
+        easy wearing. Perfect for adding a touch of warmth and texture to your winter
+        ensembles.
+      category: Accessories
+      product_type: Scarf
+      stock: 8
+      price: 28.00
+      seasons:
+        - Winter
+      attributes: {}
+  unresolved_mentions: []
+  metadata: {}
+advisor: null
+fulfiller:
+  order_result:
+    email_id: E004
+    overall_status: created
+    ordered_items:
+      - product_id: SFT1098
+        name: Infinity Scarf
+        description: Stay cozy and stylish with our infinity scarf. This versatile
+          accessory features a soft, chunky knit construction and an endless loop
+          design for easy wearing. Perfect for adding a touch of warmth and texture
+          to your winter ensembles.
+        category: Accessories
+        product_type: Scarf
+        seasons:
+          - Winter
+        price: 28.00
+        quantity: 4
+        status: created
+        total_price: 112.00
+        available_stock: 4 # 8 initial - 4 ordered
+        alternatives: []
+        promotion: null
+    total_price: 112.00
+    message: Successfully processed order for 4 units of SFT1098 Infinity Scarf.
+    stock_updated: true
+composer:
+  composed_response:
+    email_id: E004
+    subject: Your Order for SFT1098 Infinity Scarves is Confirmed
+    response_body: |
+      Hi there,
+
+      Thank you for your order! We've processed your request for the SFT1098 Infinity Scarves.
+
+      Your order for 4 SFT1098 Infinity Scarves has been created. We hope your wife loves them!
+
+      Product Details:
+      - Item: SFT1098 Infinity Scarf
+      - Quantity: 4
+      - Price per unit: $28.00
+      - Total: $112.00
+
+      We will notify you once your order has shipped.
+
+      Best regards,
+      Hermes - Delivering divine fashion
+    language: english
+    tone: friendly
+    response_points:
+      - content_type: greeting
+        content: Hi there,
+        priority: 10
+        related_to: null
+      - content_type: acknowledgement
+        content: Thank you for your order! We've processed your request for the SFT1098
+          Infinity Scarves.
+        priority: 9
+        related_to: SFT1098
+      - content_type: order_confirmation
+        content: Your order for 4 SFT1098 Infinity Scarves has been created. We hope
+          your wife loves them!
+        priority: 10
+        related_to: SFT1098
+      - content_type: product_details
+        content: |
+          Product Details:
+          - Item: SFT1098 Infinity Scarf
+          - Quantity: 4
+          - Price per unit: $28.00
+          - Total: $112.00
+        priority: 8
+        related_to: SFT1098
+      - content_type: next_steps
+        content: We will notify you once your order has shipped.
+        priority: 7
+        related_to: null
+      - content_type: closing
+        content: |
+          Best regards,
+          Hermes - Delivering divine fashion
+        priority: 10
+        related_to: null
+errors: null

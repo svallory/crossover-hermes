@@ -1,0 +1,125 @@
+input:
+  email_id: E010
+  subject: Purchase Retro Sunglasses
+  message: "Hello, I would like to order 1 pair of RSG8901 Retro Sunglasses. Thanks!"
+classifier:
+  email_analysis:
+    email_id: E010
+    language: english
+    primary_intent: order request
+    customer_pii: {}
+    segments:
+      - segment_type: order
+        main_sentence: I would like to order 1 pair of RSG8901 Retro Sunglasses.
+        related_sentences:
+          - Thanks!
+        product_mentions:
+          - product_id: RSG8901
+            product_name: Retro Sunglasses
+            product_description: null
+            product_category: Accessories
+            product_type: Sunglasses
+            quantity: 1
+            confidence: 1.0
+stockkeeper:
+  resolved_products:
+    - product_id: RSG8901
+      name: Retro Sunglasses
+      description: Transport yourself back in time with our retro sunglasses. These
+        vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+        eyes from the sun's rays. Perfect for beach days or city strolls.
+      category: Accessories
+      product_type: Sunglasses
+      stock: 1
+      price: 26.99
+      seasons:
+        - Spring
+        - Summer
+      attributes: {}
+  unresolved_mentions: []
+  metadata: {}
+advisor: null
+fulfiller:
+  order_result:
+    email_id: E010
+    overall_status: created
+    ordered_items:
+      - product_id: RSG8901
+        name: Retro Sunglasses
+        description: Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        category: Accessories
+        product_type: Sunglasses
+        seasons:
+          - Spring
+          - Summer
+        price: 26.99
+        quantity: 1
+        status: created
+        total_price: 26.99
+        available_stock: 0 # 1 initial - 1 ordered
+        alternatives: []
+        promotion: null
+    total_price: 26.99
+    message: Successfully processed order for 1 unit of RSG8901 Retro Sunglasses.
+    stock_updated: true
+composer:
+  composed_response:
+    email_id: E010
+    subject: Your Order for RSG8901 Retro Sunglasses is Confirmed
+    response_body: |
+      Hello,
+
+      Thank you for your order for the RSG8901 Retro Sunglasses!
+
+      We are pleased to confirm that your order for 1 pair of RSG8901 Retro Sunglasses has been created.
+
+      Product Details:
+      - Item: RSG8901 Retro Sunglasses
+      - Quantity: 1
+      - Price: $26.99
+
+      We will notify you once your order has shipped.
+
+      Thanks!
+
+      Best regards,
+      Hermes - Delivering divine fashion
+    language: english
+    tone: friendly
+    response_points:
+      - content_type: greeting
+        content: Hello,
+        priority: 10
+        related_to: null
+      - content_type: acknowledgement
+        content: Thank you for your order for the RSG8901 Retro Sunglasses!
+        priority: 9
+        related_to: RSG8901
+      - content_type: order_confirmation
+        content: We are pleased to confirm that your order for 1 pair of RSG8901 Retro
+          Sunglasses has been created.
+        priority: 10
+        related_to: RSG8901
+      - content_type: product_details
+        content: |
+          Product Details:
+          - Item: RSG8901 Retro Sunglasses
+          - Quantity: 1
+          - Price: $26.99
+        priority: 8
+        related_to: RSG8901
+      - content_type: next_steps
+        content: We will notify you once your order has shipped.
+        priority: 7
+        related_to: null
+      - content_type: closing
+        content: |
+          Thanks!
+
+          Best regards,
+          Hermes - Delivering divine fashion
+        priority: 10
+        related_to: null
+errors: null

@@ -1,0 +1,116 @@
+email_id: E021
+subject: null
+message: "So I''ve bought quite large collection of vintage items from your store: SDE2345, DJN8901, RGD7654, CRD3210, those are perfect fit for my style! I need your advice if there are any winter hats in your store? Thank you!"
+classifier:
+  email_analysis:
+    email_id: E021
+    subject: null
+    original_message: "So I''ve bought quite large collection of vintage items from your store: SDE2345, DJN8901, RGD7654, CRD3210, those are perfect fit for my style! I need your advice if there are any winter hats in your store? Thank you!"
+    language: en
+    primary_intent: product inquiry
+    secondary_intent: null
+    segments:
+      - segment_type: COMMENT # Past purchases, context for style
+        text: "So I''ve bought quite large collection of vintage items from your store: SDE2345, DJN8901, RGD7654, CRD3210, those are perfect fit for my style!"
+        keywords: [vintage items, SDE2345, DJN8901, RGD7654, CRD3210]
+        product_mentions:
+          - raw_mention: "SDE2345"
+            product_id_guess: "SDE2345"
+            quantity_guess: null # Past purchase
+          - raw_mention: "DJN8901"
+            product_id_guess: "DJN8901"
+            quantity_guess: null # Past purchase
+          - raw_mention: "RGD7654"
+            product_id_guess: "RGD7654"
+            quantity_guess: null # Past purchase
+          - raw_mention: "CRD3210"
+            product_id_guess: "CRD3210"
+            quantity_guess: null # Past purchase
+        questions: []
+      - segment_type: INQUIRY
+        text: "I need your advice if there are any winter hats in your store?"
+        keywords: [advice, winter hats]
+        product_mentions: []
+        questions:
+          - "Are there any winter hats in your store?"
+    product_mentions: # These are past purchases, not current requests
+      - raw_mention: "SDE2345"
+        text_span: [70, 77]
+        product_id_guess: "SDE2345"
+        name_guess: null
+        quantity_guess: null
+        confidence: 0.99
+      - raw_mention: "DJN8901"
+        text_span: [79, 86]
+        product_id_guess: "DJN8901"
+        name_guess: null
+        quantity_guess: null
+        confidence: 0.99
+      - raw_mention: "RGD7654"
+        text_span: [88, 95]
+        product_id_guess: "RGD7654"
+        name_guess: null
+        quantity_guess: null
+        confidence: 0.99
+      - raw_mention: "CRD3210"
+        text_span: [97, 104]
+        product_id_guess: "CRD3210"
+        name_guess: null
+        quantity_guess: null
+        confidence: 0.99
+    customer_info: {}
+stockkeeper:
+  resolved_products: [] # No current products requested for resolution
+  unresolved_mentions: []
+  metadata:
+    resolution_rate: 1.0
+fulfiller: null # Not an order
+advisor:
+  inquiry_response:
+    email_id: E021
+    primary_products: [] # Customer mentions past purchases, not current primary products of inquiry
+    answered_questions:
+      - question: "Are there any winter hats in your store?"
+        answer: "Yes, we have several winter hats. Options include the Chunky Knit Beanie (CHN0987) which is thick and cozy, and the Cable Knit Beanie (CLF2109) made from premium wool with a classic cable knit pattern. We also have Earmuffs (ERM5432) for keeping ears toasty."
+        confidence: 0.9
+        products_referenced: [CHN0987, CLF2109, ERM5432]
+    related_products: # Based on the inquiry for winter hats
+      - product_id: CHN0987
+        name: Chunky Knit Beanie
+        category: Accessories
+        description: "Keep your head toasty with our chunky knit beanie. Knitted from thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a touch of rustic charm. A versatile accessory to elevate your cold-weather looks."
+        price: 22
+        seasons: ["Fall", "Winter"]
+        stock: 2
+      - product_id: CLF2109
+        name: Cable Knit Beanie
+        category: Accessories
+        description: "Bundle up in our cable knit beanie. Knitted from premium wool, this classic beanie features a timeless cable knit pattern and a soft, stretchy fit. A versatile accessory for adding a touch of warmth and texture to your cold-weather looks."
+        price: 16
+        seasons: ["Winter"]
+        stock: 2
+      - product_id: ERM5432
+        name: Earmuffs
+        category: Accessories
+        description: "Keep your ears toasty with our earmuffs. These plush earmuffs feature a soft, faux fur exterior and an adjustable headband for a secure fit. A practical and stylish accessory for braving the cold in comfort."
+        price: 23
+        seasons: ["Winter"]
+        stock: 2
+    unanswered_questions: []
+    unsuccessful_references: []
+composer:
+  response: |
+    Dear Customer,
+
+    Thank you for reaching out and for your continued support! We''re glad to hear you''ve enjoyed your previous vintage purchases.
+
+    Regarding your inquiry about winter hats, we do have a few options that might suit your style:
+
+    *   **Chunky Knit Beanie (CHN0987):** This trendy beanie is knitted from thick, cozy yarn and offers a slouchy, oversized fit. It''s priced at $22 and currently in stock.
+    *   **Cable Knit Beanie (CLF2109):** A classic choice, this beanie is made from premium wool with a timeless cable knit pattern. It''s priced at $16 and currently in stock.
+    *   **Earmuffs (ERM5432):** If you prefer earmuffs, these feature a soft, faux fur exterior and are priced at $23. They are also in stock.
+
+    We hope this helps you find the perfect winter hat! Please let us know if you have any more questions or if you''d like to place an order.
+
+    Sincerely,
+    Your Fashion Store Team

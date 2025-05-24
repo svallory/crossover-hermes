@@ -1,0 +1,97 @@
+email_id: E016
+subject: Summer Wedding Guest Dress Preferences
+message: "Hello, I''m looking for a dress for a summer wedding I have coming up. My name is Claire. I don''t want anything too short, low-cut, or super tight-fitting. But I also don''t want it to be too loose or matronly. Something flattering but still comfortable to wear for an outdoor ceremony. Any recommendations on some options that might work for me? Thank you! And bag, I think I need some travel bag."
+classifier:
+  email_analysis:
+    email_id: E016
+    subject: Summer Wedding Guest Dress Preferences
+    original_message: "Hello, I''m looking for a dress for a summer wedding I have coming up. My name is Claire. I don''t want anything too short, low-cut, or super tight-fitting. But I also don''t want it to be too loose or matronly. Something flattering but still comfortable to wear for an outdoor ceremony. Any recommendations on some options that might work for me? Thank you! And bag, I think I need some travel bag."
+    language: en
+    primary_intent: product inquiry
+    secondary_intent: null
+    segments:
+      - segment_type: INQUIRY
+        text: "I''m looking for a dress for a summer wedding I have coming up."
+        keywords: [dress, summer wedding]
+        product_mentions: []
+        questions:
+          - "What dress options would work for a summer wedding, not too short, low-cut, or tight, but also not too loose or matronly, flattering and comfortable for an outdoor ceremony?"
+      - segment_type: INQUIRY
+        text: "And bag, I think I need some travel bag."
+        keywords: [bag, travel bag]
+        product_mentions: []
+        questions:
+          - "What travel bag options do you have?"
+    product_mentions: []
+    customer_info:
+      name: Claire
+stockkeeper:
+  resolved_products: []
+  unresolved_mentions: []
+  metadata:
+    resolution_rate: 1.0
+advisor:
+  inquiry_response:
+    email_id: E016
+    primary_products: []
+    answered_questions:
+      - question: "What dress options would work for a summer wedding, not too short, low-cut, or tight, but also not too loose or matronly, flattering and comfortable for an outdoor ceremony?"
+        answer: "For a summer wedding, consider our Floral Sundress (FSD2345), Floral Maxi Dress (FLD9876), or Printed Tunic Dress (PTD3210). These options offer flattering silhouettes and are made from lightweight materials suitable for outdoor ceremonies. The Floral Sundress is breezy and features a vibrant floral print. The Floral Maxi Dress flows gracefully and is also floral. The Printed Tunic Dress has a bold print and a relaxed silhouette."
+        confidence: 0.8
+        products_referenced: [FSD2345, FLD9876, PTD3210]
+      - question: "What travel bag options do you have?"
+        answer: "We have several bags suitable for travel. The Vibrant Tote (VBT2345) is spacious and stylish. The Sleek Backpack (SBP4567) offers multiple compartments and a padded laptop sleeve. The Chic Crossbody (CCB6789) is compact yet spacious. The Leather Tote (LTH5432) and Leather Backpack (LTH1098) are premium options. The Quilted Tote (QTP5432) is also a practical choice. The Canvas Beach Bag (CBG9876) could also work for casual travel."
+        confidence: 0.7
+        products_referenced: [VBT2345, SBP4567, CCB6789, LTH5432, LTH1098, QTP5432, CBG9876]
+    related_products: # Based on advisor prompt logic and product catalog context
+      - product_id: FSD2345
+        name: Floral Sundress
+        description: "Embrace the warm weather in our floral sundress. This breezy, lightweight dress features a vibrant floral print and a flattering silhouette. Perfect for sunny days or tropical vacations."
+        category: "Women''s Clothing"
+        price: 58
+      - product_id: FLD9876
+        name: Floral Maxi Dress
+        description: "Embrace the blooming season with our floral maxi dress. This breezy, lightweight dress features a vibrant floral pattern and a flattering silhouette that flows gracefully with every step. Perfect for garden parties, beach vacations, or romantic evenings."
+        category: "Women''s Clothing"
+        price: 56 # Note: 20% off promotion mentioned in desc but not applied here by advisor
+      - product_id: PTD3210
+        name: Printed Tunic Dress
+        description: "Stand out from the crowd with our printed tunic dress. This vibrant, eye-catching dress features a bold print and a flattering, relaxed silhouette. Perfect for running errands, casual outings, or a weekend brunch with friends."
+        category: "Women''s Clothing"
+        price: 67.99
+      - product_id: VBT2345
+        name: Vibrant Tote
+        category: Bags
+        description: "Add a pop of color to your everyday carry with our vibrant tote bag. Spacious and stylish, it''s the perfect companion for running errands or carrying your essentials. The vibrant hue is sure to turn heads."
+        price: 39
+      - product_id: LTH5432
+        name: Leather Tote
+        category: Bags
+        description: "Elevate your everyday carry with our leather tote bag. Crafted from premium, full-grain leather, this bag features a spacious interior, multiple pockets, and sturdy handles. Perfect for work, travel, or running errands in style."
+        price: 28
+    unanswered_questions: []
+    unsuccessful_references: []
+composer:
+  response: |
+    Dear Claire,
+
+    Thank you for reaching out to us with your inquiry.
+
+    Regarding your request for a dress suitable for a summer wedding, we have a few options that might interest you:
+    *   **Floral Sundress (FSD2345):** This breezy, lightweight dress features a vibrant floral print and a flattering silhouette, perfect for sunny days.
+    *   **Floral Maxi Dress (FLD9876):** This dress offers a vibrant floral pattern and a silhouette that flows gracefully, ideal for garden parties or beach vacations.
+    *   **Printed Tunic Dress (PTD3210):** This eye-catching dress features a bold print and a relaxed silhouette, suitable for casual outings.
+
+    For a travel bag, we can suggest the following:
+    *   **Vibrant Tote (VBT2345):** A spacious and stylish tote bag.
+    *   **Sleek Backpack (SBP4567):** Features multiple compartments and a padded laptop sleeve.
+    *   **Chic Crossbody (CCB6789):** A compact yet spacious bag.
+    *   **Leather Tote (LTH5432):** A premium leather tote with a spacious interior.
+    *   **Leather Backpack (LTH1098):** A stylish leather backpack with multiple compartments.
+    *   **Quilted Tote (QTP5432):** A chic and practical quilted tote.
+    *   **Canvas Beach Bag (CBG9876):** A spacious and durable option for casual travel.
+
+    We hope this information is helpful. Please let us know if you have any further questions.
+
+    Sincerely,
+    Your Fashion Store Team

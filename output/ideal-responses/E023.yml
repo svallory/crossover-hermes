@@ -1,0 +1,112 @@
+email_id: E023
+subject: Final Decision Made
+message: "After weeks of consideration, I''ve made up my mind! Looking at my bank account right now, and I''m prepared to commit to those CGN2345 Cargo Pants - all 5 of them, exactly as we discussed in my previous emails about the color options and material details. Just need you to confirm the availability first, before we move formward."
+classifier:
+  email_analysis:
+    email_id: E023
+    subject: Final Decision Made
+    original_message: "After weeks of consideration, I''ve made up my mind! Looking at my bank account right now, and I''m prepared to commit to those CGN2345 Cargo Pants - all 5 of them, exactly as we discussed in my previous emails about the color options and material details. Just need you to confirm the availability first, before we move formward."
+    language: en
+    primary_intent: order request
+    secondary_intent: product inquiry # Availability check is an inquiry
+    segments:
+      - segment_type: ORDER
+        text: "I''m prepared to commit to those CGN2345 Cargo Pants - all 5 of them, exactly as we discussed in my previous emails about the color options and material details."
+        keywords: [commit, CGN2345 Cargo Pants, 5]
+        product_mentions:
+          - raw_mention: "CGN2345 Cargo Pants"
+            product_id_guess: "CGN2345"
+            quantity_guess: 5
+        questions: []
+      - segment_type: INQUIRY
+        text: "Just need you to confirm the availability first, before we move formward."
+        keywords: [confirm, availability]
+        product_mentions:
+          - raw_mention: "CGN2345 Cargo Pants" # Implied subject of availability check
+            product_id_guess: "CGN2345"
+            quantity_guess: 5 # Quantity for which availability is being checked
+        questions:
+          - "Can you confirm the availability of 5 units of CGN2345 Cargo Pants?"
+    product_mentions:
+      - raw_mention: "CGN2345 Cargo Pants"
+        text_span: [124, 143]
+        product_id_guess: "CGN2345"
+        name_guess: "Cargo Pants"
+        quantity_guess: 5
+        confidence: 0.99
+    customer_info: {}
+stockkeeper:
+  resolved_products:
+    - product_id: CGN2345
+      name: Cargo Pants
+      category: Women''s Clothing
+      description: "Functionality meets style in our cargo pants. These utilitarian-inspired pants feature multiple pockets and a relaxed, straight-leg fit. Perfect for outdoor adventures, travel, or adding a touch of edge to your casual looks."
+      stock: 2 # Stock before this order
+      seasons: ["Spring", "Summer", "Fall"]
+      price: 80
+  unresolved_mentions: []
+  metadata:
+    resolution_rate: 1.0
+fulfiller:
+  order_result:
+    email_id: E023
+    order_items:
+      - product_id: CGN2345
+        name: Cargo Pants
+        quantity_requested: 5
+        quantity_fulfilled: 2
+        quantity_undeliverable: 3
+        price_per_unit: 80
+        status: "partially fulfilled"
+        issue: "Insufficient stock. Requested 5, only 2 available."
+    fulfilled_items:
+      - product_id: CGN2345
+        name: Cargo Pants
+        quantity: 2
+        price_per_unit: 80
+        total_price: 160
+    undeliverable_items:
+      - product_id: CGN2345
+        name: Cargo Pants
+        quantity_requested: 5
+        quantity_available: 2 # Stock at time of processing this item
+        quantity_missing: 3
+        reason: "insufficient stock"
+    issues: ["Order for CGN2345 (Cargo Pants) could only be partially fulfilled due to insufficient stock (requested 5, fulfilled 2)."]
+    overall_status: "partially_fulfilled"
+    total_price: 160.00 # Price for the fulfilled items
+    promotions_applied: []
+advisor:
+  inquiry_response:
+    email_id: E023
+    primary_products:
+      - product_id: CGN2345
+        name: Cargo Pants
+        category: Women''s Clothing
+        price: 80
+        stock: 2 # Stock at the time of inquiry / before this order attempt
+    answered_questions:
+      - question: "Can you confirm the availability of 5 units of CGN2345 Cargo Pants?"
+        answer: "Currently, we have 2 units of CGN2345 Cargo Pants in stock. You requested 5 units."
+        confidence: 1.0
+        products_referenced: [CGN2345]
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+composer:
+  response: |
+    Dear Customer,
+
+    Thank you for confirming your decision to order the CGN2345 Cargo Pants!
+
+    Regarding your request for 5 units, we currently have 2 units of the CGN2345 Cargo Pants in stock. We have processed an order for these 2 units for you.
+
+    - Fulfilled: 2 x CGN2345 Cargo Pants
+    - Out of Stock: 3 x CGN2345 Cargo Pants (unavailable at this time)
+
+    The 2 available pairs will be shipped to you. For the remaining 3 pairs, we can notify you when they are back in stock, or you might consider reducing your order to the available quantity for now.
+
+    Please let us know how you would like to proceed with the out-of-stock portion or if you have any other questions.
+
+    Sincerely,
+    Your Fashion Store Team
