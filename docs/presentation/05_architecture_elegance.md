@@ -17,13 +17,13 @@ While the assignment could be solved with a single monolithic script, Hermes emp
 ```python
 class EmailAnalyzer:
     """The detective that understands what customers really want"""
-    
+
     def analyze_email(self, email: Email) -> EmailAnalysis:
         """Deep email analysis with segment extraction"""
-        
+
         analysis_prompt = self.create_analysis_prompt(email)
         response = self.llm.invoke([HumanMessage(content=analysis_prompt)])
-        
+
         # Structured output with validation
         return EmailAnalysis.model_validate_json(response.content)
 ```
@@ -42,10 +42,10 @@ class EmailAnalyzer:
 ```python
 class ProductResolver:
     """The finder that never gives up on matching products"""
-    
+
     def resolve_products(self, product_requests: list[str]) -> list[ProductMatch]:
         """Cascading product resolution: exact → fuzzy → semantic"""
-        
+
         matches = []
         for request in product_requests:
             # Try exact match first
@@ -58,7 +58,7 @@ class ProductResolver:
             else:
                 semantic_matches = self.find_semantic(request)
                 matches.extend(semantic_matches)
-                
+
         return matches
 ```
 
@@ -76,20 +76,20 @@ class ProductResolver:
 ```python
 class OrderProcessor:
     """The fulfiller that makes orders happen (or explains why they can't)"""
-    
+
     def process_order(self, order_request: OrderRequest) -> OrderResult:
         """Complete order processing with intelligent handling"""
-        
+
         order_lines = []
         for line in order_request.lines:
             processed_line = self.process_order_line(line)
-            
+
             # Apply promotions if applicable
             if promotion := self.get_applicable_promotion(line.product_id):
                 processed_line = self.apply_promotion(processed_line, promotion)
-                
+
             order_lines.append(processed_line)
-            
+
         return OrderResult(lines=order_lines, total=self.calculate_total(order_lines))
 ```
 
@@ -107,20 +107,20 @@ class OrderProcessor:
 ```python
 class InquiryResponder:
     """The expert that knows everything about every product"""
-    
+
     def respond_to_inquiry(self, inquiry: ProductInquiry) -> InquiryResponse:
         """RAG-powered responses grounded in product knowledge"""
-        
+
         # Retrieve relevant products using vector search
         relevant_products = self.vector_store.search(inquiry.question, top_k=5)
-        
+
         # Generate contextual response
         response = self.generate_response(
             question=inquiry.question,
             products=relevant_products,
             customer_tone=inquiry.tone
         )
-        
+
         return InquiryResponse(content=response, sources=relevant_products)
 ```
 
@@ -138,10 +138,10 @@ class InquiryResponder:
 ```python
 class ResponseComposer:
     """The wordsmith that makes every response feel personally crafted"""
-    
+
     def compose_final_response(self, context: ResponseContext) -> str:
         """Adaptive response generation based on customer tone and context"""
-        
+
         if context.has_orders and context.has_inquiries:
             return self.compose_mixed_response(context)
         elif context.has_orders:
@@ -159,35 +159,70 @@ class ResponseComposer:
 
 ## 🌊 LangGraph Workflow Orchestration
 
+### **📋 Architecture Decision: Manual Tool Orchestration**
+
+**Decision**: Use **regular Python functions** instead of LangChain `@tool` decorators for catalog operations.
+
+**Rationale**:
+- **Cleaner Interfaces**: Direct function calls with native Python type hints vs. JSON tool inputs
+- **Better Control**: Manual orchestration provides precise control over business logic flow
+- **Easier Testing**: Regular functions are simpler to mock and test than tool objects
+- **Type Safety**: Native Python typing vs. tool interface abstractions
+- **Performance**: Eliminates tool interface overhead for internal function calls
+
+**Implementation Example**:
+```python
+# ✅ Our Approach: Clean Python Functions
+def find_product_by_name(
+    *, product_name: str, threshold: float = 0.6, top_n: int = 5
+) -> list[FuzzyMatchResult] | ProductNotFound:
+    """Direct function call with native Python typing"""
+    # Implementation...
+
+# Agent calls it directly:
+results = find_product_by_name(product_name="iPhone", threshold=0.8, top_n=3)
+
+# ❌ Alternative: LangChain Tool Decorators
+@tool
+def find_product_by_name_tool(tool_input: str) -> Any:
+    """Requires JSON input/output serialization"""
+    # More complex interface...
+
+# Agent must use tool interface:
+results = find_product_by_name_tool.invoke(json.dumps({"product_name": "iPhone"}))
+```
+
+This decision reinforces our **manual orchestration philosophy** - the system gets better reliability and maintainability by being explicit about its workflow rather than delegating control to LLM tool selection.
+
 ### **Intelligent State Management**
 **Where to find it**: `src/hermes/agents/workflow.py`
 
 ```python
 class HermesWorkflow:
     """LangGraph-powered workflow that orchestrates all agents intelligently"""
-    
+
     def create_workflow(self) -> StateGraph:
         workflow = StateGraph(HermesState)
-        
+
         # Agent nodes
         workflow.add_node("analyze_email", self.analyze_email_node)
         workflow.add_node("resolve_products", self.resolve_products_node)
         workflow.add_node("process_order", self.process_order_node)
         workflow.add_node("respond_inquiry", self.respond_inquiry_node)
         workflow.add_node("compose_response", self.compose_response_node)
-        
+
         # Conditional routing - the magic happens here
         workflow.add_conditional_edges(
             "analyze_email",
             self.route_by_intent,
             {
                 "order_only": "resolve_products",
-                "inquiry_only": "respond_inquiry", 
+                "inquiry_only": "respond_inquiry",
                 "mixed": "resolve_products",  # Handle both in parallel
                 "end": END
             }
         )
-        
+
         return workflow.compile()
 ```
 
@@ -195,19 +230,19 @@ class HermesWorkflow:
 ```python
 def handle_mixed_intent(state: HermesState) -> HermesState:
     """Parallel processing for emails with both orders and inquiries"""
-    
+
     # Split processing based on email segments
     order_segments = [s for s in state.email_analysis.segments if s.type == "order"]
     inquiry_segments = [s for s in state.email_analysis.segments if s.type == "inquiry"]
-    
+
     # Process in parallel
     with ThreadPoolExecutor(max_workers=2) as executor:
         order_future = executor.submit(process_order_segments, order_segments)
         inquiry_future = executor.submit(process_inquiry_segments, inquiry_segments)
-        
+
         order_result = order_future.result()
         inquiry_result = inquiry_future.result()
-    
+
     # Combine results intelligently
     return combine_processing_results(order_result, inquiry_result)
 ```
@@ -220,7 +255,7 @@ def handle_mixed_intent(state: HermesState) -> HermesState:
 ```python
 class RobustAgentRunner:
     """Error handling that never breaks the user experience"""
-    
+
     def run_agent_safely(self, agent_func: Callable, fallback: Callable) -> Any:
         try:
             return agent_func()
@@ -252,8 +287,8 @@ class RobustAgentRunner:
 What looks like simple email processing is actually a sophisticated dance of specialized agents, each contributing their expertise while maintaining perfect coordination. LangGraph ensures that:
 
 - **Complex flows feel simple** through intelligent routing
-- **Errors don't cascade** through robust error boundaries  
+- **Errors don't cascade** through robust error boundaries
 - **Performance scales** through parallel processing
 - **Maintenance is a joy** through clear separation of concerns
 
-**Next**: Let's explore the production-grade engineering practices that make this reliability possible... 
+**Next**: Let's explore the production-grade engineering practices that make this reliability possible...

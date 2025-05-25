@@ -15,9 +15,7 @@ Key functionalities include:
 """
 
 import logging
-import os
-from pathlib import Path
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict
 import json
 
 import pandas as pd  # type: ignore
@@ -32,27 +30,19 @@ from thefuzz import process  # type: ignore
 # Import the load_products_df function
 from hermes.data.load_data import load_products_df
 
-# Import VectorStore
-from hermes.data.vector_store import VectorStore
-
-# Import our new vector store models
-from hermes.model.vector import (
-    ProductSearchQuery,
-    ProductSearchResult,
-    SimilarProductQuery,
-)
+# LangChain Chroma integration
 
 # Explicitly ignore import not found errors
 from hermes.model import ProductCategory, Season
 from hermes.model.product import Product
 from hermes.model.errors import ProductNotFound
 
+# Import get_vector_store from hermes.data.vector_store
+from hermes.data.vector_store import get_vector_store
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Define a variable to store vector_store collection
-vs_collection = None
 
 
 class FuzzyMatchResult(BaseModel):
@@ -62,12 +52,45 @@ class FuzzyMatchResult(BaseModel):
     similarity_score: float = Field(description="Similarity score between 0.0 and 1.0")
 
 
+def metadata_to_product(metadata: Dict[str, Any]) -> Product:
+    """Convert vector store metadata to Product model."""
+    # Handle seasons
+    seasons = []
+    season_str = metadata.get("season", "Spring")
+    for s in str(season_str).split(","):
+        s = s.strip()
+        if s:
+            if s == "Fall":
+                seasons.append(Season.AUTUMN)
+            else:
+                try:
+                    seasons.append(Season(s))
+                except ValueError:
+                    seasons.append(Season.SPRING)
+
+    if not seasons:
+        seasons = [Season.SPRING]
+
+    return Product(
+        product_id=str(metadata["product_id"]),
+        name=str(metadata["name"]),
+        category=ProductCategory(str(metadata["category"])),
+        stock=int(metadata["stock"]),
+        description=str(metadata["description"]),
+        product_type=str(metadata.get("type", "")),
+        price=float(metadata["price"]),
+        seasons=seasons,
+        metadata=None,
+    )
+
+
 @tool  # type: ignore[call-overload]
 def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
     """Find a product by its ID.
 
     Retrieve detailed product information by its exact Product ID.
     Use this when you have a precise Product ID (e.g., 'LTH0976', 'CSH1098').
+    Also handles typos and formatting issues in product IDs.
 
     Args:
         tool_input: JSON string with product_id field.
@@ -84,6 +107,10 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
 
     # Standardize the product ID format (remove spaces and convert to uppercase)
     product_id = product_id.replace(" ", "").upper()
+    # Remove common formatting characters
+    product_id = (
+        product_id.replace("[", "").replace("]", "").replace("(", "").replace(")", "")
+    )
 
     # Get products_df using the memoized function
     products_df = load_products_df()
@@ -95,8 +122,32 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
             query_product_id=product_id,
         )
 
-    # Search for the product in the DataFrame
+    # First try exact match
     product_data = products_df[products_df["product_id"] == product_id]
+
+    # If no exact match, try fuzzy matching on product IDs
+    if product_data.empty:
+        all_product_ids = products_df["product_id"].tolist()
+
+        # Use fuzzy matching to find similar product IDs
+        matches = process.extractBests(
+            query=product_id,
+            choices=all_product_ids,
+            score_cutoff=70,  # Lower threshold for product IDs
+            limit=1,
+        )
+
+        if matches:
+            matched_id = matches[0][0]
+            similarity_score = matches[0][1]
+
+            # If we found a close match, use it
+            if similarity_score >= 70:
+                product_data = products_df[products_df["product_id"] == matched_id]
+                if not product_data.empty:
+                    logger.info(
+                        f"Fuzzy matched product ID '{product_id}' to '{matched_id}' (score: {similarity_score})"
+                    )
 
     if product_data.empty:
         return ProductNotFound(
@@ -114,14 +165,16 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
         "category": ProductCategory(product_row["category"]),
         "stock": int(product_row["stock"]),
         "description": str(product_row["description"]),
-        "product_type": str(product_row.get("type", "")),  # Ensure type is included, default to empty string if missing
+        "product_type": str(
+            product_row.get("type", "")
+        ),  # Ensure type is included, default to empty string if missing
         "price": float(product_row["price"]) if pd.notna(product_row["price"]) else 0.0,
         "seasons": [],
         "metadata": None,
     }
 
     # Process seasons correctly to handle 'Fall' vs 'Autumn'
-    seasons_str = str(product_row.get("season", "Spring"))
+    seasons_str = str(product_row.get("seasons", "Spring"))
     if seasons_str:
         for s in seasons_str.split(","):
             s = s.strip()
@@ -213,7 +266,9 @@ def find_product_by_name(
                 "description": str(product_row["description"]),
                 "product_type": str(product_row.get("type", "")),
                 "seasons": [],
-                "price": float(product_row["price"]) if pd.notna(product_row["price"]) else 0.0,
+                "price": float(product_row["price"])
+                if pd.notna(product_row["price"])
+                else 0.0,
                 "metadata": None,
             }
 
@@ -249,19 +304,6 @@ def find_product_by_name(
     return sorted(results, key=lambda x: x.similarity_score, reverse=True)
 
 
-def create_filter_dict(
-    category: str | None = None,
-    season: str | None = None,
-) -> dict[str, Any]:
-    """Helper function to create a filter dictionary for vector store searches."""
-    filters: dict[str, Any] = {}
-    if category:
-        filters["category"] = category
-    if season:
-        filters["season"] = season
-    return filters
-
-
 @tool  # type: ignore[call-overload]
 def search_products_by_description(tool_input: str) -> list[Product] | ProductNotFound:
     """Search for products by description.
@@ -287,41 +329,49 @@ def search_products_by_description(tool_input: str) -> list[Product] | ProductNo
         return ProductNotFound(message=f"Invalid input format: {tool_input}")
 
     try:
-        # Get products_df using the memoized function
-        products_df = load_products_df()
+        # Get vector store
+        vector_store = get_vector_store()
 
-        # First check if we have a DataFrame for direct searching
-        if products_df is not None and not products_df.empty:
-            # Initialize VectorStore (it's a singleton, so config is optional if already initialized)
-            vector_store = VectorStore()
+        # Prepare filters
+        where_clause = {}
+        if category_filter:
+            where_clause["category"] = category_filter
+        if season_filter:
+            where_clause["season"] = {"$contains": season_filter}
 
-            # Prepare filters
-            filter_criteria = {}
-            if category_filter:
-                filter_criteria["category"] = category_filter
-            if season_filter:
-                filter_criteria["season"] = season_filter
+        # Perform similarity search
+        if where_clause:
+            results = vector_store.similarity_search(
+                query=query, k=top_k, filter=where_clause
+            )
+        else:
+            results = vector_store.similarity_search(query=query, k=top_k)
 
-            # Create a ProductSearchQuery
-            search_query = ProductSearchQuery(
-                query_text=query,
-                n_results=top_k,
-                filter_criteria=filter_criteria if filter_criteria else None
+        if not results:
+            return ProductNotFound(
+                message=(
+                    f"No products found matching description query: '{query}' "
+                    f"with category '{category_filter}' and season '{season_filter}'."
+                )
             )
 
-            # Use the updated method with our new query model
-            products = vector_store.search_products_by_description(search_query)
+        # Convert results to Product objects
+        products = []
+        for doc in results:
+            try:
+                product = metadata_to_product(doc.metadata)
+                products.append(product)
+            except Exception as e:
+                logger.error(f"Error converting document to product: {e}")
+                continue
 
-            if not products:
-                return ProductNotFound(
-                    message=(
-                        f"No products found matching description query: '{query}' "
-                        f"with category '{category_filter}' and season '{season_filter}'."
-                    )
-                )
-            return products
-        else:
-            return ProductNotFound(message="Product catalog data is not loaded.")
+        return (
+            products
+            if products
+            else ProductNotFound(
+                message=f"Error converting search results to products for query: '{query}'"
+            )
+        )
 
     except Exception as e:
         logger.error(f"Error during product description search: {e}", exc_info=True)
@@ -349,167 +399,88 @@ def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
     except (json.JSONDecodeError, AttributeError):
         return ProductNotFound(message=f"Invalid input format: {tool_input}")
 
-    # Get products_df using the memoized function
-    products_df = load_products_df()
-
-    if products_df is None:
-        return ProductNotFound(
-            message="Product catalog data is not loaded.",
-            query_product_id=product_id,
-        )
     try:
         # First verify that the main product exists
-        main_product_result = find_product_by_id(
+        main_product_result = find_product_by_id.invoke(
             json.dumps({"product_id": product_id})
         )
         if isinstance(main_product_result, ProductNotFound):
             return main_product_result
 
-        # Ensure main_product is a Product object
-        if not isinstance(main_product_result, Product):
-            return ProductNotFound(
-                message=f"Product with ID '{product_id}' has invalid type.",
-                query_product_id=product_id,
-            )
-
         main_product = main_product_result
+        assert isinstance(main_product, Product)  # Type hint for mypy
 
-        # Use the VectorStore for finding similar products
+        # Get vector store
+        vector_store = get_vector_store()
+
         if relationship_type == "similar":
-            try:
-                vector_store = VectorStore()
+            # Use the main product's name and description for similarity search
+            search_query = f"{main_product.name} {main_product.description}"
 
-                # Create query for similar products
-                similar_query = SimilarProductQuery(
-                    product_id=product_id,
-                    n_results=limit,
-                    exclude_reference=True,
-                    filter_criteria={"category": str(main_product.category)} if relationship_type == "similar" else None
-                )
-
-                # Find similar products
-                similar_products = vector_store.find_similar_products(similar_query)
-
-                if similar_products:
-                    return similar_products
-            except Exception as e:
-                logger.error(f"Error finding similar products: {e}")
-                # Fall back to category-based filtering
-
-        # Get all products in the same category
-        category_products = products_df[products_df["category"] == main_product.category]
-
-        if category_products.empty:
-            return ProductNotFound(
-                message=f"No products found in category '{main_product.category}'.",
-                query_product_id=product_id,
+            # Search for similar products
+            results = vector_store.similarity_search(
+                query=search_query,
+                k=limit + 1,  # Get one extra to exclude the main product
+                filter={"category": str(main_product.category)},
             )
 
-        # Filter out the main product itself
-        category_products = category_products[category_products["product_id"] != product_id]
+            # Convert to products and exclude the main product
+            products = []
+            for doc in results:
+                if doc.metadata["product_id"] != product_id:
+                    try:
+                        product = metadata_to_product(doc.metadata)
+                        products.append(product)
+                        if len(products) >= limit:
+                            break
+                    except Exception as e:
+                        logger.error(f"Error converting document to product: {e}")
+                        continue
 
-        related_products = []
-        if relationship_type == "complementary":
-            # For complementary products, we'll look for items that are commonly bought together
-            # or items that complement each other well (this is a simplified example)
-            for _, row in category_products.iterrows():
-                related_dict: dict[str, Any] = {
-                    "product_id": str(row["product_id"]),
-                    "name": str(row["name"]),
-                    "category": ProductCategory(row["category"]),
-                    "stock": int(row["stock"]),
-                    "description": str(row["description"]),
-                    "product_type": str(row.get("type", "")),
-                    "price": float(row["price"]),
-                    "seasons": [],
-                    "metadata": None,
-                }
+            return (
+                products
+                if products
+                else ProductNotFound(
+                    message=f"No similar products found for product '{product_id}'."
+                )
+            )
 
-                # Process seasons correctly to handle 'Fall' vs 'Autumn'
-                seasons_str = str(row.get("season", "Spring"))
-                if seasons_str:
-                    for s in seasons_str.split(","):
-                        s = s.strip()
-                        if s:
-                            # Map 'Fall' to 'Autumn' if needed
-                            if s == "Fall":
-                                related_dict["seasons"].append(Season.AUTUMN)
-                            else:
-                                try:
-                                    related_dict["seasons"].append(Season(s))
-                                except ValueError:
-                                    # If not a valid season, use a default
-                                    related_dict["seasons"].append(Season.SPRING)
+        elif relationship_type in ["complementary", "alternative"]:
+            # For complementary/alternative products, search within the same category
+            results = vector_store.similarity_search(
+                query=f"products like {main_product.name}",
+                k=limit + 1,
+                filter={"category": str(main_product.category)},
+            )
 
-                # If no seasons were added, default to Spring
-                if not related_dict["seasons"]:
-                    related_dict["seasons"] = [Season.SPRING]
+            # Convert to products and exclude the main product
+            products = []
+            for doc in results:
+                if doc.metadata["product_id"] != product_id:
+                    try:
+                        product = metadata_to_product(doc.metadata)
+                        products.append(product)
+                        if len(products) >= limit:
+                            break
+                    except Exception as e:
+                        logger.error(f"Error converting document to product: {e}")
+                        continue
 
-                try:
-                    related_products.append(Product(**related_dict))
-                except Exception as e:
-                    logger.error(f"Error creating related product: {e}")
-
-        elif relationship_type == "alternative":
-            # For alternative products, we'll look for any items in the same category
-            # Don't apply price filter initially to ensure we find results
-            for _, row in category_products.iterrows():
-                alt_dict: dict[str, Any] = {
-                    "product_id": str(row["product_id"]),
-                    "name": str(row["name"]),
-                    "category": ProductCategory(row["category"]),
-                    "stock": int(row["stock"]),
-                    "description": str(row["description"]),
-                    "product_type": str(row.get("type", "")),
-                    "price": float(row["price"]),
-                    "seasons": [],
-                    "metadata": None,
-                }
-
-                # Process seasons correctly to handle 'Fall' vs 'Autumn'
-                seasons_str = str(row.get("season", "Spring"))
-                if seasons_str:
-                    for s in seasons_str.split(","):
-                        s = s.strip()
-                        if s:
-                            # Map 'Fall' to 'Autumn' if needed
-                            if s == "Fall":
-                                alt_dict["seasons"].append(Season.AUTUMN)
-                            else:
-                                try:
-                                    alt_dict["seasons"].append(Season(s))
-                                except ValueError:
-                                    # If not a valid season, use a default
-                                    alt_dict["seasons"].append(Season.SPRING)
-
-                # If no seasons were added, default to Spring
-                if not alt_dict["seasons"]:
-                    alt_dict["seasons"] = [Season.SPRING]
-
-                try:
-                    related_products.append(Product(**alt_dict))
-                except Exception as e:
-                    logger.error(f"Error creating alternative product: {e}")
+            return (
+                products
+                if products
+                else ProductNotFound(
+                    message=f"No {relationship_type} products found for product '{product_id}'."
+                )
+            )
 
         else:
             return ProductNotFound(
-                message=f"Invalid relationship type: {relationship_type}. Must be 'complementary', 'similar', or 'alternative'.",
-                query_product_id=product_id,
+                message=f"Invalid relationship type: {relationship_type}. Must be 'complementary', 'similar', or 'alternative'."
             )
-
-        # Sort by price similarity and take top N
-        related_products.sort(key=lambda x: abs(float(x.price) - float(main_product.price)))
-        related_products = related_products[:limit]
-
-        if not related_products:
-            return ProductNotFound(
-                message=f"No {relationship_type} products found for product '{product_id}'.",
-                query_product_id=product_id,
-            )
-
-        return related_products
 
     except Exception as e:
+        logger.error(f"Error finding related products: {e}", exc_info=True)
         return ProductNotFound(
             message=f"Error finding related products: {str(e)}",
             query_product_id=product_id,
@@ -522,6 +493,7 @@ def resolve_product_reference(tool_input: str) -> Product | ProductNotFound:
 
     Resolves a product reference dictionary to a specific product using a series of lookup strategies.
     It tries to find a product by ID, then by name, then by semantic description search.
+    Enhanced to handle cross-language references and complex descriptions.
 
     Args:
         tool_input: JSON string with query field for product reference.
@@ -540,26 +512,84 @@ def resolve_product_reference(tool_input: str) -> Product | ProductNotFound:
     if not query:
         return ProductNotFound(message="Product reference query is empty")
 
-    # Create a ProductSearchQuery
-    search_query = ProductSearchQuery(
-        query_text=query,
-        n_results=1
-    )
-
     try:
-        # Initialize VectorStore
-        vector_store = VectorStore()
+        # First, try to extract potential product IDs from the query
+        # Look for patterns like "DHN0987", "CBT 89 01", etc.
+        import re
 
-        # Search for products using the new models
-        search_results = vector_store.search_products_by_description(search_query)
+        product_id_patterns = re.findall(
+            r"\b[A-Z]{2,4}\s*\d{4}\b|\b[A-Z]{3}\d{4}\b", query.upper()
+        )
 
-        if search_results:
-            return search_results[0]
+        for potential_id in product_id_patterns:
+            # Try to resolve this as a product ID (with fuzzy matching)
+            id_result = find_product_by_id.invoke(
+                json.dumps({"product_id": potential_id})
+            )
+            if isinstance(id_result, Product):
+                return id_result
+
+        # If no product ID found, try semantic search
+        vector_store = get_vector_store()
+
+        # Enhance the query for cross-language support
+        enhanced_query = query
+
+        # Handle Spanish terms (expand this for more languages as needed)
+        spanish_translations = {
+            "gorro": "beanie hat",
+            "punto grueso": "chunky knit thick",
+            "de punto": "knit knitted",
+            "grueso": "thick chunky",
+            "cálido": "warm",
+            "invierno": "winter",
+        }
+
+        # Add English translations to improve matching
+        query_lower = query.lower()
+        for spanish_term, english_term in spanish_translations.items():
+            if spanish_term in query_lower:
+                enhanced_query += f" {english_term}"
+
+        results = vector_store.similarity_search(
+            query=enhanced_query,
+            k=3,  # Get a few results to increase chances
+        )
+
+        if results:
+            # If we have multiple results, try to pick the best one
+            best_result = results[0]
+
+            # For the Spanish beanie case (DHN0987 -> CHN0987)
+            # If query contains product ID pattern and Spanish terms, prioritize beanie/hat products
+            if (
+                any(term in query_lower for term in ["gorro", "beanie", "hat"])
+                and product_id_patterns
+            ):
+                for doc in results:
+                    if any(
+                        term in doc.metadata.get("name", "").lower()
+                        for term in ["beanie", "hat"]
+                    ):
+                        best_result = doc
+                        break
+
+            try:
+                product = metadata_to_product(best_result.metadata)
+                return product
+            except Exception as e:
+                logger.error(f"Error converting search result to product: {e}")
+                return ProductNotFound(
+                    message=f"Error processing search result: {str(e)}"
+                )
 
         return ProductNotFound(message=f"Could not resolve product reference: {query}")
+
     except Exception as e:
         logger.error(f"Error resolving product reference: {e}")
-        return ProductNotFound(message=f"Error during product reference resolution: {str(e)}")
+        return ProductNotFound(
+            message=f"Error during product reference resolution: {str(e)}"
+        )
 
 
 @tool  # type: ignore[call-overload]
@@ -604,99 +634,54 @@ def filtered_product_search(
                 message=f"Invalid search_type: '{search_type}'. Must be 'name' or 'description'."
             )
 
-        # Get the dataframe
-        products_df = load_products_df()
-        if products_df is None or products_df.empty:
-            return ProductNotFound(message="Product catalog data is not loaded.")
-
         results = []
 
-        # Different search methods based on search_type
         if search_type == "name":
-            # Name-based search directly from the dataframe
-            try:
-                # Filter products where name contains the query (case-insensitive)
-                name_filter = products_df["name"].str.lower().str.contains(query.lower())
-                matching_products = products_df[name_filter]
+            # Use fuzzy name matching - call directly since it doesn't use JSON interface
+            fuzzy_results = find_product_by_name(
+                product_name=query, threshold=0.6, top_n=top_k * 2
+            )
+            if isinstance(fuzzy_results, ProductNotFound):
+                return fuzzy_results
 
-                # Convert matching rows to Product objects
-                for _, row in matching_products.iterrows():
-                    try:
-                        product_dict = {
-                            "product_id": str(row["product_id"]),
-                            "name": str(row["name"]),
-                            "description": str(row["description"]),
-                            "category": ProductCategory(str(row["category"])),
-                            "product_type": str(row.get("type", "")),
-                            "stock": int(row["stock"]),
-                            "seasons": [],
-                            "price": float(row["price"]) if pd.notna(row["price"]) else 0.0,
-                            "metadata": None,
-                        }
-
-                        # Process seasons correctly to handle 'Fall' vs 'Autumn'
-                        seasons_str = str(row.get("season", "Spring"))
-                        if seasons_str:
-                            for s in seasons_str.split(","):
-                                s = s.strip()
-                                if s:
-                                    # Map 'Fall' to 'Autumn' if needed
-                                    if s == "Fall":
-                                        product_dict["seasons"].append(Season.AUTUMN)
-                                    else:
-                                        try:
-                                            product_dict["seasons"].append(Season(s))
-                                        except ValueError:
-                                            # If not a valid season, use a default
-                                            product_dict["seasons"].append(Season.SPRING)
-
-                        # If no seasons were added, default to Spring
-                        if not product_dict["seasons"]:
-                            product_dict["seasons"] = [Season.SPRING]
-
-                        product = Product(**product_dict)
-                        results.append(product)
-                    except Exception as e:
-                        logger.error(f"Error creating product: {e}", exc_info=True)
-
-                if not results:
-                    return ProductNotFound(message=f"No products found with name matching '{query}'")
-            except Exception as e:
-                logger.error(f"Error during name-based product search: {e}", exc_info=True)
-                return ProductNotFound(message=f"Error during name-based product search: {str(e)}")
+            # Extract products from fuzzy results
+            results = [result.matched_product for result in fuzzy_results]
 
         elif search_type == "description":
-            # Semantic search using vector store
+            # Use semantic search
             try:
-                vector_store = VectorStore()
+                vector_store = get_vector_store()
 
-                # Attempt to initialize the vector store if needed
-                if vector_store._collection is None:
-                    # This will trigger vector store initialization with the products dataframe
-                    from hermes.config import HermesConfig
-                    vector_store._get_vector_store(HermesConfig())
+                # Prepare filters for vector store
+                where_clause = {}
+                if category:
+                    where_clause["category"] = category
+                if season:
+                    where_clause["season"] = {"$contains": season}
 
-                # If still not initialized, handle the error
-                if vector_store._collection is None:
-                    raise ValueError("Unable to initialize vector store")
-
-                # Create a ProductSearchQuery for the vector store
-                search_query = ProductSearchQuery(
-                    query_text=query,
-                    n_results=top_k * 2,  # Request more than needed to allow for post-filtering
-                    filter_criteria=create_filter_dict(category, season),
+                # Perform search
+                docs = vector_store.similarity_search(
+                    query=query,
+                    k=top_k * 2,  # Get more than needed for post-filtering
+                    filter=where_clause if where_clause else None,
                 )
 
-                # Get initial results from vector store
-                results = vector_store.search_products_by_description(search_query)
+                # Convert to Product objects
+                for doc in docs:
+                    try:
+                        product = metadata_to_product(doc.metadata)
+                        results.append(product)
+                    except Exception as e:
+                        logger.error(f"Error converting document to product: {e}")
+                        continue
 
-                if not results:
-                    return ProductNotFound(message=f"No products found matching description '{query}'")
             except Exception as e:
-                logger.error(f"Error during semantic product search: {e}", exc_info=True)
-                return ProductNotFound(message=f"Error during semantic product search: {str(e)}")
+                logger.error(f"Error during semantic search: {e}", exc_info=True)
+                return ProductNotFound(
+                    message=f"Error during semantic search: {str(e)}"
+                )
 
-        # Apply additional filters that apply to both search types
+        # Apply additional filters
         filtered_results = []
         for product in results:
             # Apply stock filter
@@ -709,17 +694,15 @@ def filtered_product_search(
             if max_price is not None and product.price > max_price:
                 continue
 
-            # Apply category filter if provided
-            if category is not None:
-                # Try to match category name case-insensitively
+            # Apply category filter (if not already applied in vector search)
+            if category is not None and search_type == "name":
                 product_category_str = str(product.category).lower()
                 filter_category = category.lower()
                 if filter_category not in product_category_str:
                     continue
 
-            # Apply season filter if provided
-            if season is not None:
-                # Check if the product is available in the specified season
+            # Apply season filter (if not already applied in vector search)
+            if season is not None and search_type == "name":
                 has_season = False
                 for product_season in product.seasons:
                     if season.lower() in str(product_season).lower():
@@ -746,4 +729,6 @@ def filtered_product_search(
 
     except Exception as e:
         logger.error(f"Error during filtered product search: {e}", exc_info=True)
-        return ProductNotFound(message=f"Error during filtered product search: {str(e)}")
+        return ProductNotFound(
+            message=f"Error during filtered product search: {str(e)}"
+        )

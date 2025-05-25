@@ -10,7 +10,8 @@ from hermes.agents.classifier.models import ClassifierInput
 from hermes.agents.workflow.graph import workflow
 from hermes.agents.workflow.states import OverallState
 from hermes.config import HermesConfig
-from hermes.data.vector_store import VectorStore
+from hermes.data.vector_store import get_vector_store
+
 
 async def run_workflow(
     input_state: ClassifierInput,
@@ -29,7 +30,7 @@ async def run_workflow(
     # First, ensure vector store is initialized
     # This is crucial for the inquiry responder to work
     print("Ensuring vector store is initialized before running workflow...")
-    VectorStore(hermes_config=hermes_config)
+    get_vector_store(hermes_config=hermes_config)
 
     # Ensure the configuration includes HermesConfig under the 'configurable' key
     runnable_config_obj = RunnableConfig(configurable={"hermes_config": hermes_config})

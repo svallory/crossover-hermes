@@ -6,18 +6,22 @@ from typing import Any, Literal
 
 from langchain_core.runnables import RunnableConfig
 
-from hermes.agents.classifier.models import ClassifierOutput, ProductMention
+from hermes.agents.classifier.models import ProductMention
 from hermes.agents.stockkeeper.models import StockkeeperInput, StockkeeperOutput
 from hermes.agents.stockkeeper.prompts import get_prompt
 from hermes.config import HermesConfig
-from hermes.data import load_products_df, VectorStore
 from hermes.model import ProductCategory, Season
 from hermes.model.enums import Agents
 from hermes.model.product import Product
-from hermes.model.vector import ProductSearchQuery, ProductSearchResult
 from hermes.custom_types import WorkflowNodeOutput
 from hermes.utils.response import create_node_response
 from hermes.utils.llm_client import get_llm_client
+from hermes.tools.catalog_tools import (
+    find_product_by_id as find_product_by_id_tool,
+    find_product_by_name as find_product_by_name_tool,
+    search_products_by_description as search_products_by_description_tool,
+)
+
 
 def traceable(run_type: str, name: str | None = None):
     """Decorator for LangSmith tracing."""
@@ -39,8 +43,12 @@ def traceable(run_type: str, name: str | None = None):
 # Configure resolution thresholds and other parameters
 EXACT_MATCH_THRESHOLD = 0.95  # Threshold for automatic resolution
 SIMILAR_MATCH_THRESHOLD = 0.75  # Threshold for potential matches to consider
-AMBIGUITY_THRESHOLD = 0.15  # Maximum difference between top matches to consider ambiguous
-MIN_CANDIDATES_FOR_AMBIGUITY_CHECK = 2  # Minimum number of candidates needed to check for ambiguity
+AMBIGUITY_THRESHOLD = (
+    0.15  # Maximum difference between top matches to consider ambiguous
+)
+MIN_CANDIDATES_FOR_AMBIGUITY_CHECK = (
+    2  # Minimum number of candidates needed to check for ambiguity
+)
 
 
 def build_resolution_query(mention: ProductMention) -> dict[str, Any]:
@@ -107,7 +115,7 @@ def build_nl_query(query: dict[str, Any]) -> str:
 
 
 def get_product_by_id(product_id: str) -> Product | None:
-    """Find a product by exact ID match.
+    """Find a product by exact ID match using catalog tools.
 
     Args:
         product_id: The product ID to search for
@@ -116,65 +124,69 @@ def get_product_by_id(product_id: str) -> Product | None:
         A Product object if found, None otherwise
 
     """
-    products_df = load_products_df()
-    if products_df is None:
+    try:
+        result = find_product_by_id_tool.invoke(json.dumps({"product_id": product_id}))
+        return result if isinstance(result, Product) else None
+    except Exception:
         return None
 
-    product_data = products_df[products_df["product_id"] == product_id]
-    if product_data.empty:
-        return None
 
-    return _create_product_from_row(product_data.iloc[0])
-
-
-def find_products_by_name(name: str, threshold: float = 0.8, top_n: int = 3) -> list[tuple[Product, float]]:
-    """Find products by name using fuzzy matching.
+def find_products_by_name_wrapper(
+    name: str, threshold: float = 0.8, max_results: int = 3
+) -> list[tuple[Product, float]]:
+    """Find products by name using fuzzy matching via catalog tools.
 
     Args:
         name: The product name to search for
         threshold: Minimum similarity score for matches
-        top_n: Maximum number of matches to return
+        max_results: Maximum number of matches to return
 
     Returns:
         A list of (Product, score) tuples sorted by descending score
 
     """
-    results: list[tuple[Product, float]] = []
-    products_df = load_products_df()
+    try:
+        # Call the tool directly with its expected parameters (not JSON)
+        result = find_product_by_name_tool(
+            product_name=name, threshold=threshold, top_n=max_results
+        )
 
-    if products_df is None or name is None or not name.strip():
-        return results
-
-    # Implement simple fuzzy matching logic
-    # In a real implementation, this would use a more sophisticated algorithm
-    for _, row in products_df.iterrows():
-        product_name = str(row["name"])
-        # Calculate similarity (simplified for demonstration)
-        words_a = set(name.lower().split())
-        words_b = set(product_name.lower().split())
-
-        if not words_a or not words_b:
-            continue
-
-        intersection = words_a.intersection(words_b)
-        union = words_a.union(words_b)
-
-        if not union:
-            continue
-
-        similarity = len(intersection) / len(union)
-
-        if similarity >= threshold:
-            product = _create_product_from_row(row)
-            results.append((product, similarity))
-
-    # Sort by score descending and limit results
-    results.sort(key=lambda x: x[1], reverse=True)
-    return results[:top_n]
+        if isinstance(result, list):
+            return [
+                (fuzzy_result.matched_product, fuzzy_result.similarity_score)
+                for fuzzy_result in result
+            ]
+        return []
+    except Exception as e:
+        print(f"Name-based search failed: {str(e)}")
+        return []
 
 
-def resolve_product_reference(query: dict[str, Any], max_results: int = 3) -> list[tuple[Product, float]]:
-    """Resolve a product reference using a cascading strategy.
+def search_products_semantically(query: str, max_results: int = 3) -> list[Product]:
+    """Search products by description using semantic search via catalog tools.
+
+    Args:
+        query: The search query
+        max_results: Maximum number of results to return
+
+    Returns:
+        A list of Product objects
+
+    """
+    try:
+        result = search_products_by_description_tool.invoke(
+            json.dumps({"query": query, "top_k": max_results})
+        )
+        return result if isinstance(result, list) else []
+    except Exception as e:
+        print(f"Semantic search failed: {str(e)}")
+        return []
+
+
+def resolve_product_reference_local(
+    query: dict[str, Any], max_results: int = 3
+) -> list[tuple[Product, float]]:
+    """Resolve a product reference using catalog tools.
 
     Args:
         query: Query parameters to use for resolution
@@ -193,37 +205,28 @@ def resolve_product_reference(query: dict[str, Any], max_results: int = 3) -> li
             results.append((product, 1.0))  # Exact ID match has 1.0 confidence
             return results  # If we have an exact ID match, no need to continue
 
-    # Try name-based match
+    # Try name-based match using wrapper
     if "name" in query and query["name"]:
-        name_matches = find_products_by_name(name=query["name"], threshold=SIMILAR_MATCH_THRESHOLD, top_n=max_results)
-        results.extend(name_matches)
+        name_results = find_products_by_name_wrapper(
+            name=query["name"],
+            threshold=SIMILAR_MATCH_THRESHOLD,
+            max_results=max_results,
+        )
+        results.extend(name_results)
 
     # If we already have results above the exact match threshold, return early
     if results and results[0][1] >= EXACT_MATCH_THRESHOLD:
         return [results[0]]
 
-    # Try vector store semantic search
-    try:
-        nl_query = build_nl_query(query)
-        vector_store = VectorStore()
+    # Try semantic search using wrapper
+    nl_query = build_nl_query(query)
+    semantic_results = search_products_semantically(nl_query, max_results)
 
-        # Create a ProductSearchQuery
-        search_query = ProductSearchQuery(
-            query_text=nl_query,
-            n_results=max_results
-        )
-
-        # Use the new model for similarity search
-        search_results = vector_store.similarity_search_with_score(search_query)
-
-        for result in search_results:
-            # Convert ProductSearchResult to (Product, score) tuple
-            product = get_product_by_id(result.product_id)
-            if product:
-                results.append((product, result.similarity_score))
-
-    except Exception as e:
-        print(f"Vector store search failed: {str(e)}")
+    # Assign similarity scores based on order (highest first)
+    for i, product in enumerate(semantic_results):
+        # Assign decreasing confidence scores for semantic search results
+        confidence = max(0.6 - (i * 0.1), 0.3)  # Start at 0.6, decrease by 0.1 each
+        results.append((product, confidence))
 
     # Sort results by confidence
     results.sort(key=lambda x: x[1], reverse=True)
@@ -323,7 +326,10 @@ async def run_deduplication_llm(
 
 
 async def run_disambiguation_llm(
-    mention_info: dict[str, Any], candidate_text: str, email_context: str, hermes_config: HermesConfig
+    mention_info: dict[str, Any],
+    candidate_text: str,
+    email_context: str,
+    hermes_config: HermesConfig,
 ) -> dict[str, Any]:
     """Run the LLM to disambiguate between product candidates.
 
@@ -378,7 +384,11 @@ async def run_disambiguation_llm(
         print(f"Error parsing disambiguation LLM response: {str(e)}")
 
     # Return default response if parsing fails
-    return {"selected_product_id": None, "confidence": 0.0, "reasoning": "Failed to parse LLM response"}
+    return {
+        "selected_product_id": None,
+        "confidence": 0.0,
+        "reasoning": "Failed to parse LLM response",
+    }
 
 
 async def deduplicate_mentions(
@@ -407,15 +417,17 @@ async def deduplicate_mentions(
         mentions_text += f"- Product ID: {mention.product_id or 'Not provided'}\n"
         mentions_text += f"- Product Name: {mention.product_name or 'Not provided'}\n"
         mentions_text += f"- Product Type: {mention.product_type or 'Not provided'}\n"
+        mentions_text += f"- Category: {mention.product_category.value if mention.product_category else 'Not provided'}\n"
         mentions_text += (
-            f"- Category: {mention.product_category.value if mention.product_category else 'Not provided'}\n"
+            f"- Description: {mention.product_description or 'Not provided'}\n"
         )
-        mentions_text += f"- Description: {mention.product_description or 'Not provided'}\n"
         mentions_text += f"- Quantity: {mention.quantity or 1}\n\n"
 
     # Run the LLM to get deduplicated mentions
     deduplicated_data = await run_deduplication_llm(
-        mentions_text=mentions_text, email_context=email_context, hermes_config=hermes_config
+        mentions_text=mentions_text,
+        email_context=email_context,
+        hermes_config=hermes_config,
     )
 
     # Convert LLM output back to ProductMention objects if we got a result
@@ -424,7 +436,10 @@ async def deduplicate_mentions(
         for item in deduplicated_data:
             # Extract category if provided
             category = None
-            if item.get("product_category") and item["product_category"] != "Not provided":
+            if (
+                item.get("product_category")
+                and item["product_category"] != "Not provided"
+            ):
                 try:
                     category = ProductCategory(item["product_category"])
                 except (ValueError, TypeError):
@@ -432,9 +447,15 @@ async def deduplicate_mentions(
 
             # Create a new ProductMention with deduplicated data
             mention = ProductMention(
-                product_id=item.get("product_id") if item.get("product_id") != "Not provided" else None,
-                product_name=item.get("product_name") if item.get("product_name") != "Not provided" else None,
-                product_type=item.get("product_type") if item.get("product_type") != "Not provided" else None,
+                product_id=item.get("product_id")
+                if item.get("product_id") != "Not provided"
+                else None,
+                product_name=item.get("product_name")
+                if item.get("product_name") != "Not provided"
+                else None,
+                product_type=item.get("product_type")
+                if item.get("product_type") != "Not provided"
+                else None,
                 product_category=category,
                 product_description=item.get("product_description")
                 if item.get("product_description") != "Not provided"
@@ -485,7 +506,9 @@ async def disambiguate_with_llm(
         "product_id": mention.product_id or "Not provided",
         "product_name": mention.product_name or "Not provided",
         "product_type": mention.product_type or "Not provided",
-        "product_category": mention.product_category.value if mention.product_category else "Not provided",
+        "product_category": mention.product_category.value
+        if mention.product_category
+        else "Not provided",
         "product_description": mention.product_description or "Not provided",
         "quantity": mention.quantity or 1,
     }
@@ -528,7 +551,10 @@ async def resolve_product_mentions(
         classifier_output = state.classifier
 
         # Generate email context for disambiguation
-        if classifier_output.email_analysis and classifier_output.email_analysis.segments:
+        if (
+            classifier_output.email_analysis
+            and classifier_output.email_analysis.segments
+        ):
             # Build email context for disambiguation and deduplication
             context_parts = []
             for segment in classifier_output.email_analysis.segments:
@@ -557,12 +583,16 @@ async def resolve_product_mentions(
                 # Look for unique_products in various places
                 if "unique_products" in raw_dict:
                     all_product_mentions = raw_dict["unique_products"]
-                elif "_obj" in raw_dict and hasattr(raw_dict["_obj"], "unique_products"):
+                elif "_obj" in raw_dict and hasattr(
+                    raw_dict["_obj"], "unique_products"
+                ):
                     # Sometimes Pydantic wraps objects
                     all_product_mentions = raw_dict["_obj"].unique_products
 
                 # Try to access via the Pydantic internals
-                if not all_product_mentions and hasattr(classifier_output, "model_dump"):
+                if not all_product_mentions and hasattr(
+                    classifier_output, "model_dump"
+                ):
                     state_dict = classifier_output.model_dump(exclude_unset=False)
                     if "unique_products" in state_dict:
                         all_product_mentions = state_dict["unique_products"]
@@ -572,13 +602,17 @@ async def resolve_product_mentions(
                     all_product_mentions = classifier_output.get("unique_products", [])
 
         # Print log for debugging
-        print(f"Found {len(all_product_mentions) if all_product_mentions else 0} product mentions for resolution")
+        print(
+            f"Found {len(all_product_mentions) if all_product_mentions else 0} product mentions for resolution"
+        )
 
         # Deduplicate product mentions if we have more than one
         product_mentions = []
         if all_product_mentions and len(all_product_mentions) > 1:
             product_mentions = await deduplicate_mentions(
-                mentions=all_product_mentions, email_context=email_context, hermes_config=hermes_config
+                mentions=all_product_mentions,
+                email_context=email_context,
+                hermes_config=hermes_config,
             )
         else:
             product_mentions = all_product_mentions
@@ -603,7 +637,7 @@ async def resolve_product_mentions(
             query = build_resolution_query(mention)
 
             # Attempt to resolve the product reference
-            candidates = resolve_product_reference(query=query, max_results=3)
+            candidates = resolve_product_reference_local(query=query, max_results=3)
 
             # Resolution decision logic:
             # 1. If no candidates, product is unresolved
@@ -634,7 +668,10 @@ async def resolve_product_mentions(
                 second_score = candidates[1][1]
                 score_diff = top_score - second_score
 
-                if score_diff <= AMBIGUITY_THRESHOLD and second_score >= SIMILAR_MATCH_THRESHOLD:
+                if (
+                    score_diff <= AMBIGUITY_THRESHOLD
+                    and second_score >= SIMILAR_MATCH_THRESHOLD
+                ):
                     is_ambiguous = True
 
             # 4. If ambiguous, use LLM disambiguation
@@ -643,7 +680,10 @@ async def resolve_product_mentions(
 
                 # Call LLM disambiguation
                 llm_result = await disambiguate_with_llm(
-                    mention=mention, candidates=candidates, email_context=email_context, hermes_config=hermes_config
+                    mention=mention,
+                    candidates=candidates,
+                    email_context=email_context,
+                    hermes_config=hermes_config,
                 )
 
                 selected_id = llm_result.get("selected_product_id")
@@ -674,10 +714,16 @@ async def resolve_product_mentions(
                         # Add resolution metadata
                         if not selected_product.metadata:
                             selected_product.metadata = {}
-                        selected_product.metadata["resolution_confidence"] = selected_confidence
-                        selected_product.metadata["resolution_method"] = "llm_disambiguation"
+                        selected_product.metadata["resolution_confidence"] = (
+                            selected_confidence
+                        )
+                        selected_product.metadata["resolution_method"] = (
+                            "llm_disambiguation"
+                        )
                         selected_product.metadata["resolution_reasoning"] = reasoning
-                        selected_product.metadata["requested_quantity"] = mention.quantity
+                        selected_product.metadata["requested_quantity"] = (
+                            mention.quantity
+                        )
 
                         resolved_products.append(selected_product)
                         continue
