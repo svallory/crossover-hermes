@@ -5,273 +5,35 @@ import time
 from typing import Any, Literal
 
 from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import BaseTool
+from langsmith import traceable
 
 from hermes.agents.classifier.models import ProductMention
 from hermes.agents.stockkeeper.models import StockkeeperInput, StockkeeperOutput
 from hermes.agents.stockkeeper.prompts import get_prompt
 from hermes.config import HermesConfig
-from hermes.model import ProductCategory, Season
+from hermes.model import ProductCategory
 from hermes.model.enums import Agents
-from hermes.model.product import Product
 from hermes.custom_types import WorkflowNodeOutput
 from hermes.utils.response import create_node_response
 from hermes.utils.llm_client import get_llm_client
-from hermes.tools.catalog_tools import (
-    find_product_by_id as find_product_by_id_tool,
-    find_product_by_name as find_product_by_name_tool,
-    search_products_by_description as search_products_by_description_tool,
-)
+from hermes.tools.catalog_tools import resolve_product_mention
 
 
-def traceable(run_type: str, name: str | None = None):
-    """Decorator for LangSmith tracing."""
+class StockKeeperToolkit:
+    """Tools for the StockKeeper Agent (currently none - uses direct calls).
 
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
-            # Extract the runnable_config from kwargs if it exists
-            kwargs.get("runnable_config", {})
-            # Create a tracer if needed
-            # Execute the function
-            result = await func(*args, **kwargs)
-            return result
-
-        return wrapper
-
-    return decorator
-
-
-# Configure resolution thresholds and other parameters
-EXACT_MATCH_THRESHOLD = 0.95  # Threshold for automatic resolution
-SIMILAR_MATCH_THRESHOLD = 0.75  # Threshold for potential matches to consider
-AMBIGUITY_THRESHOLD = (
-    0.15  # Maximum difference between top matches to consider ambiguous
-)
-MIN_CANDIDATES_FOR_AMBIGUITY_CHECK = (
-    2  # Minimum number of candidates needed to check for ambiguity
-)
-
-
-def build_resolution_query(mention: ProductMention) -> dict[str, Any]:
-    """Build a query for product resolution based on a product mention.
-
-    Args:
-        mention: The product mention to resolve
-
-    Returns:
-        A query dictionary with all available identifying information
-
+    The StockKeeper Agent uses direct function calls for deterministic workflow steps
+    like product resolution and catalog lookups.
     """
-    query = {}
 
-    if mention.product_id:
-        query["product_id"] = mention.product_id
+    def get_tools(self) -> list[BaseTool]:
+        """Get the list of tools available to the StockKeeper Agent.
 
-    if mention.product_name:
-        query["name"] = mention.product_name
-
-    if mention.product_description:
-        query["description"] = mention.product_description
-
-    if mention.product_category:
-        query["category"] = mention.product_category
-
-    if mention.product_type:
-        query["product_type"] = mention.product_type
-
-    return query
-
-
-def build_nl_query(query: dict[str, Any]) -> str:
-    """Build a natural language query from a query dictionary.
-
-    Args:
-        query: Query parameters to use for resolution
-
-    Returns:
-        A natural language query string
-
-    """
-    query_parts = []
-
-    if "product_id" in query and query["product_id"]:
-        query_parts.append(f"Product ID: {query['product_id']}")
-
-    if "name" in query and query["name"]:
-        query_parts.append(f"Product Name: {query['name']}")
-
-    if "description" in query and query["description"]:
-        query_parts.append(f"Description: {query['description']}")
-
-    if "category" in query and query["category"]:
-        query_parts.append(f"Category: {query['category']}")
-
-    if "product_type" in query and query["product_type"]:
-        query_parts.append(f"Type: {query['product_type']}")
-
-    # Return the natural language query or a default if empty
-    if query_parts:
-        return " ".join(query_parts)
-    return "Unknown product"
-
-
-def get_product_by_id(product_id: str) -> Product | None:
-    """Find a product by exact ID match using catalog tools.
-
-    Args:
-        product_id: The product ID to search for
-
-    Returns:
-        A Product object if found, None otherwise
-
-    """
-    try:
-        result = find_product_by_id_tool.invoke(json.dumps({"product_id": product_id}))
-        return result if isinstance(result, Product) else None
-    except Exception:
-        return None
-
-
-def find_products_by_name_wrapper(
-    name: str, threshold: float = 0.8, max_results: int = 3
-) -> list[tuple[Product, float]]:
-    """Find products by name using fuzzy matching via catalog tools.
-
-    Args:
-        name: The product name to search for
-        threshold: Minimum similarity score for matches
-        max_results: Maximum number of matches to return
-
-    Returns:
-        A list of (Product, score) tuples sorted by descending score
-
-    """
-    try:
-        # Call the tool directly with its expected parameters (not JSON)
-        result = find_product_by_name_tool(
-            product_name=name, threshold=threshold, top_n=max_results
-        )
-
-        if isinstance(result, list):
-            return [
-                (fuzzy_result.matched_product, fuzzy_result.similarity_score)
-                for fuzzy_result in result
-            ]
-        return []
-    except Exception as e:
-        print(f"Name-based search failed: {str(e)}")
-        return []
-
-
-def search_products_semantically(query: str, max_results: int = 3) -> list[Product]:
-    """Search products by description using semantic search via catalog tools.
-
-    Args:
-        query: The search query
-        max_results: Maximum number of results to return
-
-    Returns:
-        A list of Product objects
-
-    """
-    try:
-        result = search_products_by_description_tool.invoke(
-            json.dumps({"query": query, "top_k": max_results})
-        )
-        return result if isinstance(result, list) else []
-    except Exception as e:
-        print(f"Semantic search failed: {str(e)}")
-        return []
-
-
-def resolve_product_reference_local(
-    query: dict[str, Any], max_results: int = 3
-) -> list[tuple[Product, float]]:
-    """Resolve a product reference using catalog tools.
-
-    Args:
-        query: Query parameters to use for resolution
-        max_results: Maximum number of potential matches to return
-
-    Returns:
-        A list of (Product, confidence) tuples sorted by descending confidence
-
-    """
-    results = []
-
-    # Try exact product ID match first (highest priority)
-    if "product_id" in query and query["product_id"]:
-        product = get_product_by_id(query["product_id"])
-        if product:
-            results.append((product, 1.0))  # Exact ID match has 1.0 confidence
-            return results  # If we have an exact ID match, no need to continue
-
-    # Try name-based match using wrapper
-    if "name" in query and query["name"]:
-        name_results = find_products_by_name_wrapper(
-            name=query["name"],
-            threshold=SIMILAR_MATCH_THRESHOLD,
-            max_results=max_results,
-        )
-        results.extend(name_results)
-
-    # If we already have results above the exact match threshold, return early
-    if results and results[0][1] >= EXACT_MATCH_THRESHOLD:
-        return [results[0]]
-
-    # Try semantic search using wrapper
-    nl_query = build_nl_query(query)
-    semantic_results = search_products_semantically(nl_query, max_results)
-
-    # Assign similarity scores based on order (highest first)
-    for i, product in enumerate(semantic_results):
-        # Assign decreasing confidence scores for semantic search results
-        confidence = max(0.6 - (i * 0.1), 0.3)  # Start at 0.6, decrease by 0.1 each
-        results.append((product, confidence))
-
-    # Sort results by confidence
-    results.sort(key=lambda x: x[1], reverse=True)
-
-    # Deduplicate by product_id
-    seen_ids = set()
-    unique_results = []
-
-    for product, score in results:
-        if product.product_id not in seen_ids:
-            seen_ids.add(product.product_id)
-            unique_results.append((product, score))
-
-    return unique_results[:max_results]
-
-
-def _create_product_from_row(row: Any) -> Product:
-    """Create a Product instance from a DataFrame row.
-
-    Args:
-        row: A row from the products DataFrame
-
-    Returns:
-        A Product instance with data from the row
-
-    """
-    # Handle seasons - convert from string or use default
-    seasons_raw = row.get("season", "Spring")
-    if isinstance(seasons_raw, str):
-        seasons = [Season(s.strip()) for s in seasons_raw.split(",") if s.strip()]
-    else:
-        seasons = [Season.SPRING]  # Default to Spring if not available
-
-    # Create the product with proper enum types
-    return Product(
-        product_id=str(row["product_id"]),
-        name=str(row["name"]),
-        description=str(row["description"]),
-        category=ProductCategory(row["category"]),
-        product_type=str(row.get("type", "")),
-        stock=int(row["stock"]),
-        price=float(row["price"]),
-        seasons=seasons,
-        metadata=None,
-    )
+        Returns:
+            Empty list - StockKeeper uses direct function calls only.
+        """
+        return []  # StockKeeper uses direct function calls
 
 
 async def run_deduplication_llm(
@@ -323,72 +85,6 @@ async def run_deduplication_llm(
 
     # Return empty list if parsing fails
     return []
-
-
-async def run_disambiguation_llm(
-    mention_info: dict[str, Any],
-    candidate_text: str,
-    email_context: str,
-    hermes_config: HermesConfig,
-) -> dict[str, Any]:
-    """Run the LLM to disambiguate between product candidates.
-
-    Args:
-        mention_info: Dictionary with product mention information
-        candidate_text: Formatted text of all candidate products
-        email_context: The full email text for context
-        hermes_config: Hermes configuration
-
-    Returns:
-        A dictionary with the LLM's decision (selected_product_id, confidence, reasoning)
-
-    """
-    # Prepare prompt variables
-    prompt_vars = {
-        "product_mention": mention_info["product_mention"],
-        "product_id": mention_info["product_id"],
-        "product_name": mention_info["product_name"],
-        "product_type": mention_info["product_type"],
-        "product_category": mention_info["product_category"],
-        "product_description": mention_info["product_description"],
-        "quantity": mention_info["quantity"],
-        "candidate_products": candidate_text,
-        "email_context": email_context,
-    }
-
-    # Get a medium-strength model with moderate temperature for reasoning
-    llm = get_llm_client(config=hermes_config, model_strength="weak", temperature=0.2)
-
-    # Get the disambiguation prompt from the prompts module
-    disambiguation_prompt = get_prompt(f"{Agents.STOCKKEEPER}_disambiguation")
-
-    # Create the chain and execute
-    disambiguation_chain = disambiguation_prompt | llm
-    raw_result = await disambiguation_chain.ainvoke(prompt_vars)
-
-    try:
-        # Process LLM output - extract JSON
-        content = raw_result.content
-        if isinstance(content, str):
-            # Extract JSON content from the response
-            if "```json" in content:
-                json_str = content.split("```json")[1].split("```")[0].strip()
-            elif "```" in content:
-                json_str = content.split("```")[1].strip()
-            else:
-                json_str = content.strip()
-
-            result = json.loads(json_str)
-            return result
-    except Exception as e:
-        print(f"Error parsing disambiguation LLM response: {str(e)}")
-
-    # Return default response if parsing fails
-    return {
-        "selected_product_id": None,
-        "confidence": 0.0,
-        "reasoning": "Failed to parse LLM response",
-    }
 
 
 async def deduplicate_mentions(
@@ -468,58 +164,6 @@ async def deduplicate_mentions(
 
     # Fallback: return original mentions if deduplication fails
     return mentions
-
-
-async def disambiguate_with_llm(
-    mention: ProductMention,
-    candidates: list[tuple[Product, float]],
-    email_context: str,
-    hermes_config: HermesConfig,
-) -> dict[str, Any]:
-    """Use an LLM to disambiguate between multiple potential product matches.
-
-    Args:
-        mention: The original product mention
-        candidates: List of (Product, confidence) tuples
-        email_context: The full email text for context
-        hermes_config: Hermes configuration
-
-    Returns:
-        A dictionary with the LLM's decision
-
-    """
-    # Format candidate products for the prompt
-    candidate_text = ""
-    for i, (product, score) in enumerate(candidates, 1):
-        candidate_text += f"CANDIDATE {i} (confidence: {score:.2f}):\n"
-        candidate_text += f"- Product ID: {product.product_id}\n"
-        candidate_text += f"- Product Name: {product.name}\n"
-        candidate_text += f"- Product Type: {product.product_type}\n"
-        candidate_text += f"- Category: {product.category}\n"
-        candidate_text += f"- Description: {product.description}\n"
-        candidate_text += f"- Stock: {product.stock}\n"
-        candidate_text += f"- Price: ${product.price}\n\n"
-
-    # Prepare mention information for the LLM
-    mention_info = {
-        "product_mention": str(mention),
-        "product_id": mention.product_id or "Not provided",
-        "product_name": mention.product_name or "Not provided",
-        "product_type": mention.product_type or "Not provided",
-        "product_category": mention.product_category.value
-        if mention.product_category
-        else "Not provided",
-        "product_description": mention.product_description or "Not provided",
-        "quantity": mention.quantity or 1,
-    }
-
-    # Run the LLM to get disambiguation decision
-    return await run_disambiguation_llm(
-        mention_info=mention_info,
-        candidate_text=candidate_text,
-        email_context=email_context,
-        hermes_config=hermes_config,
-    )
 
 
 @traceable(run_type="chain", name="Product Resolution Agent")
@@ -621,130 +265,58 @@ async def resolve_product_mentions(
         total_mentions = len(product_mentions) if product_mentions else 0
         resolution_attempts = 0
         resolution_time_ms = 0
-        deterministic_resolutions = 0
-        llm_disambiguations = 0
+        candidates_resolved = 0
 
-        # Store disambiguation reasons for logging
-        disambiguation_log = []
+        # Store candidate information for logging
+        candidate_log = []
 
-        # Process each product mention
+        # Process each product mention using the new resolve_product_mention function
         start_time = time.time()
         for mention in product_mentions:
             resolution_attempts += 1
-            time.time()
 
-            # Build a query based on the available information
-            query = build_resolution_query(mention)
+            # Use the new resolve_product_mention function from catalog_tools
+            candidates_result = await resolve_product_mention(mention=mention, top_k=3)
 
-            # Attempt to resolve the product reference
-            candidates = resolve_product_reference_local(query=query, max_results=3)
+            # Check if we got candidates back
+            if isinstance(candidates_result, list) and candidates_result:
+                # Add all candidates as resolved products
+                # The downstream agents (Advisor, Composer) will handle the final selection
+                # during their LLM calls, eliminating the need for a separate disambiguation step
+                for candidate in candidates_result:
+                    # Add mention context to help downstream agents
+                    if not candidate.metadata:
+                        candidate.metadata = {}
+                    candidate.metadata["original_mention"] = {
+                        "product_id": mention.product_id,
+                        "product_name": mention.product_name,
+                        "product_type": mention.product_type,
+                        "product_category": mention.product_category.value
+                        if mention.product_category
+                        else None,
+                        "product_description": mention.product_description,
+                        "quantity": mention.quantity,
+                    }
 
-            # Resolution decision logic:
-            # 1. If no candidates, product is unresolved
-            if not candidates:
-                unresolved_mentions.append(mention)
-                continue
+                resolved_products.extend(candidates_result)
+                candidates_resolved += len(candidates_result)
 
-            # 2. If a single high-confidence match, use it immediately
-            if len(candidates) == 1 and candidates[0][1] >= EXACT_MATCH_THRESHOLD:
-                product, confidence = candidates[0]
-
-                # Add resolution metadata to the product
-                if not product.metadata:
-                    product.metadata = {}
-                product.metadata["resolution_confidence"] = confidence
-                product.metadata["resolution_method"] = "exact_match"
-                product.metadata["requested_quantity"] = mention.quantity
-
-                resolved_products.append(product)
-                deterministic_resolutions += 1
-                continue
-
-            # 3. If multiple close candidates, check if they're ambiguous
-            # Ambiguity check: the difference between top matches is small
-            is_ambiguous = False
-            if len(candidates) >= MIN_CANDIDATES_FOR_AMBIGUITY_CHECK:
-                top_score = candidates[0][1]
-                second_score = candidates[1][1]
-                score_diff = top_score - second_score
-
-                if (
-                    score_diff <= AMBIGUITY_THRESHOLD
-                    and second_score >= SIMILAR_MATCH_THRESHOLD
-                ):
-                    is_ambiguous = True
-
-            # 4. If ambiguous, use LLM disambiguation
-            if is_ambiguous:
-                llm_disambiguations += 1
-
-                # Call LLM disambiguation
-                llm_result = await disambiguate_with_llm(
-                    mention=mention,
-                    candidates=candidates,
-                    email_context=email_context,
-                    hermes_config=hermes_config,
-                )
-
-                selected_id = llm_result.get("selected_product_id")
-                selected_confidence = llm_result.get("confidence", 0.0)
-                reasoning = llm_result.get("reasoning", "No reasoning provided")
-
-                # Log the disambiguation for metrics
-                disambiguation_log.append(
+                # Log the candidates for metrics
+                candidate_log.append(
                     {
                         "mention": str(mention),
-                        "candidates": [p.product_id for p, _ in candidates],
-                        "selected": selected_id,
-                        "confidence": selected_confidence,
-                        "reasoning": reasoning,
+                        "num_candidates": len(candidates_result),
+                        "candidate_ids": [c.product_id for c in candidates_result],
+                        "confidence_scores": [
+                            c.metadata.get("resolution_confidence", 0.0)
+                            if c.metadata
+                            else 0.0
+                            for c in candidates_result
+                        ],
                     }
                 )
-
-                # Process the LLM's decision
-                if selected_id and selected_confidence >= SIMILAR_MATCH_THRESHOLD:
-                    # Find the selected product in our candidates
-                    selected_product = None
-                    for product, _ in candidates:
-                        if product.product_id == selected_id:
-                            selected_product = product
-                            break
-
-                    if selected_product:
-                        # Add resolution metadata
-                        if not selected_product.metadata:
-                            selected_product.metadata = {}
-                        selected_product.metadata["resolution_confidence"] = (
-                            selected_confidence
-                        )
-                        selected_product.metadata["resolution_method"] = (
-                            "llm_disambiguation"
-                        )
-                        selected_product.metadata["resolution_reasoning"] = reasoning
-                        selected_product.metadata["requested_quantity"] = (
-                            mention.quantity
-                        )
-
-                        resolved_products.append(selected_product)
-                        continue
-
-                # If LLM couldn't decide or we couldn't find the product, mark as unresolved
-                unresolved_mentions.append(mention)
-            # 5. If not ambiguous, use the highest confidence match if it's above threshold
-            elif candidates[0][1] >= SIMILAR_MATCH_THRESHOLD:
-                product, confidence = candidates[0]
-
-                # Add resolution metadata
-                if not product.metadata:
-                    product.metadata = {}
-                product.metadata["resolution_confidence"] = confidence
-                product.metadata["resolution_method"] = "highest_confidence"
-                product.metadata["requested_quantity"] = mention.quantity
-
-                resolved_products.append(product)
-                deterministic_resolutions += 1
             else:
-                # Confidence too low, mark as unresolved
+                # No candidates found or resolution failed
                 unresolved_mentions.append(mention)
 
         # Calculate total resolution time
@@ -758,12 +330,8 @@ async def resolve_product_mentions(
                 "total_mentions": total_mentions,
                 "resolution_attempts": resolution_attempts,
                 "resolution_time_ms": resolution_time_ms,
-                "deterministic_resolutions": deterministic_resolutions,
-                "llm_disambiguations": llm_disambiguations,
-                "exact_match_threshold": EXACT_MATCH_THRESHOLD,
-                "similar_match_threshold": SIMILAR_MATCH_THRESHOLD,
-                "ambiguity_threshold": AMBIGUITY_THRESHOLD,
-                "disambiguation_log": disambiguation_log,
+                "candidates_resolved": candidates_resolved,
+                "candidate_log": candidate_log,
             },
         )
 

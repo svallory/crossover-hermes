@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import Any, Literal
-import json
 
 from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import BaseTool
 from langsmith import traceable
 
 from ...config import HermesConfig
@@ -14,7 +14,12 @@ from ...model.product import Product
 from ...custom_types import WorkflowNodeOutput
 from ...utils.response import create_node_response
 from ...utils.llm_client import get_llm_client
-from ...tools.catalog_tools import search_products_by_description
+from ...tools.catalog_tools import (
+    search_products_by_description,
+    find_complementary_products,
+    search_products_with_filters,
+    find_products_for_occasion,
+)
 from ..classifier.models import SegmentType
 from .models import (
     AdvisorInput,
@@ -24,11 +29,31 @@ from .models import (
 from .prompts import get_prompt
 
 
+class AdvisorToolkit:
+    """Tools for the Advisor Agent to provide contextual recommendations.
+
+    The Advisor Agent uses LLM-callable tools to enhance customer responses
+    with relevant product suggestions based on conversational context.
+    """
+
+    def get_tools(self) -> list[BaseTool]:
+        """Get the list of tools available to the Advisor Agent.
+
+        Returns:
+            List of LLM-callable tools for contextual product recommendations.
+        """
+        return [
+            find_complementary_products,
+            search_products_with_filters,
+            find_products_for_occasion,
+        ]
+
+
 def format_resolved_products(products: list[Product]) -> str:
     """Format resolved products into a string for LLM context.
 
     Args:
-        products: A list of resolved Product objects
+        products: A list of resolved Product objects (may include multiple candidates per mention)
 
     Returns:
         A formatted string containing all product information
@@ -37,28 +62,91 @@ def format_resolved_products(products: list[Product]) -> str:
     if not products:
         return "No resolved products available."
 
-    formatted_products = []
+    # Group products by their original mention to provide better context
+    mention_groups: dict[str, list[Product]] = {}
+
     for product in products:
-        # Format seasons correctly
-        seasons_str = ", ".join(
-            [s if isinstance(s, str) else s.value for s in product.seasons]
-        )
+        # Get the original mention key for grouping
+        mention_key = "unknown_mention"
+        if product.metadata and "original_mention" in product.metadata:
+            original_mention = product.metadata["original_mention"]
+            # Create a unique key from the mention details
+            key_parts = []
+            if original_mention.get("product_id"):
+                key_parts.append(f"ID:{original_mention['product_id']}")
+            if original_mention.get("product_name"):
+                key_parts.append(f"Name:{original_mention['product_name']}")
+            if original_mention.get("product_type"):
+                key_parts.append(f"Type:{original_mention['product_type']}")
+            if original_mention.get("quantity"):
+                key_parts.append(f"Qty:{original_mention['quantity']}")
 
-        # Format product details
-        product_info = (
-            f"Product: {product.name}\n"
-            f"ID: {product.product_id}\n"
-            f"Type: {product.product_type}\n"
-            f"Category: {product.category.value if hasattr(product.category, 'value') else product.category}\n"
-            f"Price: ${float(product.price):.2f}\n"
-            f"Availability: {product.stock} in stock\n"
-            f"Seasons: {seasons_str}\n"
-            f"Description: {product.description}\n"
-            f"Confidence: High (Exact catalog match)\n"
-        )
-        formatted_products.append(product_info)
+            mention_key = " | ".join(key_parts) if key_parts else "unknown_mention"
 
-    return "\n\n".join(formatted_products)
+        if mention_key not in mention_groups:
+            mention_groups[mention_key] = []
+        mention_groups[mention_key].append(product)
+
+    formatted_sections = []
+
+    for mention_key, mention_products in mention_groups.items():
+        if len(mention_products) == 1:
+            # Single candidate - format normally
+            product = mention_products[0]
+            seasons_str = ", ".join(
+                [s if isinstance(s, str) else s.value for s in product.seasons]
+            )
+
+            confidence = "High (Exact match)"
+            if product.metadata and "resolution_confidence" in product.metadata:
+                conf_score = product.metadata["resolution_confidence"]
+                confidence = f"{conf_score:.2f} (Semantic search match)"
+
+            product_info = (
+                f"Product: {product.name}\n"
+                f"ID: {product.product_id}\n"
+                f"Type: {product.product_type}\n"
+                f"Category: {product.category.value if hasattr(product.category, 'value') else product.category}\n"
+                f"Price: ${float(product.price):.2f}\n"
+                f"Availability: {product.stock} in stock\n"
+                f"Seasons: {seasons_str}\n"
+                f"Description: {product.description}\n"
+                f"Confidence: {confidence}\n"
+            )
+            formatted_sections.append(product_info)
+        else:
+            # Multiple candidates - group them with context
+            section_header = f"MULTIPLE CANDIDATES for mention: {mention_key}\n"
+            section_header += f"Please select the most appropriate product based on the customer's request:\n\n"
+
+            candidate_infos = []
+            for i, product in enumerate(mention_products, 1):
+                seasons_str = ", ".join(
+                    [s if isinstance(s, str) else s.value for s in product.seasons]
+                )
+
+                confidence = "N/A"
+                if product.metadata and "resolution_confidence" in product.metadata:
+                    conf_score = product.metadata["resolution_confidence"]
+                    confidence = f"{conf_score:.2f}"
+
+                candidate_info = (
+                    f"CANDIDATE {i}:\n"
+                    f"  Product: {product.name}\n"
+                    f"  ID: {product.product_id}\n"
+                    f"  Type: {product.product_type}\n"
+                    f"  Category: {product.category.value if hasattr(product.category, 'value') else product.category}\n"
+                    f"  Price: ${float(product.price):.2f}\n"
+                    f"  Availability: {product.stock} in stock\n"
+                    f"  Seasons: {seasons_str}\n"
+                    f"  Description: {product.description}\n"
+                    f"  Match Confidence: {confidence}\n"
+                )
+                candidate_infos.append(candidate_info)
+
+            formatted_sections.append(section_header + "\n".join(candidate_infos))
+
+    return "\n\n".join(formatted_sections)
 
 
 def search_vector_store(queries: list[str], hermes_config: HermesConfig) -> str:
@@ -82,11 +170,12 @@ def search_vector_store(queries: list[str], hermes_config: HermesConfig) -> str:
 
     # Use catalog tools for search
     try:
-        results = search_products_by_description(
-            json.dumps({"query": search_query, "top_k": 5})
-        )
+        results = search_products_by_description(query=search_query, top_k=5)
 
-        # Format the results
+        # Handle both Product list and string error returns
+        if isinstance(results, str):
+            return f"Error searching product catalog: {results}"
+
         if not isinstance(results, list) or not results:
             return "No relevant products found in the catalog for the given queries."
 
@@ -236,6 +325,11 @@ async def respond_to_inquiry(
             config=hermes_config, model_strength="strong", temperature=0.1
         )
 
+        # Get the advisor toolkit and bind tools to the LLM
+        advisor_toolkit = AdvisorToolkit()
+        advisor_tools = advisor_toolkit.get_tools()
+        llm_with_tools = llm.bind_tools(advisor_tools)
+
         # Create the prompt and chain
         advisor_prompt = get_prompt(Agents.ADVISOR)
 
@@ -246,7 +340,7 @@ async def respond_to_inquiry(
         )
         advisor_prompt = advisor_prompt.partial(seasons_instruction=season_instruction)
 
-        inquiry_response_chain = advisor_prompt | llm.with_structured_output(
+        inquiry_response_chain = advisor_prompt | llm_with_tools.with_structured_output(
             InquiryAnswers
         )
 

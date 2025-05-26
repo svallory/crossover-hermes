@@ -10,7 +10,6 @@ This module defines the agent flow for processing customer emails:
 The workflow is implemented as a LangGraph StateGraph.
 """
 
-
 from collections.abc import Hashable
 
 from langchain_core.runnables import RunnableConfig
@@ -32,9 +31,10 @@ from hermes.agents.composer.agent import compose_response
 from hermes.agents.fulfiller.agent import process_order
 from hermes.agents.stockkeeper.agent import resolve_product_mentions
 from hermes.agents.stockkeeper.models import StockkeeperInput
-from hermes.agents.workflow.states import OverallState
+from hermes.workflow.states import OverallState
 from hermes.config import HermesConfig
 from hermes.model import Nodes
+
 
 def route_resolver_result(
     state: OverallState,
@@ -58,7 +58,9 @@ def route_resolver_result(
 
 async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dict:
     # Convert OverallState to ClassifierInput before passing to analyze_email
-    classifier_input = ClassifierInput(email_id=state.email_id, subject=state.subject, message=state.message)
+    classifier_input = ClassifierInput(
+        email_id=state.email_id, subject=state.subject, message=state.message
+    )
     return await analyze_email(state=classifier_input, runnable_config=config)
 
 
@@ -82,14 +84,17 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
         from hermes.utils.response import create_node_response
 
         return create_node_response(
-            Agents.STOCKKEEPER, Exception("Email analyzer output is required for product resolution")
+            Agents.STOCKKEEPER,
+            Exception("Email analyzer output is required for product resolution"),
         )
 
     # Create StockkeeperInput from classifier
     stockkeeper_input = StockkeeperInput(classifier=classifier)
 
     # Call resolve_product_mentions with the StockkeeperInput
-    return await resolve_product_mentions(state=stockkeeper_input, runnable_config=config)
+    return await resolve_product_mentions(
+        state=stockkeeper_input, runnable_config=config
+    )
 
 
 async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
@@ -115,8 +120,11 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
         from hermes.model import Agents
         from hermes.utils.response import create_node_response
 
-        error_message = "Email analyzer output is required for order processing" \
-                        if classifier is None else "Stockkeeper output is required for order processing"
+        error_message = (
+            "Email analyzer output is required for order processing"
+            if classifier is None
+            else "Stockkeeper output is required for order processing"
+        )
         return create_node_response(Agents.FULFILLER, Exception(error_message))
 
     # Get resolved products if available
@@ -140,8 +148,8 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
 
     # Call process_order with the extracted information
     processed_order_result = process_order(
-        email_analysis=email_analysis_dict, # This should be the raw classifier output / email analysis part
-        stockkeeper_output=stockkeeper_output_data, # Pass the full StockkeeperOutput
+        email_analysis=email_analysis_dict,  # This should be the raw classifier output / email analysis part
+        stockkeeper_output=stockkeeper_output_data,  # Pass the full StockkeeperOutput
         promotion_specs=promotion_specs_data,
         email_id=email_id,
         hermes_config=hermes_config_instance,
@@ -160,7 +168,9 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
 
 
 # Build the graph
-graph_builder = StateGraph(OverallState, input=ClassifierInput, config_schema=HermesConfig)
+graph_builder = StateGraph(
+    OverallState, input=ClassifierInput, config_schema=HermesConfig
+)
 
 # Add nodes with the agent functions directly, specifying that they expect runnable_config
 graph_builder.add_node(Nodes.CLASSIFIER, analyze_email_node)

@@ -2,13 +2,11 @@
 This initializes the vector store and runs the workflow.
 """
 
-from typing import Any
-
 from langchain_core.runnables import RunnableConfig
 
 from hermes.agents.classifier.models import ClassifierInput
-from hermes.agents.workflow.graph import workflow
-from hermes.agents.workflow.states import OverallState
+from hermes.workflow.graph import workflow
+from hermes.workflow.states import OverallState
 from hermes.config import HermesConfig
 from hermes.data.vector_store import get_vector_store
 
@@ -36,7 +34,7 @@ async def run_workflow(
     runnable_config_obj = RunnableConfig(configurable={"hermes_config": hermes_config})
 
     # Create a typed config for the LangGraph StateGraph
-    runnable_config: RunnableConfig = config  # type: ignore
+    runnable_config: RunnableConfig = runnable_config_obj  # type: ignore
 
     # Run the workflow with the input state and config
     print(f"Running workflow for email {input_state.email_id}...")

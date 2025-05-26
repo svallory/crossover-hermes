@@ -1,0 +1,8 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+- this project uses `uv` and `poe` tasks
+- when adding/removing packages always use `uv add|remove`
+- when running tests, use `uv run poe test [TEST_TO_RUN]`

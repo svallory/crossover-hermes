@@ -1,27 +1,10 @@
-"""Product Catalog Tools.
-
-This module provides tools for interacting with the product catalog.
-These tools enable agents to retrieve product information based on various criteria,
-supporting tasks like answering product inquiries, resolving product references in orders,
-and suggesting alternatives.
-
-Key functionalities include:
-- Looking up products by their unique ID.
-- Searching for products by name, with fuzzy matching capabilities.
-- Performing semantic searches on product descriptions to find items based on
-  more abstract queries (core to the RAG pattern for inquiries).
-- Identifying related or complementary products.
-- Filtering products by category, season, and other attributes.
-"""
-
 import logging
-from typing import Any, Dict
-import json
+from typing import Any
 
+from langchain_core.tools import tool
 import pandas as pd  # type: ignore
 
 # Import tool from langchain_core
-from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
 # For fuzzy matching
@@ -34,15 +17,19 @@ from hermes.data.load_data import load_products_df
 
 # Explicitly ignore import not found errors
 from hermes.model import ProductCategory, Season
-from hermes.model.product import Product
+from hermes.model.product import AlternativeProduct, Product, Season
 from hermes.model.errors import ProductNotFound
+from hermes.agents.classifier.models import ProductMention
 
-# Import get_vector_store from hermes.data.vector_store
-from hermes.data.vector_store import get_vector_store
+# Import get_vector_store and metadata conversion from hermes.data.vector_store
+from hermes.data.vector_store import get_vector_store, metadata_to_product
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Configure resolution thresholds
+SIMILAR_MATCH_THRESHOLD = 0.75  # Threshold for potential matches to consider
 
 
 class FuzzyMatchResult(BaseModel):
@@ -52,40 +39,7 @@ class FuzzyMatchResult(BaseModel):
     similarity_score: float = Field(description="Similarity score between 0.0 and 1.0")
 
 
-def metadata_to_product(metadata: Dict[str, Any]) -> Product:
-    """Convert vector store metadata to Product model."""
-    # Handle seasons
-    seasons = []
-    season_str = metadata.get("season", "Spring")
-    for s in str(season_str).split(","):
-        s = s.strip()
-        if s:
-            if s == "Fall":
-                seasons.append(Season.AUTUMN)
-            else:
-                try:
-                    seasons.append(Season(s))
-                except ValueError:
-                    seasons.append(Season.SPRING)
-
-    if not seasons:
-        seasons = [Season.SPRING]
-
-    return Product(
-        product_id=str(metadata["product_id"]),
-        name=str(metadata["name"]),
-        category=ProductCategory(str(metadata["category"])),
-        stock=int(metadata["stock"]),
-        description=str(metadata["description"]),
-        product_type=str(metadata.get("type", "")),
-        price=float(metadata["price"]),
-        seasons=seasons,
-        metadata=None,
-    )
-
-
-@tool  # type: ignore[call-overload]
-def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
+def find_product_by_id(product_id: str) -> Product | ProductNotFound:
     """Find a product by its ID.
 
     Retrieve detailed product information by its exact Product ID.
@@ -93,18 +47,12 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
     Also handles typos and formatting issues in product IDs.
 
     Args:
-        tool_input: JSON string with product_id field.
+        product_id: The product ID to search for.
 
     Returns:
         A Product object if found, or a ProductNotFound object if no product matches the ID.
 
     """
-    try:
-        input_data = json.loads(tool_input)
-        product_id = input_data.get("product_id", "")
-    except (json.JSONDecodeError, AttributeError):
-        return ProductNotFound(message=f"Invalid input format: {tool_input}")
-
     # Standardize the product ID format (remove spaces and convert to uppercase)
     product_id = product_id.replace(" ", "").upper()
     # Remove common formatting characters
@@ -199,9 +147,8 @@ def find_product_by_id(tool_input: str) -> Product | ProductNotFound:
         return ProductNotFound(message=f"Error during product retrieval: {str(e)}")
 
 
-@tool  # type: ignore[call-overload]
 def find_product_by_name(
-    product_name: str, *, threshold: float = 0.8, top_n: int = 3
+    *, product_name: str, threshold: float = 0.6, top_n: int = 5
 ) -> list[FuzzyMatchResult] | ProductNotFound:
     """Find products by name using fuzzy matching.
 
@@ -210,8 +157,8 @@ def find_product_by_name(
 
     Args:
         product_name: The product name to search for.
-        threshold: Minimum similarity score (0.0 to 1.0) for a match to be considered. Defaults to 0.8.
-        top_n: Maximum number of top matching products to return. Defaults to 3.
+        threshold: Minimum similarity score (0.0 to 1.0) for a match to be considered. Defaults to 0.6.
+        top_n: Maximum number of top matching products to return. Defaults to 5.
 
     Returns:
         A list of FuzzyMatchResult objects for products matching the name above the threshold, sorted by similarity,
@@ -304,29 +251,29 @@ def find_product_by_name(
     return sorted(results, key=lambda x: x.similarity_score, reverse=True)
 
 
-@tool  # type: ignore[call-overload]
-def search_products_by_description(tool_input: str) -> list[Product] | ProductNotFound:
+def search_products_by_description(
+    query: str,
+    top_k: int = 3,
+    category_filter: str | None = None,
+    season_filter: str | None = None,
+) -> list[Product] | ProductNotFound:
     """Search for products by description.
 
     Search for products using semantic description matching.
     This tool is great for answering open-ended inquiries about products with specific features or characteristics.
 
     Args:
-        tool_input: JSON string with query, top_k (optional), category_filter (optional),
-                   and season_filter (optional) fields.
+        query: The search query to find products.
+        top_k: Maximum number of products to return (default: 3).
+        category_filter: Optional category filter.
+        season_filter: Optional season filter.
 
     Returns:
         A list of matching Product objects or a ProductNotFound object if no products match.
 
     """
-    try:
-        input_data = json.loads(tool_input)
-        query = input_data.get("query", "")
-        top_k = input_data.get("top_k", 3)
-        category_filter = input_data.get("category_filter")
-        season_filter = input_data.get("season_filter")
-    except (json.JSONDecodeError, AttributeError):
-        return ProductNotFound(message=f"Invalid input format: {tool_input}")
+    if not query:
+        return ProductNotFound(message="Query cannot be empty.")
 
     try:
         # Get vector store
@@ -378,344 +325,170 @@ def search_products_by_description(tool_input: str) -> list[Product] | ProductNo
         return ProductNotFound(message=f"Error during product search: {str(e)}")
 
 
-@tool  # type: ignore[call-overload]
-def find_related_products(tool_input: str) -> list[Product] | ProductNotFound:
-    """Find products related to a given product ID.
+@tool(parse_docstring=True)
+def find_complementary_products(
+    product_id: str, limit: int = 2
+) -> list[Product] | ProductNotFound:
+    """Find products that complement a given product for LLM-driven recommendations.
 
-    Find products related to a given product ID, such as complementary items or alternatives from the same category.
+    Use this when the LLM determines that suggesting complementary items would enhance
+    the customer experience, such as for occasions, gifts, or complete outfits.
 
     Args:
-        tool_input: JSON string with product_id, relationship_type (optional), and limit (optional) fields.
+        product_id: The product ID to find complementary products for.
+        limit: Maximum number of complementary products to return (default: 2).
 
     Returns:
-        Union[List[Product], ProductNotFound]: List of related Product objects, or ProductNotFound if none found.
+        A list of complementary Product objects, or ProductNotFound if none found.
 
     """
     try:
-        input_data = json.loads(tool_input)
-        product_id = input_data.get("product_id", "")
-        relationship_type = input_data.get("relationship_type", "complementary")
-        limit = input_data.get("limit", 2)
-    except (json.JSONDecodeError, AttributeError):
-        return ProductNotFound(message=f"Invalid input format: {tool_input}")
-
-    try:
         # First verify that the main product exists
-        main_product_result = find_product_by_id.invoke(
-            json.dumps({"product_id": product_id})
-        )
+        main_product_result = find_product_by_id(product_id)
         if isinstance(main_product_result, ProductNotFound):
             return main_product_result
 
         main_product = main_product_result
-        assert isinstance(main_product, Product)  # Type hint for mypy
+        assert isinstance(main_product, Product)
 
         # Get vector store
         vector_store = get_vector_store()
 
-        if relationship_type == "similar":
-            # Use the main product's name and description for similarity search
-            search_query = f"{main_product.name} {main_product.description}"
+        # Search for complementary products based on the main product's characteristics
+        search_query = (
+            f"products that go well with {main_product.name} {main_product.description}"
+        )
 
-            # Search for similar products
-            results = vector_store.similarity_search(
+        # Search within the same category first, then expand if needed
+        results = vector_store.similarity_search(
+            query=search_query,
+            k=limit + 1,  # Get one extra to exclude the main product
+            filter={"category": str(main_product.category)},
+        )
+
+        # Convert to products and exclude the main product
+        products = []
+        for doc in results:
+            if doc.metadata["product_id"] != product_id:
+                try:
+                    product = metadata_to_product(doc.metadata)
+                    products.append(product)
+                    if len(products) >= limit:
+                        break
+                except Exception as e:
+                    logger.error(f"Error converting document to product: {e}")
+                    continue
+
+        # If we don't have enough results from the same category, search across categories
+        if len(products) < limit:
+            broader_results = vector_store.similarity_search(
                 query=search_query,
-                k=limit + 1,  # Get one extra to exclude the main product
-                filter={"category": str(main_product.category)},
+                k=(limit - len(products)) + 1,
             )
 
-            # Convert to products and exclude the main product
-            products = []
-            for doc in results:
-                if doc.metadata["product_id"] != product_id:
-                    try:
-                        product = metadata_to_product(doc.metadata)
-                        products.append(product)
-                        if len(products) >= limit:
-                            break
-                    except Exception as e:
-                        logger.error(f"Error converting document to product: {e}")
-                        continue
+            for doc in broader_results:
+                if doc.metadata["product_id"] != product_id and len(products) < limit:
+                    # Avoid duplicates
+                    if not any(
+                        p.product_id == doc.metadata["product_id"] for p in products
+                    ):
+                        try:
+                            product = metadata_to_product(doc.metadata)
+                            products.append(product)
+                        except Exception as e:
+                            logger.error(f"Error converting document to product: {e}")
+                            continue
 
-            return (
-                products
-                if products
-                else ProductNotFound(
-                    message=f"No similar products found for product '{product_id}'."
-                )
+        return (
+            products
+            if products
+            else ProductNotFound(
+                message=f"No complementary products found for product '{product_id}'."
             )
-
-        elif relationship_type in ["complementary", "alternative"]:
-            # For complementary/alternative products, search within the same category
-            results = vector_store.similarity_search(
-                query=f"products like {main_product.name}",
-                k=limit + 1,
-                filter={"category": str(main_product.category)},
-            )
-
-            # Convert to products and exclude the main product
-            products = []
-            for doc in results:
-                if doc.metadata["product_id"] != product_id:
-                    try:
-                        product = metadata_to_product(doc.metadata)
-                        products.append(product)
-                        if len(products) >= limit:
-                            break
-                    except Exception as e:
-                        logger.error(f"Error converting document to product: {e}")
-                        continue
-
-            return (
-                products
-                if products
-                else ProductNotFound(
-                    message=f"No {relationship_type} products found for product '{product_id}'."
-                )
-            )
-
-        else:
-            return ProductNotFound(
-                message=f"Invalid relationship type: {relationship_type}. Must be 'complementary', 'similar', or 'alternative'."
-            )
+        )
 
     except Exception as e:
-        logger.error(f"Error finding related products: {e}", exc_info=True)
+        logger.error(f"Error finding complementary products: {e}", exc_info=True)
         return ProductNotFound(
-            message=f"Error finding related products: {str(e)}",
+            message=f"Error finding complementary products: {str(e)}",
             query_product_id=product_id,
         )
 
 
-@tool  # type: ignore[call-overload]
-def resolve_product_reference(tool_input: str) -> Product | ProductNotFound:
-    """Resolve a product reference from a natural language query.
-
-    Resolves a product reference dictionary to a specific product using a series of lookup strategies.
-    It tries to find a product by ID, then by name, then by semantic description search.
-    Enhanced to handle cross-language references and complex descriptions.
-
-    Args:
-        tool_input: JSON string with query field for product reference.
-
-    Returns:
-        A Product object if a match is found, otherwise a ProductNotFound object.
-
-    """
-    try:
-        input_data = json.loads(tool_input)
-        query = input_data.get("query", "")
-    except (json.JSONDecodeError, AttributeError):
-        return ProductNotFound(message=f"Invalid input format: {tool_input}")
-
-    # Check that query is not None before accessing it
-    if not query:
-        return ProductNotFound(message="Product reference query is empty")
-
-    try:
-        # First, try to extract potential product IDs from the query
-        # Look for patterns like "DHN0987", "CBT 89 01", etc.
-        import re
-
-        product_id_patterns = re.findall(
-            r"\b[A-Z]{2,4}\s*\d{4}\b|\b[A-Z]{3}\d{4}\b", query.upper()
-        )
-
-        for potential_id in product_id_patterns:
-            # Try to resolve this as a product ID (with fuzzy matching)
-            id_result = find_product_by_id.invoke(
-                json.dumps({"product_id": potential_id})
-            )
-            if isinstance(id_result, Product):
-                return id_result
-
-        # If no product ID found, try semantic search
-        vector_store = get_vector_store()
-
-        # Enhance the query for cross-language support
-        enhanced_query = query
-
-        # Handle Spanish terms (expand this for more languages as needed)
-        spanish_translations = {
-            "gorro": "beanie hat",
-            "punto grueso": "chunky knit thick",
-            "de punto": "knit knitted",
-            "grueso": "thick chunky",
-            "cálido": "warm",
-            "invierno": "winter",
-        }
-
-        # Add English translations to improve matching
-        query_lower = query.lower()
-        for spanish_term, english_term in spanish_translations.items():
-            if spanish_term in query_lower:
-                enhanced_query += f" {english_term}"
-
-        results = vector_store.similarity_search(
-            query=enhanced_query,
-            k=3,  # Get a few results to increase chances
-        )
-
-        if results:
-            # If we have multiple results, try to pick the best one
-            best_result = results[0]
-
-            # For the Spanish beanie case (DHN0987 -> CHN0987)
-            # If query contains product ID pattern and Spanish terms, prioritize beanie/hat products
-            if (
-                any(term in query_lower for term in ["gorro", "beanie", "hat"])
-                and product_id_patterns
-            ):
-                for doc in results:
-                    if any(
-                        term in doc.metadata.get("name", "").lower()
-                        for term in ["beanie", "hat"]
-                    ):
-                        best_result = doc
-                        break
-
-            try:
-                product = metadata_to_product(best_result.metadata)
-                return product
-            except Exception as e:
-                logger.error(f"Error converting search result to product: {e}")
-                return ProductNotFound(
-                    message=f"Error processing search result: {str(e)}"
-                )
-
-        return ProductNotFound(message=f"Could not resolve product reference: {query}")
-
-    except Exception as e:
-        logger.error(f"Error resolving product reference: {e}")
-        return ProductNotFound(
-            message=f"Error during product reference resolution: {str(e)}"
-        )
-
-
-@tool  # type: ignore[call-overload]
-def filtered_product_search(
-    input: str,  # This parameter name needs to match what the test is using
-    *,
-    search_type: str = "description",
-    top_k: int = 3,
+@tool(parse_docstring=True)
+def search_products_with_filters(
+    query: str,
     category: str | None = None,
     season: str | None = None,
-    min_stock: int | None = None,
     min_price: float | None = None,
     max_price: float | None = None,
+    min_stock: int | None = None,
+    top_k: int = 3,
 ) -> list[Product] | ProductNotFound:
-    """Search products with multiple filter options.
+    """Search products with advanced filtering for complex customer requirements.
 
-    Supports searching by name or description, with additional filters
-    like category, season, stock level, and price range.
+    Use this when the LLM determines that the customer has specific filtering needs
+    that go beyond basic description search, such as price ranges, availability, etc.
 
     Args:
-        input: The search query text
-        search_type: "name" or "description" (default: "description")
-        top_k: Number of results to return (default: 3)
-        category: Filter by product category (optional)
-        season: Filter by season (optional)
-        min_stock: Minimum stock level (optional)
-        min_price: Minimum price (optional)
-        max_price: Maximum price (optional)
+        query: The search query text.
+        category: Filter by product category (optional).
+        season: Filter by season (optional).
+        min_price: Minimum price filter (optional).
+        max_price: Maximum price filter (optional).
+        min_stock: Minimum stock level filter (optional).
+        top_k: Number of results to return (default: 3).
 
     Returns:
-        List of matching Product objects or ProductNotFound
+        A list of matching Product objects or ProductNotFound if no products match.
 
     """
+    if not query:
+        return ProductNotFound(message="Search query cannot be empty.")
+
     try:
-        # Parameter validation
-        query = input  # Use input parameter as query
-        if not query:
-            return ProductNotFound(message="Search query cannot be empty.")
+        # Get vector store
+        vector_store = get_vector_store()
 
-        if search_type not in ["name", "description"]:
-            return ProductNotFound(
-                message=f"Invalid search_type: '{search_type}'. Must be 'name' or 'description'."
-            )
+        # Prepare filters for vector store
+        where_clause = {}
+        if category:
+            where_clause["category"] = category
+        if season:
+            where_clause["season"] = {"$contains": season}
 
-        results = []
+        # Perform semantic search
+        docs = vector_store.similarity_search(
+            query=query,
+            k=top_k * 2,  # Get more than needed for post-filtering
+            filter=where_clause if where_clause else None,
+        )
 
-        if search_type == "name":
-            # Use fuzzy name matching - call directly since it doesn't use JSON interface
-            fuzzy_results = find_product_by_name(
-                product_name=query, threshold=0.6, top_n=top_k * 2
-            )
-            if isinstance(fuzzy_results, ProductNotFound):
-                return fuzzy_results
-
-            # Extract products from fuzzy results
-            results = [result.matched_product for result in fuzzy_results]
-
-        elif search_type == "description":
-            # Use semantic search
+        # Convert to Product objects and apply additional filters
+        filtered_results = []
+        for doc in docs:
             try:
-                vector_store = get_vector_store()
+                product = metadata_to_product(doc.metadata)
 
-                # Prepare filters for vector store
-                where_clause = {}
-                if category:
-                    where_clause["category"] = category
-                if season:
-                    where_clause["season"] = {"$contains": season}
+                # Apply price filters
+                if min_price is not None and product.price < min_price:
+                    continue
+                if max_price is not None and product.price > max_price:
+                    continue
 
-                # Perform search
-                docs = vector_store.similarity_search(
-                    query=query,
-                    k=top_k * 2,  # Get more than needed for post-filtering
-                    filter=where_clause if where_clause else None,
-                )
+                # Apply stock filter
+                if min_stock is not None and product.stock < min_stock:
+                    continue
 
-                # Convert to Product objects
-                for doc in docs:
-                    try:
-                        product = metadata_to_product(doc.metadata)
-                        results.append(product)
-                    except Exception as e:
-                        logger.error(f"Error converting document to product: {e}")
-                        continue
+                filtered_results.append(product)
+
+                # Stop once we have enough results
+                if len(filtered_results) >= top_k:
+                    break
 
             except Exception as e:
-                logger.error(f"Error during semantic search: {e}", exc_info=True)
-                return ProductNotFound(
-                    message=f"Error during semantic search: {str(e)}"
-                )
-
-        # Apply additional filters
-        filtered_results = []
-        for product in results:
-            # Apply stock filter
-            if min_stock is not None and product.stock < min_stock:
+                logger.error(f"Error converting document to product: {e}")
                 continue
-
-            # Apply price filters
-            if min_price is not None and product.price < min_price:
-                continue
-            if max_price is not None and product.price > max_price:
-                continue
-
-            # Apply category filter (if not already applied in vector search)
-            if category is not None and search_type == "name":
-                product_category_str = str(product.category).lower()
-                filter_category = category.lower()
-                if filter_category not in product_category_str:
-                    continue
-
-            # Apply season filter (if not already applied in vector search)
-            if season is not None and search_type == "name":
-                has_season = False
-                for product_season in product.seasons:
-                    if season.lower() in str(product_season).lower():
-                        has_season = True
-                        break
-                if not has_season:
-                    continue
-
-            filtered_results.append(product)
-
-            # Stop once we have enough results
-            if len(filtered_results) >= top_k:
-                break
 
         if not filtered_results:
             return ProductNotFound(
@@ -728,7 +501,321 @@ def filtered_product_search(
         return filtered_results
 
     except Exception as e:
-        logger.error(f"Error during filtered product search: {e}", exc_info=True)
+        logger.error(f"Error during filtered search: {e}", exc_info=True)
+        return ProductNotFound(message=f"Error during filtered search: {str(e)}")
+
+
+@tool(parse_docstring=True)
+def find_products_for_occasion(
+    occasion: str, limit: int = 3
+) -> list[Product] | ProductNotFound:
+    """Find products suitable for a specific occasion or context.
+
+    Use this when the LLM identifies that the customer is shopping for a specific
+    occasion, event, or context that would benefit from curated product suggestions.
+
+    Args:
+        occasion: The occasion or context (e.g., "wedding", "winter hiking", "office wear").
+        limit: Maximum number of products to return (default: 3).
+
+    Returns:
+        A list of occasion-appropriate Product objects, or ProductNotFound if none found.
+
+    """
+    if not occasion:
+        return ProductNotFound(message="Occasion cannot be empty.")
+
+    try:
+        # Get vector store
+        vector_store = get_vector_store()
+
+        # Create a search query optimized for occasion-based discovery
+        search_query = f"products suitable for {occasion} occasion event"
+
+        # Perform semantic search
+        results = vector_store.similarity_search(
+            query=search_query,
+            k=limit,
+        )
+
+        if not results:
+            return ProductNotFound(
+                message=f"No products found suitable for occasion: '{occasion}'."
+            )
+
+        # Convert results to Product objects
+        products = []
+        for doc in results:
+            try:
+                product = metadata_to_product(doc.metadata)
+                products.append(product)
+            except Exception as e:
+                logger.error(f"Error converting document to product: {e}")
+                continue
+
+        return (
+            products
+            if products
+            else ProductNotFound(
+                message=f"Error converting search results for occasion: '{occasion}'"
+            )
+        )
+
+    except Exception as e:
+        logger.error(f"Error finding products for occasion: {e}", exc_info=True)
+        return ProductNotFound(message=f"Error finding products for occasion: {str(e)}")
+
+
+def find_alternatives(
+    original_product_id: str, limit: int = 2
+) -> list[AlternativeProduct] | ProductNotFound:
+    """Find and suggest in-stock alternative products if a requested item is out of stock.
+    This helps provide customers with options when their desired item isn't available.
+
+    Args:
+        original_product_id: The product ID that is out of stock.
+        limit: Maximum number of alternatives to return (default: 2).
+
+    Returns:
+        A list of AlternativeProduct objects with suggested alternatives,
+        or ProductNotFound if the original product ID is invalid.
+
+    """
+    # First, check if the original product exists
+    products_df = load_products_df()
+    if products_df is None:
         return ProductNotFound(
-            message=f"Error during filtered product search: {str(e)}"
+            message="Product catalog data is not loaded.",
+            query_product_id=original_product_id,
+        )
+    original_product_data = products_df[
+        products_df["product_id"] == original_product_id
+    ]
+    if original_product_data.empty:
+        return ProductNotFound(
+            message=f"Original product with ID '{original_product_id}' not found in catalog.",
+            query_product_id=original_product_id,
+        )
+
+    # Get details of the original product
+    original_product = original_product_data.iloc[0]
+    # Get the category for filtering
+    original_category = original_product["category"]
+
+    # Get all products in the same category
+    category_products = products_df[products_df["category"] == original_category]
+
+    # Filter out the original product and items that are out of stock
+    filtered_products = category_products[
+        (category_products["product_id"] != original_product_id)
+        & (category_products["stock"] > 0)
+    ]
+
+    if filtered_products.empty:
+        return ProductNotFound(
+            message=f"No in-stock alternatives found for product '{original_product_id}'.",
+            query_product_id=original_product_id,
+        )
+
+    # Calculate price similarity
+    original_price = float(original_product["price"])
+
+    # Add price similarity as a column using .copy() to avoid warning
+    filtered_products = filtered_products.copy()
+    filtered_products.loc[:, "price_similarity"] = filtered_products["price"].apply(
+        lambda x: 1.0 - abs(float(x) - original_price) / max(original_price, float(x))
+    )
+
+    # Sort by price similarity, descending
+    sorted_products = filtered_products.sort_values("price_similarity", ascending=False)
+
+    # Take top alternatives
+    top_alternatives = sorted_products.head(limit)
+
+    # Convert to AlternativeProduct objects
+    result = []
+    for _, row in top_alternatives.iterrows():
+        # Create the product object
+        product_dict = {
+            "product_id": str(row["product_id"]),
+            "name": str(row["name"]),
+            "description": str(row["description"]),
+            "category": str(row["category"]),
+            "product_type": str(row.get("type", "")),
+            "stock": int(row["stock"]),
+            "price": float(row["price"]),
+            "seasons": [],
+        }
+
+        # Process seasons correctly to handle 'Fall' vs 'Autumn'
+        seasons_str = str(row.get("season", ""))
+        if seasons_str:
+            for s in seasons_str.split(","):
+                s = s.strip()
+                if s:
+                    # Map 'Fall' to 'Autumn' if needed
+                    if s == "Fall":
+                        product_dict["seasons"].append(Season.AUTUMN)
+                    else:
+                        try:
+                            product_dict["seasons"].append(Season(s))
+                        except ValueError:
+                            # If not a valid season, use a default
+                            product_dict["seasons"].append(Season.SPRING)
+
+        # If no seasons were added, default to Spring
+        if not product_dict["seasons"]:
+            product_dict["seasons"] = [Season.SPRING]
+
+        product = Product(**product_dict)
+
+        # Calculate similarity score (normalized between 0-1)
+        similarity_score = float(row["price_similarity"])
+
+        # Generate a reason based on price and availability
+        if similarity_score > 0.9:
+            reason = f"Very similar price (${float(row['price']):.2f} vs ${original_price:.2f}) and currently in stock"
+        elif similarity_score > 0.7:
+            reason = f"Similar price range and currently in stock ({int(row['stock'])} available)"
+        else:
+            reason = f"Same category alternative that's currently available ({int(row['stock'])} in stock)"
+
+        # Create and add the AlternativeProduct
+        alternative = AlternativeProduct(
+            product=product, similarity_score=similarity_score, reason=reason
+        )
+        result.append(alternative)
+
+    return result
+
+
+async def resolve_product_mention(
+    mention: ProductMention,
+    top_k: int = 3,
+) -> list[Product] | ProductNotFound:
+    """Resolve a single ProductMention to top-K candidate products using ChromaDB's capabilities.
+
+    This function leverages ChromaDB's metadata filtering and similarity search to find
+    the most relevant product candidates. The results are intended to be used as context
+    for LLM-based disambiguation.
+
+    Args:
+        mention: The product mention to resolve
+        top_k: Maximum number of candidate products to return (default: 3)
+
+    Returns:
+        A list of candidate Product objects ranked by relevance, or ProductNotFound if no candidates found
+    """
+    try:
+        candidates = []
+
+        # 1. Try exact product ID match first (highest priority)
+        if mention.product_id:
+            id_result = find_product_by_id(product_id=mention.product_id)
+            if isinstance(id_result, Product):
+                # Add resolution metadata
+                if not id_result.metadata:
+                    id_result.metadata = {}
+                id_result.metadata["resolution_confidence"] = 1.0
+                id_result.metadata["resolution_method"] = "exact_id_match"
+                id_result.metadata["requested_quantity"] = mention.quantity
+
+                # For exact ID matches, return immediately with just this result
+                return [id_result]
+
+        # 2. Build a search query from available information
+        search_parts = []
+        if mention.product_name:
+            search_parts.append(mention.product_name)
+        if mention.product_description:
+            search_parts.append(mention.product_description)
+        if mention.product_type:
+            search_parts.append(mention.product_type)
+
+        if not search_parts:
+            return ProductNotFound(
+                message=f"No searchable information in mention: {mention}",
+                query_product_name=mention.product_name,
+                query_product_id=mention.product_id,
+            )
+
+        search_query = " ".join(search_parts)
+
+        # 3. Build metadata filters for ChromaDB
+        filters = {}
+        if mention.product_category:
+            filters["category"] = str(mention.product_category.value)
+
+        # 4. Use ChromaDB's similarity search with metadata filtering
+        try:
+            # Get vector store
+            vector_store = get_vector_store()
+
+            # Perform similarity search with metadata filtering
+            if filters:
+                results = vector_store.similarity_search_with_score(
+                    query=search_query,
+                    k=top_k,  # Get top-K candidates for LLM disambiguation
+                    filter=filters,
+                )
+            else:
+                results = vector_store.similarity_search_with_score(
+                    query=search_query, k=top_k
+                )
+
+            if not results:
+                return ProductNotFound(
+                    message=f"No products found matching search query: '{search_query}'",
+                    query_product_name=mention.product_name,
+                    query_product_id=mention.product_id,
+                )
+
+            # 5. Process all results and return as candidates
+            for doc, score in results:
+                # ChromaDB similarity_search_with_score returns distance scores (lower = more similar)
+                # Convert distance to similarity/confidence
+                confidence = max(0.0, min(1.0, 1.0 - (score / 2.0)))
+
+                # Only include candidates above minimum threshold
+                if confidence >= SIMILAR_MATCH_THRESHOLD:
+                    try:
+                        product = metadata_to_product(doc.metadata)
+
+                        # Add resolution metadata
+                        if not product.metadata:
+                            product.metadata = {}
+                        product.metadata["resolution_confidence"] = confidence
+                        product.metadata["resolution_method"] = "semantic_search"
+                        product.metadata["requested_quantity"] = mention.quantity
+                        product.metadata["search_query"] = search_query
+                        product.metadata["similarity_score"] = score
+
+                        candidates.append(product)
+                    except Exception as e:
+                        logger.error(f"Error converting document to product: {e}")
+                        continue
+
+            if not candidates:
+                return ProductNotFound(
+                    message=f"No candidates above threshold {SIMILAR_MATCH_THRESHOLD} for query: '{search_query}'",
+                    query_product_name=mention.product_name,
+                    query_product_id=mention.product_id,
+                )
+
+            return candidates
+
+        except Exception as e:
+            logger.error(f"Error during vector search: {e}", exc_info=True)
+            return ProductNotFound(
+                message=f"Error during vector search: {str(e)}",
+                query_product_name=mention.product_name,
+                query_product_id=mention.product_id,
+            )
+
+    except Exception as e:
+        logger.error(f"Error during product mention resolution: {e}", exc_info=True)
+        return ProductNotFound(
+            message=f"Error during product mention resolution: {str(e)}",
+            query_product_name=mention.product_name,
+            query_product_id=mention.product_id,
         )

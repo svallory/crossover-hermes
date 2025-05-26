@@ -1,6 +1,5 @@
 """Tests for catalog_tools.py."""
 
-import json
 import unittest
 from unittest.mock import patch, MagicMock
 
@@ -8,10 +7,10 @@ from hermes.tools.catalog_tools import (
     find_product_by_id,
     find_product_by_name,
     search_products_by_description,
-    find_related_products,
-    resolve_product_reference,
-    filtered_product_search,
     metadata_to_product,
+    find_complementary_products,
+    search_products_with_filters,
+    find_products_for_occasion,
 )
 from hermes.model.product import Product, ProductCategory, Season
 from hermes.model.errors import ProductNotFound
@@ -21,7 +20,6 @@ from tests.fixtures.mock_product_catalog import (
 )
 from tests.fixtures.test_product_catalog import (
     get_test_products_df,
-    get_product_by_id,
 )
 
 
@@ -34,8 +32,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function
-        result = find_product_by_id.invoke('{"product_id": "TST001"}')
+        # Call function directly (not a @tool)
+        result = find_product_by_id(product_id="TST001")
 
         # Verify result
         self.assertIsInstance(result, Product)
@@ -49,8 +47,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function
-        result = find_product_by_id.invoke('{"product_id": "NONEXISTENT"}')
+        # Call function directly (not a @tool)
+        result = find_product_by_id(product_id="NONEXISTENT")
 
         # Verify result
         self.assertIsInstance(result, ProductNotFound)
@@ -58,15 +56,15 @@ class TestCatalogTools(unittest.TestCase):
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_invalid_input(self, mock_load_df):
-        """Test finding a product with invalid JSON input."""
-        # No mock needed for dataframe access since it should fail before that
+        """Test finding a product with invalid input."""
+        # Setup mock
+        mock_load_df.return_value = get_mock_products_df()
 
-        # Call function with invalid JSON
-        result = find_product_by_id.invoke("not a json")
+        # Call function directly with empty string
+        result = find_product_by_id(product_id="")
 
         # Verify result
         self.assertIsInstance(result, ProductNotFound)
-        self.assertIn("Invalid input format", result.message)
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_name_valid(self, mock_load_df):
@@ -74,8 +72,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function with exact match
-        result = find_product_by_name.invoke("Test Shirt")
+        # Call function directly (not a @tool)
+        result = find_product_by_name(product_name="Test Shirt")
 
         # Verify result - should match both "Test Shirt" products in mock data
         self.assertIsInstance(result, list)
@@ -90,8 +88,10 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function with high threshold to force no matches
-        result = find_product_by_name.invoke("Nonexistent Product", threshold=0.99)
+        # Call function directly with high threshold to force no matches
+        result = find_product_by_name(
+            product_name="Nonexistent Product", threshold=0.99
+        )
 
         # Verify result
         self.assertIsInstance(result, ProductNotFound)
@@ -117,10 +117,8 @@ class TestCatalogTools(unittest.TestCase):
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Call function
-        result = search_products_by_description.invoke(
-            '{"query": "comfortable", "top_k": 2}'
-        )
+        # Call function directly (not a @tool)
+        result = search_products_by_description(query="comfortable", top_k=2)
 
         # Verify result
         self.assertIsInstance(result, list)
@@ -135,15 +133,15 @@ class TestCatalogTools(unittest.TestCase):
         mock_get_vector_store.return_value = mock_vector_store
         mock_vector_store.similarity_search.return_value = []
 
-        # Call function
-        result = search_products_by_description.invoke('{"query": "nonexistent term"}')
+        # Call function directly (not a @tool)
+        result = search_products_by_description(query="nonexistent term")
 
         # Verify result
         self.assertIsInstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_find_related_products_valid(self, mock_get_vector_store):
-        """Test finding related products with valid product ID."""
+    def test_find_complementary_products_valid(self, mock_get_vector_store):
+        """Test finding complementary products with valid product ID."""
         # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
@@ -161,62 +159,45 @@ class TestCatalogTools(unittest.TestCase):
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Create mock function that behaves like find_product_by_id
-        original_find_product = find_product_by_id.func
+        # Mock find_product_by_id to return a valid product
+        with patch("hermes.tools.catalog_tools.find_product_by_id") as mock_find:
+            mock_find.return_value = Product(
+                product_id="TST001",
+                name="Test Shirt",
+                description="A comfortable test shirt",
+                category=ProductCategory.SHIRTS,
+                stock=10,
+                price=29.99,
+                product_type="",
+                seasons=[Season.SPRING],
+                metadata=None,
+            )
 
-        def mock_find_product_func(tool_input: str):
-            # Parse the input to get the product ID
-            import json
-
-            try:
-                input_data = json.loads(tool_input)
-                product_id = input_data.get("product_id", "")
-                if product_id == "TST001":
-                    return Product(
-                        product_id="TST001",
-                        name="Test Shirt",
-                        description="A comfortable test shirt",
-                        category=ProductCategory.SHIRTS,
-                        stock=10,
-                        price=29.99,
-                        product_type="",
-                        seasons=[Season.SPRING],
-                        metadata=None,
-                    )
-                else:
-                    return ProductNotFound(message="Product not found")
-            except:
-                return ProductNotFound(message="Invalid input")
-
-        # Patch the underlying function
-        with patch.object(find_product_by_id, "func", mock_find_product_func):
-            # Call function
-            result = find_related_products.invoke(
-                '{"product_id": "TST001", "relationship_type": "similar", "limit": 2}'
+            # Call @tool function using invoke
+            result = find_complementary_products.invoke(
+                {"product_id": "TST001", "limit": 2}
             )
 
             # Verify result
             self.assertIsInstance(result, list)
             self.assertGreater(len(result), 0)
 
-    def test_find_related_products_invalid_product(self):
-        """Test finding related products with invalid product ID."""
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_find_complementary_products_invalid_product(self, mock_get_vector_store):
+        """Test finding complementary products with invalid product ID."""
+        # Mock find_product_by_id to return ProductNotFound
+        with patch("hermes.tools.catalog_tools.find_product_by_id") as mock_find:
+            mock_find.return_value = ProductNotFound(message="Product not found")
 
-        # Create mock function that always returns ProductNotFound
-        def mock_find_product_func(tool_input: str):
-            return ProductNotFound(message="Product not found")
-
-        # Patch the underlying function
-        with patch.object(find_product_by_id, "func", mock_find_product_func):
-            # Call function
-            result = find_related_products.invoke('{"product_id": "NONEXISTENT"}')
+            # Call @tool function using invoke
+            result = find_complementary_products.invoke({"product_id": "NONEXISTENT"})
 
             # Verify result
             self.assertIsInstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_resolve_product_reference_valid(self, mock_get_vector_store):
-        """Test resolving product reference with valid query."""
+    def test_search_products_with_filters_valid(self, mock_get_vector_store):
+        """Test searching products with filters."""
         # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
@@ -234,50 +215,15 @@ class TestCatalogTools(unittest.TestCase):
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Call function
-        result = resolve_product_reference.invoke('{"query": "comfortable shirt"}')
-
-        # Verify result
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "TST001")
-
-    @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_resolve_product_reference_no_match(self, mock_get_vector_store):
-        """Test resolving product reference with no match."""
-        # Setup mock vector store
-        mock_vector_store = MagicMock()
-        mock_get_vector_store.return_value = mock_vector_store
-        mock_vector_store.similarity_search.return_value = []
-
-        # Call function
-        result = resolve_product_reference.invoke('{"query": "nonexistent product"}')
-
-        # Verify result
-        self.assertIsInstance(result, ProductNotFound)
-
-    @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_filtered_product_search_description(self, mock_get_vector_store):
-        """Test filtered product search using description search."""
-        # Setup mock vector store
-        mock_vector_store = MagicMock()
-        mock_get_vector_store.return_value = mock_vector_store
-
-        mock_doc = MagicMock()
-        mock_doc.metadata = {
-            "product_id": "TST001",
-            "name": "Test Shirt",
-            "category": "Shirts",
-            "stock": 10,
-            "price": 29.99,
-            "season": "Spring",
-            "type": "",
-            "description": "A comfortable cotton test shirt",
-        }
-        mock_vector_store.similarity_search.return_value = [mock_doc]
-
-        # Call function
-        result = filtered_product_search.invoke(
-            input="comfortable", search_type="description", category="Shirts"
+        # Call @tool function using invoke
+        result = search_products_with_filters.invoke(
+            {
+                "query": "comfortable shirt",
+                "category": "Shirts",
+                "min_price": 20.0,
+                "max_price": 50.0,
+                "top_k": 3,
+            }
         )
 
         # Verify result
@@ -285,25 +231,65 @@ class TestCatalogTools(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].product_id, "TST001")
 
-    @patch("hermes.tools.catalog_tools.load_products_df")
-    def test_filtered_product_search_name(self, mock_load_df):
-        """Test filtered product search using name-based search."""
-        # Setup mocks
-        mock_load_df.return_value = get_mock_products_df()
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_search_products_with_filters_no_match(self, mock_get_vector_store):
+        """Test searching products with filters that don't match."""
+        # Setup mock vector store
+        mock_vector_store = MagicMock()
+        mock_get_vector_store.return_value = mock_vector_store
+        mock_vector_store.similarity_search.return_value = []
 
-        # Call function - searching for "Test" should match multiple products in mock data
-        result = filtered_product_search.invoke(
-            input="Test", search_type="name", min_stock=1
+        # Call @tool function using invoke
+        result = search_products_with_filters.invoke(
+            {"query": "nonexistent product", "category": "Shirts"}
+        )
+
+        # Verify result
+        self.assertIsInstance(result, ProductNotFound)
+
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_find_products_for_occasion_valid(self, mock_get_vector_store):
+        """Test finding products for a specific occasion."""
+        # Setup mock vector store
+        mock_vector_store = MagicMock()
+        mock_get_vector_store.return_value = mock_vector_store
+
+        mock_doc = MagicMock()
+        mock_doc.metadata = {
+            "product_id": "TST001",
+            "name": "Formal Shirt",
+            "category": "Shirts",
+            "stock": 10,
+            "price": 49.99,
+            "season": "Spring",
+            "type": "",
+            "description": "A formal dress shirt perfect for business meetings.",
+        }
+        mock_vector_store.similarity_search.return_value = [mock_doc]
+
+        # Call @tool function using invoke
+        result = find_products_for_occasion.invoke(
+            {"occasion": "business meeting", "limit": 3}
         )
 
         # Verify result
         self.assertIsInstance(result, list)
-        self.assertGreater(len(result), 0)
-        for product in result:
-            self.assertGreaterEqual(product.stock, 1)
-            self.assertIn(
-                "Test", product.name
-            )  # All mock products have "Test" in the name
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].product_id, "TST001")
+
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_find_products_for_occasion_no_match(self, mock_get_vector_store):
+        """Test finding products for occasion with no matches."""
+        # Setup mock vector store
+        mock_vector_store = MagicMock()
+        mock_get_vector_store.return_value = mock_vector_store
+        mock_vector_store.similarity_search.return_value = []
+
+        # Call @tool function using invoke
+        result = find_products_for_occasion.invoke({"occasion": "space travel"})
+
+        # Verify result
+        self.assertIsInstance(result, ProductNotFound)
 
 
 class TestCatalogToolsCriticalScenarios(unittest.TestCase):
@@ -317,7 +303,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test the typo case: DHN0987 -> CHN0987
-        result = find_product_by_id.invoke('{"product_id": "DHN0987"}')
+        result = find_product_by_id(product_id="DHN0987")
 
         # Should find CHN0987 through fuzzy matching
         self.assertIsInstance(result, Product)
@@ -331,7 +317,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test spaces in product ID
-        result = find_product_by_id.invoke('{"product_id": "CBT 89 01"}')
+        result = find_product_by_id(product_id="CBT 89 01")
 
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, "CBT8901")
@@ -344,7 +330,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test brackets and spaces in product ID
-        result = find_product_by_id.invoke('{"product_id": "[CBT 89 01]"}')
+        result = find_product_by_id(product_id="[CBT 89 01]")
 
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, "CBT8901")
@@ -357,7 +343,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test lowercase product ID
-        result = find_product_by_id.invoke('{"product_id": "rsg8901"}')
+        result = find_product_by_id(product_id="rsg8901")
 
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, "RSG8901")
@@ -365,118 +351,120 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_spanish_to_english_resolution(self, mock_get_vector_store):
-        """Test E009: Spanish 'Gorro de punto grueso' should find chunky knit beanie."""
+        """Test resolving Spanish product references to English products."""
         # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
 
-        # Mock finding a beanie product
+        # Mock a beanie product that should match the Spanish query
         mock_doc = MagicMock()
         mock_doc.metadata = {
             "product_id": "CHN0987",
             "name": "Chunky Knit Beanie",
             "category": "Accessories",
-            "stock": 2,
-            "price": 22.0,
-            "season": "Fall, Winter",
+            "stock": 15,
+            "price": 24.99,
+            "season": "Winter",
             "type": "",
-            "description": "Keep your head toasty with our chunky knit beanie",
+            "description": "A warm chunky knit beanie for winter weather.",
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
         # Test Spanish query
-        result = resolve_product_reference.invoke(
-            '{"query": "DHN0987 Gorro de punto grueso"}'
+        result = search_products_with_filters.invoke(
+            {"query": "DHN0987 Gorro de punto grueso"}
         )
 
         # Should find the beanie through enhanced translation
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "CHN0987")
-        self.assertIn("Beanie", result.name)
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].product_id, "CHN0987")
+        self.assertIn("Beanie", result[0].name)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_vague_description_handling(self, mock_get_vector_store):
-        """Test E017: Very vague query should return ProductNotFound."""
+        """Test handling of very vague product descriptions."""
+        # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
         mock_vector_store.similarity_search.return_value = []
 
         # Test very vague query
-        result = resolve_product_reference.invoke(
-            '{"query": "popular item selling like hotcakes"}'
+        result = search_products_with_filters.invoke(
+            {"query": "popular item selling like hotcakes"}
         )
 
         self.assertIsInstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_functional_description_search(self, mock_get_vector_store):
-        """Test E003: 'bag to carry laptop and documents' should find work bags."""
+        """Test searching by functional description rather than product name."""
+        # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
 
-        # Mock finding a work bag
+        # Mock a laptop bag that should match functional description
         mock_doc = MagicMock()
         mock_doc.metadata = {
-            "product_id": "LTH1098",
-            "name": "Leather Backpack",
+            "product_id": "BAG001",
+            "name": "Professional Laptop Bag",
             "category": "Bags",
-            "stock": 7,
-            "price": 43.99,
-            "season": "All seasons",
+            "stock": 8,
+            "price": 89.99,
+            "season": "Spring",
             "type": "",
-            "description": "Leather backpack with padded laptop sleeve and multiple compartments",
+            "description": "A professional bag designed for laptops and documents.",
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        result = search_products_by_description.invoke(
-            '{"query": "bag to carry laptop and documents"}'
+        result = search_products_with_filters.invoke(
+            {"query": "bag to carry laptop and documents"}
         )
 
         self.assertIsInstance(result, list)
-        self.assertGreater(len(result), 0)
-        # Should find bags suitable for work - backpack contains "pack" and is a type of bag
-        self.assertTrue(
-            "backpack" in result[0].name.lower()
-            or "bag" in result[0].name.lower()
-            or result[0].category == ProductCategory.BAGS
-        )
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].product_id, "BAG001")
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_category_and_season_filtering(self, mock_get_vector_store):
-        """Test E013: 'slide sandals for men' with category filtering."""
+        """Test filtering by category and season."""
+        # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
 
+        # Mock sandals that should match the query
         mock_doc = MagicMock()
         mock_doc.metadata = {
-            "product_id": "SLD7654",
-            "name": "Slide Sandals",
+            "product_id": "SND001",
+            "name": "Men's Slide Sandals",
             "category": "Men's Shoes",
-            "stock": 3,
-            "price": 22.0,
-            "season": "Spring, Summer",
+            "stock": 12,
+            "price": 39.99,
+            "season": "Summer",
             "type": "",
-            "description": "Casual slide sandals for men",
+            "description": "Comfortable slide sandals for men.",
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        result = search_products_by_description.invoke(
-            '{"query": "slide sandals for men", "category_filter": "Men\'s Shoes"}'
+        result = search_products_with_filters.invoke(
+            {"query": "slide sandals for men", "category": "Men's Shoes"}
         )
 
         self.assertIsInstance(result, list)
-        self.assertEqual(result[0].product_id, "SLD7654")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].product_id, "SND001")
 
     def test_empty_query_handling(self):
         """Test edge case: empty query should return ProductNotFound."""
-        result = resolve_product_reference.invoke('{"query": ""}')
+        result = search_products_with_filters.invoke({"query": ""})
         self.assertIsInstance(result, ProductNotFound)
 
     def test_malformed_json_handling(self):
-        """Test edge case: malformed JSON should be handled gracefully."""
-        result = find_product_by_id.invoke("not valid json")
+        """Test edge case: malformed input should be handled gracefully."""
+        # This test is no longer relevant since we're using proper function parameters
+        # instead of JSON strings, but we'll test empty occasion for find_products_for_occasion
+        result = find_products_for_occasion.invoke({"occasion": ""})
         self.assertIsInstance(result, ProductNotFound)
-        self.assertIn("Invalid input format", result.message)
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_nonexistent_product_id(self, mock_load_df):
@@ -484,7 +472,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_df = get_test_products_df()
         mock_load_df.return_value = mock_df
 
-        result = find_product_by_id.invoke('{"product_id": "XXX9999"}')
+        result = find_product_by_id(product_id="XXX9999")
         self.assertIsInstance(result, ProductNotFound)
 
 
@@ -545,10 +533,10 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         # Use a product ID from the test data
         test_product_id = "RSG8901"  # Retro Sunglasses
 
-        # Call the tool function using invoke
-        result = find_product_by_id.invoke(json.dumps({"product_id": test_product_id}))
+        # Call the tool function directly
+        result = find_product_by_id(product_id=test_product_id)
 
-        # Verify the result is a Product object (tool returns Product directly)
+        # Verify the result is a Product object
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, test_product_id)
         self.assertEqual(result.name, "Retro Sunglasses")
@@ -564,13 +552,8 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         product_id_to_find = "CHN0987"
         expected_name = "Chunky Knit Beanie"  # Name in products.csv for CHN0987
 
-        # Call the tool function using invoke
-        # The tool should use the product_id for lookup, ignoring the Spanish name in a real scenario.
-        # For this test, we are essentially checking if the ID lookup works correctly
-        # even if the original mention had a different language name.
-        result = find_product_by_id.invoke(
-            json.dumps({"product_id": product_id_to_find})
-        )
+        # Call the tool function directly
+        result = find_product_by_id(product_id=product_id_to_find)
 
         # Verify the result is a Product object
         self.assertIsInstance(result, Product)
@@ -587,7 +570,7 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         mock_load_df.return_value = get_test_products_df()
 
         # Call with non-existent ID
-        result = find_product_by_id.invoke(json.dumps({"product_id": "NONEXISTENT"}))
+        result = find_product_by_id(product_id="NONEXISTENT")
 
         # Verify the result is a ProductNotFound object
         self.assertIsInstance(result, ProductNotFound)
@@ -600,112 +583,103 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
 
-        # Mock finding leather products
+        # Mock document representing a leather wallet from test data
         mock_doc = MagicMock()
         mock_doc.metadata = {
             "product_id": "LTH0976",
-            "name": "Leather Bifold Wallet",
+            "name": "Leather Wallet",
             "category": "Accessories",
-            "stock": 4,
-            "price": 21.0,
+            "stock": 25,
+            "price": 45.0,
             "season": "All seasons",
             "type": "",
-            "description": "Premium leather bifold wallet with multiple card slots",
+            "description": "Premium leather wallet with multiple card slots",
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Call the function using invoke
-        result = search_products_by_description.invoke(
-            json.dumps({"query": "leather", "top_k": 2})
-        )
+        # Call the function directly
+        result = search_products_with_filters.invoke({"query": "leather"})
 
         # Verify the result is a list of Product objects
         self.assertIsInstance(result, list)
-        self.assertGreater(len(result), 0)
-
-        # Verify at least one product has "leather" in its description
-        has_leather = any("leather" in p.description.lower() for p in result)
-        self.assertTrue(has_leather)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].product_id, "LTH0976")
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_find_related_products_with_test_data(self, mock_get_vector_store):
-        """Test finding related products using test data."""
+    def test_find_complementary_products_with_test_data(self, mock_get_vector_store):
+        """Test finding complementary products using test data."""
         # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
 
+        # Mock document representing a complementary product
         mock_doc = MagicMock()
         mock_doc.metadata = {
-            "product_id": "SWL2345",
-            "name": "Sleek Wallet",
+            "product_id": "LTH0977",
+            "name": "Leather Belt",
             "category": "Accessories",
-            "stock": 5,
-            "price": 30.0,
+            "stock": 15,
+            "price": 35.0,
             "season": "All seasons",
             "type": "",
-            "description": "Sleek wallet with multiple slots",
+            "description": "Premium leather belt to match your wallet",
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Create mock function that returns the test product
-        def mock_find_product_call(tool_input: str):
-            import json
+        # Mock find_product_by_id to return the original product
+        with patch("hermes.tools.catalog_tools.find_product_by_id") as mock_find:
+            mock_find.return_value = Product(
+                product_id="LTH0976",
+                name="Leather Wallet",
+                description="Premium leather wallet with multiple card slots",
+                category=ProductCategory.ACCESSORIES,
+                stock=25,
+                price=45.0,
+                product_type="",
+                seasons=[Season.SPRING],
+                metadata=None,
+            )
 
-            try:
-                input_data = json.loads(tool_input)
-                product_id = input_data.get("product_id", "")
-                if product_id == "LTH0976":
-                    return get_product_by_id("LTH0976")  # Leather Bifold Wallet
-                else:
-                    return ProductNotFound(message="Product not found")
-            except:
-                return ProductNotFound(message="Invalid input")
-
-        # Patch the __call__ method
-        with patch.object(find_product_by_id, "__call__", mock_find_product_call):
             # Call function using invoke
-            result = find_related_products.invoke(
-                json.dumps(
-                    {
-                        "product_id": "LTH0976",
-                        "relationship_type": "complementary",
-                        "limit": 2,
-                    }
-                )
+            result = find_complementary_products.invoke(
+                {"product_id": "LTH0976", "limit": 2}
             )
 
             # Verify result is a list of products
             self.assertIsInstance(result, list)
-            self.assertGreater(len(result), 0)
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0].product_id, "LTH0977")
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_resolve_product_reference_with_test_data(self, mock_get_vector_store):
-        """Test resolving a product reference using test data."""
+    def test_search_products_with_filters_with_test_data(self, mock_get_vector_store):
+        """Test searching products with filters using test data."""
         # Setup mock vector store
         mock_vector_store = MagicMock()
         mock_get_vector_store.return_value = mock_vector_store
 
+        # Mock document representing a leather wallet from test data
         mock_doc = MagicMock()
         mock_doc.metadata = {
             "product_id": "LTH0976",
-            "name": "Leather Bifold Wallet",
+            "name": "Leather Wallet",
             "category": "Accessories",
-            "stock": 4,
-            "price": 21.0,
+            "stock": 25,
+            "price": 45.0,
             "season": "All seasons",
             "type": "",
-            "description": "Premium leather wallet",
+            "description": "Premium leather wallet with multiple card slots",
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Call function using invoke
-        result = resolve_product_reference.invoke(
-            json.dumps({"query": "leather wallet"})
+        # Call function directly
+        result = search_products_with_filters.invoke(
+            {"query": "leather wallet", "category": "Accessories"}
         )
 
         # Verify result is a Product object
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "LTH0976")
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].product_id, "LTH0976")
 
 
 if __name__ == "__main__":

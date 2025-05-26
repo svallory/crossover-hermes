@@ -1,9 +1,12 @@
 """Main function for analyzing customer emails."""
 
+from __future__ import annotations
+
 import json
 from typing import Literal
 
 from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import BaseTool
 from langsmith import traceable
 
 from ...config import HermesConfig
@@ -17,6 +20,23 @@ from .models import (
     EmailAnalysis,
 )
 from .prompts import get_prompt
+
+
+class ClassifierToolkit:
+    """Tools for the Classifier Agent (currently none - pure LLM analysis).
+
+    The Classifier Agent performs pure LLM analysis to extract email structure,
+    product mentions, and intent without needing external tools.
+    """
+
+    def get_tools(self) -> list[BaseTool]:
+        """Get the list of tools available to the Classifier Agent.
+
+        Returns:
+            Empty list - Classifier uses pure LLM analysis only.
+        """
+        return []  # Classifier uses pure LLM analysis
+
 
 async def get_product_mention_stats(email_analysis: EmailAnalysis) -> dict[str, int]:
     """Analyzes product mentions from email analysis results to provide statistics."""
@@ -37,6 +57,7 @@ async def get_product_mention_stats(email_analysis: EmailAnalysis) -> dict[str, 
         "segments_with_products": segments_with_products,
         "total_mentions": total_mentions,
     }
+
 
 @traceable(run_type="chain")
 async def analyze_email(
@@ -62,7 +83,9 @@ async def analyze_email(
         )
 
         # Use a weak model for initial analysis since it's a relatively simple task
-        llm = get_llm_client(config=hermes_config, model_strength="weak", temperature=0.0)
+        llm = get_llm_client(
+            config=hermes_config, model_strength="weak", temperature=0.0
+        )
 
         analyzer_prompt = get_prompt("classifier")
         analysis_chain = analyzer_prompt | llm
@@ -71,7 +94,10 @@ async def analyze_email(
             raw_llm_output = await analysis_chain.ainvoke(state.model_dump())
 
             # Manually parse the JSON output
-            if not isinstance(raw_llm_output.content, str) or not raw_llm_output.content.strip():
+            if (
+                not isinstance(raw_llm_output.content, str)
+                or not raw_llm_output.content.strip()
+            ):
                 # Handle empty or non-string output from LLM
                 error_message = (
                     f"Expected LLM output content to be a non-empty string, but got "
@@ -79,11 +105,15 @@ async def analyze_email(
                 )
                 print(f"Error analyzing email {state.email_id}: {error_message}")
                 # Return an error response indicating LLM output issue
-                return create_node_response(Agents.CLASSIFIER, ValueError(error_message))
+                return create_node_response(
+                    Agents.CLASSIFIER, ValueError(error_message)
+                )
 
             try:
                 # Strip markdown code block fences before parsing
-                json_string = raw_llm_output.content.strip().strip("```json").strip("```")
+                json_string = (
+                    raw_llm_output.content.strip().strip("```json").strip("```")
+                )
                 print(f"Attempting to parse JSON string: {json_string[:200]}...")
                 parsed_output = json.loads(json_string)
             except json.JSONDecodeError as e:
@@ -94,7 +124,9 @@ async def analyze_email(
                 )
                 print(f"Error analyzing email {state.email_id}: {error_message}")
                 # Return an error response indicating JSON parsing failure
-                return create_node_response(Agents.CLASSIFIER, ValueError(error_message))
+                return create_node_response(
+                    Agents.CLASSIFIER, ValueError(error_message)
+                )
 
             # Explicitly handle the customer_pii field if it's a string (though with manual parsing,
             # json.loads should handle it if it's valid JSON string of a dict)
@@ -106,7 +138,9 @@ async def analyze_email(
             # Check if customer_pii is a string and attempt to parse it as JSON
             if isinstance(email_analysis.customer_pii, str):
                 try:
-                    email_analysis.customer_pii = json.loads(email_analysis.customer_pii)
+                    email_analysis.customer_pii = json.loads(
+                        email_analysis.customer_pii
+                    )
                 except json.JSONDecodeError:
                     # Handle cases where it's a string but not valid JSON, maybe log a warning
                     print(

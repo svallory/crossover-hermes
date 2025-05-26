@@ -5,5 +5,10 @@
     "LOUNGEWEAR",
     "metadatas",
     "WOMENS"
-  ]
+  ],
+  "editor.codeActionsOnSave": {
+    "source.unusedImports": "always",
+    "source.fixAll": "always",
+    "source.organizeImports.biome": "always"
+  }
 }

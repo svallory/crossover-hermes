@@ -8,4 +8,4 @@ from .classifier import *
 from .composer import *
 from .fulfiller import *
 from .stockkeeper import *
-from .workflow import *
+from hermes.workflow import *

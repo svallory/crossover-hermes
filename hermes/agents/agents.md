@@ -21,25 +21,28 @@ The Email Analyzer establishes the context for all subsequent processing by prod
 
 ## 2. Product Resolver Agent (stockkeeper.py)
 
-This agent takes product mentions from the Email Analyzer and converts them to actual catalog products. It:
+This agent takes product mentions from the Email Analyzer and converts them to catalog product candidates. It:
 
-- Deduplicates product mentions from all segments
-- Resolves product mentions to actual catalog products using:
-  - Exact ID matching (highest priority)
-  - Fuzzy name matching using word similarity
-  - Semantic vector search for description matching
-- Provides confidence scores for each resolution
-- Uses an LLM for disambiguation when multiple similar matches are found
-- Tracks resolution metadata including method and confidence
-- Collects unresolved product mentions for downstream processing
+- Deduplicates product mentions from all segments using LLM analysis
+- Resolves product mentions to top-K catalog product candidates using:
+  - Exact ID matching (returns immediately with single result)
+  - Semantic vector search with ChromaDB for fuzzy matching
+  - Metadata filtering for category-specific searches
+- Returns **multiple candidates per mention** instead of trying to pick one
+- Provides confidence scores and resolution metadata for each candidate
+- Includes original mention context in candidate metadata
+- Tracks resolution metrics including candidates found and search performance
 
-The Product Resolver produces a `ResolvedProductsOutput` containing successfully resolved products and any unresolved mentions.
+**Key Architectural Change**: The Product Resolver no longer performs LLM disambiguation. Instead, it returns all viable candidates (typically 1-3 per mention) and lets downstream agents make the final selection with full context.
+
+The Product Resolver produces a `ResolvedProductsOutput` containing candidate products with their confidence scores and any unresolved mentions.
 
 ## 3. Order Processor Agent (fulfiller.py)
 
 This agent processes emails containing order requests. It:
 
-- Uses resolved products from the Product Resolver
+- **Naturally selects products** from multiple candidates during LLM processing
+- Uses resolved product candidates from the Product Resolver
 - Verifies stock availability for requested products
 - Updates inventory levels for fulfilled orders
 - Processes ordered items with individual status tracking
@@ -56,7 +59,10 @@ The Order Processor produces a detailed `ProcessedOrder` with information about 
 ## 4. Inquiry Responder Agent (advisor.py)
 
 This agent handles emails containing product inquiries. It:
-- Uses resolved products from the Product Resolver
+
+- **Naturally selects products** from multiple candidates during response generation
+- Uses resolved product candidates from the Product Resolver with enhanced formatting
+- Groups candidates by original mention for better LLM context
 - Uses RAG (Retrieval-Augmented Generation) for semantic product search
 - Extracts and classifies questions from inquiry segments
 - Answers specific customer questions about products with factual information
@@ -65,11 +71,14 @@ This agent handles emails containing product inquiries. It:
 - Processes mixed-intent emails that contain both inquiry and order segments
 - Tracks unanswerable questions due to missing information
 
+**Enhanced Candidate Handling**: The Advisor now receives grouped candidates with confidence scores and makes intelligent selections while generating natural responses.
+
 The Inquiry Responder produces an `InquiryAnswers` object containing factual, objective answers to customer questions.
 
 ## 5. Response Composer Agent (composer.py)
 
 This agent takes the outputs from previous agents and creates the final response. It:
+
 - Analyzes customer communication style to determine appropriate tone
 - Adapts tone and style to match the customer's communication patterns
 - Plans a logical response structure with appropriate greeting and closing
@@ -110,12 +119,12 @@ flowchart TD
 
     Start --> Analyze
     Analyze -->|Extract Product Mentions| Stockkeeper
-    Stockkeeper -->|Has Order & Inquiry| Order & Inquiry
-    Stockkeeper -->|Has Order Only| Order
-    Stockkeeper -->|Has Inquiry Only| Inquiry
-    Stockkeeper -->|No Order/Inquiry| Compose
-    Order --> Compose
-    Inquiry --> Compose
+    Stockkeeper -->|Multiple Candidates per Mention| Order & Inquiry
+    Stockkeeper -->|Multiple Candidates per Mention| Order
+    Stockkeeper -->|Multiple Candidates per Mention| Inquiry
+    Stockkeeper -->|No Candidates Found| Compose
+    Order -->|Natural Product Selection| Compose
+    Inquiry -->|Natural Product Selection| Compose
     Compose --> End
 ```
 
@@ -129,13 +138,25 @@ The Hermes system uses a directed graph of specialized agents to process custome
 
 1. **Email Analyzer**: Analyzes and classifies the customer email, extracting intents, product mentions, and other key information.
 
-2. **Product Resolver**: Takes product mentions from the Email Analyzer, deduplicates them, and resolves them against the product catalog to find exact matching products.
+2. **Product Resolver**: Takes product mentions from the Email Analyzer, deduplicates them, and resolves them to **multiple product candidates** from the catalog for downstream selection.
 
-3. **Order Processor** (conditional): If the email contains an order request, processes the order using resolved products from the Product Resolver.
+3. **Order Processor** (conditional): If the email contains an order request, processes the order while **naturally selecting the best products** from candidates during LLM processing.
 
-4. **Inquiry Responder** (conditional): If the email contains product inquiries, provides factual information about products using resolved products from the Product Resolver.
+4. **Inquiry Responder** (conditional): If the email contains product inquiries, provides factual information about products while **naturally selecting the most relevant candidates** during response generation.
 
 5. **Response Composer**: Combines outputs from the order processor and inquiry responder to generate a comprehensive response to the customer.
+
+## Key Architectural Principles
+
+### Efficient LLM Usage
+- **Single Point of Selection**: Product disambiguation happens naturally during response generation, not in a separate step
+- **Contextual Decision Making**: Agents select products while considering customer intent and full conversation context
+- **Reduced API Calls**: Eliminated redundant LLM calls for disambiguation
+
+### Enhanced Context Flow
+- **Candidate Metadata**: Each product candidate includes confidence scores and original mention context
+- **Grouped Presentation**: Multiple candidates are grouped by original mention for clearer LLM reasoning
+- **Natural Selection**: Agents pick the most appropriate products while generating natural responses
 
 ## Agent Descriptions
 
@@ -148,36 +169,39 @@ The Hermes system uses a directed graph of specialized agents to process custome
 
 ### Product Resolver
 
-- **Purpose**: Deduplicate and convert product mentions to actual catalog products
+- **Purpose**: Convert product mentions to **multiple viable candidates** for downstream selection
 - **Input**: Product mentions from Email Analyzer
-- **Output**: `ResolvedProductsOutput` with resolved products and unresolved mentions
-- **Implementation**: Uses cascading resolution strategy with vector search
+- **Output**: `ResolvedProductsOutput` with **top-K candidate products per mention** and unresolved mentions
+- **Implementation**: Uses ChromaDB semantic search with metadata filtering
+- **Key Change**: Returns candidates instead of making selection decisions
 
 ### Order Processor
 
-- **Purpose**: Process order requests and apply promotions
-- **Input**: Email analysis, resolved products
-- **Output**: `ProcessedOrder` with order status and item details
+- **Purpose**: Process order requests while naturally selecting from product candidates
+- **Input**: Email analysis, **multiple product candidates**
+- **Output**: `ProcessedOrder` with order status and selected item details
 - **Implementation**: Uses stock checking tools and promotion specifications
+- **Selection Strategy**: LLM picks best candidates while processing orders
 
 ### Inquiry Responder
 
-- **Purpose**: Provide factual answers to product inquiries
-- **Input**: Email analysis, resolved products
-- **Output**: `InquiryAnswers` with factual answers to customer questions
-- **Implementation**: Uses RAG with vector search for product information
+- **Purpose**: Provide factual answers while naturally selecting relevant products
+- **Input**: Email analysis, **grouped product candidates with confidence scores**
+- **Output**: `InquiryAnswers` with factual answers and selected products
+- **Implementation**: Uses RAG with enhanced candidate formatting
+- **Selection Strategy**: LLM chooses most relevant candidates while answering questions
 
 ### Response Composer
 
 - **Purpose**: Generate the final personalized customer response
-- **Input**: Outputs from all previous agents
+- **Input**: Outputs from all previous agents with selected products
 - **Output**: `ComposedResponse` with complete email response
 - **Implementation**: Uses strong LLM for natural language generation
 
 ## State Management
 
 The system maintains a comprehensive `OverallState` object that accumulates outputs from each agent.
-Nodes can access outputs from previous nodes, enabling contextual processing.
+**Product candidates** flow through the state with rich metadata, enabling informed selection by downstream agents.
 
 ## Error Handling
 
@@ -190,4 +214,4 @@ state and can be used for diagnostic purposes.
 # and clear separation of concerns.
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-``` 
+```

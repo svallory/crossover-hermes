@@ -1,20 +1,17 @@
 import asyncio
-import csv
 import os
 from typing import Any
 
 # Apply nest_asyncio for Jupyter compatibility
 from hermes.utils.output import create_output_csv
-from hermes.utils.output import write_yaml_to_file
 from hermes.utils.output import save_workflow_result_as_yaml
 from hermes.utils.gsheets import create_output_spreadsheet
 import nest_asyncio
 import pandas as pd  # type: ignore
-import yaml
 
 from hermes.agents.classifier.models import ClassifierInput
-from hermes.agents.workflow.states import OverallState
-from hermes.agents.workflow.run import run_workflow
+from hermes.workflow.states import OverallState
+from hermes.workflow.run import run_workflow
 from hermes.config import HermesConfig
 from hermes.data import load_emails_df, load_products_df
 
@@ -28,6 +25,7 @@ nest_asyncio.apply()
 # Default output directory
 OUTPUT_DIR = "output"
 RESULTS_DIR = os.path.join(OUTPUT_DIR, "results")
+
 
 async def process_emails(
     emails_to_process: list[dict[str, str]],
@@ -69,7 +67,9 @@ async def process_emails(
             )
 
             # Execute the LangGraph workflow
-            workflow_state: OverallState = await run_workflow(input_state=input_state, hermes_config=config_obj)
+            workflow_state: OverallState = await run_workflow(
+                input_state=input_state, hermes_config=config_obj
+            )
 
             # Save the workflow result as YAML file
             await save_workflow_result_as_yaml(email_id, workflow_state, results_dir)
@@ -85,7 +85,9 @@ async def process_emails(
 
             # Extract classification from classifier output
             if workflow_state.classifier and workflow_state.classifier.email_analysis:
-                result["classification"] = workflow_state.classifier.email_analysis.primary_intent
+                result["classification"] = (
+                    workflow_state.classifier.email_analysis.primary_intent
+                )
                 print(f"  → Classification: {result['classification']}")
 
             # Extract order status from fulfiller output
@@ -103,8 +105,12 @@ async def process_emails(
 
             # Extract response from composer output
             if workflow_state.composer:
-                result["response"] = workflow_state.composer.composed_response.response_body
-                print(f"  → Generated response: {len(str(result['response']))} characters")
+                result["response"] = (
+                    workflow_state.composer.composed_response.response_body
+                )
+                print(
+                    f"  → Generated response: {len(str(result['response']))} characters"
+                )
 
             # Store in results dictionary
             results[email_id] = result
@@ -130,7 +136,7 @@ async def run_email_processing(
     output_spreadsheet_id: str | None = None,
     processing_limit: int | None = None,
     target_email_ids: list[str] | None = None,
-    output_dir: str = "output"
+    output_dir: str = "output",
 ) -> str:
     """Core function implementing the email processing workflow.
 
@@ -161,7 +167,6 @@ async def run_email_processing(
     RESULTS_DIR = os.path.join(OUTPUT_DIR, "results")
     os.makedirs(RESULTS_DIR, exist_ok=True)
 
-
     # 1. Load app config
     hermes_config = HermesConfig()
     # TODO: Update config with products_source and emails_source if necessary,
@@ -180,7 +185,6 @@ async def run_email_processing(
     if gsheet_output_target:
         print(f"Output Google Sheet for upload: {gsheet_output_target}")
 
-
     # 2. Load the emails dataset
     try:
         print(f"Attempting to load emails from source: {emails_source}")
@@ -192,7 +196,9 @@ async def run_email_processing(
             print(f"Filtering for specific email IDs: {target_email_ids}")
             # Ensure 'email_id' column exists. Adjust column name if different in your actual data.
             if "email_id" not in emails_df.columns:
-                raise ValueError("DataFrame does not contain an 'email_id' column for filtering.")
+                raise ValueError(
+                    "DataFrame does not contain an 'email_id' column for filtering."
+                )
 
             # Convert all email IDs in DataFrame to string for consistent comparison
             emails_df["email_id"] = emails_df["email_id"].astype(str)
@@ -202,7 +208,9 @@ async def run_email_processing(
             filtered_count = len(emails_df)
             print(f"Filtered emails: {initial_count} -> {filtered_count}")
             if filtered_count == 0:
-                print("Warning: No emails matched the provided target email IDs. No emails will be processed.")
+                print(
+                    "Warning: No emails matched the provided target email IDs. No emails will be processed."
+                )
                 # Early exit or specific handling might be desired here
                 # For now, it will proceed with an empty batch, resulting in no processing.
 
@@ -220,7 +228,6 @@ async def run_email_processing(
         print(f"Products loaded/ensured available.")
     except Exception as e:
         raise ValueError(f"Error loading products from source '{products_source}': {e}")
-
 
     # 3. Convert emails to dictionary format
     emails_batch = emails_df.to_dict(orient="records")
@@ -251,32 +258,48 @@ async def run_email_processing(
         # Email classification data
         classification = result["classification"]
         if classification and classification in ["order request", "product inquiry"]:
-            email_classification_data.append({"email ID": email_id, "category": classification})
+            email_classification_data.append(
+                {"email ID": email_id, "category": classification}
+            )
 
         # Order status data
         if classification == "order request" and result["order_status"]:
-            order_status_data.extend([
-                {
-                    "email ID": email_id,
-                    "product ID": order_status["product ID"],
-                    "quantity": order_status["quantity"],
-                    "status": order_status["status"],
-                }
-                for order_status in result["order_status"]
-            ])
+            order_status_data.extend(
+                [
+                    {
+                        "email ID": email_id,
+                        "product ID": order_status["product ID"],
+                        "quantity": order_status["quantity"],
+                        "status": order_status["status"],
+                    }
+                    for order_status in result["order_status"]
+                ]
+            )
 
         # Determine which response sheet to populate based on classification
         if result["response"]:
             if classification == "order request":
-                order_response_data.append({"email ID": email_id, "response": result["response"]})
+                order_response_data.append(
+                    {"email ID": email_id, "response": result["response"]}
+                )
             elif classification == "product inquiry":
-                inquiry_response_data.append({"email ID": email_id, "response": result["response"]})
+                inquiry_response_data.append(
+                    {"email ID": email_id, "response": result["response"]}
+                )
 
     # Create DataFrames with the required column names
-    email_classification_df = pd.DataFrame(email_classification_data, columns=["email ID", "category"])
-    order_status_df = pd.DataFrame(order_status_data, columns=["email ID", "product ID", "quantity", "status"])
-    order_response_df = pd.DataFrame(order_response_data, columns=["email ID", "response"])
-    inquiry_response_df = pd.DataFrame(inquiry_response_data, columns=["email ID", "response"])
+    email_classification_df = pd.DataFrame(
+        email_classification_data, columns=["email ID", "category"]
+    )
+    order_status_df = pd.DataFrame(
+        order_status_data, columns=["email ID", "product ID", "quantity", "status"]
+    )
+    order_response_df = pd.DataFrame(
+        order_response_data, columns=["email ID", "response"]
+    )
+    inquiry_response_df = pd.DataFrame(
+        inquiry_response_data, columns=["email ID", "response"]
+    )
 
     # 6. Create and populate the output
     # Always save to CSV
