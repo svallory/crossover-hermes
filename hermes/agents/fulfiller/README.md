@@ -35,38 +35,36 @@ Returns a simple enum status:
 
 ## Usage
 
+The Fulfiller agent is integrated into the LangGraph workflow and uses the standardized agent pattern:
+
 ```python
-from hermes.agents.stockkeeper import resolve_product_mentions
-from hermes.agents.fulfiller import process_order
-from hermes.model.promotions import PromotionSpec, PromotionConditions, PromotionEffects, DiscountSpec
+from hermes.agents.fulfiller import run_fulfiller
+from hermes.agents.fulfiller.models import FulfillerInput, FulfillerOutput
 
-# First, resolve product mentions using stockkeeper
-stockkeeper_output = await resolve_product_mentions(classifier_output)
-
-# Create promotion specifications
-promotions = [
-    PromotionSpec(
-        conditions=PromotionConditions(min_quantity=2),
-        effects=PromotionEffects(
-            apply_discount=DiscountSpec(
-                type="percentage",
-                amount=15.0
-            )
-        )
-    ),
-    # Add more promotion specs as needed
-]
-
-# Process the order with resolved products and promotions
-processed_order = process_order(
-    email_analysis=classifier_output,
-    stockkeeper_output=stockkeeper_output,
-    promotion_specs=promotions,
-    email_id="customer-email-123"
+# Create input with classifier and stockkeeper outputs
+fulfiller_input = FulfillerInput(
+    email_id="customer-email-123",
+    classifier=classifier_output,  # From classifier agent
+    stockkeeper=stockkeeper_output  # From stockkeeper agent
 )
 
-# The processed_order now contains order items with promotions applied
+# Process the order through the LangGraph workflow
+result = await run_fulfiller(
+    state=fulfiller_input,
+    runnable_config=config
+)
+
+# The result contains the processed order with promotions applied
+processed_order = result.fulfiller.processed_order
 ```
+
+## LangGraph Integration
+
+The agent leverages LangGraph's type safety guarantees:
+- **Type-safe inputs**: LangGraph validates `FulfillerInput` before execution
+- **Direct property access**: Uses `state.classifier.email_analysis.model_dump()` safely
+- **Structured outputs**: Returns `WorkflowNodeOutput[Agents.FULFILLER, FulfillerOutput]`
+- **Error handling**: Graceful error propagation through the workflow
 
 ## Assignment Requirements Fulfilled
 
@@ -97,17 +95,17 @@ The Fulfiller agent meets all assignment requirements:
 
 ## Components
 
-- `agent.py`: Main entry point that processes an order request
-- `models.py`: Pydantic models for input/output data
+- `agent.py`: Main entry point with `run_fulfiller()` function for LangGraph integration
+- `models.py`: Pydantic models for input/output data (`FulfillerInput`, `FulfillerOutput`)
 - `prompts.py`: LLM prompts for order processing
 
 ## Integration Points
 
 The Fulfiller Agent works within the Hermes system as follows:
 
-1. Receives email analysis from the Classifier Agent
-2. Receives resolved products from the Stockkeeper Agent
+1. Receives email analysis from the Classifier Agent via `FulfillerInput.classifier`
+2. Receives resolved products from the Stockkeeper Agent via `FulfillerInput.stockkeeper`
 3. Processes orders and updates inventory using simplified, type-safe tools
-4. Passes order processing results to the Composer Agent
+4. Returns structured output to the LangGraph workflow for the Composer Agent
 
-The agent focuses specifically on order management, handling the business logic required to process customer purchase requests efficiently with minimal complexity suitable for the assignment scope.
+The agent focuses specifically on order management, handling the business logic required to process customer purchase requests efficiently with minimal complexity suitable for the assignment scope. The implementation leverages LangGraph's type safety guarantees for clean, maintainable code.

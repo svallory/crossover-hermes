@@ -17,44 +17,57 @@ The primary purpose of this agent is to:
 
 - `models.py`: Defines the data models used by the Response Composer
 - `prompts.py`: Contains the prompt template for the LLM
-- `compose_response.py`: Main function that orchestrates the response composition process
+- `agent.py`: Main function that orchestrates the response composition process
 
 ## Usage
 
 The Response Composer should be the final agent in the pipeline, after the Email Analyzer and any applicable domain-specific agents (Inquiry Responder, Order Processor).
 
 ```python
-from hermes.agents.composer import compose_response, ComposerInput
+from hermes.agents.composer import run_composer, ComposerInput
 
 # Create input from previous agent outputs
 composer_input = ComposerInput(
-    email_analysis=email_analysis_result,
-    inquiry_response=inquiry_response,  # Optional
-    order_result=order_result  # Optional
+    email_id="E001",
+    subject="Customer Inquiry",
+    message="Original email content",
+    classifier=classifier_output,
+    advisor=advisor_output,  # Optional
+    fulfiller=fulfiller_output  # Optional
 )
 
 # Generate the final response
-response_output = await compose_response(composer_input)
+response_output = await run_composer(composer_input)
 
-# Access the composed response
-final_response = response_output.composed_response
+# Access the composed response directly
+final_response = response_output.data
 print(final_response.response_body)
+print(final_response.subject)
 ```
 
 ## Response Structure
 
-The composed response includes:
+The composed response (ComposerOutput) includes:
 
-- **Subject Line**: An appropriate subject for the response email
-- **Response Body**: The complete natural language response
-- **Language**: Matches the customer's original language
-- **Tone**: Adapts to the customer's communication style
-- **Response Points**: Structured breakdown of the response elements
+- **email_id**: The ID of the email being responded to
+- **subject**: An appropriate subject line for the response email
+- **response_body**: The complete natural language response
+- **language**: Matches the customer's original language
+- **tone**: Descriptive tone that captures the response style (e.g., "professional and warm", "friendly and enthusiastic")
+- **response_points**: Structured breakdown of response elements (used internally for LLM reasoning)
+
+## Model Simplification
+
+The composer models have been simplified for better maintainability:
+
+- **Flattened Structure**: `ComposerOutput` now contains response fields directly instead of wrapping a separate `ComposedResponse` model
+- **Flexible Tone**: The tone field is now a free-form string allowing rich descriptions like "professional and empathetic" rather than being constrained to an enum
+- **Internal Reasoning**: `ResponsePoint` is documented as an internal LLM reasoning tool, not used elsewhere in the system
 
 ## Customization
 
 The Response Composer can be customized by:
 
 1. Modifying the prompt in `prompts.py` to change the response style or structure
-2. Adjusting the temperature parameter in `compose_response.py` to control creativity
-3. Extending the `ComposedResponse` model to include additional metadata 
+2. Adjusting the temperature parameter in `agent.py` to control creativity
+3. Extending the `ComposerOutput` model to include additional metadata

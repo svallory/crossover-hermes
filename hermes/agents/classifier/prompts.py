@@ -1,12 +1,6 @@
 """Classifier agent prompts for use with LangChain."""
 
-
 from langchain_core.prompts import PromptTemplate
-
-from hermes.model.enums import Agents
-
-# Dictionary to store all prompt templates
-PROMPTS: dict[str, PromptTemplate] = {}
 
 # Main Classifier agent Prompt
 markdown = str
@@ -98,28 +92,24 @@ PRODUCT NAME EXTRACTION RULES:
 - When in doubt about whether a word is part of the product name or just a descriptor, favor putting
   it in the product_type field instead of the product_name
 
+PRODUCT MENTION CONSOLIDATION:
+- When the same product is mentioned multiple times in an email (by ID, name, or description),
+  create only ONE product mention that consolidates all the information
+- Combine quantities if mentioned separately (e.g., "2 Alpine Explorer" + "1 more Alpine Explorer" = quantity: 3)
+- Merge descriptions and details from all references into a single comprehensive product_description
+- Use the highest confidence score from all the references to the same product
+- Consider products the same if they share the same product_id, or if they have the same product_name
+  and product_type combination
+- When consolidating, preserve all unique details mentioned about the product across different sentences
+- Example: If "Alpine Explorer backpack in blue" and "Alpine Explorer with laptop compartment" appear
+  separately, consolidate into one mention with product_description: "backpack in blue with laptop compartment"
+
 ### USER REQUEST
 CUSTOMER EMAIL:
 Subject: {{subject}}
 Message: {{message}}
 """
 
-PROMPTS[Agents.CLASSIFIER] = PromptTemplate.from_template(classifier_prompt_template_str, template_format="mustache")
-
-
-def get_prompt(key: str) -> PromptTemplate:
-    """Get a specific prompt template by key.
-
-    Args:
-        key: The key of the prompt template to retrieve.
-
-    Returns:
-        The requested PromptTemplate.
-
-    Raises:
-        KeyError: If the key doesn't exist in the PROMPTS dictionary.
-
-    """
-    if key not in PROMPTS:
-        raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")
-    return PROMPTS[key]
+CLASSIFIER_PROMPT = PromptTemplate.from_template(
+    classifier_prompt_template_str, template_format="mustache"
+)

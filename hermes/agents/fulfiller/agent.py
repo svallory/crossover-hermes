@@ -1,310 +1,149 @@
 """Main function for processing customer order requests."""
 
-import json
-from typing import Any, Literal
+from typing import Literal
 
 from langchain_core.tools import BaseTool
+from langchain_core.runnables import RunnableConfig
+from langsmith import traceable
 
+from .models import FulfillerInput, FulfillerOutput
 from hermes.agents.stockkeeper.models import StockkeeperOutput
 from hermes.config import HermesConfig
-from hermes.model.enums import Agents
 from hermes.model.order import Order, OrderLineStatus
-from hermes.model.promotions import PromotionSpec, PromotionConditions, PromotionEffects
 from hermes.tools.catalog_tools import (
-    Product,
     find_alternatives,
-    find_product_by_id,
 )
 from hermes.tools.order_tools import (
-    ProductNotFound,
-    StockStatus,
-    StockUpdateStatus,
     check_stock,
     update_stock,
+    StockUpdateStatus,
+    StockStatus,
 )
 from hermes.tools.promotion_tools import apply_promotion
+from hermes.utils.response import create_node_response
 from hermes.utils.llm_client import get_llm_client
-
-from .prompts import get_prompt
+from hermes.workflow.types import WorkflowNodeOutput
+from hermes.model.enums import Agents
+from .prompts import FULFILLER_PROMPT
 
 
 class FulfillerToolkit:
-    """Tools for the Fulfiller Agent (currently none - uses direct calls).
-
-    The Fulfiller Agent uses direct function calls for deterministic workflow steps
-    like stock checking, inventory updates, and promotion application.
-    """
+    """Tools for the Fulfiller Agent."""
 
     def get_tools(self) -> list[BaseTool]:
-        """Get the list of tools available to the Fulfiller Agent.
-
-        Returns:
-            Empty list - Fulfiller uses direct function calls only.
-        """
-        return []  # Fulfiller uses direct function calls
+        return []
 
 
-def process_order(
-    email_analysis: dict[str, Any],
-    stockkeeper_output: StockkeeperOutput,
-    promotion_specs: list[PromotionSpec],
-    email_id: str = "unknown",
-    model_strength: Literal["weak", "strong"] = "strong",
-    temperature: float = 0.0,
-    hermes_config: HermesConfig | None = None,
-) -> Order:
-    """Processes a customer order request based on the email analysis and stockkeeper results.
+@traceable(run_type="chain", name="Order Processing Agent")
+async def run_fulfiller(
+    state: FulfillerInput, runnable_config: RunnableConfig
+) -> WorkflowNodeOutput[Literal[Agents.FULFILLER], FulfillerOutput]:
+    """Process customer order requests with stock checking and promotion application.
 
     Args:
-        email_analysis: Dictionary containing the email analysis
-        stockkeeper_output: Output from the stockkeeper agent with resolved products
-        promotion_specs: List of promotion specifications to apply
-        email_id: ID of the email being processed
-        model_strength: Strength of the LLM to use ('strong' or 'weak')
-        temperature: Temperature setting for the LLM
-        hermes_config: Optional HermesConfig instance
+        state: The input model containing classifier output and stockkeeper results
+        runnable_config: Configuration for the runnable
 
     Returns:
-        Order object with the order processing results
+        A WorkflowNodeOutput containing the processed order or an error
+
     """
     try:
-        print(f"Processing order request for email {email_id}")
-
-        # Get the order processor prompt template
-        fulfiller_prompt = get_prompt(Agents.FULFILLER)
-
-        # Use specified model for order processing
-        if hermes_config is None:
-            hermes_config = HermesConfig()
-
+        hermes_config = HermesConfig.from_runnable_config(runnable_config)
         llm = get_llm_client(
-            config=hermes_config, model_strength=model_strength, temperature=temperature
+            config=hermes_config, model_strength="strong", temperature=0.0
         )
 
-        # Handle OverallState or dictionary properly - extract just what we need
-        analysis_dict = {}
-        if isinstance(email_analysis, dict):
-            # Extract the relevant parts without the full OverallState
-            if "email_analysis" in email_analysis:
-                # Handle nested structures
-                if hasattr(email_analysis["email_analysis"], "model_dump"):
-                    analysis_dict = email_analysis["email_analysis"].model_dump()
-                else:
-                    analysis_dict = email_analysis["email_analysis"]
-            else:
-                # Use the dict directly
-                analysis_dict = email_analysis
-        # If it's an OverallState object or something with model_dump
-        elif hasattr(email_analysis, "model_dump"):
-            analysis_dict = email_analysis.model_dump()
-        elif hasattr(email_analysis, "email_analysis") and hasattr(
-            email_analysis.email_analysis, "model_dump"
-        ):
-            analysis_dict = email_analysis.email_analysis.model_dump()
-        else:
-            raise ValueError(
-                f"Cannot extract email analysis from object of type {type(email_analysis)}"
-            )
+        # Extract email analysis - LangGraph guarantees type safety
+        analysis_dict = state.classifier.email_analysis.model_dump()
 
-        # Create processing chain including error handling
-        order_processing_chain = fulfiller_prompt | llm.with_structured_output(Order)
+        # Extract stockkeeper output
+        stockkeeper_output: StockkeeperOutput = state.stockkeeper
 
-        # Generate order processing result
-        response_data = order_processing_chain.invoke(
+        # Create the chain for order processing
+        chain = FULFILLER_PROMPT | llm.with_structured_output(Order)
+
+        # Process the order using the LLM
+        llm_response = await chain.ainvoke(
             {
-                "email_analysis": json.dumps(analysis_dict, indent=2),
-                "resolved_products": json.dumps(
-                    stockkeeper_output.model_dump(), indent=2
-                ),
+                "email_analysis": analysis_dict,
+                "resolved_products": [
+                    product.model_dump()
+                    for product in stockkeeper_output.resolved_products
+                ],
+                "unresolved_mentions": [
+                    mention.model_dump()
+                    for mention in stockkeeper_output.unresolved_mentions
+                ],
             }
         )
 
-        # Handle the response properly with type checking
-        if isinstance(response_data, Order):
-            processed_order = response_data
-        # If we got a dict, convert it to Order with required fields
-        elif isinstance(response_data, dict):
-            # Make sure required fields are included
-            response_data["email_id"] = email_id
-            if "overall_status" not in response_data:
-                response_data["overall_status"] = "processed"
-            processed_order = Order(**response_data)
+        order_response = Order.model_validate(llm_response)
+
+        # Ensure email_id is set
+        if not order_response.email_id:
+            order_response.email_id = analysis_dict.get("email_id", "unknown")
+
+        # Process each order item for stock checking and inventory updates
+        processed_items = []
+        total_amount = 0.0
+
+        for item in order_response.lines:
+            # Check stock availability
+            stock_status = check_stock(item.product_id, item.quantity)
+
+            if isinstance(stock_status, StockStatus) and stock_status.is_available:
+                # Update stock levels
+                update_result = update_stock(item.product_id, item.quantity)
+
+                if update_result == StockUpdateStatus.SUCCESS:
+                    item.status = OrderLineStatus.CREATED
+                    total_amount += (item.unit_price or item.base_price) * item.quantity
+                else:
+                    item.status = OrderLineStatus.OUT_OF_STOCK
+                    # Find alternatives for out-of-stock items
+                    alternatives_result = find_alternatives(
+                        original_product_id=item.product_id, limit=3
+                    )
+                    if isinstance(alternatives_result, list):
+                        item.alternatives = alternatives_result
+            else:
+                item.status = OrderLineStatus.OUT_OF_STOCK
+                # Find alternatives for out-of-stock items
+                alternatives_result = find_alternatives(
+                    original_product_id=item.product_id, limit=3
+                )
+                if isinstance(alternatives_result, list):
+                    item.alternatives = alternatives_result
+
+            processed_items.append(item)
+
+        # Update the order with processed items
+        order_response.lines = processed_items
+        order_response.total_price = total_amount
+
+        # Extract promotion specs from the resolved products instead of using hardcoded ones
+        promotion_specs = []
+        for product in stockkeeper_output.resolved_products:
+            if product.promotion is not None:
+                promotion_specs.append(product.promotion)
+
+        # Apply promotions to the order if any promotion specs were found
+        if promotion_specs:
+            promoted_order = apply_promotion(
+                order=order_response,
+                promotion_specs=promotion_specs,
+            )
         else:
-            # Fallback if we got something unexpected
-            processed_order = Order(
-                email_id=email_id,
-                overall_status="no_valid_products",
-                lines=[],
-                message="Unexpected response type from order processing",
-                stock_updated=False,
-                total_discount=0.0,
-            )
+            # No promotions to apply, use the order as-is
+            promoted_order = order_response
 
-        # Make sure the email_id is set correctly in the result
-        if processed_order.email_id != email_id:
-            processed_order.email_id = email_id
+        # Create the output
+        output = FulfillerOutput(
+            order_result=promoted_order,
+        )
 
-        # Process the ordered items - check actual stock and set status
-        if processed_order.lines:
-            # Reset total price to recalculate with correct promotions
-            total_price = 0.0
-            order_items = []
-
-            for line in processed_order.lines:
-                # Check actual stock
-                try:
-                    # Call the stock checking function directly
-                    stock_result = check_stock(
-                        product_id=line.product_id,
-                        requested_quantity=line.quantity,
-                    )
-
-                    # Get product details
-                    product_result = find_product_by_id(product_id=line.product_id)
-
-                    # Handle response based on type
-                    if isinstance(stock_result, StockStatus):
-                        # In stock - update status and decrement stock
-                        if stock_result.is_available:
-                            line.status = OrderLineStatus.CREATED
-                            line.stock = stock_result.current_stock
-
-                            # Create an order item dictionary for promotion processing
-                            if isinstance(product_result, Product):
-                                order_item = {
-                                    "product_id": line.product_id,
-                                    "description": line.description,
-                                    "base_price": line.base_price or 0.0,
-                                    "quantity": line.quantity,
-                                }
-                                order_items.append(order_item)
-
-                            # Update the stock directly
-                            update_result = update_stock(
-                                product_id=line.product_id,
-                                quantity_to_decrement=line.quantity,
-                            )
-
-                            if update_result == StockUpdateStatus.SUCCESS:
-                                processed_order.stock_updated = True
-
-                            # Add to the total price (before promotions)
-                            if line.total_price is not None:
-                                total_price += line.total_price
-
-                        else:
-                            # Out of stock - set status and available stock
-                            line.status = OrderLineStatus.OUT_OF_STOCK
-                            line.stock = stock_result.current_stock
-
-                            # Find alternatives directly
-                            alternatives_result = find_alternatives(
-                                original_product_id=line.product_id, limit=2
-                            )
-
-                            if (
-                                isinstance(alternatives_result, list)
-                                and alternatives_result
-                            ):
-                                line.alternatives = alternatives_result
-                    elif isinstance(stock_result, ProductNotFound):
-                        # Product not found - set to out of stock
-                        line.status = OrderLineStatus.OUT_OF_STOCK
-                        line.stock = 0
-                    else:
-                        # Unexpected result - set to out of stock
-                        line.status = OrderLineStatus.OUT_OF_STOCK
-                        line.stock = 0
-
-                except Exception as e:
-                    print(f"Error processing item {line.product_id}: {e}")
-                    # Set to out of stock in case of error
-                    line.status = OrderLineStatus.OUT_OF_STOCK
-                    line.stock = 0
-
-            # Apply promotions if we have items in stock
-            if order_items:
-                try:
-                    # Call the apply_promotion function directly
-                    order_result = apply_promotion(
-                        ordered_items=order_items,
-                        promotion_specs=[p.model_dump() for p in promotion_specs],
-                        email_id=email_id,
-                    )
-
-                    # Update the ordered items with promotion information from the result
-                    if isinstance(order_result, Order):
-                        # Update the lines with promotion information
-                        for line in processed_order.lines:
-                            for order_line in order_result.lines:
-                                if line.product_id == order_line.product_id:
-                                    # Add promotion information to the item
-                                    if order_line.promotion_applied:
-                                        promotion_desc = (
-                                            order_line.promotion_description
-                                        )
-                                        if promotion_desc is not None:
-                                            # Always create a PromotionSpec object since that's what OrderLine expects
-                                            # Create a simple PromotionSpec with the promotion description
-                                            line.promotion = PromotionSpec(
-                                                conditions=PromotionConditions(
-                                                    min_quantity=1
-                                                ),
-                                                effects=PromotionEffects(
-                                                    free_gift=promotion_desc
-                                                ),
-                                            )
-
-                                    # Update price with promotional pricing
-                                    if order_line.unit_price is not None:
-                                        line.unit_price = order_line.unit_price
-                                    if order_line.total_price is not None:
-                                        line.total_price = order_line.total_price
-                                    break
-
-                        # Update overall order with discount information
-                        processed_order.total_discount = order_result.total_discount
-                        processed_order.total_price = sum(
-                            line.total_price
-                            for line in processed_order.lines
-                            if line.status == OrderLineStatus.CREATED
-                            and line.total_price is not None
-                        )
-                except Exception as e:
-                    print(f"Error applying promotions: {e}")
-                    # Use original prices if promotion application fails
-                    processed_order.total_price = total_price
-            else:
-                # No items in stock, set total price to 0
-                processed_order.total_price = 0.0
-
-            # Determine overall status based on item statuses
-            in_stock_count = sum(
-                1
-                for line in processed_order.lines
-                if line.status == OrderLineStatus.CREATED
-            )
-            total_count = len(processed_order.lines)
-
-            if total_count == 0:
-                processed_order.overall_status = "no_valid_products"
-            elif in_stock_count == 0:
-                processed_order.overall_status = "out_of_stock"
-            elif in_stock_count < total_count:
-                processed_order.overall_status = "partially_fulfilled"
-            else:
-                processed_order.overall_status = "created"
-
-        return processed_order
+        return create_node_response(Agents.FULFILLER, output)
 
     except Exception as e:
-        print(f"Error processing order: {e}")
-        # Return a basic error response
-        return Order(
-            email_id=email_id,
-            overall_status="no_valid_products",
-            lines=[],
-            message=f"Error processing order: {str(e)}",
-            stock_updated=False,
-            total_discount=0.0,
-        )
+        return create_node_response(Agents.FULFILLER, e)

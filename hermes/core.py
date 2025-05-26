@@ -6,7 +6,7 @@ from typing import Any
 from hermes.utils.output import create_output_csv
 from hermes.utils.output import save_workflow_result_as_yaml
 from hermes.utils.gsheets import create_output_spreadsheet
-import nest_asyncio
+import nest_asyncio  # type: ignore
 import pandas as pd  # type: ignore
 
 from hermes.agents.classifier.models import ClassifierInput
@@ -14,6 +14,7 @@ from hermes.workflow.states import OverallState
 from hermes.workflow.run import run_workflow
 from hermes.config import HermesConfig
 from hermes.data import load_emails_df, load_products_df
+from hermes.model.email import CustomerEmail
 
 # Set the event loop policy back to the default asyncio policy
 # This is needed because uvloop is incompatible with nest_asyncio
@@ -61,9 +62,11 @@ async def process_emails(
         try:
             # Create ClassifierInput from email_data
             input_state = ClassifierInput(
-                email_id=email_data.get("email_id", f"unknown_email_{i}"),
-                subject=email_data.get("subject", ""),
-                message=email_data.get("message", ""),
+                email=CustomerEmail(
+                    email_id=email_data.get("email_id", f"unknown_email_{i}"),
+                    subject=email_data.get("subject", ""),
+                    message=email_data.get("message", ""),
+                )
             )
 
             # Execute the LangGraph workflow
@@ -105,9 +108,7 @@ async def process_emails(
 
             # Extract response from composer output
             if workflow_state.composer:
-                result["response"] = (
-                    workflow_state.composer.composed_response.response_body
-                )
+                result["response"] = workflow_state.composer.response_body
                 print(
                     f"  → Generated response: {len(str(result['response']))} characters"
                 )
@@ -152,11 +153,6 @@ async def run_email_processing(
     Returns:
         Message indicating where the results were saved (CSV path and/or GSheet link).
     """
-    # TODO: Parse products_source and emails_source to determine if they are GSheet or file path
-    # and load data accordingly. This will require a new helper function.
-    # For now, we'll assume emails_source is a GSheet ID or a file path,
-    # and products_source will be handled by load_products_df later.
-
     # 0. Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
     # Update the global OUTPUT_DIR for other functions like save_workflow_result_as_yaml
@@ -169,9 +165,6 @@ async def run_email_processing(
 
     # 1. Load app config
     hermes_config = HermesConfig()
-    # TODO: Update config with products_source and emails_source if necessary,
-    # or pass them directly to data loading functions.
-    # For now, input_spreadsheet_id in config is not used directly by run_email_processing.
 
     # Determine the output spreadsheet ID to use for GSheet upload
     # If output_spreadsheet_id is provided, that's where we upload.

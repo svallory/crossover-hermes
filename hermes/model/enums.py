@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # Enum of nodes
 class Agents(str, Enum):
     """Names of our Agents (also nodes in the workflow graph)."""
@@ -34,7 +35,7 @@ class ProductCategory(str, Enum):
     MENS_SHOES = "Men's Shoes"
     WOMENS_CLOTHING = "Women's Clothing"
     WOMENS_SHOES = "Women's Shoes"
-    
+
     # Additional categories for testing purposes
     SHIRTS = "Shirts"  # Testing category
 
@@ -46,3 +47,4 @@ class Season(str, Enum):
     SUMMER = "Summer"
     AUTUMN = "Autumn"
     WINTER = "Winter"
+    ALL_SEASONS = "All seasons"

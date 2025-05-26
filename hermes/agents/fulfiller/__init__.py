@@ -1,12 +1,12 @@
 """Fulfiller agent package."""
 
 from ...model.order import OrderLineStatus
-from .agent import process_order
+from .agent import run_fulfiller
 from .models import FulfillerInput, FulfillerOutput
 from ...model.order import OrderLine
 
 __all__ = [
-    "process_order",
+    "run_fulfiller",
     "FulfillerInput",
     "FulfillerOutput",
     "OrderLine",

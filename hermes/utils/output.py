@@ -2,6 +2,7 @@ import asyncio
 import os
 import pandas as pd
 import yaml
+from typing import Any
 
 from hermes.workflow.states import OverallState
 
@@ -75,9 +76,9 @@ async def save_workflow_result_as_yaml(
 
     # Convert workflow state to a serializable dict
     if hasattr(workflow_state, "model_dump"):
-        state_dict = workflow_state.model_dump()
+        state_dict: dict[str, Any] = workflow_state.model_dump()
     else:
-        state_dict = workflow_state
+        state_dict: dict[str, Any] = workflow_state  # type: ignore
 
     # Write the YAML file
     try:

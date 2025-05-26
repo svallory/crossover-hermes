@@ -6,8 +6,8 @@ input:
     de antemano.
 classifier:
   email_analysis:
-    email_id: E009
-    language: spanish
+  email_id: E009
+  language: spanish
     primary_intent: product inquiry
     customer_pii: {}
     segments:
@@ -49,7 +49,7 @@ stockkeeper:
       type.
 advisor:
   inquiry_answers:
-    email_id: E009
+  email_id: E009
     primary_products:
     - product_id: CHN0987
       name: Chunky Knit Beanie
@@ -88,10 +88,10 @@ advisor:
     unsuccessful_references: []
 fulfiller: null
 composer:
-  composed_response:
-    email_id: E009
-    subject: Respuesta a su consulta sobre el Gorro de Punto Grueso (CHN0987)
-    response_body: |
+
+  email_id: E009
+  subject: Respuesta a su consulta sobre el Gorro de Punto Grueso (CHN0987)
+  response_body: |
       Hola,
 
       Gracias por su consulta sobre nuestro Gorro de Punto Grueso (modelo CHN0987 - Chunky Knit Beanie).
@@ -104,9 +104,9 @@ composer:
 
       Saludos cordiales,
       Hermes - Delivering divine fashion
-    language: spanish
-    tone: friendly
-    response_points:
+  language: spanish
+  tone: friendly
+  response_points:
     - content_type: greeting
       content: Hola,
       priority: 10

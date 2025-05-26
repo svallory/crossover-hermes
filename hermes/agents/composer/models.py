@@ -1,26 +1,19 @@
 """Pydantic models for the response composer agent."""
 
-from enum import Enum
-
 from pydantic import BaseModel, Field
 
 from hermes.agents.advisor.models import AdvisorOutput
-from hermes.agents.classifier.models import ClassifierInput, ClassifierOutput
+from hermes.agents.classifier.models import ClassifierOutput
 from hermes.agents.fulfiller.models import FulfillerOutput
-
-
-class ResponseTone(str, Enum):
-    """Tone options for customer responses."""
-
-    PROFESSIONAL = "professional"
-    FRIENDLY = "friendly"
-    FORMAL = "formal"
-    APOLOGETIC = "apologetic"
-    ENTHUSIASTIC = "enthusiastic"
+from ...model.email import CustomerEmail
 
 
 class ResponsePoint(BaseModel):
-    """A structured point to include in the response."""
+    """A structured point to include in the response.
+
+    This is used internally by the LLM for step-by-step thinking and response planning.
+    It helps the LLM organize its thoughts but is not used elsewhere in the system.
+    """
 
     content_type: str = Field(
         description="Type of content (greeting, product_info, answer, alternative, closing, etc.)"
@@ -32,38 +25,48 @@ class ResponsePoint(BaseModel):
         le=10,
         description="Priority of this point (1-10, 10 being highest)",
     )
-    related_to: str | None = Field(default=None, description="Product ID or question this point relates to, if any")
-
-
-class ComposedResponse(BaseModel):
-    """The final composed response to be sent to the customer."""
-
-    email_id: str = Field(description="The ID of the email being responded to")
-    subject: str = Field(description="Subject line for the response email")
-    response_body: str = Field(description="Full text of the response")
-    language: str = Field(description="Language code of the response (should match customer's language)")
-    tone: ResponseTone = Field(description="Detected tone used in the response")
-    response_points: list[ResponsePoint] = Field(
-        default_factory=list, description="Structured breakdown of response elements"
+    related_to: str | None = Field(
+        default=None, description="Product ID or question this point relates to, if any"
     )
 
 
-class ComposerInput(ClassifierInput):
+class ComposerInput(BaseModel):
     """Input model for the response composer function.
 
     Contains outputs from previous agents in the pipeline.
     """
 
-    classifier: ClassifierOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
+    email: CustomerEmail = Field(description="The customer email being processed")
+
+    classifier: ClassifierOutput = Field(
+        description="Complete EmailAnalysisResult from the analyzer"
+    )
+
     advisor: AdvisorOutput | None = Field(
         default=None, description="Results from the Advisor agent, if applicable"
     )
+
     fulfiller: FulfillerOutput | None = Field(
         default=None, description="Results from the Fulfiller agent, if applicable"
     )
 
 
 class ComposerOutput(BaseModel):
-    """Output model for the response composer function."""
+    """Output model for the response composer function.
 
-    composed_response: ComposedResponse = Field(description="The final composed response to send to the customer")
+    Contains the final composed response to be sent to the customer.
+    """
+
+    email_id: str = Field(description="The ID of the email being responded to")
+    subject: str = Field(description="Subject line for the response email")
+    response_body: str = Field(description="Full text of the response")
+    language: str = Field(
+        description="Language code of the response (should match customer's language)"
+    )
+    tone: str = Field(
+        description="The tone used in the response (e.g., professional, friendly, enthusiastic)"
+    )
+    response_points: list[ResponsePoint] = Field(
+        default_factory=list,
+        description="Structured breakdown of response elements (used internally for LLM reasoning)",
+    )

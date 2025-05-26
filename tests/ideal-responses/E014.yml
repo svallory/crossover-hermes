@@ -4,8 +4,8 @@ input:
   message: "To Whom It May Concern, I am writing to report a serious issue with my recent order, #ORD12345, which I received today. The PSS5432 Patterned Silk Scarf I ordered arrived with a noticeable pull and a small stain on it. This is unacceptable for a silk scarf, especially at its price point. I have attached photos for your review. I need a replacement sent out ASAP as this was intended as a gift for an event next week. Please advise on how to proceed. Sincerely, David Miller"
 classifier:
   email_analysis:
-    email_id: E014
-    language: english
+  email_id: E014
+  language: english
     primary_intent: product issue
     customer_pii:
       name: David Miller
@@ -51,7 +51,7 @@ stockkeeper:
     order_id: ORD12345
 advisor:
   inquiry_answers:
-    email_id: E014
+  email_id: E014
     primary_products:
       - product_id: PSS5432
         name: Patterned Silk Scarf
@@ -78,7 +78,7 @@ advisor:
     unsuccessful_references: []
 fulfiller:
   replacement_details:
-    email_id: E014
+  email_id: E014
     order_id: ORD12345
     customer_id: null # Not provided, name "David Miller" available
     damaged_product:
@@ -100,10 +100,10 @@ fulfiller:
     status: replacement_shipped
     return_status: pending_customer_return
 composer:
-  composed_response:
-    email_id: E014
-    subject: "Re: Urgent: Order #ORD12345 - Damaged Item Received (Replacement Shipped)"
-    response_body: |
+
+  email_id: E014
+  subject: "Re: Urgent: Order #ORD12345 - Damaged Item Received (Replacement Shipped)"
+  response_body: |
       Dear Mr. Miller,
 
       Thank you for contacting us regarding order #ORD12345 and the issue with the PSS5432 Patterned Silk Scarf. We are very sorry to hear that it arrived with a pull and a stain; please accept our sincerest apologies for this unacceptable error.
@@ -118,9 +118,9 @@ composer:
 
       Sincerely,
       Hermes - Delivering divine fashion
-    language: english
-    tone: apologetic_efficient
-    response_points:
+  language: english
+  tone: apologetic_efficient
+  response_points:
       - content_type: greeting
         content: Dear Mr. Miller,
         priority: 10

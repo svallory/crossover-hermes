@@ -5,8 +5,8 @@ input:
     \ can be worn as a scarf, shawl, or headwrap. Thanks!"
 classifier:
   email_analysis:
-    email_id: E008
-    language: english
+  email_id: E008
+  language: english
     primary_intent: order request
     customer_pii: {}
     segments:
@@ -43,7 +43,7 @@ stockkeeper:
 advisor: null
 fulfiller:
   order_result:
-    email_id: E008
+  email_id: E008
     overall_status: created
     ordered_items:
       - product_id: VSC6789
@@ -67,10 +67,10 @@ fulfiller:
     message: Successfully processed order for 1 unit of VSC6789 Versatile Scarf.
     stock_updated: true
 composer:
-  composed_response:
-    email_id: E008
-    subject: Your Order for the Versatile Scarf (VSC6789) is Confirmed
-    response_body: |
+
+  email_id: E008
+  subject: Your Order for the Versatile Scarf (VSC6789) is Confirmed
+  response_body: |
       Hello,
 
       Thank you for your order! We've processed your request for the Versatile Scarf.
@@ -88,9 +88,9 @@ composer:
 
       Best regards,
       Hermes - Delivering divine fashion
-    language: english
-    tone: friendly
-    response_points:
+  language: english
+  tone: friendly
+  response_points:
       - content_type: greeting
         content: Hello,
         priority: 10

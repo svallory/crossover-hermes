@@ -129,77 +129,76 @@ advisor:
     unsuccessful_references: []
 fulfiller: null
 composer:
-  composed_response:
-    email_id: E003
-    subject: Helping you choose the perfect work bag
-    response_body: |
-      Hello David,
+  email_id: E003
+  subject: Helping you choose the perfect work bag
+  response_body: |
+    Hello David,
 
-      Thank you for reaching out! I understand you're looking for a new bag for work to carry your laptop and documents, and you're considering our LTH1098 Leather Backpack and our Leather Tote (LTH5432).
+    Thank you for reaching out! I understand you're looking for a new bag for work to carry your laptop and documents, and you're considering our LTH1098 Leather Backpack and our Leather Tote (LTH5432).
 
-      Both are excellent choices and popular for work. Here's a bit more insight to help you decide:
+    Both are excellent choices and popular for work. Here's a bit more insight to help you decide:
 
-      - The LTH1098 Leather Backpack ($43.99) is designed with multiple compartments, including a padded laptop sleeve, which offers structured organization and protection for your devices.
-      - The LTH5432 Leather Tote ($28.00) offers a spacious interior with multiple pockets, providing flexibility in how you organize your items.
+    - The LTH1098 Leather Backpack ($43.99) is designed with multiple compartments, including a padded laptop sleeve, which offers structured organization and protection for your devices.
+    - The LTH5432 Leather Tote ($28.00) offers a spacious interior with multiple pockets, providing flexibility in how you organize your items.
 
-      Regarding organizational pockets, the LTH1098 Leather Backpack explicitly mentions multiple compartments, which often means more dedicated sections. The LTH5432 Leather Tote has multiple pockets within its spacious main area.
+    Regarding organizational pockets, the LTH1098 Leather Backpack explicitly mentions multiple compartments, which often means more dedicated sections. The LTH5432 Leather Tote has multiple pockets within its spacious main area.
 
-      Ultimately, the best choice depends on your preferred carrying style and how you like to organize your belongings. Both are crafted from premium leather and are suitable for professional use.
+    Ultimately, the best choice depends on your preferred carrying style and how you like to organize your belongings. Both are crafted from premium leather and are suitable for professional use.
 
-      I hope this helps your decision! Let me know if you have any more questions.
+    I hope this helps your decision! Let me know if you have any more questions.
 
-      Best regards,
-      Hermes - Delivering divine fashion
-    language: english
-    tone: friendly
-    response_points:
-      - content_type: greeting
-        content: Hello David,
-        priority: 10
-        related_to: null
-      - content_type: acknowledgement
-        content: Thank you for reaching out! I understand you're looking for a new
-          bag for work to carry your laptop and documents, and you're considering
-          our LTH1098 Leather Backpack and our Leather Tote (LTH5432).
-        priority: 9
-        related_to: LTH1098
-      - content_type: answer_intro
-        content: Both are excellent choices and popular for work. Here's a bit more
-          insight to help you decide:
-        priority: 8
-        related_to: null
-      - content_type: product_info
-        content: The LTH1098 Leather Backpack ($43.99) is designed with multiple compartments,
-          including a padded laptop sleeve, which offers structured organization and
-          protection for your devices.
-        priority: 10
-        related_to: LTH1098
-      - content_type: product_info
-        content: The LTH5432 Leather Tote ($28.00) offers a spacious interior with
-          multiple pockets, providing flexibility in how you organize your items.
-        priority: 10
-        related_to: LTH5432
-      - content_type: answer
-        content: Regarding organizational pockets, the LTH1098 Leather Backpack explicitly
-          mentions multiple compartments, which often means more dedicated sections.
-          The LTH5432 Leather Tote has multiple pockets within its spacious main area.
-        priority: 9
-        related_to: LTH1098
-      - content_type: advice
-        content: Ultimately, the best choice depends on your preferred carrying style
-          and how you like to organize your belongings. Both are crafted from premium
-          leather and are suitable for professional use.
-        priority: 7
-        related_to: null
-      - content_type: further_assistance
-        content: I hope this helps your decision! Let me know if you have any more
-          questions.
-        priority: 6
-        related_to: null
-      - content_type: closing
-        content: |
-          Best regards,
-          Hermes - Delivering divine fashion
-        priority: 10
-        related_to: null
+    Best regards,
+    Hermes - Delivering divine fashion
+  language: english
+  tone: friendly
+  response_points:
+    - content_type: greeting
+      content: Hello David,
+      priority: 10
+      related_to: null
+    - content_type: acknowledgement
+      content: Thank you for reaching out! I understand you're looking for a new
+        bag for work to carry your laptop and documents, and you're considering
+        our LTH1098 Leather Backpack and our Leather Tote (LTH5432).
+      priority: 9
+      related_to: LTH1098
+    - content_type: answer_intro
+      content: Both are excellent choices and popular for work. Here's a bit more
+        insight to help you decide:
+      priority: 8
+      related_to: null
+    - content_type: product_info
+      content: The LTH1098 Leather Backpack ($43.99) is designed with multiple compartments,
+        including a padded laptop sleeve, which offers structured organization and
+        protection for your devices.
+      priority: 10
+      related_to: LTH1098
+    - content_type: product_info
+      content: The LTH5432 Leather Tote ($28.00) offers a spacious interior with
+        multiple pockets, providing flexibility in how you organize your items.
+      priority: 10
+      related_to: LTH5432
+    - content_type: answer
+      content: Regarding organizational pockets, the LTH1098 Leather Backpack explicitly
+        mentions multiple compartments, which often means more dedicated sections.
+        The LTH5432 Leather Tote has multiple pockets within its spacious main area.
+      priority: 9
+      related_to: LTH1098
+    - content_type: advice
+      content: Ultimately, the best choice depends on your preferred carrying style
+        and how you like to organize your belongings. Both are crafted from premium
+        leather and are suitable for professional use.
+      priority: 7
+      related_to: null
+    - content_type: further_assistance
+      content: I hope this helps your decision! Let me know if you have any more
+        questions.
+      priority: 6
+      related_to: null
+    - content_type: closing
+      content: |
+        Best regards,
+        Hermes - Delivering divine fashion
+      priority: 10
+      related_to: null
 errors: null

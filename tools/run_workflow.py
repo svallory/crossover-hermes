@@ -9,9 +9,10 @@ from dotenv import load_dotenv
 # Assuming the HermesConfig and ClassifierInput are structured like this based on workflow.py
 # You might need to adjust imports based on your actual project structure
 from hermes.agents.classifier.models import ClassifierInput
-from hermes.agents.workflow.run import run_workflow
+from hermes.model.email import CustomerEmail
+from hermes.workflow import run_workflow
 from hermes.config import HermesConfig  # Adjust import if HermesConfig is elsewhere
-from hermes.data.vector_store import VectorStore
+from hermes.data.vector_store import get_vector_store
 
 # Default output directory
 OUTPUT_DIR = "output"
@@ -67,9 +68,11 @@ async def process_email(email_data, hermes_config):
     try:
         # Create ClassifierInput from email_data
         input_state = ClassifierInput(
-            email_id=email_id,
-            subject=email_data.get("subject", ""),
-            message=email_data.get("message", ""),
+            email=CustomerEmail(
+                email_id=email_id,
+                subject=email_data.get("subject", ""),
+                message=email_data.get("message", ""),
+            )
         )
 
         # Run the workflow
@@ -94,10 +97,10 @@ async def process_email(email_data, hermes_config):
         if (
             hasattr(result, "composer")
             and result.composer is not None
-            and hasattr(result.composer, "composed_response")
-            and result.composer.composed_response is not None
+            and hasattr(result.composer, "response_body")
+            and result.composer.response_body is not None
         ):
-            response = result.composer.composed_response.response_body
+            response = result.composer.response_body
             print(f"  → Generated response: {len(str(response))} characters")
 
         return result
@@ -125,7 +128,7 @@ async def main():
     hermes_config = HermesConfig()
 
     # Initialize vector store
-    VectorStore(hermes_config=hermes_config)
+    get_vector_store()
 
     # Load the emails data
     emails_df = pd.read_csv("data/emails.csv")

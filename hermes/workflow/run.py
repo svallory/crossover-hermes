@@ -28,7 +28,7 @@ async def run_workflow(
     # First, ensure vector store is initialized
     # This is crucial for the inquiry responder to work
     print("Ensuring vector store is initialized before running workflow...")
-    get_vector_store(hermes_config=hermes_config)
+    get_vector_store()
 
     # Ensure the configuration includes HermesConfig under the 'configurable' key
     runnable_config_obj = RunnableConfig(configurable={"hermes_config": hermes_config})
@@ -37,10 +37,10 @@ async def run_workflow(
     runnable_config: RunnableConfig = runnable_config_obj  # type: ignore
 
     # Run the workflow with the input state and config
-    print(f"Running workflow for email {input_state.email_id}...")
+    print(f"Running workflow for email {input_state.email.email_id}...")
     result = await workflow.ainvoke(input_state, config=runnable_config)
 
-    print(f"Workflow completed for email {input_state.email_id}")
+    print(f"Workflow completed for email {input_state.email.email_id}")
 
     # Convert the result to an OverallState
     if isinstance(result, dict):

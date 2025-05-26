@@ -1,12 +1,6 @@
 """Composer agent prompts for use with LangChain."""
 
-
 from langchain_core.prompts import PromptTemplate
-
-from hermes.model.enums import Agents
-
-# Dictionary to store all prompt templates
-PROMPTS: dict[str, PromptTemplate] = {}
 
 # Main Composer agent Prompt
 composer_prompt_template_str = """
@@ -24,13 +18,13 @@ You will be provided with:
 3. (Optional) ProcessOrderResult - If the email contained an order request, this contains the order
    processing results.
 
-Your goal is to generate the `ComposedResponse` Pydantic model, which includes:
+Your goal is to generate the `ComposerOutput` Pydantic model, which includes:
 1. `email_id`: The email identifier (extracted from the EmailAnalysisResult).
 2. `subject`: An appropriate subject line for the response email.
 3. `response_body`: The complete, natural-sounding email response.
 4. `language`: The language to use (matching the customer's original language).
-5. `tone`: The tone used in the response (professional, friendly, formal, apologetic, or enthusiastic).
-6. `response_points`: Structured breakdown of response elements.
+5. `tone`: A descriptive tone that captures the style used in the response (e.g., "professional and warm", "friendly and enthusiastic", "formal and respectful").
+6. `response_points`: Structured breakdown of response elements (used for internal reasoning).
 
 FIRST TASK - ANALYZE CUSTOMER COMMUNICATION STYLE:
 1. Analyze the original email's tone, formality level, and personal style.
@@ -43,18 +37,18 @@ TONE MATCHING GUIDELINES:
 - Adaptive Tone Matching means responding appropriately to the customer's emotional state,
   NOT mirroring negative emotions.
 - The goal is to create a positive emotional shift while maintaining authenticity.
-- Use the following reference table for tone selection, if the customer's tone is not listed, use your best judgement:
+- Use the following reference table for tone selection, but feel free to use nuanced descriptions:
 
-| Customer Tone | Priority Emotions to Elicit     | Response Tone         |
-|---------------|---------------------------------|-----------------------|
-| Apologetic    | Reassurance, Confidence, Trust  | Friendly              |
-| Frustrated    | Understanding, Trust, Relief    | Professional          |
-| Upset/Angry   | Calm, Understanding, Resolution | Professional          |
-| Excited       | Excitement, Anticipation, Joy   | Enthusiastic          |
-| Formal        | Trust, Confidence, Respect      | Formal/Professional   |
-| Confused      | Clarity, Confidence, Trust      | Friendly              |
-| Urgent        | Trust, Efficiency, Control      | Professional          |
-| Neutral       | Trust, Confidence, Interest     | Friendly/Professional |
+| Customer Tone | Priority Emotions to Elicit     | Response Tone Examples        |
+|---------------|---------------------------------|-------------------------------|
+| Apologetic    | Reassurance, Confidence, Trust  | "friendly and reassuring"     |
+| Frustrated    | Understanding, Trust, Relief    | "professional and empathetic" |
+| Upset/Angry   | Calm, Understanding, Resolution | "professional and calming"    |
+| Excited       | Excitement, Anticipation, Joy   | "enthusiastic and engaging"   |
+| Formal        | Trust, Confidence, Respect      | "formal and respectful"       |
+| Confused      | Clarity, Confidence, Trust      | "friendly and clarifying"     |
+| Urgent        | Trust, Efficiency, Control      | "professional and efficient"  |
+| Neutral       | Trust, Confidence, Interest     | "professional and warm"       |
 
 SECOND TASK - PLAN RESPONSE STRUCTURE:
 1. Determine appropriate greeting based on customer's level of formality.
@@ -108,10 +102,10 @@ InquiryResponse:
 ProcessOrderResult:
 {{order_result}}
 
-Please generate the ComposedResponse object with the final email to be sent to the customer.
+Please generate the ComposerOutput object with the final email to be sent to the customer.
 """
 
-PROMPTS[Agents.COMPOSER] = PromptTemplate.from_template(
+COMPOSER_PROMPT = PromptTemplate.from_template(
     composer_prompt_template_str,
     template_format="mustache",
     partial_variables={
@@ -119,21 +113,3 @@ PROMPTS[Agents.COMPOSER] = PromptTemplate.from_template(
         "order_result": "The customer had no orders",
     },
 )
-
-
-def get_prompt(key: str) -> PromptTemplate:
-    """Get a specific prompt template by key.
-
-    Args:
-        key: The key of the prompt template to retrieve.
-
-    Returns:
-        The requested PromptTemplate.
-
-    Raises:
-        KeyError: If the key doesn't exist in the PROMPTS dictionary.
-
-    """
-    if key not in PROMPTS:
-        raise KeyError(f"Prompt key '{key}' not found. Available keys: {list(PROMPTS.keys())}")
-    return PROMPTS[key]

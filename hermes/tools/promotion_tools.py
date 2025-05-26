@@ -1,111 +1,99 @@
-from typing import List, Any
+from typing import List, Any, Union
 
-from hermes.model.order import OrderLine, Order
+from hermes.model.order import Order
 from hermes.model.promotions import PromotionSpec
 
 
 def apply_promotion(
-    ordered_items: list[dict[str, Any]],
-    promotion_specs: list[dict[str, Any]],
-    email_id: str,
+    order: Order,
+    promotion_specs: Union[list[PromotionSpec], list[dict[str, Any]]],
 ) -> Order:
-    """Apply promotions to ordered items and create an Order object.
+    """Apply promotions to an existing order and modify it in place.
 
-    This tool processes a list of ordered items and applies any applicable promotions based on
+    This tool processes an existing Order object and applies any applicable promotions based on
     the provided promotion specifications. It handles different types of promotions including
     quantity-based discounts, product combinations, and free items.
 
     Args:
-        ordered_items: List of dictionaries representing ordered items with keys:
-                      product_id, description, quantity, base_price.
-        promotion_specs: List of promotion specification dictionaries.
-        email_id: The email identifier for this order.
+        order: The Order object to apply promotions to.
+        promotion_specs: List of PromotionSpec objects or dictionaries defining the promotions to apply.
 
     Returns:
-        An Order object with all promotions applied and totals calculated
+        The modified Order object with all promotions applied and totals recalculated
     """
-    # Initialize order lines and discount tracking
-    order_lines: List[OrderLine] = []
+    # Convert dictionaries to PromotionSpec objects if needed
+    processed_promotion_specs: List[PromotionSpec] = []
+    for spec in promotion_specs:
+        if isinstance(spec, dict):
+            processed_promotion_specs.append(PromotionSpec.model_validate(spec))
+        else:
+            processed_promotion_specs.append(spec)
+
+    # Initialize discount tracking
     total_discount = 0.0
 
-    # Convert promotion_specs to PromotionSpec objects if they aren't already
-    promotion_specs_objects = []
-    for spec_data in promotion_specs:
-        if isinstance(spec_data, dict):
-            try:
-                promotion_specs_objects.append(PromotionSpec(**spec_data))
-            except Exception:
-                # Skip invalid promotion specs
-                pass
-        elif isinstance(spec_data, PromotionSpec):
-            promotion_specs_objects.append(spec_data)
-
-    # Process each item and check for applicable promotions
-    for item in ordered_items:
-        # Default values when no promotion applies
-        product_id = item.get("product_id", "")
-        description = item.get("description", "")
-        quantity = item.get("quantity", 1)
-        base_price = item.get("base_price", 0.0)
-
-        unit_price = base_price
-        promotion_applied = False
-        promotion_description = None
+    # Process each order line and check for applicable promotions
+    for line in order.lines:
+        # Reset promotion fields
+        original_unit_price = line.base_price
+        line.unit_price = line.base_price
+        line.promotion_applied = False
+        line.promotion_description = None
 
         # Check each promotion spec for applicability
-        for promotion in promotion_specs_objects:
+        for promotion in processed_promotion_specs:
             # Check min_quantity condition
             if (
                 promotion.conditions.min_quantity is not None
-                and quantity >= promotion.conditions.min_quantity
+                and line.quantity >= promotion.conditions.min_quantity
             ):
                 # Apply percentage discount if specified
                 if promotion.effects.apply_discount is not None and (
                     promotion.effects.apply_discount.to_product_id is None
-                    or promotion.effects.apply_discount.to_product_id == product_id
+                    or promotion.effects.apply_discount.to_product_id == line.product_id
                 ):
                     discount_spec = promotion.effects.apply_discount
                     if discount_spec.type == "percentage":
-                        discount_amount = unit_price * (discount_spec.amount / 100)
-                        unit_price -= discount_amount
-                        total_discount += discount_amount * quantity
-                        promotion_applied = True
-                        promotion_description = (
+                        discount_amount = line.unit_price * (discount_spec.amount / 100)
+                        line.unit_price -= discount_amount
+                        total_discount += discount_amount * line.quantity
+                        line.promotion_applied = True
+                        line.promotion_description = (
                             f"{discount_spec.amount}% discount applied"
                         )
                     elif discount_spec.type == "fixed":
                         discount_amount = min(
-                            discount_spec.amount, unit_price
+                            discount_spec.amount, line.unit_price
                         )  # Cannot discount below zero
-                        unit_price -= discount_amount
-                        total_discount += discount_amount * quantity
-                        promotion_applied = True
-                        promotion_description = (
+                        line.unit_price -= discount_amount
+                        total_discount += discount_amount * line.quantity
+                        line.promotion_applied = True
+                        line.promotion_description = (
                             f"${discount_spec.amount} discount applied"
                         )
 
                 # Handle free items if specified
                 if promotion.effects.free_items is not None:
-                    free_count = min(promotion.effects.free_items, quantity)
-                    effective_quantity = quantity
+                    free_count = min(promotion.effects.free_items, line.quantity)
+                    effective_quantity = line.quantity
                     # Calculate effective price considering free items
                     if effective_quantity > 0:
-                        discount_per_item = unit_price * (
+                        discount_per_item = line.unit_price * (
                             free_count / effective_quantity
                         )
-                        total_discount += discount_per_item * quantity
-                        unit_price -= discount_per_item
-                        promotion_applied = True
-                        promotion_description = f"Buy {effective_quantity - free_count}, get {free_count} free"
+                        total_discount += discount_per_item * line.quantity
+                        line.unit_price -= discount_per_item
+                        line.promotion_applied = True
+                        line.promotion_description = f"Buy {effective_quantity - free_count}, get {free_count} free"
 
                 # Handle free gift if specified (don't affect unit price but note in description)
                 if promotion.effects.free_gift is not None:
-                    promotion_applied = True
+                    line.promotion_applied = True
                     gift_description = promotion.effects.free_gift
-                    promotion_description = (
+                    line.promotion_description = (
                         f"Free gift: {gift_description}"
-                        if promotion_description is None
-                        else f"{promotion_description} + Free gift: {gift_description}"
+                        if line.promotion_description is None
+                        else f"{line.promotion_description} + Free gift: {gift_description}"
                     )
 
             # Check product_combination condition
@@ -120,28 +108,11 @@ def apply_promotion(
                 # Future enhancement: implement applies_every logic
                 pass
 
-        # Create the order line with final price using Pydantic model
-        order_line = OrderLine(
-            product_id=product_id,
-            description=description,
-            quantity=quantity,
-            base_price=base_price,
-            unit_price=unit_price,
-            total_price=unit_price * quantity,
-            promotion_applied=promotion_applied,
-            promotion_description=promotion_description,
-        )
+        # Update the line's total price
+        line.total_price = line.unit_price * line.quantity
 
-        order_lines.append(order_line)
-
-    # Create and return the final order using Pydantic model
-    order = Order(
-        email_id=email_id,
-        overall_status="created" if order_lines else "no_valid_products",
-        lines=order_lines,
-        total_discount=total_discount,
-        total_price=sum(line.total_price or 0.0 for line in order_lines),
-        stock_updated=False,
-    )
+    # Update order totals
+    order.total_discount = total_discount
+    order.total_price = sum(line.total_price or 0.0 for line in order.lines)
 
     return order

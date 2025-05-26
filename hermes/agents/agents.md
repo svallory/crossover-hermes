@@ -16,14 +16,19 @@ This agent serves as the entry point for all customer emails. It:
   - Name-based fuzzy matching
   - Context-based description matching
   - Handling of vague or formatted variations
+- **Consolidates duplicate product mentions** to prevent the same product from appearing multiple times:
+  - Combines quantities when mentioned separately
+  - Merges descriptions and details from multiple references
+  - Uses highest confidence score from all references
+  - Identifies same products by ID or name+type combinations
 
-The Email Analyzer establishes the context for all subsequent processing by producing a comprehensive `EmailAnalysis` that includes all product mentions found across all segments.
+The Email Analyzer establishes the context for all subsequent processing by producing a comprehensive `EmailAnalysis` that includes consolidated product mentions across all segments.
 
 ## 2. Product Resolver Agent (stockkeeper.py)
 
-This agent takes product mentions from the Email Analyzer and converts them to catalog product candidates. It:
+This agent takes **consolidated product mentions** from the Email Analyzer and converts them to catalog product candidates. It:
 
-- Deduplicates product mentions from all segments using LLM analysis
+- Receives pre-consolidated product mentions (no deduplication needed)
 - Resolves product mentions to top-K catalog product candidates using:
   - Exact ID matching (returns immediately with single result)
   - Semantic vector search with ChromaDB for fuzzy matching
@@ -33,7 +38,7 @@ This agent takes product mentions from the Email Analyzer and converts them to c
 - Includes original mention context in candidate metadata
 - Tracks resolution metrics including candidates found and search performance
 
-**Key Architectural Change**: The Product Resolver no longer performs LLM disambiguation. Instead, it returns all viable candidates (typically 1-3 per mention) and lets downstream agents make the final selection with full context.
+**Key Architectural Role**: The Product Resolver serves as a **procedural node** that efficiently bridges unstructured mentions to structured catalog candidates using RAG (ChromaDB vector search), while leaving intelligent product selection to downstream LLM-powered agents.
 
 The Product Resolver produces a `ResolvedProductsOutput` containing candidate products with their confidence scores and any unresolved mentions.
 
@@ -89,7 +94,7 @@ This agent takes the outputs from previous agents and creates the final response
 - Creates an appropriate subject line for the response email
 - Provides structured response points for analysis
 
-The Response Composer produces a `ComposedResponse` containing the final, personalized response text that will be sent to the customer.
+The Response Composer produces a `ComposerOutput` containing the final, personalized response text that will be sent to the customer.
 
 ## LangGraph Workflow Implementation
 
@@ -110,15 +115,15 @@ The workflow is defined by the `workflow` object, which orchestrates the entire 
 ```mermaid
 flowchart TD
     Start([Start])
-    Analyze[Email Analyzer]
-    Stockkeeper[Product Resolver]
+    Analyze[Email Analyzer<br/>+ Mention Consolidation]
+    Stockkeeper[Product Resolver<br/>RAG + Candidates]
     Order[Order Processor]
     Inquiry[Inquiry Responder]
     Compose[Response Composer]
     End([End])
 
     Start --> Analyze
-    Analyze -->|Extract Product Mentions| Stockkeeper
+    Analyze -->|Consolidated Mentions| Stockkeeper
     Stockkeeper -->|Multiple Candidates per Mention| Order & Inquiry
     Stockkeeper -->|Multiple Candidates per Mention| Order
     Stockkeeper -->|Multiple Candidates per Mention| Inquiry
@@ -136,9 +141,9 @@ This document describes the flow of the Hermes agent system, showing how custome
 
 The Hermes system uses a directed graph of specialized agents to process customer emails:
 
-1. **Email Analyzer**: Analyzes and classifies the customer email, extracting intents, product mentions, and other key information.
+1. **Email Analyzer**: Analyzes and classifies the customer email, extracting intents, product mentions, and other key information. **Now includes mention consolidation** to prevent duplicate product references.
 
-2. **Product Resolver**: Takes product mentions from the Email Analyzer, deduplicates them, and resolves them to **multiple product candidates** from the catalog for downstream selection.
+2. **Product Resolver**: Takes **consolidated product mentions** from the Email Analyzer and resolves them to **multiple product candidates** from the catalog for downstream selection.
 
 3. **Order Processor** (conditional): If the email contains an order request, processes the order while **naturally selecting the best products** from candidates during LLM processing.
 
@@ -147,6 +152,10 @@ The Hermes system uses a directed graph of specialized agents to process custome
 5. **Response Composer**: Combines outputs from the order processor and inquiry responder to generate a comprehensive response to the customer.
 
 ## Key Architectural Principles
+
+### Data Quality at Source
+- **Mention Consolidation**: Duplicate product mentions are consolidated at the classifier level, ensuring clean data flows through the entire pipeline
+- **Efficient Processing**: Fewer mentions to resolve means faster processing and better resource utilization
 
 ### Efficient LLM Usage
 - **Single Point of Selection**: Product disambiguation happens naturally during response generation, not in a separate step
@@ -164,16 +173,16 @@ The Hermes system uses a directed graph of specialized agents to process custome
 
 - **Purpose**: Understand and extract structured information from customer emails
 - **Input**: Raw email text with optional subject line
-- **Output**: `EmailAnalysis` with intents, product mentions, and customer information
-- **Implementation**: Uses LLM with structured output parsing
+- **Output**: `EmailAnalysis` with intents, **consolidated product mentions**, and customer information
+- **Implementation**: Uses LLM with structured output parsing and mention consolidation logic
 
 ### Product Resolver
 
-- **Purpose**: Convert product mentions to **multiple viable candidates** for downstream selection
-- **Input**: Product mentions from Email Analyzer
+- **Purpose**: Convert **consolidated product mentions** to **multiple viable candidates** for downstream selection
+- **Input**: Consolidated product mentions from Email Analyzer
 - **Output**: `ResolvedProductsOutput` with **top-K candidate products per mention** and unresolved mentions
-- **Implementation**: Uses ChromaDB semantic search with metadata filtering
-- **Key Change**: Returns candidates instead of making selection decisions
+- **Implementation**: Uses ChromaDB semantic search with metadata filtering (RAG)
+- **Key Role**: Procedural node that efficiently bridges mentions to candidates using vector search
 
 ### Order Processor
 
@@ -195,13 +204,13 @@ The Hermes system uses a directed graph of specialized agents to process custome
 
 - **Purpose**: Generate the final personalized customer response
 - **Input**: Outputs from all previous agents with selected products
-- **Output**: `ComposedResponse` with complete email response
+- **Output**: `ComposerOutput` with complete email response
 - **Implementation**: Uses strong LLM for natural language generation
 
 ## State Management
 
 The system maintains a comprehensive `OverallState` object that accumulates outputs from each agent.
-**Product candidates** flow through the state with rich metadata, enabling informed selection by downstream agents.
+**Consolidated product mentions and candidates** flow through the state with rich metadata, enabling informed selection by downstream agents.
 
 ## Error Handling
 

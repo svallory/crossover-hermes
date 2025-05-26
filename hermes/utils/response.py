@@ -1,8 +1,8 @@
 from typing import TypeVar
 
+from ..workflow.types import WorkflowNodeOutput
 from hermes.model.enums import Agents
 from hermes.model.errors import Error
-from hermes.custom_types import WorkflowNodeOutput
 
 SpecificAgent = TypeVar("SpecificAgent", bound=Agents)
 OutputType = TypeVar("OutputType")

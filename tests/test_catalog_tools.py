@@ -32,8 +32,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function directly (not a @tool)
-        result = find_product_by_id(product_id="TST001")
+        # Call @tool function using invoke
+        result = find_product_by_id.invoke({"product_id": "TST001"})
 
         # Verify result
         self.assertIsInstance(result, Product)
@@ -47,8 +47,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function directly (not a @tool)
-        result = find_product_by_id(product_id="NONEXISTENT")
+        # Call @tool function using invoke
+        result = find_product_by_id.invoke({"product_id": "NONEXISTENT"})
 
         # Verify result
         self.assertIsInstance(result, ProductNotFound)
@@ -60,8 +60,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function directly with empty string
-        result = find_product_by_id(product_id="")
+        # Call @tool function using invoke with empty string
+        result = find_product_by_id.invoke({"product_id": ""})
 
         # Verify result
         self.assertIsInstance(result, ProductNotFound)
@@ -72,8 +72,8 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function directly (not a @tool)
-        result = find_product_by_name(product_name="Test Shirt")
+        # Call @tool function using invoke
+        result = find_product_by_name.invoke({"product_name": "Test Shirt"})
 
         # Verify result - should match both "Test Shirt" products in mock data
         self.assertIsInstance(result, list)
@@ -88,9 +88,9 @@ class TestCatalogTools(unittest.TestCase):
         # Setup mock
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call function directly with high threshold to force no matches
-        result = find_product_by_name(
-            product_name="Nonexistent Product", threshold=0.99
+        # Call @tool function using invoke with high threshold to force no matches
+        result = find_product_by_name.invoke(
+            {"product_name": "Nonexistent Product", "threshold": 0.99}
         )
 
         # Verify result
@@ -159,20 +159,21 @@ class TestCatalogTools(unittest.TestCase):
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Mock find_product_by_id to return a valid product
-        with patch("hermes.tools.catalog_tools.find_product_by_id") as mock_find:
-            mock_find.return_value = Product(
-                product_id="TST001",
-                name="Test Shirt",
-                description="A comfortable test shirt",
-                category=ProductCategory.SHIRTS,
-                stock=10,
-                price=29.99,
-                product_type="",
-                seasons=[Season.SPRING],
-                metadata=None,
-            )
+        # Mock find_product_by_id tool to return a valid product
+        mock_tool = MagicMock()
+        mock_tool.invoke.return_value = Product(
+            product_id="TST001",
+            name="Test Shirt",
+            description="A comfortable test shirt",
+            category=ProductCategory.SHIRTS,
+            stock=10,
+            price=29.99,
+            product_type="",
+            seasons=[Season.SPRING],
+            metadata=None,
+        )
 
+        with patch("hermes.tools.catalog_tools.find_product_by_id", mock_tool):
             # Call @tool function using invoke
             result = find_complementary_products.invoke(
                 {"product_id": "TST001", "limit": 2}
@@ -185,10 +186,11 @@ class TestCatalogTools(unittest.TestCase):
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_find_complementary_products_invalid_product(self, mock_get_vector_store):
         """Test finding complementary products with invalid product ID."""
-        # Mock find_product_by_id to return ProductNotFound
-        with patch("hermes.tools.catalog_tools.find_product_by_id") as mock_find:
-            mock_find.return_value = ProductNotFound(message="Product not found")
+        # Mock find_product_by_id tool to return ProductNotFound
+        mock_tool = MagicMock()
+        mock_tool.invoke.return_value = ProductNotFound(message="Product not found")
 
+        with patch("hermes.tools.catalog_tools.find_product_by_id", mock_tool):
             # Call @tool function using invoke
             result = find_complementary_products.invoke({"product_id": "NONEXISTENT"})
 
@@ -303,7 +305,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test the typo case: DHN0987 -> CHN0987
-        result = find_product_by_id(product_id="DHN0987")
+        result = find_product_by_id.invoke({"product_id": "DHN0987"})
 
         # Should find CHN0987 through fuzzy matching
         self.assertIsInstance(result, Product)
@@ -317,7 +319,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test spaces in product ID
-        result = find_product_by_id(product_id="CBT 89 01")
+        result = find_product_by_id.invoke({"product_id": "CBT 89 01"})
 
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, "CBT8901")
@@ -330,7 +332,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test brackets and spaces in product ID
-        result = find_product_by_id(product_id="[CBT 89 01]")
+        result = find_product_by_id.invoke({"product_id": "[CBT 89 01]"})
 
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, "CBT8901")
@@ -343,7 +345,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         # Test lowercase product ID
-        result = find_product_by_id(product_id="rsg8901")
+        result = find_product_by_id.invoke({"product_id": "rsg8901"})
 
         self.assertIsInstance(result, Product)
         self.assertEqual(result.product_id, "RSG8901")
@@ -472,7 +474,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_df = get_test_products_df()
         mock_load_df.return_value = mock_df
 
-        result = find_product_by_id(product_id="XXX9999")
+        result = find_product_by_id.invoke({"product_id": "XXX9999"})
         self.assertIsInstance(result, ProductNotFound)
 
 
@@ -534,7 +536,7 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         test_product_id = "RSG8901"  # Retro Sunglasses
 
         # Call the tool function directly
-        result = find_product_by_id(product_id=test_product_id)
+        result = find_product_by_id.invoke({"product_id": test_product_id})
 
         # Verify the result is a Product object
         self.assertIsInstance(result, Product)
@@ -553,7 +555,7 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         expected_name = "Chunky Knit Beanie"  # Name in products.csv for CHN0987
 
         # Call the tool function directly
-        result = find_product_by_id(product_id=product_id_to_find)
+        result = find_product_by_id.invoke({"product_id": product_id_to_find})
 
         # Verify the result is a Product object
         self.assertIsInstance(result, Product)
@@ -570,7 +572,7 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         mock_load_df.return_value = get_test_products_df()
 
         # Call with non-existent ID
-        result = find_product_by_id(product_id="NONEXISTENT")
+        result = find_product_by_id.invoke({"product_id": "NONEXISTENT"})
 
         # Verify the result is a ProductNotFound object
         self.assertIsInstance(result, ProductNotFound)
@@ -626,20 +628,21 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         }
         mock_vector_store.similarity_search.return_value = [mock_doc]
 
-        # Mock find_product_by_id to return the original product
-        with patch("hermes.tools.catalog_tools.find_product_by_id") as mock_find:
-            mock_find.return_value = Product(
-                product_id="LTH0976",
-                name="Leather Wallet",
-                description="Premium leather wallet with multiple card slots",
-                category=ProductCategory.ACCESSORIES,
-                stock=25,
-                price=45.0,
-                product_type="",
-                seasons=[Season.SPRING],
-                metadata=None,
-            )
+        # Mock find_product_by_id tool to return a valid product
+        mock_tool = MagicMock()
+        mock_tool.invoke.return_value = Product(
+            product_id="LTH0976",
+            name="Leather Wallet",
+            description="Premium leather wallet with multiple card slots",
+            category=ProductCategory.ACCESSORIES,
+            stock=25,
+            price=45.0,
+            product_type="",
+            seasons=[Season.SPRING],
+            metadata=None,
+        )
 
+        with patch("hermes.tools.catalog_tools.find_product_by_id", mock_tool):
             # Call function using invoke
             result = find_complementary_products.invoke(
                 {"product_id": "LTH0976", "limit": 2}

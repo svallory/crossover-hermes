@@ -4,8 +4,8 @@ input:
   message: "Hi team, I recently purchased the Tailored Suit (TLR5432) and overall, I'm very impressed with the quality and fit for the price! The wool feels great. My only small feedback is that the trouser legs are a little wider at the ankle than I typically prefer for a modern suit. Is any tailoring service or recommendation available through you for slight alterations, like tapering the trousers? Not a dealbreaker at all, still love the suit! Best, Michael P."
 classifier:
   email_analysis:
-    email_id: E015
-    language: english
+  email_id: E015
+  language: english
     primary_intent: feedback_and_inquiry
     customer_pii:
       name: Michael P.
@@ -61,7 +61,7 @@ stockkeeper:
     feedback_type: positive_and_constructive
 advisor:
   inquiry_answers:
-    email_id: E015
+  email_id: E015
     primary_products:
       - product_id: TLR5432
         name: Tailored Suit
@@ -90,10 +90,10 @@ advisor:
     unsuccessful_references: []
 fulfiller: null
 composer:
-  composed_response:
-    email_id: E015
-    subject: "Re: Feedback & Question about Men's Tailored Suit (TLR5432)"
-    response_body: |
+
+  email_id: E015
+  subject: "Re: Feedback & Question about Men's Tailored Suit (TLR5432)"
+  response_body: |
       Hi Michael,
 
       Thank you so much for your feedback on the TLR5432 Tailored Suit! We're delighted to hear that you're impressed with the quality, fit, and the feel of the wool – that's fantastic!
@@ -106,9 +106,9 @@ composer:
 
       Best regards,
       Hermes - Delivering divine fashion
-    language: english
-    tone: appreciative_helpful
-    response_points:
+  language: english
+  tone: appreciative_helpful
+  response_points:
       - content_type: greeting
         content: Hi Michael,
         priority: 10

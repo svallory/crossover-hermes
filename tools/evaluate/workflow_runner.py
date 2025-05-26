@@ -15,8 +15,11 @@ if str(PROJECT_ROOT) not in sys.path:
 from langsmith import Client
 
 # Import Hermes workflow
-from hermes.agents.workflow import run_workflow
+from hermes.workflow.run import run_workflow
 from hermes.config import HermesConfig
+from hermes.agents.classifier import ClassifierInput
+from hermes.model.email import CustomerEmail
+
 
 async def run_with_dataset(
     dataset_id: str,
@@ -81,10 +84,10 @@ async def run_with_dataset(
     for example in examples:
         try:
             # Extract input data from the example
-            inputs = example.inputs
+            inputs = example.inputs or {}
             email_id = str(example.id)
-            email_subject = inputs.get("email_subject", "")
-            email_message = inputs.get("email_message", "")
+            email_subject = inputs.get("email_subject", "") if inputs else ""
+            email_message = inputs.get("email_message", "") if inputs else ""
 
             print(f"Processing email {email_id}: {email_subject[:50]}...")
 
@@ -95,20 +98,41 @@ async def run_with_dataset(
                 "email_message": email_message,
             }
 
+            # Create proper input state
+            input_state = ClassifierInput(
+                email=CustomerEmail(
+                    email_id=email_id,
+                    subject=email_subject,
+                    message=email_message,
+                )
+            )
+
             # Run the workflow directly
-            workflow_result = await run_workflow(email_data=email_data, hermes_config=hermes_config)
+            workflow_result = await run_workflow(
+                input_state=input_state, hermes_config=hermes_config
+            )
 
             # Store the workflow state in our results format
             results.append(
                 {
                     "input": email_data,
                     "output": {
-                        "email-analyzer": workflow_result.get("email_analysis"),
-                        "order-processor": workflow_result.get("order_result"),
-                        "inquiry-responder": workflow_result.get("inquiry_response"),
-                        "response-composer": workflow_result.get("composed_response"),
+                        "email-analyzer": workflow_result.classifier.model_dump()
+                        if workflow_result.classifier
+                        else None,
+                        "order-processor": workflow_result.fulfiller.model_dump()
+                        if workflow_result.fulfiller
+                        else None,
+                        "inquiry-responder": workflow_result.advisor.model_dump()
+                        if workflow_result.advisor
+                        else None,
+                        "response-composer": workflow_result.composer.model_dump()
+                        if workflow_result.composer
+                        else None,
                     },
-                    "errors": workflow_result.get("errors", {}),
+                    "errors": workflow_result.errors
+                    if hasattr(workflow_result, "errors")
+                    else {},
                 }
             )
 
@@ -119,28 +143,43 @@ async def run_with_dataset(
                     name=f"Hermes Workflow - {email_id}",
                     inputs=email_data,
                     outputs={
-                        "email_analysis": workflow_result.get("email_analysis"),
-                        "order_result": workflow_result.get("order_result"),
-                        "inquiry_response": workflow_result.get("inquiry_response"),
-                        "composed_response": workflow_result.get("composed_response"),
+                        "email_analysis": workflow_result.classifier.model_dump()
+                        if workflow_result.classifier
+                        else None,
+                        "order_result": workflow_result.fulfiller.model_dump()
+                        if workflow_result.fulfiller
+                        else None,
+                        "inquiry_response": workflow_result.advisor.model_dump()
+                        if workflow_result.advisor
+                        else None,
+                        "composer_output": workflow_result.composer.model_dump()
+                        if workflow_result.composer
+                        else None,
                     },
                     tags=["hermes_workflow", email_id],
                     run_type="chain",
                 )
 
-                print(f"  Completed workflow for email {email_id} - Run ID: {run.id}")
+                print(
+                    f"  Completed workflow for email {email_id} - Run ID: {run.id if run else 'unknown'}"
+                )
             except Exception as e:
                 print(f"  Error logging run to LangSmith: {e}")
 
         except Exception as e:
             print(f"Error processing example {example.id}: {e}")
             # Add error to results for tracking
+            safe_inputs = example.inputs or {}
             results.append(
                 {
                     "input": {
                         "email_id": str(example.id),
-                        "email_subject": inputs.get("email_subject", ""),
-                        "email_message": inputs.get("email_message", ""),
+                        "email_subject": safe_inputs.get("email_subject", "")
+                        if safe_inputs
+                        else "",
+                        "email_message": safe_inputs.get("email_message", "")
+                        if safe_inputs
+                        else "",
                     },
                     "output": {},
                     "errors": {"workflow_execution": str(e)},

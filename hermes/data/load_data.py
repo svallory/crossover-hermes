@@ -1,6 +1,6 @@
 import pandas as pd  # type: ignore
 import os
-from chromadb.api.models.Collection import Collection
+from chromadb.api.models.Collection import Collection  # type: ignore
 
 from hermes.config import HermesConfig
 from hermes.utils.gsheets import read_data_from_gsheet
@@ -11,7 +11,10 @@ vector_store: Collection | None = None
 
 input_spreadsheet_id = HermesConfig().input_spreadsheet_id
 
-def _parse_data_source(source: str, default_sheet_name: str) -> tuple[str | None, str | None, str | None]:
+
+def _parse_data_source(
+    source: str, default_sheet_name: str
+) -> tuple[str | None, str | None, str | None]:
     """Parses a data source string.
 
     Args:
@@ -26,15 +29,22 @@ def _parse_data_source(source: str, default_sheet_name: str) -> tuple[str | None
     if "#" in source:
         gsheet_id, sheet_name = source.split("#", 1)
         return gsheet_id, sheet_name, None
-    elif os.path.exists(source): # If it's a path to an existing file, assume it's a CSV
+    elif os.path.exists(
+        source
+    ):  # If it's a path to an existing file, assume it's a CSV
         return None, None, source
     else:
         # Default to assuming it's a GSheet ID using the default_sheet_name
-        print(f"Warning: Source '{source}' not found as a local file and does not contain '#'. "
-              f"Assuming it is a Google Sheet ID for the sheet '{default_sheet_name}'.")
+        print(
+            f"Warning: Source '{source}' not found as a local file and does not contain '#'. "
+            f"Assuming it is a Google Sheet ID for the sheet '{default_sheet_name}'."
+        )
         return source, default_sheet_name, None
 
-def load_emails_df(source: str = f"{input_spreadsheet_id}#emails", default_sheet_name: str = "emails") -> pd.DataFrame:
+
+def load_emails_df(
+    source: str = f"{input_spreadsheet_id}#emails", default_sheet_name: str = "emails"
+) -> pd.DataFrame:
     """Loads the emails DataFrame from a specified source (Google Sheet or local CSV file)."""
     gsheet_id, sheet_name, file_path = _parse_data_source(source, default_sheet_name)
 
@@ -49,7 +59,10 @@ def load_emails_df(source: str = f"{input_spreadsheet_id}#emails", default_sheet
         raise ValueError(f"Invalid email data source: {source}")
 
 
-def load_products_df(source: str = f"{input_spreadsheet_id}#products", default_sheet_name: str = "products") -> pd.DataFrame:
+def load_products_df(
+    source: str = f"{input_spreadsheet_id}#products",
+    default_sheet_name: str = "products",
+) -> pd.DataFrame:
     """Loads the products DataFrame from a specified source (Google Sheet or local CSV file) with memoization.
 
     Args:
@@ -62,13 +75,19 @@ def load_products_df(source: str = f"{input_spreadsheet_id}#products", default_s
     global _products_df
 
     if _products_df is None:
-        gsheet_id, sheet_name, file_path = _parse_data_source(source, default_sheet_name)
+        gsheet_id, sheet_name, file_path = _parse_data_source(
+            source, default_sheet_name
+        )
 
         if file_path:
-            print(f"Loading products from local file: {file_path} (assuming CSV format)")
+            print(
+                f"Loading products from local file: {file_path} (assuming CSV format)"
+            )
             _products_df = pd.read_csv(file_path)
         elif gsheet_id and sheet_name:
-            print(f"Loading products from spreadsheet ID: {gsheet_id}, sheet: {sheet_name}")
+            print(
+                f"Loading products from spreadsheet ID: {gsheet_id}, sheet: {sheet_name}"
+            )
             _products_df = read_data_from_gsheet(gsheet_id, sheet_name)
         else:
             # This case should ideally not be reached

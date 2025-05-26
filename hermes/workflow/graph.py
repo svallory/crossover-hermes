@@ -13,27 +13,29 @@ The workflow is implemented as a LangGraph StateGraph.
 from collections.abc import Hashable
 
 from langchain_core.runnables import RunnableConfig
-from langgraph.constants import END, START
+from langgraph.constants import END, START  # type: ignore
 
 # LangGraph imports
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph  # type: ignore
 
-from hermes.agents.advisor.agent import respond_to_inquiry
+from hermes.agents.advisor.agent import run_advisor
 
 # Import agent functions directly
-from hermes.agents.classifier.agent import analyze_email
+from hermes.agents.classifier.agent import run_classifier
 
 # Import agent models
-from hermes.agents.classifier.models import (
+from hermes.agents.classifier import (
     ClassifierInput,
 )
-from hermes.agents.composer.agent import compose_response
-from hermes.agents.fulfiller.agent import process_order
-from hermes.agents.stockkeeper.agent import resolve_product_mentions
+from hermes.agents.composer.agent import run_composer
+from hermes.agents.fulfiller.agent import run_fulfiller
+from hermes.agents.stockkeeper.agent import run_stockkeeper
 from hermes.agents.stockkeeper.models import StockkeeperInput
 from hermes.workflow.states import OverallState
 from hermes.config import HermesConfig
 from hermes.model import Nodes
+from hermes.agents.fulfiller.models import FulfillerInput
+from hermes.model.email import CustomerEmail
 
 
 def route_resolver_result(
@@ -45,23 +47,20 @@ def route_resolver_result(
     if classifier is not None:
         analysis = classifier.email_analysis
 
-        return (
-            Nodes.ADVISOR
-            if analysis.primary_intent == "product inquiry"
-            else [Nodes.FULFILLER, Nodes.ADVISOR]
-            if analysis.has_inquiry()
-            else Nodes.FULFILLER
-        )
+        if analysis.primary_intent == "product inquiry":
+            return Nodes.ADVISOR
+        elif analysis.has_inquiry():
+            return [Nodes.FULFILLER, Nodes.ADVISOR]
+        else:
+            return Nodes.FULFILLER
 
     return END
 
 
 async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dict:
     # Convert OverallState to ClassifierInput before passing to analyze_email
-    classifier_input = ClassifierInput(
-        email_id=state.email_id, subject=state.subject, message=state.message
-    )
-    return await analyze_email(state=classifier_input, runnable_config=config)
+    classifier_input = ClassifierInput(email=state.email)
+    return await run_classifier(state=classifier_input, runnable_config=config)
 
 
 async def resolve_products_node(state: OverallState, config: RunnableConfig) -> dict:
@@ -92,30 +91,25 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
     stockkeeper_input = StockkeeperInput(classifier=classifier)
 
     # Call resolve_product_mentions with the StockkeeperInput
-    return await resolve_product_mentions(
-        state=stockkeeper_input, runnable_config=config
-    )
+    return await run_stockkeeper(state=stockkeeper_input, runnable_config=config)
 
 
 async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
-    """Wrapper function for process_order that correctly extracts email_id and classifier from state.
+    """Wrapper function for run_fulfiller that converts OverallState to FulfillerInput.
 
     Args:
-        state: The workflow state containing classifier output
+        state: The workflow state containing classifier and stockkeeper outputs
         config: Runnable configuration for the agent
 
     Returns:
-        Result from process_order function in dictionary format
+        Result from run_fulfiller function in dictionary format
 
     """
-    # Extract email_id from state
-    email_id = state.email_id
-
-    # Extract classifier from state - handle potential None case
+    # Extract classifier and stockkeeper outputs from state
     classifier = state.classifier
-    stockkeeper_output_data = state.stockkeeper
+    stockkeeper_output = state.stockkeeper
 
-    if classifier is None or stockkeeper_output_data is None:
+    if classifier is None or stockkeeper_output is None:
         # If classifier or stockkeeper_output is None, return an error
         from hermes.model import Agents
         from hermes.utils.response import create_node_response
@@ -127,49 +121,20 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
         )
         return create_node_response(Agents.FULFILLER, Exception(error_message))
 
-    # Get resolved products if available
-    # resolved_products = state.stockkeeper.resolved_products if state.stockkeeper else [] # No longer directly needed here
-    # unresolved_mentions = state.stockkeeper.unresolved_mentions if state.stockkeeper else [] # No longer directly needed here
-
-    # Convert ClassifierOutput to dict for process_order
-    if hasattr(classifier, "model_dump"):
-        email_analysis_dict = classifier.model_dump()
-    else:
-        # Fallback if model_dump not available
-        email_analysis_dict = dict(classifier)
-
-    # Add resolved products to the email analysis dict (process_order expects this within email_analysis)
-    # This was how it was previously, but process_order signature is (email_analysis, stockkeeper_output, ...)
-    # email_analysis_dict["resolved_products"] = resolved_products
-    # email_analysis_dict["unresolved_mentions"] = unresolved_mentions
-
-    hermes_config_instance = HermesConfig.from_runnable_config(config)
-    promotion_specs_data = hermes_config_instance.promotion_specs
-
-    # Call process_order with the extracted information
-    processed_order_result = process_order(
-        email_analysis=email_analysis_dict,  # This should be the raw classifier output / email analysis part
-        stockkeeper_output=stockkeeper_output_data,  # Pass the full StockkeeperOutput
-        promotion_specs=promotion_specs_data,
-        email_id=email_id,
-        hermes_config=hermes_config_instance,
+    # Create FulfillerInput from the state
+    fulfiller_input = FulfillerInput(
+        email=state.email,
+        classifier=classifier,
+        stockkeeper=stockkeeper_output,
     )
 
-    # Convert the result to a dictionary for LangGraph
-    from hermes.agents.fulfiller.models import FulfillerOutput
-    from hermes.model import Agents
-    from hermes.utils.response import create_node_response
-
-    # Create the expected output type
-    fulfiller_output_response = FulfillerOutput(order_result=processed_order_result)
-
-    # Return in the format expected by LangGraph
-    return create_node_response(Agents.FULFILLER, fulfiller_output_response)
+    # Call run_fulfiller with the FulfillerInput
+    return await run_fulfiller(state=fulfiller_input, runnable_config=config)
 
 
 # Build the graph
 graph_builder = StateGraph(
-    OverallState, input=ClassifierInput, config_schema=HermesConfig
+    OverallState, input=CustomerEmail, config_schema=HermesConfig
 )
 
 # Add nodes with the agent functions directly, specifying that they expect runnable_config
@@ -181,11 +146,11 @@ graph_builder.add_node(
 )
 graph_builder.add_node(
     Nodes.ADVISOR,
-    respond_to_inquiry,
+    run_advisor,
 )
 graph_builder.add_node(
     Nodes.COMPOSER,
-    compose_response,
+    run_composer,
 )
 
 # Add edges to create the workflow

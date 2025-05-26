@@ -19,7 +19,7 @@ from hermes.data.load_data import load_products_df
 from hermes.model import ProductCategory, Season
 from hermes.model.product import AlternativeProduct, Product, Season
 from hermes.model.errors import ProductNotFound
-from hermes.agents.classifier.models import ProductMention
+from hermes.model.email import ProductMention
 
 # Import get_vector_store and metadata conversion from hermes.data.vector_store
 from hermes.data.vector_store import get_vector_store, metadata_to_product
@@ -39,6 +39,7 @@ class FuzzyMatchResult(BaseModel):
     similarity_score: float = Field(description="Similarity score between 0.0 and 1.0")
 
 
+@tool(parse_docstring=True)
 def find_product_by_id(product_id: str) -> Product | ProductNotFound:
     """Find a product by its ID.
 
@@ -106,20 +107,8 @@ def find_product_by_id(product_id: str) -> Product | ProductNotFound:
     # Map DataFrame columns to our Product model fields
     product_row = product_data.iloc[0]
 
-    # Handle potential missing columns
-    product_dict: dict[str, Any] = {
-        "product_id": str(product_row["product_id"]),
-        "name": str(product_row["name"]),
-        "category": ProductCategory(product_row["category"]),
-        "stock": int(product_row["stock"]),
-        "description": str(product_row["description"]),
-        "product_type": str(
-            product_row.get("type", "")
-        ),  # Ensure type is included, default to empty string if missing
-        "price": float(product_row["price"]) if pd.notna(product_row["price"]) else 0.0,
-        "seasons": [],
-        "metadata": None,
-    }
+    # Handle potential missing columns with proper typing
+    seasons_list: list[Season] = []
 
     # Process seasons correctly to handle 'Fall' vs 'Autumn'
     seasons_str = str(product_row.get("seasons", "Spring"))
@@ -129,24 +118,37 @@ def find_product_by_id(product_id: str) -> Product | ProductNotFound:
             if s:
                 # Map 'Fall' to 'Autumn' if needed
                 if s == "Fall":
-                    product_dict["seasons"].append(Season.AUTUMN)
+                    seasons_list.append(Season.AUTUMN)
                 else:
                     try:
-                        product_dict["seasons"].append(Season(s))
+                        seasons_list.append(Season(s))
                     except ValueError:
                         # If not a valid season, use a default
-                        product_dict["seasons"].append(Season.SPRING)
+                        seasons_list.append(Season.SPRING)
 
     # If no seasons were added, default to Spring
-    if not product_dict["seasons"]:
-        product_dict["seasons"] = [Season.SPRING]
+    if not seasons_list:
+        seasons_list = [Season.SPRING]
 
     try:
-        return Product(**product_dict)
+        return Product(
+            product_id=str(product_row["product_id"]),
+            name=str(product_row["name"]),
+            category=ProductCategory(product_row["category"]),
+            stock=int(product_row["stock"]),
+            description=str(product_row["description"]),
+            product_type=str(product_row.get("type", "")),
+            price=float(product_row["price"])
+            if pd.notna(product_row["price"])
+            else 0.0,
+            seasons=seasons_list,
+            metadata=None,
+        )
     except Exception as e:
         return ProductNotFound(message=f"Error during product retrieval: {str(e)}")
 
 
+@tool(parse_docstring=True)
 def find_product_by_name(
     *, product_name: str, threshold: float = 0.6, top_n: int = 5
 ) -> list[FuzzyMatchResult] | ProductNotFound:
@@ -204,22 +206,8 @@ def find_product_by_name(
         if not product_data.empty:
             product_row = product_data.iloc[0]
 
-            # Build product dict with all required fields
-            product_dict = {
-                "product_id": str(product_row["product_id"]),
-                "name": str(product_row["name"]),
-                "category": ProductCategory(str(product_row["category"])),
-                "stock": int(product_row["stock"]),
-                "description": str(product_row["description"]),
-                "product_type": str(product_row.get("type", "")),
-                "seasons": [],
-                "price": float(product_row["price"])
-                if pd.notna(product_row["price"])
-                else 0.0,
-                "metadata": None,
-            }
-
-            # Process seasons correctly to handle 'Fall' vs 'Autumn'
+            # Process seasons with proper typing
+            seasons_list: list[Season] = []
             seasons_str = str(product_row.get("season", "Spring"))
             if seasons_str:
                 for s in seasons_str.split(","):
@@ -227,19 +215,31 @@ def find_product_by_name(
                     if s:
                         # Map 'Fall' to 'Autumn' if needed
                         if s == "Fall":
-                            product_dict["seasons"].append(Season.AUTUMN)
+                            seasons_list.append(Season.AUTUMN)
                         else:
                             try:
-                                product_dict["seasons"].append(Season(s))
+                                seasons_list.append(Season(s))
                             except ValueError:
                                 # If not a valid season, use a default
-                                product_dict["seasons"].append(Season.SPRING)
+                                seasons_list.append(Season.SPRING)
 
             # If no seasons were added, default to Spring
-            if not product_dict["seasons"]:
-                product_dict["seasons"] = [Season.SPRING]
+            if not seasons_list:
+                seasons_list = [Season.SPRING]
 
-            product = Product(**product_dict)  # type: ignore[arg-type]
+            product = Product(
+                product_id=str(product_row["product_id"]),
+                name=str(product_row["name"]),
+                category=ProductCategory(str(product_row["category"])),
+                stock=int(product_row["stock"]),
+                description=str(product_row["description"]),
+                product_type=str(product_row.get("type", "")),
+                seasons=seasons_list,
+                price=float(product_row["price"])
+                if pd.notna(product_row["price"])
+                else 0.0,
+                metadata=None,
+            )
             results.append(
                 FuzzyMatchResult(
                     matched_product=product,
@@ -280,7 +280,7 @@ def search_products_by_description(
         vector_store = get_vector_store()
 
         # Prepare filters
-        where_clause = {}
+        where_clause: dict[str, Any] = {}
         if category_filter:
             where_clause["category"] = category_filter
         if season_filter:
@@ -344,7 +344,7 @@ def find_complementary_products(
     """
     try:
         # First verify that the main product exists
-        main_product_result = find_product_by_id(product_id)
+        main_product_result = find_product_by_id.invoke({"product_id": product_id})
         if isinstance(main_product_result, ProductNotFound):
             return main_product_result
 
@@ -451,7 +451,7 @@ def search_products_with_filters(
         vector_store = get_vector_store()
 
         # Prepare filters for vector store
-        where_clause = {}
+        where_clause: dict[str, Any] = {}
         if category:
             where_clause["category"] = category
         if season:
@@ -635,19 +635,8 @@ def find_alternatives(
     # Convert to AlternativeProduct objects
     result = []
     for _, row in top_alternatives.iterrows():
-        # Create the product object
-        product_dict = {
-            "product_id": str(row["product_id"]),
-            "name": str(row["name"]),
-            "description": str(row["description"]),
-            "category": str(row["category"]),
-            "product_type": str(row.get("type", "")),
-            "stock": int(row["stock"]),
-            "price": float(row["price"]),
-            "seasons": [],
-        }
-
-        # Process seasons correctly to handle 'Fall' vs 'Autumn'
+        # Process seasons with proper typing
+        seasons_list: list[Season] = []
         seasons_str = str(row.get("season", ""))
         if seasons_str:
             for s in seasons_str.split(","):
@@ -655,19 +644,29 @@ def find_alternatives(
                 if s:
                     # Map 'Fall' to 'Autumn' if needed
                     if s == "Fall":
-                        product_dict["seasons"].append(Season.AUTUMN)
+                        seasons_list.append(Season.AUTUMN)
                     else:
                         try:
-                            product_dict["seasons"].append(Season(s))
+                            seasons_list.append(Season(s))
                         except ValueError:
                             # If not a valid season, use a default
-                            product_dict["seasons"].append(Season.SPRING)
+                            seasons_list.append(Season.SPRING)
 
         # If no seasons were added, default to Spring
-        if not product_dict["seasons"]:
-            product_dict["seasons"] = [Season.SPRING]
+        if not seasons_list:
+            seasons_list = [Season.SPRING]
 
-        product = Product(**product_dict)
+        product = Product(
+            product_id=str(row["product_id"]),
+            name=str(row["name"]),
+            description=str(row["description"]),
+            category=ProductCategory(str(row["category"])),
+            product_type=str(row.get("type", "")),
+            stock=int(row["stock"]),
+            price=float(row["price"]),
+            seasons=seasons_list,
+            metadata=None,
+        )
 
         # Calculate similarity score (normalized between 0-1)
         similarity_score = float(row["price_similarity"])
@@ -711,7 +710,9 @@ async def resolve_product_mention(
 
         # 1. Try exact product ID match first (highest priority)
         if mention.product_id:
-            id_result = find_product_by_id(product_id=mention.product_id)
+            id_result: Product | ProductNotFound = await find_product_by_id.ainvoke(
+                {"product_id": mention.product_id}
+            )
             if isinstance(id_result, Product):
                 # Add resolution metadata
                 if not id_result.metadata:

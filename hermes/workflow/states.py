@@ -9,8 +9,10 @@ from hermes.agents.classifier.models import ClassifierOutput
 from hermes.agents.composer.models import ComposerOutput
 from hermes.agents.fulfiller.models import FulfillerOutput
 from hermes.agents.stockkeeper.models import StockkeeperOutput
+from hermes.model.email import CustomerEmail
 from hermes.model.enums import Agents  # This should be fine
 from hermes.model.errors import Error
+
 
 def merge_errors(dict1, dict2):
     """Merge two error dictionaries."""
@@ -22,9 +24,7 @@ def merge_errors(dict1, dict2):
 class OverallState(BaseModel):
     """Overall state that can contain any combination of analysis, processing, and response."""
 
-    email_id: str
-    subject: str | None = None
-    message: str
+    email: CustomerEmail
 
     # Use properly quoted string literals for forward references
     classifier: ClassifierOutput | None = None

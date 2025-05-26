@@ -6,8 +6,8 @@ input:
     for my inventory. Thank you!
 classifier:
   email_analysis:
-    email_id: E001
-    language: english
+  email_id: E001
+  language: english
     primary_intent: order request
     customer_pii: {}
     segments:
@@ -48,7 +48,7 @@ stockkeeper:
 advisor: null
 fulfiller:
   order_result:
-    email_id: E001
+  email_id: E001
     overall_status: created
     ordered_items:
       - product_id: LTH0976
@@ -73,10 +73,10 @@ fulfiller:
       Wallet.
     stock_updated: true
 composer:
-  composed_response:
-    email_id: E001
-    subject: Your Order for LTH0976 Leather Bifold Wallets is Confirmed
-    response_body: |
+
+  email_id: E001
+  subject: Your Order for LTH0976 Leather Bifold Wallets is Confirmed
+  response_body: |
       Dear Customer,
 
       Thank you for your order and for your interest in our LTH0976 Leather Bifold Wallets for your new boutique shop! We're excited for your new venture.
@@ -93,9 +93,9 @@ composer:
 
       Best regards,
       Hermes - Delivering divine fashion
-    language: english
-    tone: professional
-    response_points:
+  language: english
+  tone: professional
+  response_points:
       - content_type: greeting
         content: Dear Customer,
         priority: 10

@@ -57,12 +57,19 @@ def metadata_to_product(metadata: Dict[str, Any]) -> Product:
     for s in str(season_str).split(","):
         s = s.strip()
         if s:
-            if s == "Fall":
+            # Handle 'All seasons' (valid enum value)
+            if s == "All seasons":
+                seasons.append(Season.ALL_SEASONS)
+            # Map 'Fall' to 'Autumn' (data inconsistency)
+            elif s == "Fall":
                 seasons.append(Season.AUTUMN)
+            # Handle other valid seasons
             else:
                 try:
                     seasons.append(Season(s))
                 except ValueError:
+                    # If season is not valid, default to Spring
+                    print(f"Warning: Invalid season '{s}' found, defaulting to Spring")
                     seasons.append(Season.SPRING)
 
     if not seasons:

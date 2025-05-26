@@ -2,7 +2,7 @@
 
 import pytest
 from hermes.tools.catalog_tools import resolve_product_mention
-from hermes.agents.classifier.models import ProductMention
+from hermes.model.email import ProductMention
 from hermes.model.enums import ProductCategory
 from hermes.model.errors import ProductNotFound
 from hermes.model.product import Product

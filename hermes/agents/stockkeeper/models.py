@@ -4,13 +4,17 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from hermes.agents.classifier.models import ClassifierOutput, ProductMention
+from hermes.agents.classifier import ClassifierOutput
+from hermes.model.email import ProductMention
 from hermes.model.product import Product
+
 
 class StockkeeperInput(BaseModel):
     """Input model for the product resolver function."""
 
-    classifier: ClassifierOutput = Field(description="Complete EmailAnalysisResult from the analyzer")
+    classifier: ClassifierOutput = Field(
+        description="Complete EmailAnalysisResult from the analyzer"
+    )
 
 
 class StockkeeperOutput(BaseModel):
