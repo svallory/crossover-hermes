@@ -1,6 +1,6 @@
 """Tests for order_tools.py."""
 
-import unittest
+import pytest
 from unittest.mock import patch
 
 from hermes.tools.catalog_tools import find_alternatives
@@ -16,7 +16,7 @@ from tests.fixtures.mock_product_catalog import get_mock_products_df
 from tests.fixtures.test_product_catalog import get_test_products_df
 
 
-class TestOrderTools(unittest.TestCase):
+class TestOrderTools:
     """Tests for the order_tools module using mock data."""
 
     @patch("hermes.tools.order_tools.load_products_df")
@@ -29,9 +29,9 @@ class TestOrderTools(unittest.TestCase):
         result = check_stock(product_id="TST001", requested_quantity=5)
 
         # Verify result
-        self.assertIsInstance(result, StockStatus)
-        self.assertEqual(result.current_stock, 10)
-        self.assertTrue(result.is_available)
+        assert isinstance(result, StockStatus)
+        assert result.current_stock == 10
+        assert result.is_available
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_check_stock_out_of_stock(self, mock_load_df):
@@ -43,9 +43,9 @@ class TestOrderTools(unittest.TestCase):
         result = check_stock(product_id="TST003", requested_quantity=1)
 
         # Verify result
-        self.assertIsInstance(result, StockStatus)
-        self.assertEqual(result.current_stock, 0)
-        self.assertFalse(result.is_available)
+        assert isinstance(result, StockStatus)
+        assert result.current_stock == 0
+        assert not result.is_available
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_check_stock_insufficient_quantity(self, mock_load_df):
@@ -57,9 +57,9 @@ class TestOrderTools(unittest.TestCase):
         result = check_stock(product_id="TST002", requested_quantity=10)
 
         # Verify result
-        self.assertIsInstance(result, StockStatus)
-        self.assertEqual(result.current_stock, 5)
-        self.assertFalse(result.is_available)
+        assert isinstance(result, StockStatus)
+        assert result.current_stock == 5
+        assert not result.is_available
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_check_stock_invalid_product(self, mock_load_df):
@@ -71,8 +71,8 @@ class TestOrderTools(unittest.TestCase):
         result = check_stock(product_id="NONEXISTENT", requested_quantity=1)
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
-        self.assertIn("not found", result.message)
+        assert isinstance(result, ProductNotFound)
+        assert "not found" in result.message
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_update_stock_valid(self, mock_load_df):
@@ -85,7 +85,7 @@ class TestOrderTools(unittest.TestCase):
         result = update_stock(product_id="TST001", quantity_to_decrement=2)
 
         # Verify result
-        self.assertEqual(result, StockUpdateStatus.SUCCESS)
+        assert result == StockUpdateStatus.SUCCESS
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_update_stock_insufficient(self, mock_load_df):
@@ -97,7 +97,7 @@ class TestOrderTools(unittest.TestCase):
         result = update_stock(product_id="TST002", quantity_to_decrement=10)
 
         # Verify result
-        self.assertEqual(result, StockUpdateStatus.INSUFFICIENT_STOCK)
+        assert result == StockUpdateStatus.INSUFFICIENT_STOCK
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_update_stock_invalid_product(self, mock_load_df):
@@ -109,7 +109,7 @@ class TestOrderTools(unittest.TestCase):
         result = update_stock(product_id="NONEXISTENT", quantity_to_decrement=1)
 
         # Verify result
-        self.assertEqual(result, StockUpdateStatus.PRODUCT_NOT_FOUND)
+        assert result == StockUpdateStatus.PRODUCT_NOT_FOUND
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_alternatives_for_oos_valid(self, mock_load_df):
@@ -122,12 +122,12 @@ class TestOrderTools(unittest.TestCase):
 
         # Verify result - could be list or ProductNotFound
         if isinstance(result, list):
-            self.assertGreater(len(result), 0)
+            assert len(result) > 0
             for alternative in result:
-                self.assertEqual(alternative.product.category, "Men's Clothing")
-                self.assertGreater(alternative.product.stock, 0)
+                assert alternative.product.category == "Men's Clothing"
+                assert alternative.product.stock > 0
         else:
-            self.assertIsInstance(result, ProductNotFound)
+            assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_alternatives_for_oos_invalid_product(self, mock_load_df):
@@ -139,10 +139,10 @@ class TestOrderTools(unittest.TestCase):
         result = find_alternatives(original_product_id="NONEXISTENT")
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
 
-class TestOrderToolsWithTestData(unittest.TestCase):
+class TestOrderToolsWithTestData:
     """Tests for the order_tools module using test data."""
 
     @patch("hermes.tools.order_tools.load_products_df")
@@ -156,9 +156,9 @@ class TestOrderToolsWithTestData(unittest.TestCase):
 
         # Verify result
         if isinstance(result, StockStatus):
-            self.assertTrue(result.is_available)
+            assert result.is_available
         else:
-            self.fail("Expected StockStatus but got ProductNotFound")
+            pytest.fail("Expected StockStatus but got ProductNotFound")
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_check_stock_insufficient_with_test_data(self, mock_load_df):
@@ -171,9 +171,9 @@ class TestOrderToolsWithTestData(unittest.TestCase):
 
         # Verify result
         if isinstance(result, StockStatus):
-            self.assertFalse(result.is_available)
+            assert not result.is_available
         else:
-            self.fail("Expected StockStatus but got ProductNotFound")
+            pytest.fail("Expected StockStatus but got ProductNotFound")
 
     @patch("hermes.tools.order_tools.load_products_df")
     def test_update_stock_valid_with_test_data(self, mock_load_df):
@@ -186,7 +186,7 @@ class TestOrderToolsWithTestData(unittest.TestCase):
         result = update_stock(product_id="LTH0976", quantity_to_decrement=1)
 
         # Verify result
-        self.assertEqual(result, StockUpdateStatus.SUCCESS)
+        assert result == StockUpdateStatus.SUCCESS
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_alternatives_for_oos_with_test_data(self, mock_load_df):
@@ -199,10 +199,6 @@ class TestOrderToolsWithTestData(unittest.TestCase):
 
         # Verify result - could be list or ProductNotFound
         if isinstance(result, list):
-            self.assertGreaterEqual(len(result), 0)
+            assert len(result) >= 0
         else:
-            self.assertIsInstance(result, ProductNotFound)
-
-
-if __name__ == "__main__":
-    unittest.main()
+            assert isinstance(result, ProductNotFound)

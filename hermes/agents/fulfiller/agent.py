@@ -98,6 +98,7 @@ async def run_fulfiller(
 
                 if update_result == StockUpdateStatus.SUCCESS:
                     item.status = OrderLineStatus.CREATED
+                    order_response.stock_updated = True
                     total_amount += (item.unit_price or item.base_price) * item.quantity
                 else:
                     item.status = OrderLineStatus.OUT_OF_STOCK
@@ -130,17 +131,17 @@ async def run_fulfiller(
 
         # Apply promotions to the order if any promotion specs were found
         if promotion_specs:
-            promoted_order = apply_promotion(
+            final_order = apply_promotion(
                 order=order_response,
                 promotion_specs=promotion_specs,
             )
         else:
             # No promotions to apply, use the order as-is
-            promoted_order = order_response
+            final_order = order_response
 
         # Create the output
         output = FulfillerOutput(
-            order_result=promoted_order,
+            order_result=final_order,
         )
 
         return create_node_response(Agents.FULFILLER, output)

@@ -13,3 +13,5 @@ chroma_db/
 .mypy_cache/**/*
 output/
 hermes.egg-info
+.coverage*
+htmlcov/

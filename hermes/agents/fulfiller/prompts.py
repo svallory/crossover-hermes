@@ -35,6 +35,8 @@ IMPORTANT GUIDELINES:
    - If a product has promotion information, include it in the order line
    - The promotion system will automatically apply these promotions after your processing
    - Do NOT create or modify promotion specifications - use them as provided by the stockkeeper
+   - COMBINATION PROMOTIONS: When a product has a promotion that requires multiple products (like "Buy vest, get matching shirt 50% off"), include ALL required products in the order if mentioned by the customer
+   - BOGO PROMOTIONS: For "Buy one get one X% off" promotions, ensure the quantity is at least 2 to trigger the promotion
 6. For emails with mixed intent (both order and inquiry segments), focus only on the order segments
 7. Calculate the total price based on available items only:
    - Set the base price per unit and quantity × price for total
@@ -66,6 +68,48 @@ Your response MUST be a valid JSON object that follows the Order model with thes
 - total_discount: Set to 0.0 initially (will be calculated by promotion system)
 - message: Additional information about the processing result
 - stock_updated: Whether inventory levels were updated
+
+PROMOTION SPECIFICATION EXAMPLES:
+
+1. Simple percentage discount:
+```json
+{
+  "conditions": {"min_quantity": 1},
+  "effects": {"apply_discount": {"type": "percentage", "amount": 20.0}}
+}
+```
+
+2. BOGO (Buy One Get One 50% off):
+```json
+{
+  "conditions": {"min_quantity": 2},
+  "effects": {"apply_discount": {"type": "bogo_half", "amount": 50.0}}
+}
+```
+
+3. Combination promotion (Buy product A, get product B discounted):
+```json
+{
+  "conditions": {"product_combination": ["PLV8765", "PLD9876"]},
+  "effects": {"apply_discount": {"type": "percentage", "amount": 50.0, "to_product_id": "PLD9876"}}
+}
+```
+
+4. Free gift promotion:
+```json
+{
+  "conditions": {"min_quantity": 1},
+  "effects": {"free_gift": "matching beanie"}
+}
+```
+
+5. Quantity-based free items:
+```json
+{
+  "conditions": {"min_quantity": 3},
+  "effects": {"free_items": 1}
+}
+```
 
 Example output format:
 ```json

@@ -1,6 +1,5 @@
 """Tests for catalog_tools.py."""
 
-import unittest
 from unittest.mock import patch, MagicMock
 
 from hermes.tools.catalog_tools import (
@@ -23,7 +22,7 @@ from tests.fixtures.test_product_catalog import (
 )
 
 
-class TestCatalogTools(unittest.TestCase):
+class TestCatalogTools:
     """Tests for the catalog_tools module using mock data."""
 
     @patch("hermes.tools.catalog_tools.load_products_df")
@@ -36,10 +35,10 @@ class TestCatalogTools(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": "TST001"})
 
         # Verify result
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "TST001")
-        self.assertEqual(result.name, "Test Shirt")
-        self.assertEqual(result.category, ProductCategory.SHIRTS)
+        assert isinstance(result, Product)
+        assert result.product_id == "TST001"
+        assert result.name == "Test Shirt"
+        assert result.category == ProductCategory.SHIRTS
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_invalid(self, mock_load_df):
@@ -51,8 +50,8 @@ class TestCatalogTools(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": "NONEXISTENT"})
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
-        self.assertIn("not found", result.message)
+        assert isinstance(result, ProductNotFound)
+        assert "not found" in result.message
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_invalid_input(self, mock_load_df):
@@ -64,7 +63,7 @@ class TestCatalogTools(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": ""})
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_name_valid(self, mock_load_df):
@@ -76,11 +75,11 @@ class TestCatalogTools(unittest.TestCase):
         result = find_product_by_name.invoke({"product_name": "Test Shirt"})
 
         # Verify result - should match both "Test Shirt" products in mock data
-        self.assertIsInstance(result, list)
+        assert isinstance(result, list)
         # Both "Test Shirt" and "Test Shirt Blue" will match "Test Shirt"
-        self.assertGreaterEqual(len(result), 1)
-        self.assertEqual(result[0].matched_product.name, "Test Shirt")
-        self.assertGreater(result[0].similarity_score, 0.9)
+        assert len(result) >= 1
+        assert result[0].matched_product.name == "Test Shirt"
+        assert result[0].similarity_score > 0.9
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_name_no_match(self, mock_load_df):
@@ -94,7 +93,7 @@ class TestCatalogTools(unittest.TestCase):
         )
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_by_description_valid(self, mock_get_vector_store):
@@ -121,9 +120,9 @@ class TestCatalogTools(unittest.TestCase):
         result = search_products_by_description(query="comfortable", top_k=2)
 
         # Verify result
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "TST001")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "TST001"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_by_description_no_match(self, mock_get_vector_store):
@@ -137,7 +136,7 @@ class TestCatalogTools(unittest.TestCase):
         result = search_products_by_description(query="nonexistent term")
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_find_complementary_products_valid(self, mock_get_vector_store):
@@ -180,8 +179,8 @@ class TestCatalogTools(unittest.TestCase):
             )
 
             # Verify result
-            self.assertIsInstance(result, list)
-            self.assertGreater(len(result), 0)
+            assert isinstance(result, list)
+            assert len(result) > 0
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_find_complementary_products_invalid_product(self, mock_get_vector_store):
@@ -195,7 +194,7 @@ class TestCatalogTools(unittest.TestCase):
             result = find_complementary_products.invoke({"product_id": "NONEXISTENT"})
 
             # Verify result
-            self.assertIsInstance(result, ProductNotFound)
+            assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_with_filters_valid(self, mock_get_vector_store):
@@ -229,9 +228,9 @@ class TestCatalogTools(unittest.TestCase):
         )
 
         # Verify result
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "TST001")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "TST001"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_with_filters_no_match(self, mock_get_vector_store):
@@ -247,7 +246,7 @@ class TestCatalogTools(unittest.TestCase):
         )
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_find_products_for_occasion_valid(self, mock_get_vector_store):
@@ -275,9 +274,9 @@ class TestCatalogTools(unittest.TestCase):
         )
 
         # Verify result
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "TST001")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "TST001"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_find_products_for_occasion_no_match(self, mock_get_vector_store):
@@ -291,10 +290,10 @@ class TestCatalogTools(unittest.TestCase):
         result = find_products_for_occasion.invoke({"occasion": "space travel"})
 
         # Verify result
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
 
-class TestCatalogToolsCriticalScenarios(unittest.TestCase):
+class TestCatalogToolsCriticalScenarios:
     """Tests for critical real-world scenarios from email analysis."""
 
     @patch("hermes.tools.catalog_tools.load_products_df")
@@ -308,9 +307,9 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": "DHN0987"})
 
         # Should find CHN0987 through fuzzy matching
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "CHN0987")
-        self.assertEqual(result.name, "Chunky Knit Beanie")
+        assert isinstance(result, Product)
+        assert result.product_id == "CHN0987"
+        assert result.name == "Chunky Knit Beanie"
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_product_id_with_spaces(self, mock_load_df):
@@ -321,9 +320,9 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         # Test spaces in product ID
         result = find_product_by_id.invoke({"product_id": "CBT 89 01"})
 
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "CBT8901")
-        self.assertEqual(result.name, "Chelsea Boots")
+        assert isinstance(result, Product)
+        assert result.product_id == "CBT8901"
+        assert result.name == "Chelsea Boots"
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_product_id_with_brackets(self, mock_load_df):
@@ -334,9 +333,9 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         # Test brackets and spaces in product ID
         result = find_product_by_id.invoke({"product_id": "[CBT 89 01]"})
 
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "CBT8901")
-        self.assertEqual(result.name, "Chelsea Boots")
+        assert isinstance(result, Product)
+        assert result.product_id == "CBT8901"
+        assert result.name == "Chelsea Boots"
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_case_insensitive_product_id(self, mock_load_df):
@@ -347,9 +346,9 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         # Test lowercase product ID
         result = find_product_by_id.invoke({"product_id": "rsg8901"})
 
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, "RSG8901")
-        self.assertEqual(result.name, "Retro Sunglasses")
+        assert isinstance(result, Product)
+        assert result.product_id == "RSG8901"
+        assert result.name == "Retro Sunglasses"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_spanish_to_english_resolution(self, mock_get_vector_store):
@@ -378,10 +377,10 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         )
 
         # Should find the beanie through enhanced translation
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "CHN0987")
-        self.assertIn("Beanie", result[0].name)
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "CHN0987"
+        assert "Beanie" in result[0].name
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_vague_description_handling(self, mock_get_vector_store):
@@ -396,7 +395,7 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
             {"query": "popular item selling like hotcakes"}
         )
 
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_functional_description_search(self, mock_get_vector_store):
@@ -423,9 +422,9 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
             {"query": "bag to carry laptop and documents"}
         )
 
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "BAG001")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "BAG001"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_category_and_season_filtering(self, mock_get_vector_store):
@@ -452,21 +451,21 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
             {"query": "slide sandals for men", "category": "Men's Shoes"}
         )
 
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "SND001")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "SND001"
 
     def test_empty_query_handling(self):
         """Test edge case: empty query should return ProductNotFound."""
         result = search_products_with_filters.invoke({"query": ""})
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     def test_malformed_json_handling(self):
         """Test edge case: malformed input should be handled gracefully."""
         # This test is no longer relevant since we're using proper function parameters
         # instead of JSON strings, but we'll test empty occasion for find_products_for_occasion
         result = find_products_for_occasion.invoke({"occasion": ""})
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_nonexistent_product_id(self, mock_load_df):
@@ -475,10 +474,10 @@ class TestCatalogToolsCriticalScenarios(unittest.TestCase):
         mock_load_df.return_value = mock_df
 
         result = find_product_by_id.invoke({"product_id": "XXX9999"})
-        self.assertIsInstance(result, ProductNotFound)
+        assert isinstance(result, ProductNotFound)
 
 
-class TestMetadataConversion(unittest.TestCase):
+class TestMetadataConversion:
     """Test the metadata_to_product conversion function."""
 
     def test_metadata_to_product_basic(self):
@@ -496,12 +495,12 @@ class TestMetadataConversion(unittest.TestCase):
 
         product = metadata_to_product(metadata)
 
-        self.assertIsInstance(product, Product)
-        self.assertEqual(product.product_id, "TST001")
-        self.assertEqual(product.name, "Test Product")
-        self.assertEqual(product.category, ProductCategory.ACCESSORIES)
-        self.assertEqual(product.stock, 10)
-        self.assertEqual(product.price, 29.99)
+        assert isinstance(product, Product)
+        assert product.product_id == "TST001"
+        assert product.name == "Test Product"
+        assert product.category == ProductCategory.ACCESSORIES
+        assert product.stock == 10
+        assert product.price == 29.99
 
     def test_metadata_to_product_season_handling(self):
         """Test season handling in metadata conversion."""
@@ -519,11 +518,11 @@ class TestMetadataConversion(unittest.TestCase):
         product = metadata_to_product(metadata)
 
         # Fall should be converted to Autumn
-        self.assertIn(Season.AUTUMN, product.seasons)
-        self.assertIn(Season.WINTER, product.seasons)
+        assert Season.AUTUMN in product.seasons
+        assert Season.WINTER in product.seasons
 
 
-class TestCatalogToolsWithTestData(unittest.TestCase):
+class TestCatalogToolsWithTestData:
     """Tests for catalog_tools using test product data from CSV."""
 
     @patch("hermes.tools.catalog_tools.load_products_df")
@@ -539,10 +538,10 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": test_product_id})
 
         # Verify the result is a Product object
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, test_product_id)
-        self.assertEqual(result.name, "Retro Sunglasses")
-        self.assertEqual(result.category, ProductCategory.ACCESSORIES)
+        assert isinstance(result, Product)
+        assert result.product_id == test_product_id
+        assert result.name == "Retro Sunglasses"
+        assert result.category == ProductCategory.ACCESSORIES
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_with_spanish_name_test_data(self, mock_load_df):
@@ -558,12 +557,10 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": product_id_to_find})
 
         # Verify the result is a Product object
-        self.assertIsInstance(result, Product)
-        self.assertEqual(result.product_id, product_id_to_find)
-        self.assertEqual(
-            result.name, expected_name
-        )  # Check against the actual name in the CSV
-        self.assertEqual(result.category, ProductCategory.ACCESSORIES)
+        assert isinstance(result, Product)
+        assert result.product_id == product_id_to_find
+        assert result.name == expected_name  # Check against the actual name in the CSV
+        assert result.category == ProductCategory.ACCESSORIES
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_not_found_with_test_data(self, mock_load_df):
@@ -575,8 +572,8 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         result = find_product_by_id.invoke({"product_id": "NONEXISTENT"})
 
         # Verify the result is a ProductNotFound object
-        self.assertIsInstance(result, ProductNotFound)
-        self.assertIn("not found", result.message.lower())
+        assert isinstance(result, ProductNotFound)
+        assert "not found" in result.message.lower()
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_by_description_with_test_data(self, mock_get_vector_store):
@@ -603,9 +600,9 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         result = search_products_with_filters.invoke({"query": "leather"})
 
         # Verify the result is a list of Product objects
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "LTH0976")
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "LTH0976"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_find_complementary_products_with_test_data(self, mock_get_vector_store):
@@ -649,9 +646,9 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
             )
 
             # Verify result is a list of products
-            self.assertIsInstance(result, list)
-            self.assertEqual(len(result), 1)
-            self.assertEqual(result[0].product_id, "LTH0977")
+            assert isinstance(result, list)
+            assert len(result) == 1
+            assert result[0].product_id == "LTH0977"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_with_filters_with_test_data(self, mock_get_vector_store):
@@ -680,10 +677,6 @@ class TestCatalogToolsWithTestData(unittest.TestCase):
         )
 
         # Verify result is a Product object
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].product_id, "LTH0976")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].product_id == "LTH0976"
