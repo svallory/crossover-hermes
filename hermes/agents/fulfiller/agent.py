@@ -2,7 +2,6 @@
 
 from typing import Literal
 
-from langchain_core.tools import BaseTool
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
@@ -27,13 +26,6 @@ from hermes.model.enums import Agents
 from .prompts import FULFILLER_PROMPT
 
 
-class FulfillerToolkit:
-    """Tools for the Fulfiller Agent."""
-
-    def get_tools(self) -> list[BaseTool]:
-        return []
-
-
 @traceable(run_type="chain", name="Order Processing Agent")
 async def run_fulfiller(
     state: FulfillerInput, runnable_config: RunnableConfig
@@ -51,7 +43,11 @@ async def run_fulfiller(
     try:
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
         llm = get_llm_client(
-            config=hermes_config, model_strength="strong", temperature=0.0
+            config=hermes_config,
+            schema=Order,
+            tools=[],
+            model_strength="strong",
+            temperature=0.0,
         )
 
         # Extract email analysis - LangGraph guarantees type safety
@@ -61,7 +57,7 @@ async def run_fulfiller(
         stockkeeper_output: StockkeeperOutput = state.stockkeeper
 
         # Create the chain for order processing
-        chain = FULFILLER_PROMPT | llm.with_structured_output(Order)
+        chain = FULFILLER_PROMPT | llm
 
         # Process the order using the LLM
         llm_response = await chain.ainvoke(

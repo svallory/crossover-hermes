@@ -21,6 +21,27 @@ def merge_errors(dict1, dict2):
     return result
 
 
+class WorkflowInput(BaseModel):
+    """Input of the workflow."""
+
+    email: CustomerEmail
+
+
+class WorkflowOutput(BaseModel):
+    """Output of the workflow."""
+
+    email: CustomerEmail
+    classifier: ClassifierOutput
+    stockkeeper: StockkeeperOutput
+    fulfiller: FulfillerOutput | None = None
+    advisor: AdvisorOutput | None = None
+    composer: ComposerOutput
+
+    errors: None | Annotated[dict[Agents, Error], merge_errors] = Field(
+        default_factory=dict
+    )
+
+
 class OverallState(BaseModel):
     """Overall state that can contain any combination of analysis, processing, and response."""
 

@@ -2,6 +2,7 @@
 
 from langchain_core.prompts import PromptTemplate
 
+
 # Main Advisor agent Prompt
 markdown = str
 advisor_prompt_template_str: markdown = """
@@ -84,10 +85,10 @@ Complete EmailAnalysisResult:
 
 Retrieved Products Context (list of product dictionaries):
 {{retrieved_products_context}}
-
-Please generate the InquiryResponse JSON object with factual answers to customer questions, using the provided product data.
 """
 
-ADVISOR_PROMPT = PromptTemplate.from_template(
-    advisor_prompt_template_str, template_format="mustache"
+ADVISOR_PROMPT = PromptTemplate(
+    template=advisor_prompt_template_str,
+    input_variables=["email_analysis", "retrieved_products_context"],
+    template_format="mustache",
 )

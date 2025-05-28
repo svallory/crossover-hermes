@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+
 Condition = Literal[
     "min_quantity",  # Minimum quantity required to activate the promotion
     "applies_every",  # How many items the promotion applies to (e.g., every Nth item gets discount)
@@ -22,20 +23,29 @@ class DiscountSpec(BaseModel):
     """Specification for a discount."""
 
     to_product_id: str | None = Field(
-        default=None, description="Optional ID of product to apply discount to (if omitted, applies to all)"
+        default=None,
+        description="Optional ID of product to apply discount to (if omitted, applies to all)",
     )
-    type: Literal["percentage", "fixed", "bogo_half"] = Field(description="Type of discount")
-    amount: float = Field(gt=0, description="Amount of discount (percentage or fixed amount)")
+    type: Literal["percentage", "fixed", "bogo_half"] = Field(
+        description="Type of discount"
+    )
+    amount: float = Field(
+        gt=0, description="Amount of discount (percentage or fixed amount)"
+    )
 
 
 class PromotionConditions(BaseModel):
     """Strongly typed model for promotion conditions."""
 
     min_quantity: int | None = Field(
-        default=None, ge=1, description="Minimum quantity required to activate the promotion"
+        default=None,
+        ge=1,
+        description="Minimum quantity required to activate the promotion",
     )
     applies_every: int | None = Field(
-        default=None, ge=1, description="How many items the promotion applies to (e.g., every Nth item gets discount)"
+        default=None,
+        ge=1,
+        description="How many items the promotion applies to (e.g., every Nth item gets discount)",
     )
     product_combination: list[str] | None = Field(
         default=None,
@@ -53,11 +63,19 @@ class PromotionConditions(BaseModel):
 class PromotionEffects(BaseModel):
     """Strongly typed model for promotion effects."""
 
-    free_items: int | None = Field(default=None, ge=1, description="Number of free items of the same product to add")
-    free_gift: str | None = Field(
-        default=None, min_length=1, description="Description of a free gift to include with the order"
+    free_items: int | None = Field(
+        default=None,
+        ge=1,
+        description="Number of free items of the same product to add",
     )
-    apply_discount: DiscountSpec | None = Field(default=None, description="Specification for a discount to apply")
+    free_gift: str | None = Field(
+        default=None,
+        min_length=1,
+        description="Description of a free gift to include with the order",
+    )
+    apply_discount: DiscountSpec | None = Field(
+        default=None, description="Specification for a discount to apply"
+    )
 
     @field_validator("free_gift")
     def validate_free_gift(cls, v):
@@ -69,20 +87,28 @@ class PromotionEffects(BaseModel):
 class PromotionSpec(BaseModel):
     """Model representing a promotion with conditions and effects."""
 
-    conditions: PromotionConditions = Field(description="Conditions that must be met to trigger this promotion")
-    effects: PromotionEffects = Field(description="Effects that are applied when the promotion is triggered")
+    conditions: PromotionConditions = Field(
+        description="Conditions that must be met to trigger this promotion"
+    )
+    effects: PromotionEffects = Field(
+        description="Effects that are applied when the promotion is triggered"
+    )
 
     @field_validator("conditions")
     def validate_conditions(cls, v):
         # Ensure at least one condition is set
-        if not any(getattr(v, field) is not None for field in PromotionConditions.model_fields):
+        if not any(
+            getattr(v, field) is not None for field in PromotionConditions.model_fields
+        ):
             raise ValueError("At least one condition must be specified")
         return v
 
     @field_validator("effects")
     def validate_effects(cls, v):
         # Ensure at least one effect is set
-        if not any(getattr(v, field) is not None for field in PromotionEffects.model_fields):
+        if not any(
+            getattr(v, field) is not None for field in PromotionEffects.model_fields
+        ):
             raise ValueError("At least one effect must be specified")
         return v
 
@@ -90,10 +116,17 @@ class PromotionSpec(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "conditions": {"min_quantity": 2, "product_combination": ["product-123", "product-456"]},
+                    "conditions": {
+                        "min_quantity": 2,
+                        "product_combination": ["product-123", "product-456"],
+                    },
                     "effects": {
                         "free_items": 1,
-                        "apply_discount": {"to_product_id": "product-123", "type": "percentage", "amount": 10.0},
+                        "apply_discount": {
+                            "to_product_id": "product-123",
+                            "type": "percentage",
+                            "amount": 10.0,
+                        },
                     },
                 }
             ]

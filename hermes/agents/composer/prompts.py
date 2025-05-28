@@ -2,6 +2,7 @@
 
 from langchain_core.prompts import PromptTemplate
 
+
 # Main Composer agent Prompt
 composer_prompt_template_str = """
 ### SYSTEM INSTRUCTIONS
@@ -101,15 +102,14 @@ InquiryResponse:
 
 ProcessOrderResult:
 {{order_result}}
-
-Please generate the ComposerOutput object with the final email to be sent to the customer.
 """
 
-COMPOSER_PROMPT = PromptTemplate.from_template(
-    composer_prompt_template_str,
-    template_format="mustache",
+COMPOSER_PROMPT = PromptTemplate(
+    template=composer_prompt_template_str,
+    input_variables=["email_analysis", "inquiry_response", "order_result"],
     partial_variables={
         "inquiry_response": "The customer had no questions",
         "order_result": "The customer had no orders",
     },
+    template_format="mustache",
 )

@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Literal
 
 from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import BaseTool
 from langsmith import traceable
 
 from ...model.email import EmailAnalysis
@@ -15,16 +14,9 @@ from ...config import HermesConfig
 from ...model.enums import Agents
 from ...workflow.types import WorkflowNodeOutput
 from ...utils.response import create_node_response
-from ...utils.llm_client import get_llm_client
+from hermes.utils.llm_client import get_llm_client
 
 from .prompts import CLASSIFIER_PROMPT
-
-
-class ClassifierToolkit:
-    """Tools for the Classifier Agent"""
-
-    def get_tools(self) -> list[BaseTool]:
-        return []
 
 
 @traceable(run_type="chain")
@@ -52,10 +44,14 @@ async def run_classifier(
 
         # Use a weak model for initial analysis since it's a relatively simple task
         llm = get_llm_client(
-            config=hermes_config, model_strength="weak", temperature=0.0
+            config=hermes_config,
+            schema=EmailAnalysis,
+            tools=[],
+            model_strength="weak",
+            temperature=0.0,
         )
 
-        analysis_chain = CLASSIFIER_PROMPT | llm.with_structured_output(EmailAnalysis)
+        analysis_chain = CLASSIFIER_PROMPT | llm
 
         try:
             chain_result = await analysis_chain.ainvoke(state.email.model_dump())

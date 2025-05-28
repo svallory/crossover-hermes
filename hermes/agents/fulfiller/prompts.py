@@ -2,6 +2,7 @@
 
 from langchain_core.prompts import PromptTemplate
 
+
 # Main Fulfiller agent Prompt
 markdown = str
 fulfiller_prompt_template_str: markdown = """
@@ -46,28 +47,6 @@ IMPORTANT GUIDELINES:
    - "out_of_stock" if no items are available
    - "partially_fulfilled" if some items are available and others are not
    - "no_valid_products" if no products could be identified
-
-OUTPUT FORMAT:
-Your response MUST be a valid JSON object that follows the Order model with these fields:
-- email_id: The ID of the email being processed
-- overall_status: One of "created", "out_of_stock", "partially_fulfilled", or "no_valid_products"
-- lines: Array of OrderLine objects containing:
-  - product_id: The unique product identifier
-  - description: The description of the product
-  - quantity: Number of items ordered
-  - base_price: Original price per unit before any discounts
-  - unit_price: Initially set to base_price (promotions will be applied later)
-  - total_price: base_price × quantity (promotions will adjust this later)
-  - status: Either "created" or "out_of_stock"
-  - stock: Current stock level after processing
-  - promotion_applied: Set to false initially (will be updated by promotion system)
-  - promotion_description: Copy from product's promotion_text if available
-  - promotion: Copy from product's promotion field if available
-  - alternatives: Array of alternative products (if out of stock)
-- total_price: Sum of all available items' total prices (before promotions)
-- total_discount: Set to 0.0 initially (will be calculated by promotion system)
-- message: Additional information about the processing result
-- stock_updated: Whether inventory levels were updated
 
 PROMOTION SPECIFICATION EXAMPLES:
 
@@ -180,9 +159,13 @@ Resolved Products from Stockkeeper:
 
 Unresolved Product Mentions:
 {{unresolved_mentions}}
-
-Please process this order request and return a complete Order object. Pay special attention to any promotion information in the resolved products and include it in the corresponding order lines.
 """
+
+FULFILLER_PROMPT = PromptTemplate(
+    template=fulfiller_prompt_template_str,
+    input_variables=["email_analysis", "resolved_products", "unresolved_mentions"],
+    template_format="mustache",
+)
 
 # Discount calculation prompt - used as fallback if the tool fails
 promotion_calculation_prompt_template_str: markdown = """
@@ -199,10 +182,6 @@ If the promotion text doesn't indicate a clear discount or isn't specific, retur
 
 Return ONLY the final unit price as a decimal number without any explanation or dollar sign.
 """
-
-FULFILLER_PROMPT = PromptTemplate.from_template(
-    fulfiller_prompt_template_str, template_format="mustache"
-)
 
 PROMOTION_CALCULATOR_PROMPT = PromptTemplate.from_template(
     promotion_calculation_prompt_template_str, template_format="mustache"

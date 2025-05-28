@@ -24,15 +24,11 @@ from .models import (
 )
 from .prompts import COMPOSER_PROMPT
 
-
-class ComposerToolkit:
-    """Tools for the Composer Agent."""
-
-    def get_tools(self) -> list[BaseTool]:
-        return [
-            find_complementary_products,  # For suggesting additional items
-            find_products_for_occasion,  # For occasion-based suggestions
-        ]
+# We don't want to make ALL catalog tools available to the composer agent
+ComposerToolkit: list[BaseTool] = [
+    find_complementary_products,  # For suggesting additional items
+    find_products_for_occasion,  # For occasion-based suggestions
+]
 
 
 @traceable(run_type="chain", name="Composer agent Agent")  # type: ignore
@@ -62,11 +58,15 @@ async def run_composer(
 
         # Use a strong model for natural language generation
         llm = get_llm_client(
-            config=hermes_config, model_strength="strong", temperature=0.7
+            config=hermes_config,
+            schema=ComposerOutput,
+            tools=ComposerToolkit,
+            model_strength="strong",
+            temperature=0.7,
         )
 
         # Create the chain with structured output
-        composer_chain = COMPOSER_PROMPT | llm.with_structured_output(ComposerOutput)
+        composer_chain = COMPOSER_PROMPT | llm
 
         try:
             # Prepare prompt input - LangGraph ensures these fields exist

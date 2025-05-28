@@ -16,7 +16,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.constants import END, START  # type: ignore
 
 # LangGraph imports
-from langgraph.graph import StateGraph  # type: ignore
+from langgraph.graph import StateGraph
 
 from hermes.agents.advisor.agent import run_advisor
 
@@ -31,11 +31,10 @@ from hermes.agents.composer.agent import run_composer
 from hermes.agents.fulfiller.agent import run_fulfiller
 from hermes.agents.stockkeeper.agent import run_stockkeeper
 from hermes.agents.stockkeeper.models import StockkeeperInput
-from hermes.workflow.states import OverallState
+from hermes.workflow.states import OverallState, WorkflowInput, WorkflowOutput
 from hermes.config import HermesConfig
 from hermes.model import Nodes
 from hermes.agents.fulfiller.models import FulfillerInput
-from hermes.model.email import CustomerEmail
 
 
 def route_resolver_result(
@@ -58,9 +57,15 @@ def route_resolver_result(
 
 
 async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dict:
-    # Convert OverallState to ClassifierInput before passing to analyze_email
-    classifier_input = ClassifierInput(email=state.email)
-    return await run_classifier(state=classifier_input, runnable_config=config)
+    # Extract email from OverallState
+    email = state.email
+
+    # Convert to ClassifierInput before passing to analyze_email
+    classifier_input = ClassifierInput(email=email)
+    result = await run_classifier(state=classifier_input, runnable_config=config)
+
+    # Return the result as-is - the email is already in the state
+    return result
 
 
 async def resolve_products_node(state: OverallState, config: RunnableConfig) -> dict:
@@ -134,7 +139,10 @@ async def process_order_node(state: OverallState, config: RunnableConfig) -> dic
 
 # Build the graph
 graph_builder = StateGraph(
-    OverallState, input=CustomerEmail, config_schema=HermesConfig
+    input=WorkflowInput,
+    output=WorkflowOutput,
+    state_schema=OverallState,
+    config_schema=HermesConfig,
 )
 
 # Add nodes with the agent functions directly, specifying that they expect runnable_config
@@ -160,7 +168,7 @@ graph_builder.add_edge(Nodes.CLASSIFIER, Nodes.STOCKKEEPER)
 graph_builder.add_conditional_edges(
     Nodes.STOCKKEEPER,
     route_resolver_result,
-    [Nodes.FULFILLER, Nodes.ADVISOR],
+    [Nodes.FULFILLER, Nodes.ADVISOR, END],
 )
 graph_builder.add_edge(Nodes.FULFILLER, Nodes.COMPOSER)
 graph_builder.add_edge(Nodes.ADVISOR, Nodes.COMPOSER)

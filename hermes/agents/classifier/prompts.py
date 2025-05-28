@@ -2,6 +2,7 @@
 
 from langchain_core.prompts import PromptTemplate
 
+
 # Main Classifier agent Prompt
 markdown = str
 classifier_prompt_template_str: markdown = """
@@ -19,46 +20,11 @@ Extract the following information:
 3. Identify the primary intent of the email
 4. Extract customer PII (name, contact info) if present
 
-OUTPUT FORMAT:
-Return a JSON structure with the following format:
-
-```json
-{
-  "language": "english|spanish|french|etc",
-  "primary_intent": "order request|product inquiry",
-  "customer_pii": {
-    "name": "Customer name if provided",
-    "address": "Customer address if provided",
-    // Other PII fields as found
-  }, // Always return a JSON object (dictionary) for customer_pii, e.g.,
-  // {"name": "John Doe", "email": "john.doe@example.com"} or {} if no PII is found.
-  "segments": [
-    {
-      "segment_type": "order|inquiry|personal_statement",
-      "main_sentence": "The core sentence representing this segment",
-      "related_sentences": [
-        "Additional context sentence 1",
-        "Additional context sentence 2"
-      ],
-      "product_mentions": [
-        {
-          "product_category": "Accessories|Bags|Kid's Clothing|Loungewear|Men's Accessories|Men's Clothing|
-          Men's Shoes|Women's Clothing|Women's Shoes", // or null if not mentioned or unknown
-          "product_type": "Fundamental product type in the general category", // or null if not clear
-          "product_name": "The exact branded name without additional descriptors (e.g., 'Alpine Explorer',
-          'Sunset Breeze', 'Urban Nomad')", // or null if only generic type is mentioned
-          "product_id": "XYZ4321", // or null if not specified
-          "product_description": "Customer's description", // or null if not provided
-          "quantity": 2, // defaults to 1 if not specified
-          "confidence": 0.95 // confidence in this product mention (0.0-1.0)
-        }
-        // Additional product mentions...
-      ]
-    }
-    // Additional segments...
-  ]
-}
-```
+IMPORTANT FORMATTING RULES:
+- The customer_pii MUST be a JSON object (dictionary), never as a string
+- If no PII is found, return an empty object: {}
+- If any PII is found, determine the most reasonable key for the value
+- Do not include any comments or explanatory text in the JSON output
 
 GUIDELINES:
 - Break down the email into distinct segments based on customer's intent
@@ -92,6 +58,10 @@ PRODUCT NAME EXTRACTION RULES:
 - When in doubt about whether a word is part of the product name or just a descriptor, favor putting
   it in the product_type field instead of the product_name
 
+PRODUCT CATEGORY EXTRACTION RULES:
+- The `product_category` field MUST be one of the following exact string values: 'Accessories', 'Bags', "Kid's Clothing", 'Loungewear', "Men's Accessories", "Men's Clothing", "Men's Shoes", "Women's Clothing", "Women's Shoes', 'Shirts'.
+- Ensure the capitalization and exact wording match these allowed values precisely. For example, use 'Bags', not 'bags' or 'bag'.
+
 PRODUCT MENTION CONSOLIDATION:
 - When the same product is mentioned multiple times in an email (by ID, name, or description),
   create only ONE product mention that consolidates all the information
@@ -110,6 +80,8 @@ Subject: {{subject}}
 Message: {{message}}
 """
 
-CLASSIFIER_PROMPT = PromptTemplate.from_template(
-    classifier_prompt_template_str, template_format="mustache"
+CLASSIFIER_PROMPT = PromptTemplate(
+    template=classifier_prompt_template_str,
+    input_variables=["subject", "message"],
+    template_format="mustache",
 )

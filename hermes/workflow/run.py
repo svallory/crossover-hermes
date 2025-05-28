@@ -4,17 +4,17 @@ This initializes the vector store and runs the workflow.
 
 from langchain_core.runnables import RunnableConfig
 
-from hermes.agents.classifier.models import ClassifierInput
-from hermes.workflow.graph import workflow
-from hermes.workflow.states import OverallState
 from hermes.config import HermesConfig
 from hermes.data.vector_store import get_vector_store
 
+from .graph import workflow
+from .states import WorkflowInput, WorkflowOutput
+
 
 async def run_workflow(
-    input_state: ClassifierInput,
+    input_state: WorkflowInput,
     hermes_config: HermesConfig,
-) -> OverallState:
+) -> WorkflowOutput:
     """Run the workflow with the given input state and configuration.
     Ensures the vector store is initialized before running.
 
@@ -36,15 +36,17 @@ async def run_workflow(
     # Create a typed config for the LangGraph StateGraph
     runnable_config: RunnableConfig = runnable_config_obj  # type: ignore
 
-    # Run the workflow with the input state and config
+    # Run the workflow with the email from the input state and config
+    # Create an OverallState with the email
     print(f"Running workflow for email {input_state.email.email_id}...")
-    result = await workflow.ainvoke(input_state, config=runnable_config)
+
+    result = await workflow.ainvoke(input=input_state, config=runnable_config)
 
     print(f"Workflow completed for email {input_state.email.email_id}")
 
     # Convert the result to an OverallState
     if isinstance(result, dict):
-        final_state = OverallState.model_validate(result)
+        final_state = WorkflowOutput.model_validate(result)
     else:
         # If result is already an OverallState, use it directly
         final_state = result

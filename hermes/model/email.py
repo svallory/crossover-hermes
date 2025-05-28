@@ -1,7 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
 
-
 from typing import Any, Literal
 
 from .enums import ProductCategory
@@ -79,7 +78,7 @@ class EmailAnalysis(BaseModel):
         description="The main purpose of the customer's email"
     )
 
-    customer_pii: dict[str, Any] = Field(
+    customer_pii: dict[str, Any] | None = Field(
         default_factory=dict,
         description="Personal identifiable information like name, email, phone, etc.",
     )

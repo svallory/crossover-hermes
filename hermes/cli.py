@@ -5,6 +5,10 @@ import sys
 
 from hermes.core import run_email_processing
 
+from rich.traceback import install
+
+install(show_locals=True)
+
 
 def create_parser():
     """Create the main argument parser with subcommands."""
@@ -26,7 +30,7 @@ Examples:
 
 Environment Variables:
   HERMES_PROCESSING_LIMIT Set to number to limit email processing
-        """
+        """,
     )
 
     # Create subparsers for commands
@@ -45,43 +49,39 @@ Environment Variables:
     )
 
     run_parser.add_argument(
-        "products_source",
-        type=str,
-        help="Source for products catalog."
+        "products_source", type=str, help="Source for products catalog."
     )
 
     run_parser.add_argument(
-        "emails_source",
-        type=str,
-        help="Source for the customer emails."
+        "emails_source", type=str, help="Source for the customer emails."
     )
 
     run_parser.add_argument(
         "--output-gsheet-id",
         type=str,
         default=None,
-        help="Google Spreadsheet ID for output results. If provided, results will be uploaded to this sheet."
+        help="Google Spreadsheet ID for output results. If provided, results will be uploaded to this sheet.",
     )
 
     run_parser.add_argument(
         "--out-dir",
         type=str,
         default="./output",
-        help="Directory to save output CSV files (default: ./output)"
+        help="Directory to save output CSV files (default: ./output)",
     )
 
     run_parser.add_argument(
         "--limit",
         type=int,
         metavar="N",
-        help="Limit the number of emails to process (default: no limit, 0 means no limit)"
+        help="Limit the number of emails to process (default: no limit, 0 means no limit)",
     )
 
     run_parser.add_argument(
         "--email-id",
         type=str,
         action="append",
-        help="Process only specific email IDs. Can be used multiple times or as a comma-separated list (e.g., --email-id id1 --email-id id2,id3)."
+        help="Process only specific email IDs. Can be used multiple times or as a comma-separated list (e.g., --email-id id1 --email-id id2,id3).",
     )
 
     return parser
@@ -93,7 +93,7 @@ def handle_run_command(args):
     # Output directory
     output_dir = args.out_dir
     os.makedirs(output_dir, exist_ok=True)
-    global OUTPUT_DIR # Allow modification of global OUTPUT_DIR for other modules if needed
+    global OUTPUT_DIR  # Allow modification of global OUTPUT_DIR for other modules if needed
     OUTPUT_DIR = output_dir
     print(f"Output directory set to: {output_dir}")
 
@@ -116,31 +116,37 @@ def handle_run_command(args):
     target_email_ids_list = []
     if args.email_id:
         for item in args.email_id:
-            target_email_ids_list.extend([eid.strip() for eid in item.split(',') if eid.strip()])
+            target_email_ids_list.extend(
+                [eid.strip() for eid in item.split(",") if eid.strip()]
+            )
 
         if target_email_ids_list:
             print(f"Targeting specific email IDs: {target_email_ids_list}")
         else:
             # Handles cases like --email-id "" or --email-id ",,"
-            print("Warning: --email-id flag used but no valid IDs were extracted. No emails will be processed.")
+            print(
+                "Warning: --email-id flag used but no valid IDs were extracted. No emails will be processed."
+            )
             print("Exiting: No valid email IDs provided with --email-id flag.")
             sys.exit(1)
     # else:
-        # target_email_ids = None # Process all if flag not used
+    # target_email_ids = None # Process all if flag not used
 
     # Determine final target_email_ids to pass to run_email_processing
     final_target_email_ids = target_email_ids_list if args.email_id else None
 
     # Run the main function
     try:
-        result = asyncio.run(run_email_processing(
-            products_source=args.products_source,
-            emails_source=args.emails_source,
-            output_spreadsheet_id=args.output_gsheet_id,
-            processing_limit=limit,
-            target_email_ids=final_target_email_ids, # Pass the processed list of email IDs
-            output_dir=output_dir # Pass output_dir
-        ))
+        result = asyncio.run(
+            run_email_processing(
+                products_source=args.products_source,
+                emails_source=args.emails_source,
+                output_spreadsheet_id=args.output_gsheet_id,
+                processing_limit=limit,
+                target_email_ids=final_target_email_ids,  # Pass the processed list of email IDs
+                output_dir=output_dir,  # Pass output_dir
+            )
+        )
         print(f"Final result: {result}")
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")

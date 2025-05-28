@@ -4,25 +4,16 @@ import time
 from typing import Literal
 
 from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import BaseTool
 from langsmith import traceable
 
 from hermes.agents.stockkeeper.models import (
     StockkeeperInput,
     StockkeeperOutput,
 )
-from hermes.config import HermesConfig
 from hermes.model.enums import Agents
 from hermes.workflow.types import WorkflowNodeOutput
 from hermes.utils.response import create_node_response
 from hermes.tools.catalog_tools import resolve_product_mention
-
-
-class StockKeeperToolkit:
-    """Tools for the StockKeeper Agent."""
-
-    def get_tools(self) -> list[BaseTool]:
-        return []
 
 
 @traceable(run_type="chain", name="Product Resolution Agent")
@@ -41,8 +32,6 @@ async def run_stockkeeper(
 
     """
     try:
-        hermes_config = HermesConfig.from_runnable_config(runnable_config)
-
         resolved_products = []
         unresolved_mentions = []
 

@@ -9,8 +9,7 @@ from hermes.utils.gsheets import create_output_spreadsheet
 import nest_asyncio  # type: ignore
 import pandas as pd  # type: ignore
 
-from hermes.agents.classifier.models import ClassifierInput
-from hermes.workflow.states import OverallState
+from hermes.workflow.states import WorkflowInput, WorkflowOutput
 from hermes.workflow.run import run_workflow
 from hermes.config import HermesConfig
 from hermes.data import load_emails_df, load_products_df
@@ -61,7 +60,7 @@ async def process_emails(
 
         try:
             # Create ClassifierInput from email_data
-            input_state = ClassifierInput(
+            input_state = WorkflowInput(
                 email=CustomerEmail(
                     email_id=email_data.get("email_id", f"unknown_email_{i}"),
                     subject=email_data.get("subject", ""),
@@ -70,7 +69,7 @@ async def process_emails(
             )
 
             # Execute the LangGraph workflow
-            workflow_state: OverallState = await run_workflow(
+            workflow_state: WorkflowOutput = await run_workflow(
                 input_state=input_state, hermes_config=config_obj
             )
 
@@ -118,7 +117,11 @@ async def process_emails(
             processed_count += 1
 
         except Exception as e:
+            import traceback
+
             print(f"  Error processing email {email_id}: {e}")
+            print(f"  Traceback:")
+            traceback.print_exc()
             results[email_id] = {
                 "email_id": email_id,
                 "error": str(e),

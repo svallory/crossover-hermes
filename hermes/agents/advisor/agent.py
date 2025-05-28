@@ -18,6 +18,7 @@ from .models import (
     InquiryAnswers,
 )
 from .prompts import ADVISOR_PROMPT
+from hermes.tools.toolkits import CatalogToolkit
 
 
 @traceable(
@@ -54,6 +55,8 @@ async def run_advisor(
         # Get LLM instance
         llm = get_llm_client(
             config=HermesConfig.from_runnable_config(runnable_config),
+            schema=InquiryAnswers,
+            tools=CatalogToolkit.get_tools(),
             model_strength="strong",
             temperature=0.1,
         )
@@ -68,9 +71,7 @@ async def run_advisor(
                 product_context.append(product_dict)
 
         # Create the chain using LangChain composition
-        inquiry_response_chain = ADVISOR_PROMPT | llm.with_structured_output(
-            InquiryAnswers
-        )
+        inquiry_response_chain = ADVISOR_PROMPT | llm
 
         try:
             # Prepare input data
