@@ -1,0 +1,160 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_pii: {}
+    email_id: E001
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I want to order all the remaining LTH0976 Leather Bifold Wallets
+        you have in stock.
+      product_mentions:
+      - confidence: 1.0
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: null
+        product_id: LTH0976
+        product_name: Leather Bifold Wallet
+        product_type: null
+        quantity: 1
+      related_sentences:
+      - I'm opening up a small boutique shop and these would be perfect for my inventory.
+      - Thank you!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E001
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to Hermes! We were delighted to receive your email
+    and learn about your exciting plans to open a small boutique.
+
+
+    We''ve successfully processed your request to order the remaining LTH0976 Leather
+    Bifold Wallets. Your order for 4 units, totaling $84.0, has been created.
+
+
+    These wallets are indeed a wonderful choice. As you know, they are crafted from
+    premium, full-grain leather and feature multiple card slots, a billfold compartment,
+    and a timeless, minimalist design. A sophisticated choice for any occasion, and
+    we hope they are a fantastic addition to your boutique inventory.
+
+
+    We wish you the very best with your new venture!
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Greeting the customer.
+    content_type: greeting
+    priority: 1
+    related_to: null
+  - content: Thank the customer for their email and acknowledge their order request
+      for LTH0976 Leather Bifold Wallets.
+    content_type: answer
+    priority: 2
+    related_to: LTH0976
+  - content: Confirm that the order for 4 units of LTH0976 totaling $84.0 has been
+      created.
+    content_type: answer
+    priority: 3
+    related_to: LTH0976
+  - content: Include the product description for LTH0976.
+    content_type: product_info
+    priority: 4
+    related_to: LTH0976
+  - content: Acknowledge their reason for ordering (opening a boutique) and wish them
+      well.
+    content_type: answer
+    priority: 5
+    related_to: null
+  - content: Closing remarks.
+    content_type: closing
+    priority: 6
+    related_to: null
+  - content: Signature.
+    content_type: signature
+    priority: 7
+    related_to: null
+  subject: Your Hermes Order Confirmation - LTH0976 Leather Bifold Wallets
+  tone: Professional and friendly
+email:
+  email_id: E001
+  message: Hi there, I want to order all the remaining LTH0976 Leather Bifold Wallets
+    you have in stock. I'm opening up a small boutique shop and these would be perfect
+    for my inventory. Thank you!
+  subject: Leather Wallets
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E001
+    lines:
+    - alternatives: []
+      base_price: 21.0
+      description: Upgrade your everyday carry with our leather bifold wallet. Crafted
+        from premium, full-grain leather, this sleek wallet features multiple card
+        slots, a billfold compartment, and a timeless, minimalist design. A sophisticated
+        choice for any occasion.
+      product_id: LTH0976
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 4
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 4
+      total_price: 84.0
+      unit_price: 21.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 84.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - LTH0976
+      confidence_scores:
+      - 1.0
+      mention: 'product_id=''LTH0976'' product_name=''Leather Bifold Wallet'' product_description=None
+        product_category=<ProductCategory.ACCESSORIES: ''Accessories''> product_type=None
+        quantity=1 confidence=1.0'
+      num_candidates: 1
+    candidates_resolved: 1
+    resolution_attempts: 1
+    resolution_time_ms: 5
+    total_mentions: 1
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Upgrade your everyday carry with our leather bifold wallet. Crafted
+      from premium, full-grain leather, this sleek wallet features multiple card slots,
+      a billfold compartment, and a timeless, minimalist design. A sophisticated choice
+      for any occasion.
+    metadata:
+      original_mention:
+        product_category: Accessories
+        product_description: null
+        product_id: LTH0976
+        product_name: Leather Bifold Wallet
+        product_type: null
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Leather Bifold Wallet
+    price: 21.0
+    product_id: LTH0976
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - All seasons
+    stock: 4
+  unresolved_mentions: []

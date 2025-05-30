@@ -23,7 +23,7 @@ The advisor agent had a hardcoded instruction that explicitly forbade using "All
 # hermes/agents/advisor/agent.py:158-161 (OLD)
 season_instruction = (
     "IMPORTANT: When specifying product seasons, only use the values: "
-    "Spring, Summer, Autumn, Winter. Do not use 'All seasons'."
+    "Spring, Summer, Fall, Winter. Do not use 'All seasons'."
 )
 ```
 
@@ -32,11 +32,11 @@ season_instruction = (
 # hermes/agents/advisor/agent.py:78-81 (NEW)
 season_instruction = (
     "IMPORTANT: When specifying product seasons, only use the values: "
-    "Spring, Summer, Autumn, Winter, All seasons."
+    "Spring, Summer, Fall, Winter, All seasons."
 )
 ```
 
-**Status: ✅ COMPLETED** - The instruction now correctly includes "All seasons" as a valid enum value.
+**Status: ✅ COMPLETED** - The instruction now correctly includes "All seasons" as a valid enum value and uses "Fall".
 
 ---
 
@@ -75,7 +75,7 @@ season_instruction = (
 - **Status: ✅ ALREADY IMPLEMENTED** - Season normalization is properly handled in `metadata_to_product`
 - **Location:** `hermes/data/vector_store.py:metadata_to_product` function handles:
   - "All seasons" → `Season.ALL_SEASONS`
-  - "Fall" → `Season.AUTUMN`
+  - "Fall" → `Season.FALL`
   - Invalid seasons → default to `Season.SPRING`
 
 ### **E. Let LLM Handle More Extraction/Grouping - ✅ COMPLETED**

@@ -1,0 +1,254 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E023
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: After weeks of consideration, I've made up my mind! Looking at
+        my bank account right now, and I'm prepared to commit to those CGN2345 Cargo
+        Pants - all 5 of them, exactly as we discussed in my previous emails about
+        the color options and material details.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: those CGN2345 Cargo Pants
+        product_category: null
+        product_description: null
+        product_id: CGN2345
+        product_name: Cargo Pants
+        product_type: null
+        quantity: 5
+      related_sentences:
+      - Just need you to confirm the availability first, before we move formward.'
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E023
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for your email and for choosing Hermes! We were thrilled to hear about
+    your decision regarding the CGN2345 Cargo Pants after your thoughtful consideration.
+    We appreciate you reaching out to place your order for 5 units.
+
+
+    We checked our current inventory for the Cargo Pants (CGN2345) and found that
+    while they are available, we currently only have 2 units in stock, not the full
+    quantity of 5 you requested. Unfortunately, this means we couldn''t process your
+    order for the complete amount at this time.
+
+
+    Would you be interested in purchasing the 2 units we currently have available?
+    Please let us know if you would like to proceed with the available stock.
+
+
+    In the meantime, we''ve identified a few other items you might love, which are
+    currently in stock and similarly priced:
+
+
+    *   **TST005 Floral Print Dress:** Elegant floral dress for special occasions
+    ($79.99)
+
+    *   **CHN5432 Chunky Knit Sweater:** Stay cozy and stylish with our chunky knit
+    sweater ($79.99)
+
+    *   **DTD0123 Denim Trucker Jacket:** A timeless staple, our denim trucker jacket
+    ($79.00)
+
+
+    Please feel free to browse these suggestions. We apologize for any inconvenience
+    regarding the Cargo Pants stock.
+
+
+    We look forward to hearing from you soon and are here to assist with any further
+    questions.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Acknowledge customer's email and decision to order Cargo Pants.
+    content_type: greeting
+    priority: 9
+    related_to: null
+  - content: Inform customer that the requested quantity of 5 units for CGN2345 Cargo
+      Pants is out of stock.
+    content_type: answer
+    priority: 10
+    related_to: CGN2345
+  - content: State the available quantity (2 units).
+    content_type: answer
+    priority: 9
+    related_to: CGN2345
+  - content: Explain that the order could not be fully processed.
+    content_type: answer
+    priority: 9
+    related_to: null
+  - content: Ask if the customer is interested in purchasing the available 2 units.
+    content_type: question
+    priority: 10
+    related_to: null
+  - content: Suggest alternative products based on the ProcessOrderResult.
+    content_type: alternative
+    priority: 8
+    related_to: null
+  - content: List the alternative products (TST005, CHN5432, DTD0123) with brief descriptions
+      and prices.
+    content_type: product_info
+    priority: 8
+    related_to: TST005, CHN5432, DTD0123
+  - content: Apologize for the inconvenience.
+    content_type: closing
+    priority: 7
+    related_to: null
+  - content: Offer further assistance.
+    content_type: closing
+    priority: 7
+    related_to: null
+  - content: Include standard Hermes signature.
+    content_type: closing
+    priority: 10
+    related_to: null
+  subject: Regarding your order for CGN2345 Cargo Pants - Stock Update
+  tone: professional and warm
+email:
+  email_id: E023
+  message: After weeks of consideration, I've made up my mind! Looking at my bank
+    account right now, and I'm prepared to commit to those CGN2345 Cargo Pants - all
+    5 of them, exactly as we discussed in my previous emails about the color options
+    and material details. Just need you to confirm the availability first, before
+    we move formward.
+  subject: Final Decision Made
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E023
+    lines:
+    - alternatives:
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Women's Clothing
+          description: Elegant floral dress for special occasions.
+          metadata: null
+          name: Floral Print Dress
+          price: 79.99
+          product_id: TST005
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          stock: 8
+        reason: Very similar price ($79.99 vs $80.00) and currently in stock
+        similarity_score: 0.999875
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Women's Clothing
+          description: Stay cozy and stylish with our chunky knit sweater. Crafted
+            from soft, high-quality yarn, this oversized sweater features a trendy,
+            chunky knit pattern and a relaxed fit. Perfect for layering or wearing
+            on its own.
+          metadata: null
+          name: Chunky Knit Sweater
+          price: 79.99
+          product_id: CHN5432
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          stock: 4
+        reason: Very similar price ($79.99 vs $80.00) and currently in stock
+        similarity_score: 0.999875
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Women's Clothing
+          description: A timeless staple, our denim trucker jacket is a must-have
+            for any fashion-forward wardrobe. Crafted from sturdy denim, this jacket
+            features a classic trucker silhouette with button-front closure. Layer
+            it over dresses or pair it with jeans for a cool, casual look.
+          metadata: null
+          name: Denim Trucker Jacket
+          price: 79.0
+          product_id: DTD0123
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          stock: 3
+        reason: Very similar price ($79.00 vs $80.00) and currently in stock
+        similarity_score: 0.9875
+      base_price: 80.0
+      description: Functionality meets style in our cargo pants. These utilitarian-inspired
+        pants feature multiple pockets and a relaxed, straight-leg fit. Perfect for
+        outdoor adventures, travel, or adding a touch of edge to your casual looks.
+      product_id: CGN2345
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 5
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - out_of_stock
+      stock: 2
+      total_price: 400.0
+      unit_price: 80.0
+    message: The requested quantity for Cargo Pants (CGN2345) is not available. Only
+      2 are in stock. We have suggested an alternative.
+    overall_status: out_of_stock
+    stock_updated: false
+    total_discount: 0.0
+    total_price: 0.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - CGN2345
+      confidence_scores:
+      - 1.0
+      mention: product_id='CGN2345' product_name='Cargo Pants' product_description=None
+        product_category=None product_type=None quantity=5 confidence=1.0 mention_text='those
+        CGN2345 Cargo Pants'
+      num_candidates: 1
+    candidates_resolved: 1
+    resolution_attempts: 1
+    resolution_time_ms: 5
+    total_mentions: 1
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Functionality meets style in our cargo pants. These utilitarian-inspired
+      pants feature multiple pockets and a relaxed, straight-leg fit. Perfect for
+      outdoor adventures, travel, or adding a touch of edge to your casual looks.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: null
+        product_id: CGN2345
+        product_name: Cargo Pants
+        product_type: null
+        quantity: 5
+      requested_quantity: 5
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Cargo Pants
+    price: 80.0
+    product_id: CGN2345
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    - !!python/object/apply:hermes.model.enums.Season
+      - Autumn
+    stock: 2
+  unresolved_mentions: []

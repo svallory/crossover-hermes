@@ -110,25 +110,11 @@ def find_product_by_id(product_id: str) -> Product | ProductNotFound:
     # Handle potential missing columns with proper typing
     seasons_list: list[Season] = []
 
-    # Process seasons correctly to handle 'Fall' vs 'Autumn'
-    seasons_str = str(product_row.get("seasons", "Spring"))
+    seasons_str = str(product_row.get("seasons", None))
     if seasons_str:
         for s in seasons_str.split(","):
             s = s.strip()
-            if s:
-                # Map 'Fall' to 'Autumn' if needed
-                if s == "Fall":
-                    seasons_list.append(Season.AUTUMN)
-                else:
-                    try:
-                        seasons_list.append(Season(s))
-                    except ValueError:
-                        # If not a valid season, use a default
-                        seasons_list.append(Season.SPRING)
-
-    # If no seasons were added, default to Spring
-    if not seasons_list:
-        seasons_list = [Season.SPRING]
+            seasons_list.append(Season(s))
 
     try:
         return Product(
@@ -208,24 +194,11 @@ def find_product_by_name(
 
             # Process seasons with proper typing
             seasons_list: list[Season] = []
-            seasons_str = str(product_row.get("season", "Spring"))
+            seasons_str = str(product_row.get("season", None))
             if seasons_str:
                 for s in seasons_str.split(","):
                     s = s.strip()
-                    if s:
-                        # Map 'Fall' to 'Autumn' if needed
-                        if s == "Fall":
-                            seasons_list.append(Season.AUTUMN)
-                        else:
-                            try:
-                                seasons_list.append(Season(s))
-                            except ValueError:
-                                # If not a valid season, use a default
-                                seasons_list.append(Season.SPRING)
-
-            # If no seasons were added, default to Spring
-            if not seasons_list:
-                seasons_list = [Season.SPRING]
+                    seasons_list.append(Season(s))
 
             product = Product(
                 product_id=str(product_row["product_id"]),
@@ -637,24 +610,11 @@ def find_alternatives(
     for _, row in top_alternatives.iterrows():
         # Process seasons with proper typing
         seasons_list: list[Season] = []
-        seasons_str = str(row.get("season", ""))
+        seasons_str = str(row.get("seasons", None))
         if seasons_str:
             for s in seasons_str.split(","):
                 s = s.strip()
-                if s:
-                    # Map 'Fall' to 'Autumn' if needed
-                    if s == "Fall":
-                        seasons_list.append(Season.AUTUMN)
-                    else:
-                        try:
-                            seasons_list.append(Season(s))
-                        except ValueError:
-                            # If not a valid season, use a default
-                            seasons_list.append(Season.SPRING)
-
-        # If no seasons were added, default to Spring
-        if not seasons_list:
-            seasons_list = [Season.SPRING]
+                seasons_list.append(Season(s))
 
         product = Product(
             product_id=str(row["product_id"]),

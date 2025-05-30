@@ -1,0 +1,153 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E016
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - I'm looking for a dress for a summer wedding I have coming up. Any recommendations
+      on some options that might work for me?
+    - I think I need some travel bag.
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Claire
+    email_id: E016
+    language: en
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm looking for a dress for a summer wedding I have coming up.
+      product_mentions:
+      - confidence: 0.5
+        mention_text: a dress
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: null
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - I don't want anything too short, low-cut, or super tight-fitting.
+      - But I also don't want it to be too loose or matronly.
+      - Something flattering but still comfortable to wear for an outdoor ceremony.
+      - Any recommendations on some options that might work for me?
+      - Thank you!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: My name is Claire.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: And bag, I think I need some travel bag.
+      product_mentions:
+      - confidence: 0.5
+        mention_text: some travel bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: null
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E016
+  language: en
+  response_body: 'Dear Claire,
+
+
+    Thank you for contacting Hermes.
+
+
+    I understand you are looking for recommendations for a dress for an upcoming summer
+    wedding, keeping in mind your preferences for fit and comfort for an outdoor ceremony.
+    You also asked for suggestions for a travel bag.
+
+
+    I have reviewed your requests, but unfortunately, I was unable to find specific
+    product recommendations that perfectly match your detailed needs at this moment.
+
+
+    I sincerely apologize that I cannot provide you with immediate suggestions.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Dear Claire,
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: I understand you are looking for recommendations for a dress for an upcoming
+      summer wedding, keeping in mind your preferences for fit and comfort for an
+      outdoor ceremony.
+    content_type: answer
+    priority: 9
+    related_to: dress inquiry
+  - content: You also asked for suggestions for a travel bag.
+    content_type: answer
+    priority: 8
+    related_to: bag inquiry
+  - content: I have reviewed your requests, but unfortunately, I was unable to find
+      specific product recommendations that perfectly match your detailed needs at
+      this moment.
+    content_type: answer
+    priority: 7
+    related_to: null
+  - content: I sincerely apologize that I cannot provide you with immediate suggestions.
+    content_type: answer
+    priority: 6
+    related_to: null
+  - content: Best regards,
+    content_type: closing
+    priority: 10
+    related_to: null
+  - content: Hermes - Delivering divine fashion
+    content_type: closing
+    priority: 10
+    related_to: null
+  subject: Response to your inquiry
+  tone: Helpful and polite
+email:
+  email_id: E016
+  message: Hello, I'm looking for a dress for a summer wedding I have coming up. My
+    name is Claire. I don't want anything too short, low-cut, or super tight-fitting.
+    But I also don't want it to be too loose or matronly. Something flattering but
+    still comfortable to wear for an outdoor ceremony. Any recommendations on some
+    options that might work for me? Thank you! And bag, I think I need some travel
+    bag.
+  subject: Summer Wedding Guest Dress Preferences
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata:
+    candidate_log: []
+    candidates_resolved: 0
+    resolution_attempts: 2
+    resolution_time_ms: 1403
+    total_mentions: 2
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.5
+    mention_text: a dress
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: null
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1
+  - confidence: 0.5
+    mention_text: some travel bag
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: null
+    product_id: null
+    product_name: null
+    product_type: bag
+    quantity: 1

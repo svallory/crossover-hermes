@@ -1,0 +1,153 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The Chunky Knit Beanie is knitted from thick, cozy yarn.
+      answer_type: factual
+      confidence: 1.0
+      question: "\xBFDe qu\xE9 material est\xE1 hecho?"
+      reference_product_ids:
+      - CHN0987
+    - answer: The Chunky Knit Beanie is suitable for winter and is described as keeping
+        your head toasty.
+      answer_type: factual
+      confidence: 1.0
+      question: "\xBFEs lo suficientemente c\xE1lido para usar en invierno?"
+      reference_product_ids:
+      - CHN0987
+    email_id: E009
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      description: Keep your head toasty with our chunky knit beanie. Knitted from
+        thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a
+        touch of rustic charm. A versatile accessory to elevate your cold-weather
+        looks.
+      metadata: null
+      name: Chunky Knit Beanie
+      price: 22.0
+      product_id: CHN0987
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Autumn
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 2
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E009
+    language: es
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: "\xBFDe qu\xE9 material est\xE1 hecho?"
+      product_mentions:
+      - confidence: 1.0
+        mention_text: el DHN0987 Gorro de punto grueso
+        product_category: null
+        product_description: null
+        product_id: DHN0987
+        product_name: Gorro de punto grueso
+        product_type: null
+        quantity: 1
+      related_sentences:
+      - Hola, tengo una pregunta sobre el DHN0987 Gorro de punto grueso.
+      - "\xBFEs lo suficientemente c\xE1lido para usar en invierno?"
+      - Gracias de antemano.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E009
+  language: es
+  response_body: "Hola,\n\nGracias por contactarnos. Con gusto te proporciono informaci\xF3\
+    n sobre el Gorro de punto grueso.\n\nEste gorro est\xE1 tejido con hilo grueso\
+    \ y acogedor.\n\nS\xED, es adecuado para el invierno y est\xE1 dise\xF1ado para\
+    \ mantener tu cabeza bien abrigada.\n\nEspero que esta informaci\xF3n te sea \xFA\
+    til. Si tienes alguna otra pregunta, no dudes en consultarnos.\n\nBest regards,\n\
+    Hermes - Delivering divine fashion"
+  response_points:
+  - content: Greeting the customer.
+    content_type: greeting
+    priority: 1
+    related_to: null
+  - content: Acknowledging the customer's inquiry about the Chunky Knit Beanie (Gorro
+      de punto grueso).
+    content_type: acknowledgement
+    priority: 2
+    related_to: CHN0987
+  - content: Providing information on the material of the beanie.
+    content_type: answer
+    priority: 3
+    related_to: CHN0987
+  - content: Confirming the beanie's suitability and warmth for winter.
+    content_type: answer
+    priority: 4
+    related_to: CHN0987
+  - content: Offering further assistance.
+    content_type: closing
+    priority: 5
+    related_to: null
+  - content: Adding the standard signature.
+    content_type: signature
+    priority: 6
+    related_to: null
+  subject: Respuesta sobre su consulta del Gorro de punto grueso
+  tone: friendly and helpful
+email:
+  email_id: E009
+  message: "Hola, tengo una pregunta sobre el DHN0987 Gorro de punto grueso. \xBF\
+    De qu\xE9 material est\xE1 hecho? \xBFEs lo suficientemente c\xE1lido para usar\
+    \ en invierno? Gracias de antemano."
+  subject: Pregunta Sobre Gorro de Punto Grueso
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - CHN0987
+      confidence_scores:
+      - 1.0
+      mention: product_id='DHN0987' product_name='Gorro de punto grueso' product_description=None
+        product_category=None product_type=None quantity=1 confidence=1.0 mention_text='el
+        DHN0987 Gorro de punto grueso'
+      num_candidates: 1
+    candidates_resolved: 1
+    resolution_attempts: 1
+    resolution_time_ms: 6
+    total_mentions: 1
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Keep your head toasty with our chunky knit beanie. Knitted from thick,
+      cozy yarn, this trendy beanie offers a slouchy, oversized fit and a touch of
+      rustic charm. A versatile accessory to elevate your cold-weather looks.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: null
+        product_id: DHN0987
+        product_name: Gorro de punto grueso
+        product_type: null
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Chunky Knit Beanie
+    price: 22.0
+    product_id: CHN0987
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Autumn
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 2
+  unresolved_mentions: []

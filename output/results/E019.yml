@@ -1,0 +1,254 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E019
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Hey there, I would like to buy Chelsea Boots [CBT 89 01] from
+        you guys!
+      product_mentions:
+      - confidence: 1.0
+        mention_text: Chelsea Boots [CBT 89 01]
+        product_category: null
+        product_description: null
+        product_id: CBT8901
+        product_name: Chelsea Boots
+        product_type: null
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: You're so awesome I'm so impressed with the quality of Fuzzy
+        Slippers - FZZ1098 I've bought from you before.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: Fuzzy Slippers - FZZ1098
+        product_category: null
+        product_description: null
+        product_id: FZZ1098
+        product_name: Fuzzy Slippers
+        product_type: null
+        quantity: 1
+      related_sentences:
+      - I hope the quality stays.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: I would like to order Retro sunglasses from you, but probably
+        next time!
+      product_mentions:
+      - confidence: 0.8
+        mention_text: Retro sunglasses
+        product_category: null
+        product_description: null
+        product_id: null
+        product_name: Retro sunglasses
+        product_type: null
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: Thanks
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E019
+  language: English
+  response_body: "Hi there,\n\nThank you so much for your recent order with Hermes!\
+    \ We were absolutely delighted to hear how impressed you are with the quality\
+    \ of the Fuzzy Slippers you previously purchased. We truly appreciate your kind\
+    \ words and are committed to maintaining that high standard.\n\nWe'd like to confirm\
+    \ that your order for the Chelsea Boots (CBT8901), quantity 1, totaling $65.0\
+    \ has been successfully created.\n\nWe also noted your interest in our Retro sunglasses\
+    \ for a future purchase \u2013 we look forward to assisting you with those when\
+    \ you're ready!\n\nThank you again for choosing Hermes.\n\nBest regards,\nHermes\
+    \ - Delivering divine fashion"
+  response_points:
+  - content: Greeting the customer.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Thanking the customer for their order.
+    content_type: answer
+    priority: 9
+    related_to: null
+  - content: Acknowledging the customer's positive feedback on their previous purchase
+      (Fuzzy Slippers) and assuring them of continued quality.
+    content_type: answer
+    priority: 8
+    related_to: FZZ1098
+  - content: 'Confirming the order details: Chelsea Boots (CBT8901), quantity 1, total
+      price $65.0.'
+    content_type: answer
+    priority: 10
+    related_to: CBT8901
+  - content: Stating that the order has been successfully created.
+    content_type: answer
+    priority: 10
+    related_to: CBT8901
+  - content: Acknowledging their interest in Retro sunglasses for a future purchase.
+    content_type: answer
+    priority: 7
+    related_to: null
+  - content: Expressing gratitude again.
+    content_type: closing
+    priority: 9
+    related_to: null
+  - content: Standard closing signature.
+    content_type: closing
+    priority: 10
+    related_to: null
+  subject: Thank you for your order and kind words!
+  tone: friendly and appreciative
+email:
+  email_id: E019
+  message: Hey there, I would like to buy Chelsea Boots [CBT 89 01] from you guys!
+    You're so awesome I'm so impressed with the quality of Fuzzy Slippers - FZZ1098
+    I've bought from you before. I hope the quality stays. I would like to order Retro
+    sunglasses from you, but probably next time! Thanks
+  subject: Hi
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E019
+    lines:
+    - alternatives: []
+      base_price: 65.0
+      description: Elevate your casual looks with our Chelsea boots. These stylish
+        ankle boots feature a sleek leather construction, elastic side panels, and
+        a sturdy lug sole. An essential for completing modern, edgy outfits.
+      product_id: CBT8901
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 1
+      total_price: 65.0
+      unit_price: 65.0
+    message: Your order has been created.
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 65.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - CBT8901
+      confidence_scores:
+      - 1.0
+      mention: product_id='CBT8901' product_name='Chelsea Boots' product_description=None
+        product_category=None product_type=None quantity=1 confidence=1.0 mention_text='Chelsea
+        Boots [CBT 89 01]'
+      num_candidates: 1
+    - candidate_ids:
+      - FZZ1098
+      confidence_scores:
+      - 1.0
+      mention: product_id='FZZ1098' product_name='Fuzzy Slippers' product_description=None
+        product_category=None product_type=None quantity=1 confidence=1.0 mention_text='Fuzzy
+        Slippers - FZZ1098'
+      num_candidates: 1
+    - candidate_ids:
+      - RSG8901
+      confidence_scores:
+      - 0.7605521380901337
+      mention: product_id=None product_name='Retro sunglasses' product_description=None
+        product_category=None product_type=None quantity=1 confidence=0.8 mention_text='Retro
+        sunglasses'
+      num_candidates: 1
+    candidates_resolved: 3
+    resolution_attempts: 3
+    resolution_time_ms: 804
+    total_mentions: 3
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Shoes
+    description: Elevate your casual looks with our Chelsea boots. These stylish ankle
+      boots feature a sleek leather construction, elastic side panels, and a sturdy
+      lug sole. An essential for completing modern, edgy outfits.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: null
+        product_id: CBT8901
+        product_name: Chelsea Boots
+        product_type: null
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Chelsea Boots
+    price: 65.0
+    product_id: CBT8901
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Autumn
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 2
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+      a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+      comfort. An ideal choice for lounging at home or running errands on chilly days.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: null
+        product_id: FZZ1098
+        product_name: Fuzzy Slippers
+        product_type: null
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Fuzzy Slippers
+    price: 29.0
+    product_id: FZZ1098
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Autumn
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 0
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Transport yourself back in time with our retro sunglasses. These
+      vintage-inspired shades offer a cool, nostalgic vibe while protecting your eyes
+      from the sun's rays. Perfect for beach days or city strolls.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: null
+        product_id: null
+        product_name: Retro sunglasses
+        product_type: null
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 0.7605521380901337
+      resolution_method: semantic_search
+      search_query: Retro sunglasses
+      similarity_score: 0.47889572381973267
+    name: Retro Sunglasses
+    price: 26.99
+    product_id: RSG8901
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 1
+  unresolved_mentions: []

@@ -1,0 +1,100 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E017
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Hi there I want to place an order for that popular item you sell.
+      product_mentions:
+      - confidence: 0.5
+        mention_text: that popular item you sell
+        product_category: null
+        product_description: null
+        product_id: null
+        product_name: null
+        product_type: null
+        quantity: 1
+      related_sentences:
+      - The one that's been selling like hotcakes lately.
+      - You know what I mean right?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E017
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to Hermes and for your interest in placing an order.
+
+
+    We received your request to order "that popular item you sell", but we couldn''t
+    identify the specific product you are referring to from your description. We have
+    many popular items, and to ensure you receive exactly what you desire, we need
+    a little more information.
+
+
+    To help you place your order, could you please provide a more specific description
+    of the item, perhaps the product name, or even a link if you saw it online?
+
+
+    We look forward to assisting you further and helping you find the perfect piece.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Acknowledge customer's email and interest in ordering.
+    content_type: greeting
+    priority: 1
+    related_to: null
+  - content: Explain that the product could not be identified from the description.
+    content_type: answer
+    priority: 2
+    related_to: null
+  - content: Ask the customer to provide more specific details about the product.
+    content_type: answer
+    priority: 3
+    related_to: null
+  - content: Closing and signature.
+    content_type: closing
+    priority: 4
+    related_to: null
+  subject: Regarding Your Recent Order Inquiry
+  tone: helpful and polite
+email:
+  email_id: E017
+  message: Hi there I want to place an order for that popular item you sell. The one
+    that's been selling like hotcakes lately. You know what I mean right?
+  subject: nan
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E017
+    lines: []
+    message: No valid products were identified from your request. Please provide a
+      more specific description or product name.
+    overall_status: no_valid_products
+    stock_updated: false
+    total_discount: 0.0
+    total_price: 0.0
+stockkeeper:
+  metadata:
+    candidate_log: []
+    candidates_resolved: 0
+    resolution_attempts: 1
+    resolution_time_ms: 0
+    total_mentions: 1
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.5
+    mention_text: that popular item you sell
+    product_category: null
+    product_description: null
+    product_id: null
+    product_name: null
+    product_type: null
+    quantity: 1

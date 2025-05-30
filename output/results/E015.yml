@@ -1,0 +1,116 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E015
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - Which men's bag would you recommend that's both stylish and practical?
+    unsuccessful_references:
+    - men's bag
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E015
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Which men's bag would you recommend that's both stylish and practical?
+      product_mentions:
+      - confidence: 0.6
+        mention_text: men's bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Accessories
+        product_description: null
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 1
+      related_sentences:
+      - Good morning,
+      - I'm looking for a nice bag for my husband Thomas for our anniversary.
+      - Something he can use for work but also take on hikes.
+      - Thank you in advance!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E015
+  language: English
+  response_body: "Good morning,\n\nThank you for reaching out to us. We understand\
+    \ you're looking for a stylish and practical men's bag for your husband Thomas\
+    \ for your anniversary, something suitable for both work and hiking.\n\nFinding\
+    \ a single recommendation that perfectly balances all these specific needs \u2013\
+    \ style, practicality, and suitability for both work and hiking \u2013 can be\
+    \ quite specific. While we have a wide range of exquisite men's bags, identifying\
+    \ one that ticks every single box without exploring the collection further or\
+    \ understanding more about Thomas's preferences and the specific hiking context\
+    \ is challenging.\n\nWe invite you to explore our full collection of men's bags\
+    \ on our website, where you can filter by style, material, and features. Alternatively,\
+    \ visiting one of our stores would allow you to see the bags in person and speak\
+    \ with our knowledgeable staff.\n\nFor a more personalized recommendation tailored\
+    \ precisely to Thomas's requirements, we would be delighted to connect you with\
+    \ one of our personal shoppers. They can offer expert guidance and help you find\
+    \ the perfect anniversary gift.\n\nWe hope this helps you in your search for a\
+    \ truly special gift.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Greeting the customer warmly.
+    content_type: greeting
+    priority: 5
+    related_to: null
+  - content: Acknowledging the customer's inquiry about a stylish and practical men's
+      bag for her husband Thomas for their anniversary, to be used for work and hiking.
+    content_type: answer
+    priority: 5
+    related_to: men's bag inquiry
+  - content: Explaining that finding a single recommendation meeting all criteria
+      (stylish, practical, work, hiking) is challenging without more information or
+      browsing.
+    content_type: explanation
+    priority: 5
+    related_to: null
+  - content: Suggesting exploring the full collection online or visiting a store.
+    content_type: alternative
+    priority: 5
+    related_to: null
+  - content: Offering personalized assistance from a personal shopper to find a tailored
+      recommendation.
+    content_type: alternative
+    priority: 5
+    related_to: null
+  - content: Closing the email.
+    content_type: closing
+    priority: 5
+    related_to: null
+  - content: Adding the standard signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Finding the perfect men's bag for Thomas
+  tone: warm and helpful
+email:
+  email_id: E015
+  message: Good morning, I'm looking for a nice bag for my husband Thomas for our
+    anniversary. He has a professional office job, but also likes outdoor activities
+    on weekends. Which men's bag would you recommend that's both stylish and practical?
+    Something he can use for work but also take on hikes. Thank you in advance!
+  subject: Stylish Yet Practical Men's Bag Recommendation
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata:
+    candidate_log: []
+    candidates_resolved: 0
+    resolution_attempts: 1
+    resolution_time_ms: 889
+    total_mentions: 1
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.6
+    mention_text: men's bag
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Accessories
+    product_description: null
+    product_id: null
+    product_name: null
+    product_type: bag
+    quantity: 1

@@ -1,0 +1,319 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Liz
+    email_id: E007
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Please send me 5 CLF2109 Cable Knit Beanies and 2 pairs of FZZ1098
+        Fuzzy Slippers.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: 5 CLF2109 Cable Knit Beanies
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: null
+        product_id: CLF2109
+        product_name: Cable Knit Beanies
+        product_type: Beanie
+        quantity: 5
+      - confidence: 1.0
+        mention_text: 2 pairs of FZZ1098 Fuzzy Slippers
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Loungewear
+        product_description: null
+        product_id: FZZ1098
+        product_name: Fuzzy Slippers
+        product_type: Slippers
+        quantity: 2
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: I'm prepping some holiday gift baskets.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E007
+  language: English
+  response_body: 'Dear Liz,
+
+
+    Thank you for your email and for reaching out to Hermes! It sounds like you''re
+    putting together some wonderful holiday gift baskets.
+
+
+    We''ve reviewed your request for 5 Cable Knit Beanies and 2 pairs of Fuzzy Slippers.
+
+
+    We are pleased to confirm your order for **2 pairs of FZZ1098 Fuzzy Slippers**
+    for a total of $58.00.
+
+
+    Regarding the CLF2109 Cable Knit Beanies, we currently have limited stock available.
+    While you requested 5, we only have 2 beanies in stock at the moment. We were
+    unable to fulfill the full quantity you requested.
+
+
+    We understand this may impact your gift basket plans. We have a few similar items
+    you might consider as alternatives for the beanies:
+
+    *   **CSH1098 Cozy Shawl**: Priced at $22.00, we have 3 in stock.
+
+    *   **CHN0987 Chunky Knit Beanie**: Priced at $22.00, we have 2 in stock.
+
+    *   **VSC6789 Versatile Scarf**: Priced at $23.00, we have 6 in stock.
+
+
+    Please let us know if you would like to proceed with the 2 available Cable Knit
+    Beanies, or if you''d prefer to order one of the alternative items.
+
+
+    We apologize for any inconvenience this may cause and look forward to assisting
+    you further.
+
+
+    Best regards,
+
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Dear Liz, Thank you for your email and for reaching out to Hermes! It
+      sounds like you're putting together some wonderful holiday gift baskets.
+    content_type: greeting
+    priority: 9
+    related_to: null
+  - content: We are pleased to confirm your order for **2 pairs of FZZ1098 Fuzzy Slippers**
+      for a total of $58.00.
+    content_type: order_confirmation
+    priority: 10
+    related_to: FZZ1098
+  - content: Regarding the CLF2109 Cable Knit Beanies, we currently have limited stock
+      available. While you requested 5, we only have 2 beanies in stock at the moment.
+      We were unable to fulfill the full quantity you requested.
+    content_type: stock_issue
+    priority: 10
+    related_to: CLF2109
+  - content: 'We understand this may impact your gift basket plans. We have a few
+      similar items you might consider as alternatives for the beanies:'
+    content_type: alternative_suggestion
+    priority: 8
+    related_to: CLF2109
+  - content: '**CSH1098 Cozy Shawl**: Priced at $22.00, we have 3 in stock.'
+    content_type: alternative_info
+    priority: 7
+    related_to: CSH1098
+  - content: '**CHN0987 Chunky Knit Beanie**: Priced at $22.00, we have 2 in stock.'
+    content_type: alternative_info
+    priority: 7
+    related_to: CHN0987
+  - content: '**VSC6789 Versatile Scarf**: Priced at $23.00, we have 6 in stock.'
+    content_type: alternative_info
+    priority: 7
+    related_to: VSC6789
+  - content: Please let us know if you would like to proceed with the 2 available
+      Cable Knit Beanies, or if you'd prefer to order one of the alternative items.
+      We apologize for any inconvenience this may cause and look forward to assisting
+      you further.
+    content_type: call_to_action
+    priority: 9
+    related_to: null
+  - content: Best regards,
+    content_type: closing
+    priority: 9
+    related_to: null
+  - content: Hermes - Delivering divine fashion
+    content_type: signature
+    priority: 9
+    related_to: null
+  subject: Update on your recent Hermes order
+  tone: friendly and helpful
+email:
+  email_id: E007
+  message: Hi, this is Liz. Please send me 5 CLF2109 Cable Knit Beanies and 2 pairs
+    of FZZ1098 Fuzzy Slippers. I'm prepping some holiday gift baskets.
+  subject: Order for Beanies, Slippers
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E007
+    lines:
+    - alternatives:
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Accessories
+          description: Wrap yourself in comfort with our cozy shawl. Knitted from
+            soft, warm yarn, this versatile accessory can be worn as a shawl, scarf,
+            or even a lightweight blanket. Perfect for chilly evenings or adding a
+            cozy layer to your outfit.
+          metadata: null
+          name: Cozy Shawl
+          price: 22.0
+          product_id: CSH1098
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          stock: 3
+        reason: Similar price range and currently in stock (3 available)
+        similarity_score: 0.7272727272727273
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Accessories
+          description: Keep your head toasty with our chunky knit beanie. Knitted
+            from thick, cozy yarn, this trendy beanie offers a slouchy, oversized
+            fit and a touch of rustic charm. A versatile accessory to elevate your
+            cold-weather looks.
+          metadata: null
+          name: Chunky Knit Beanie
+          price: 22.0
+          product_id: CHN0987
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          stock: 2
+        reason: Similar price range and currently in stock (2 available)
+        similarity_score: 0.7272727272727273
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Accessories
+          description: Add a touch of versatility to your wardrobe with our versatile
+            scarf. This lightweight, multi-purpose accessory can be worn as a scarf,
+            shawl, or even a headwrap. Perfect for transitional seasons or travel.
+          metadata: null
+          name: Versatile Scarf
+          price: 23.0
+          product_id: VSC6789
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          stock: 6
+        reason: Same category alternative that's currently available (6 in stock)
+        similarity_score: 0.6956521739130435
+      base_price: 16.0
+      description: Bundle up in our cable knit beanie. Knitted from premium wool,
+        this classic beanie features a timeless cable knit pattern and a soft, stretchy
+        fit. A versatile accessory for adding a touch of warmth and texture to your
+        cold-weather looks.
+      product_id: CLF2109
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 5
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - out_of_stock
+      stock: 2
+      total_price: 80.0
+      unit_price: 16.0
+    - alternatives: []
+      base_price: 29.0
+      description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+        a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+        comfort. An ideal choice for lounging at home or running errands on chilly
+        days.
+      product_id: FZZ1098
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 2
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 0
+      total_price: 58.0
+      unit_price: 29.0
+    message: Your order is partially fulfilled. One item is out of stock for the requested
+      quantity.
+    overall_status: partially_fulfilled
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 58.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - CLF2109
+      confidence_scores:
+      - 1.0
+      mention: 'product_id=''CLF2109'' product_name=''Cable Knit Beanies'' product_description=None
+        product_category=<ProductCategory.ACCESSORIES: ''Accessories''> product_type=''Beanie''
+        quantity=5 confidence=1.0 mention_text=''5 CLF2109 Cable Knit Beanies'''
+      num_candidates: 1
+    - candidate_ids:
+      - FZZ1098
+      confidence_scores:
+      - 1.0
+      mention: 'product_id=''FZZ1098'' product_name=''Fuzzy Slippers'' product_description=None
+        product_category=<ProductCategory.LOUNGEWEAR: ''Loungewear''> product_type=''Slippers''
+        quantity=2 confidence=1.0 mention_text=''2 pairs of FZZ1098 Fuzzy Slippers'''
+      num_candidates: 1
+    candidates_resolved: 2
+    resolution_attempts: 2
+    resolution_time_ms: 8
+    total_mentions: 2
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Bundle up in our cable knit beanie. Knitted from premium wool, this
+      classic beanie features a timeless cable knit pattern and a soft, stretchy fit.
+      A versatile accessory for adding a touch of warmth and texture to your cold-weather
+      looks.
+    metadata:
+      original_mention:
+        product_category: Accessories
+        product_description: null
+        product_id: CLF2109
+        product_name: Cable Knit Beanies
+        product_type: Beanie
+        quantity: 5
+      requested_quantity: 5
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Cable Knit Beanie
+    price: 16.0
+    product_id: CLF2109
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 2
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+      a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+      comfort. An ideal choice for lounging at home or running errands on chilly days.
+    metadata:
+      original_mention:
+        product_category: Loungewear
+        product_description: null
+        product_id: FZZ1098
+        product_name: Fuzzy Slippers
+        product_type: Slippers
+        quantity: 2
+      requested_quantity: 2
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Fuzzy Slippers
+    price: 29.0
+    product_id: FZZ1098
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Autumn
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 2
+  unresolved_mentions: []

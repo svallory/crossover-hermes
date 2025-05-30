@@ -53,27 +53,33 @@ def metadata_to_product(metadata: Dict[str, Any]) -> Product:
     """
     # Handle seasons
     seasons = []
-    season_str = metadata.get("season", "Spring")
-    for s in str(season_str).split(","):
-        s = s.strip()
-        if s:
-            # Handle 'All seasons' (valid enum value)
-            if s == "All seasons":
-                seasons.append(Season.ALL_SEASONS)
-            # Map 'Fall' to 'Autumn' (data inconsistency)
-            elif s == "Fall":
-                seasons.append(Season.AUTUMN)
-            # Handle other valid seasons
-            else:
-                try:
-                    seasons.append(Season(s))
-                except ValueError:
-                    # If season is not valid, default to Spring
-                    print(f"Warning: Invalid season '{s}' found, defaulting to Spring")
-                    seasons.append(Season.SPRING)
+    season_data = metadata.get("season")  # No default like "Spring" if key is missing
 
-    if not seasons:
-        seasons = [Season.SPRING]
+    if (
+        isinstance(season_data, str) and season_data.strip()
+    ):  # Process only if it's a non-empty string
+        season_values = season_data.split(",")
+        for s_val_raw in season_values:
+            s_val = s_val_raw.strip()
+            if not s_val:  # Skip empty strings that might result from "Spring,,Summer"
+                continue
+
+            # Attempt direct conversion for other seasons like "Spring", "Summer", "Winter"
+            # This assumes s_val matches the enum value string exactly (e.g. "Spring")
+            try:
+                seasons.append(Season(s_val))
+            except ValueError:
+                # If a season string is provided but is not valid and not handled above,
+                # it's an error in the data.
+                raise ValueError(
+                    f"Invalid season value '{s_val}' found in metadata for product ID '{metadata.get('product_id', 'Unknown')}'. "
+                    f"Expected one of: {', '.join([e.value for e in Season])} (case-sensitive for non-mapped values), "
+                    f"or 'all seasons'/'fall'/'autumn' (case-insensitive)."
+                )
+
+    # The 'seasons' list will be empty if 'season_data' was None, an empty string,
+    # or contained only empty strings after splitting. This is not a default.
+    # If the Product model requires seasons to be non-empty, Pydantic validation will catch it.
 
     return Product(
         product_id=str(metadata["product_id"]),

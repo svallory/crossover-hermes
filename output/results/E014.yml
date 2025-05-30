@@ -1,0 +1,148 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Johny
+    email_id: E014
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Please send me 1 Sleek Wallet.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: 1 Sleek Wallet
+        product_category: null
+        product_description: null
+        product_id: null
+        product_name: Sleek Wallet
+        product_type: null
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E014
+  language: English
+  response_body: 'Dear Johny,
+
+
+    Thank you for your order! We are pleased to confirm that your order for 1 Sleek
+    Wallet has been successfully created.
+
+
+    Your order details:
+
+    Item: Sleek Wallet
+
+    Quantity: 1
+
+    Total Price: $30.00
+
+
+    We appreciate your business and hope you enjoy your new Sleek Wallet.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Greeting the customer by name.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirming that the order has been successfully created.
+    content_type: order_confirmation
+    priority: 9
+    related_to: null
+  - content: 'Listing the item ordered: Sleek Wallet, Quantity: 1'
+    content_type: order_details
+    priority: 8
+    related_to: SWL2345
+  - content: 'Stating the total price of the order: $30.00'
+    content_type: order_total
+    priority: 8
+    related_to: null
+  - content: Expressing gratitude and looking forward to the customer enjoying their
+      purchase.
+    content_type: closing
+    priority: 10
+    related_to: null
+  - content: Adding the standard Hermes signature.
+    content_type: signature
+    priority: 10
+    related_to: null
+  subject: Your Hermes Order Confirmation - Sleek Wallet
+  tone: professional and warm
+email:
+  email_id: E014
+  message: Please send me 1 Sleek Wallet. Thanks, Johny
+  subject: Sleek Wallet Order
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E014
+    lines:
+    - alternatives: []
+      base_price: 30.0
+      description: Keep your essentials organized and secure with our sleek wallet.
+        Featuring multiple card slots and a billfold compartment, this stylish wallet
+        is both functional and fashionable. Perfect for everyday carry.
+      product_id: SWL2345
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 5
+      total_price: 30.0
+      unit_price: 30.0
+    message: Your order has been created.
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 30.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - SWL2345
+      confidence_scores:
+      - 0.7552834302186966
+      mention: product_id=None product_name='Sleek Wallet' product_description=None
+        product_category=None product_type=None quantity=1 confidence=1.0 mention_text='1
+        Sleek Wallet'
+      num_candidates: 1
+    candidates_resolved: 1
+    resolution_attempts: 1
+    resolution_time_ms: 770
+    total_mentions: 1
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Keep your essentials organized and secure with our sleek wallet.
+      Featuring multiple card slots and a billfold compartment, this stylish wallet
+      is both functional and fashionable. Perfect for everyday carry.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: null
+        product_id: null
+        product_name: Sleek Wallet
+        product_type: null
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 0.7552834302186966
+      resolution_method: semantic_search
+      search_query: Sleek Wallet
+      similarity_score: 0.4894331395626068
+    name: Sleek Wallet
+    price: 30.0
+    product_id: SWL2345
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 5
+  unresolved_mentions: []

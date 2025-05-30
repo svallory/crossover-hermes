@@ -1,0 +1,149 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E008
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I'd want to order one of your Versatile Scarves, the one that
+        can be worn as a scarf, shawl, or headwrap.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: Versatile Scarves
+        product_category: null
+        product_description: the one that can be worn as a scarf, shawl, or headwrap
+        product_id: null
+        product_name: Versatile Scarves
+        product_type: Scarves
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E008
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for your order! We are pleased to confirm that your order has been successfully
+    created.
+
+
+    You have ordered:
+
+    1 x Versatile Scarf (VSC6789) at a price of 23.0.
+
+
+    Your order total is 23.0.
+
+
+    We will process your order shortly and notify you once it ships.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Dear Customer,
+    content_type: greeting
+    priority: 5
+    related_to: null
+  - content: Your order has been successfully created.
+    content_type: order_confirmation
+    priority: 5
+    related_to: null
+  - content: 1 x Versatile Scarf (VSC6789)
+    content_type: product_info
+    priority: 5
+    related_to: VSC6789
+  - content: Your order total is 23.0.
+    content_type: order_total
+    priority: 5
+    related_to: null
+  - content: We will process your order shortly and notify you once it ships.
+    content_type: closing
+    priority: 5
+    related_to: null
+  - content: Best regards, Hermes - Delivering divine fashion
+    content_type: signature
+    priority: 5
+    related_to: null
+  subject: Your Hermes Order Confirmation (E008)
+  tone: professional and warm
+email:
+  email_id: E008
+  message: Hello, I'd want to order one of your Versatile Scarves, the one that can
+    be worn as a scarf, shawl, or headwrap. Thanks!
+  subject: Ordering a Versatile Scarf-like item
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E008
+    lines:
+    - alternatives: []
+      base_price: 23.0
+      description: Add a touch of versatility to your wardrobe with our versatile
+        scarf. This lightweight, multi-purpose accessory can be worn as a scarf, shawl,
+        or even a headwrap. Perfect for transitional seasons or travel.
+      product_id: VSC6789
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 6
+      total_price: 23.0
+      unit_price: 23.0
+    message: Your order has been created.
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 23.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - VSC6789
+      confidence_scores:
+      - 0.8094666451215744
+      mention: product_id=None product_name='Versatile Scarves' product_description='the
+        one that can be worn as a scarf, shawl, or headwrap' product_category=None
+        product_type='Scarves' quantity=1 confidence=0.9 mention_text='Versatile Scarves'
+      num_candidates: 1
+    candidates_resolved: 1
+    resolution_attempts: 1
+    resolution_time_ms: 678
+    total_mentions: 1
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Add a touch of versatility to your wardrobe with our versatile scarf.
+      This lightweight, multi-purpose accessory can be worn as a scarf, shawl, or
+      even a headwrap. Perfect for transitional seasons or travel.
+    metadata:
+      original_mention:
+        product_category: null
+        product_description: the one that can be worn as a scarf, shawl, or headwrap
+        product_id: null
+        product_name: Versatile Scarves
+        product_type: Scarves
+        quantity: 1
+      requested_quantity: 1
+      resolution_confidence: 0.8094666451215744
+      resolution_method: semantic_search
+      search_query: Versatile Scarves the one that can be worn as a scarf, shawl,
+        or headwrap Scarves
+      similarity_score: 0.3810667097568512
+    name: Versatile Scarf
+    price: 23.0
+    product_id: VSC6789
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 6
+  unresolved_mentions: []

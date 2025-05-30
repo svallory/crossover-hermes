@@ -40,7 +40,7 @@ async def run_classifier(
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
         print(
-            f"Analyzing email {state.email.email_id} - Subject: '{state.email.subject[:50] if state.email.subject else 'No subject'}...'"
+            f"Analyzing email {state.email.email_id} - Subject: '{state.email.subject if state.email.subject else 'No subject'}...'"
         )
 
         # Use a weak model for initial analysis since it's a relatively simple task

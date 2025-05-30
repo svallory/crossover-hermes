@@ -7,7 +7,7 @@ from hermes.core import run_email_processing
 
 from rich.traceback import install
 
-install(show_locals=True)
+install(show_locals=False)
 
 
 def create_parser():

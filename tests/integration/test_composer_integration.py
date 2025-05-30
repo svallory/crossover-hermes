@@ -156,7 +156,7 @@ class TestComposerIntegration:
         # Parse seasons string into list of Season enums
         season_list = []
         if seasons.lower() == "all seasons":
-            season_list = [Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER]
+            season_list = [Season.SPRING, Season.SUMMER, Season.FALL, Season.WINTER]
         else:
             for season_name in seasons.split(", "):
                 season_name = season_name.strip()
@@ -165,7 +165,7 @@ class TestComposerIntegration:
                 elif season_name == "Summer":
                     season_list.append(Season.SUMMER)
                 elif season_name == "Fall" or season_name == "Autumn":
-                    season_list.append(Season.AUTUMN)
+                    season_list.append(Season.FALL)
                 elif season_name == "Winter":
                     season_list.append(Season.WINTER)
 
@@ -261,9 +261,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -390,9 +388,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -507,9 +503,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -593,9 +587,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -696,9 +688,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -797,9 +787,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -897,9 +885,7 @@ class TestComposerIntegration:
         )
 
         # Run the composer agent
-        result = await run_composer(
-            composer_input, runnable_config=mock_runnable_config
-        )
+        result = await run_composer(state=composer_input, config=mock_runnable_config)
 
         # Verify detailed structure
         assert isinstance(result, dict)

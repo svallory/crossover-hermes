@@ -1,0 +1,133 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E004
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Hi, I'd like to order three to four SFT1098 Infinity Scarves
+        please.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: three to four SFT1098 Infinity Scarves
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: null
+        product_id: SFT1098
+        product_name: Infinity Scarves
+        product_type: scarf
+        quantity: 3
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: My wife loves collecting scarves in different colors and patterns.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E004
+  language: English
+  response_body: "Dear Customer,\n\nThank you for your order with Hermes! We are pleased\
+    \ to confirm that your order for 3 SFT1098 Infinity Scarves has been successfully\
+    \ created.\n\nThe total price for your order is $84.0.\n\nIt's wonderful to hear\
+    \ that your wife enjoys collecting scarves \u2013 we hope these new additions\
+    \ bring her much joy!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Greeting the customer.
+    content_type: greeting
+    priority: 1
+    related_to: null
+  - content: Confirming the order for 3 SFT1098 Infinity Scarves.
+    content_type: order_confirmation
+    priority: 2
+    related_to: SFT1098
+  - content: Stating the total price of the order ($84.0).
+    content_type: order_summary
+    priority: 3
+    related_to: null
+  - content: Acknowledging the customer's personal comment about their wife loving
+      scarves.
+    content_type: personal_touch
+    priority: 4
+    related_to: null
+  - content: Standard closing and signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Hermes Order Confirmation - E004
+  tone: warm and helpful
+email:
+  email_id: E004
+  message: Hi, I'd like to order three to four SFT1098 Infinity Scarves please. My
+    wife loves collecting scarves in different colors and patterns.
+  subject: Buy Infinity Scarves Order
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E004
+    lines:
+    - alternatives: []
+      base_price: 28.0
+      description: Stay cozy and stylish with our infinity scarf. This versatile accessory
+        features a soft, chunky knit construction and an endless loop design for easy
+        wearing. Perfect for adding a touch of warmth and texture to your winter ensembles.
+      product_id: SFT1098
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 3
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 5
+      total_price: 84.0
+      unit_price: 28.0
+    message: Your order has been created.
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 84.0
+stockkeeper:
+  metadata:
+    candidate_log:
+    - candidate_ids:
+      - SFT1098
+      confidence_scores:
+      - 1.0
+      mention: 'product_id=''SFT1098'' product_name=''Infinity Scarves'' product_description=None
+        product_category=<ProductCategory.ACCESSORIES: ''Accessories''> product_type=''scarf''
+        quantity=3 confidence=1.0 mention_text=''three to four SFT1098 Infinity Scarves'''
+      num_candidates: 1
+    candidates_resolved: 1
+    resolution_attempts: 1
+    resolution_time_ms: 10
+    total_mentions: 1
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
+    description: Stay cozy and stylish with our infinity scarf. This versatile accessory
+      features a soft, chunky knit construction and an endless loop design for easy
+      wearing. Perfect for adding a touch of warmth and texture to your winter ensembles.
+    metadata:
+      original_mention:
+        product_category: Accessories
+        product_description: null
+        product_id: SFT1098
+        product_name: Infinity Scarves
+        product_type: scarf
+        quantity: 3
+      requested_quantity: 3
+      resolution_confidence: 1.0
+      resolution_method: exact_id_match
+    name: Infinity Scarf
+    price: 28.0
+    product_id: SFT1098
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 8
+  unresolved_mentions: []

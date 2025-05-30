@@ -517,8 +517,7 @@ class TestMetadataConversion:
 
         product = metadata_to_product(metadata)
 
-        # Fall should be converted to Autumn
-        assert Season.AUTUMN in product.seasons
+        assert Season.FALL in product.seasons
         assert Season.WINTER in product.seasons
 
 

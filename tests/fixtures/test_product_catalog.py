@@ -16,7 +16,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 2,
             "price": 22.0,
             "season": "Fall, Winter",
-            "type": ""
+            "type": "",
         },
         # CBT8901 - Chelsea Boots (for E019 spaces scenario)
         {
@@ -27,7 +27,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 4,
             "price": 89.99,
             "season": "Fall, Winter",
-            "type": ""
+            "type": "",
         },
         # RSG8901 - Retro Sunglasses (for case sensitivity testing)
         {
@@ -38,7 +38,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 8,
             "price": 25.99,
             "season": "Spring, Summer",
-            "type": ""
+            "type": "",
         },
         # LTH0976 - Leather Bifold Wallet
         {
@@ -49,7 +49,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 4,
             "price": 21.0,
             "season": "All seasons",
-            "type": ""
+            "type": "",
         },
         # SWL2345 - Sleek Wallet (for E014 scenario)
         {
@@ -60,7 +60,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 5,
             "price": 30.0,
             "season": "All seasons",
-            "type": ""
+            "type": "",
         },
         # VSC6789 - Versatile Scarf (for E008 scenario)
         {
@@ -71,7 +71,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 12,
             "price": 18.50,
             "season": "All seasons",
-            "type": ""
+            "type": "",
         },
         # SDE2345 - Saddle Bag (for E020 scenario)
         {
@@ -82,7 +82,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 3,
             "price": 65.0,
             "season": "All seasons",
-            "type": ""
+            "type": "",
         },
         # SLD7654 - Slide Sandals (for E013 scenario)
         {
@@ -93,7 +93,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 3,
             "price": 22.0,
             "season": "Spring, Summer",
-            "type": ""
+            "type": "",
         },
         # LTH2109 - Leather Messenger Bag (for E012 scenario)
         {
@@ -104,7 +104,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 6,
             "price": 120.0,
             "season": "All seasons",
-            "type": ""
+            "type": "",
         },
         # LTH1098 - Leather Backpack (for laptop bag searches)
         {
@@ -115,7 +115,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 7,
             "price": 95.99,
             "season": "All seasons",
-            "type": ""
+            "type": "",
         },
         # Additional products for testing variety
         {
@@ -126,7 +126,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 15,
             "price": 32.99,
             "season": "Spring, Summer",
-            "type": ""
+            "type": "",
         },
         {
             "product_id": "WNT4567",
@@ -136,7 +136,7 @@ def get_test_products_df() -> pd.DataFrame:
             "stock": 8,
             "price": 149.99,
             "season": "Fall, Winter",
-            "type": ""
+            "type": "",
         },
     ]
 
@@ -160,7 +160,7 @@ def get_product_by_id(product_id: str) -> Product | None:
         s = s.strip()
         if s:
             if s == "Fall":
-                seasons.append(Season.AUTUMN)
+                seasons.append(Season.FALL)
             else:
                 try:
                     seasons.append(Season(s))
@@ -183,7 +183,9 @@ def get_product_by_id(product_id: str) -> Product | None:
     )
 
 
-def get_products_matching_description(description: str, limit: int = 5) -> list[Product]:
+def get_products_matching_description(
+    description: str, limit: int = 5
+) -> list[Product]:
     """Get products matching a description for testing."""
     df = get_test_products_df()
 
@@ -192,9 +194,10 @@ def get_products_matching_description(description: str, limit: int = 5) -> list[
     matching_products = []
 
     for _, row in df.iterrows():
-        if (description_lower in row["name"].lower() or
-            description_lower in row["description"].lower()):
-
+        if (
+            description_lower in row["name"].lower()
+            or description_lower in row["description"].lower()
+        ):
             # Process seasons
             seasons = []
             seasons_str = str(row.get("season", "Spring"))
@@ -202,7 +205,7 @@ def get_products_matching_description(description: str, limit: int = 5) -> list[
                 s = s.strip()
                 if s:
                     if s == "Fall":
-                        seasons.append(Season.AUTUMN)
+                        seasons.append(Season.FALL)
                     else:
                         try:
                             seasons.append(Season(s))
@@ -245,7 +248,7 @@ def get_products_by_category(category: str, limit: int = 5) -> list[Product]:
             s = s.strip()
             if s:
                 if s == "Fall":
-                    seasons.append(Season.AUTUMN)
+                    seasons.append(Season.FALL)
                 else:
                     try:
                         seasons.append(Season(s))

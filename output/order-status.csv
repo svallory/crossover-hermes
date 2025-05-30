@@ -1,0 +1,12 @@
+email ID,product ID,quantity,status
+E001,LTH0976,4,created
+E002,VBT2345,1,created
+E004,SFT1098,3,created
+E007,CLF2109,5,out_of_stock
+E007,FZZ1098,2,created
+E008,VSC6789,1,created
+E010,RSG8901,1,created
+E014,SWL2345,1,created
+E018,RSG8901,2,out_of_stock
+E019,CBT8901,1,created
+E023,CGN2345,5,out_of_stock

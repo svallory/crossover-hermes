@@ -16,7 +16,7 @@ You will be provided with:
 - A `retrieved_products_context` list containing product dictionaries with detailed information
   about products relevant to the customer's inquiry, resolved from our product catalog.
 
-IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Autumn, Winter, All seasons.
+IMPORTANT: When specifying product seasons, only use the values: Spring, Summer, Fall, Winter, All seasons.
 
 Your goal is to generate the `InquiryResponse` Pydantic model, which includes:
 1.  `email_id`: The email identifier (extracted from the EmailAnalysisResult).

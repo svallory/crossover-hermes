@@ -2,7 +2,7 @@
 
 import pytest
 import os
-from typing import Literal, cast
+from typing import Literal, cast, Optional
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -64,7 +64,7 @@ class TestAdvisorIntegration:
         email_id: str,
         message: str,
         product_mentions: list[ProductMention],
-        customer_name: str = None,
+        customer_name: Optional[str] = None,
         language: str = "English",
     ) -> ClassifierOutput:
         """Helper to create a ClassifierOutput with inquiry segments."""
@@ -101,7 +101,7 @@ class TestAdvisorIntegration:
         stock: int,
         seasons: str,
         price: float,
-        product_type: str = None,
+        product_type: Optional[str] = None,
     ) -> Product:
         """Helper to create a Product object."""
         # Auto-generate product_type from name if not provided
@@ -119,8 +119,8 @@ class TestAdvisorIntegration:
                     season_list.append(Season.SPRING)
                 elif season_str == "Summer":
                     season_list.append(Season.SUMMER)
-                elif season_str == "Fall" or season_str == "Autumn":
-                    season_list.append(Season.AUTUMN)
+                elif season_str == "Fall":
+                    season_list.append(Season.FALL)
                 elif season_str == "Winter":
                     season_list.append(Season.WINTER)
 
@@ -198,7 +198,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -283,7 +283,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -369,7 +369,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -454,7 +454,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -561,7 +561,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -650,7 +650,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -730,7 +730,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -846,7 +846,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -913,7 +913,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Verify the result structure
         assert isinstance(result, dict)
@@ -954,7 +954,7 @@ class TestAdvisorIntegration:
         )
 
         # Run the advisor agent - should handle gracefully
-        result = await run_advisor(advisor_input, mock_runnable_config)
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
 
         # Should return a valid result even with minimal input
         assert isinstance(result, dict)

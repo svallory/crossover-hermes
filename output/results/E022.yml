@@ -1,0 +1,159 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Monica
+    email_id: E022
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Hi! I'm ready to place my order for those amazing bags I saw
+        in your latest collection - you know, the ones with the geometric patterns
+        that everyone's been talking about on Instagram?
+      product_mentions:
+      - confidence: 0.7
+        mention_text: those amazing bags I saw in your latest collection - you know,
+          the ones with the geometric patterns that everyone's been talking about
+          on Instagram?
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: null
+        product_id: null
+        product_name: null
+        product_type: bags
+        quantity: 3
+      related_sentences:
+      - I want to get 3 of them, preferably in the darker shade you showed in your
+        social media posts last week.
+      - I have the cash ready to go, just let me know where to send it!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: Can't wait to get my hands on them.
+      product_mentions:
+      - confidence: 0.7
+        mention_text: them
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: null
+        product_id: null
+        product_name: null
+        product_type: bags
+        quantity: 1
+      related_sentences:
+      - Hi! I'm ready to place my order for those amazing bags I saw in your latest
+        collection - you know, the ones with the geometric patterns that everyone's
+        been talking about on Instagram?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E022
+  language: English
+  response_body: 'Hi Monica,
+
+
+    Thank you for reaching out and for your enthusiasm for our latest collection,
+    especially the geometric pattern bags you saw on Instagram! We understand you''re
+    excited to place an order for 3 of these bags in the darker shade.
+
+
+    We received your request, but it seems we were unable to identify the specific
+    product details based on the description provided. To ensure you get exactly the
+    bags you''re looking for, could you please provide a bit more information? Perhaps
+    a product ID if you have it, or maybe a link or screenshot from the social media
+    post?
+
+
+    We want to make sure you get the perfect bags, and we''re here to help you find
+    them. We look forward to hearing back from you so we can help you complete your
+    order.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Hi Monica,
+    content_type: greeting
+    priority: 5
+    related_to: null
+  - content: Thank you for reaching out and for your enthusiasm for our latest collection,
+      especially the geometric pattern bags you saw on Instagram! We understand you're
+      excited to place an order for 3 of these bags in the darker shade.
+    content_type: acknowledgement
+    priority: 5
+    related_to: null
+  - content: We received your request, but it seems we were unable to identify the
+      specific product details based on the description provided.
+    content_type: explanation
+    priority: 5
+    related_to: E022
+  - content: To ensure you get exactly the bags you're looking for, could you please
+      provide a bit more information? Perhaps a product ID if you have it, or maybe
+      a link or screenshot from the social media post?
+    content_type: request_info
+    priority: 5
+    related_to: E022
+  - content: We want to make sure you get the perfect bags, and we're here to help
+      you find them.
+    content_type: offer_of_help
+    priority: 5
+    related_to: null
+  - content: We look forward to hearing back from you so we can help you complete
+      your order.
+    content_type: closing
+    priority: 5
+    related_to: null
+  - content: 'Best regards,
+
+      Hermes - Delivering divine fashion'
+    content_type: signature
+    priority: 5
+    related_to: null
+  subject: Regarding your order request for the geometric bags
+  tone: Professional and empathetic
+email:
+  email_id: E022
+  message: Hi! I'm ready to place my order for those amazing bags I saw in your latest
+    collection - you know, the ones with the geometric patterns that everyone's been
+    talking about on Instagram? I want to get 3 of them, preferably in the darker
+    shade you showed in your social media posts last week. I have the cash ready to
+    go, just let me know where to send it! Can't wait to get my hands on them. Thanks,
+    Monica
+  subject: Placing My Order Today
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E022
+    lines: []
+    message: No valid products were identified in your request.
+    overall_status: no_valid_products
+    stock_updated: false
+    total_discount: 0.0
+    total_price: 0.0
+stockkeeper:
+  metadata:
+    candidate_log: []
+    candidates_resolved: 0
+    resolution_attempts: 2
+    resolution_time_ms: 1080
+    total_mentions: 2
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.7
+    mention_text: those amazing bags I saw in your latest collection - you know, the
+      ones with the geometric patterns that everyone's been talking about on Instagram?
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: null
+    product_id: null
+    product_name: null
+    product_type: bags
+    quantity: 3
+  - confidence: 0.7
+    mention_text: them
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: null
+    product_id: null
+    product_name: null
+    product_type: bags
+    quantity: 1
