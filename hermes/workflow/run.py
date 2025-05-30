@@ -42,6 +42,9 @@ async def run_workflow(
 
     result = await workflow.ainvoke(input=input_state, config=runnable_config)
 
+    if result["errors"]:
+        raise Exception(result["errors"])
+
     print(f"Workflow completed for email {input_state.email.email_id}")
 
     # Convert the result to an OverallState

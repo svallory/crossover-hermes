@@ -3,7 +3,7 @@
 import pytest
 import os
 from unittest.mock import AsyncMock, patch, MagicMock
-from typing import Optional
+from typing import Literal, Optional, cast
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -39,7 +39,9 @@ class TestFulfillerPromotionDetection:
     def hermes_config(self):
         """Create a test configuration with real API keys for integration testing."""
         # Use real API keys from environment for integration tests
-        llm_provider = os.getenv("LLM_PROVIDER", "OpenAI")
+        llm_provider = cast(
+            Literal["OpenAI", "Gemini"], os.getenv("LLM_PROVIDER", "OpenAI")
+        )
 
         if llm_provider == "OpenAI":
             api_key = os.getenv("OPENAI_API_KEY")

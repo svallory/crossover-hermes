@@ -325,7 +325,7 @@ def search_products_by_description(
         return ProductNotFound(message=f"Error during product search: {str(e)}")
 
 
-@tool(parse_docstring=True)
+@tool(parse_docstring=True, name_or_callable="find_complementary_products")
 def find_complementary_products(
     product_id: str, limit: int = 2
 ) -> list[Product] | ProductNotFound:

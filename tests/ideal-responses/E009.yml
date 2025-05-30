@@ -8,23 +8,23 @@ classifier:
   email_analysis:
   email_id: E009
   language: spanish
-    primary_intent: product inquiry
-    customer_pii: {}
-    segments:
-    - segment_type: inquiry
-      main_sentence: tengo una pregunta sobre el DHN0987 Gorro de punto grueso.
-      related_sentences:
-      - ¿De qué material está hecho?
-      - ¿Es lo suficientemente cálido para usar en invierno?
-      - Gracias de antemano.
-      product_mentions:
-      - product_id: DHN0987
-        product_name: Gorro de punto grueso
-        product_description: null
-        product_category: Accessories
-        product_type: Gorro
-        quantity: 1
-        confidence: 0.9
+  primary_intent: product inquiry
+  customer_pii: {}
+  segments:
+  - segment_type: inquiry
+    main_sentence: tengo una pregunta sobre el DHN0987 Gorro de punto grueso.
+    related_sentences:
+    - ¿De qué material está hecho?
+    - ¿Es lo suficientemente cálido para usar en invierno?
+    - Gracias de antemano.
+    product_mentions:
+    - product_id: DHN0987
+      product_name: Gorro de punto grueso
+      product_description: null
+      product_category: Accessories
+      product_type: Gorro
+      quantity: 1
+      confidence: 0.9
 stockkeeper:
   resolved_products:
   - product_id: CHN0987

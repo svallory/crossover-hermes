@@ -1,3 +1,17 @@
+input:
+  email_id: E002
+  message: |-
+    Good morning, I'm looking to buy the VBT2345 Vibrant Tote bag. My name
+    is Jessica and I love tote bags, they're so convenient for carrying all my stuff.
+    Last summer I bought this really cute straw tote that I used at the beach. Oh,
+    and a few years ago I got this nylon tote as a free gift with purchase that
+    I still use for groceries., I'm looking to buy the VBT2345 Vibrant Tote bag. My
+    name is Jessica and I love tote bags, they're so convenient for carrying all my
+    stuff. Last summer I bought this really cute straw tote that I used at the beach.
+    Oh, and a few years ago I got this nylon tote as a free gift with purchase that
+    I still use for groceries.
+  subject: Buy Vibrant Tote with noise
+
 advisor: null
 classifier:
   email_analysis:
@@ -7,41 +21,42 @@ classifier:
     language: english
     primary_intent: order request
     segments:
-    - main_sentence: I'm looking to buy the VBT2345 Vibrant Tote bag.
-      product_mentions:
-      - confidence: 1.0
-        product_category: Bags
-        product_description: null
-        product_id: VBT2345
-        product_name: Vibrant Tote
-        product_type: Tote bag
-        quantity: 1
-      related_sentences:
-      - My name is Jessica and I love tote bags, they're so convenient for carrying
-        all my stuff.
-      - Last summer I bought this really cute straw tote that I used at the beach.
-      - Oh, and a few years ago I got this nylon tote as a free gift with purchase
-        that I still use for groceries.
-      segment_type: order
-    - main_sentence: My name is Jessica and I love tote bags, they're so convenient
-        for carrying all my stuff.
-      product_mentions: []
-      related_sentences:
-      - Last summer I bought this really cute straw tote that I used at the beach.
-      - Oh, and a few years ago I got this nylon tote as a free gift with purchase
-        that I still use for groceries.
-      segment_type: personal_statement
+      - main_sentence: I'm looking to buy the VBT2345 Vibrant Tote bag.
+        product_mentions:
+          - confidence: 1.0
+            product_category: Bags
+            product_description: null
+            product_id: VBT2345
+            product_name: Vibrant Tote
+            product_type: Tote bag
+            quantity: 1
+        related_sentences:
+          - My name is Jessica and I love tote bags, they're so convenient for carrying
+            all my stuff.
+          - Last summer I bought this really cute straw tote that I used at the beach.
+          - Oh, and a few years ago I got this nylon tote as a free gift with purchase
+            that I still use for groceries.
+        segment_type: order
+      - main_sentence: My name is Jessica and I love tote bags, they're so convenient
+          for carrying all my stuff.
+        product_mentions: []
+        related_sentences:
+          - Last summer I bought this really cute straw tote that I used at the beach.
+          - Oh, and a few years ago I got this nylon tote as a free gift with purchase
+            that I still use for groceries.
+        segment_type: personal_statement
 composer:
   email_id: E002
   language: english
-  response_body: 'Dear Jessica,
+  response_body: |-
+    Dear Jessica,
 
 
     Good morning! Thank you for your order for the VBT2345 Vibrant Tote bag.
 
 
-    We''re pleased to confirm that your order for 1 VBT2345 Vibrant Tote has been
-    created. We''re sure you''ll love its spacious and stylish design!
+    We're pleased to confirm that your order for 1 VBT2345 Vibrant Tote has been
+    created. We're sure you'll love its spacious and stylish design!
 
 
     Product Details:
@@ -60,97 +75,90 @@ composer:
 
     Hermes - Delivering divine fashion
 
-    '
   response_points:
-  - content: Dear Jessica,
-    content_type: greeting
-    priority: 10
-    related_to: null
-  - content: Good morning! Thank you for your order for the VBT2345 Vibrant Tote bag.
-    content_type: acknowledgement
-    priority: 9
-    related_to: VBT2345
-  - content: We're pleased to confirm that your order for 1 VBT2345 Vibrant Tote has
-      been created. We're sure you'll love its spacious and stylish design!
-    content_type: order_confirmation
-    priority: 10
-    related_to: VBT2345
-  - content: 'Product Details:
+    - content: Hi Jessica,
+      content_type: greeting
+      priority: 10
+      related_to: null
+    - content: |-
+        Good morning! Thank you for your order for the VBT2345 Vibrant Tote bag.
+      content_type: acknowledgement
+      priority: 9
+      related_to: VBT2345
+    - content: |-
+        We're pleased to confirm that your order for 1 VBT2345 Vibrant Tote has
+        been created. We're sure you'll love its spacious and stylish design!
+      content_type: order_confirmation
+      priority: 10
+      related_to: VBT2345
+    - content: |-
+        Product Details:
 
-      - Item: VBT2345 Vibrant Tote
+        - Item: VBT2345 Vibrant Tote
 
-      - Quantity: 1
+        - Quantity: 1
 
-      - Price: $39.00
+        - Price: $39.00
 
-      '
-    content_type: product_details
-    priority: 8
-    related_to: VBT2345
-  - content: We will notify you once your order has shipped.
-    content_type: next_steps
-    priority: 7
-    related_to: null
-  - content: 'Best regards,
+      content_type: product_details
+      priority: 8
+      related_to: VBT2345
+    - content: |-
+        We will notify you once your order has shipped.
+      content_type: next_steps
+      priority: 7
+      related_to: null
+    - content: |-
+        Best regards,
 
-      Hermes - Delivering divine fashion
+        Hermes - Delivering divine fashion
 
-      '
-    content_type: closing
-    priority: 10
-    related_to: null
+      content_type: closing
+      priority: 10
+      related_to: null
   subject: Your Order for VBT2345 Vibrant Tote is Confirmed
   tone: friendly
 errors: null
 fulfiller:
   order_result:
     email_id: E002
-    message: Successfully processed order for 1 unit of VBT2345 Vibrant Tote.
+    message: |-
+      Successfully processed order for 1 unit of VBT2345 Vibrant Tote.
     ordered_items:
-    - alternatives: []
-      available_stock: 3
+      - alternatives: []
+        available_stock: 3
+        category: Bags
+        description: |-
+          Add a pop of color to your everyday carry with our vibrant tote bag.
+          Spacious and stylish, it's the perfect companion for running errands
+          or carrying your essentials. The vibrant hue is sure to turn heads.
+        name: Vibrant Tote
+        price: 39.0
+        product_id: VBT2345
+        product_type: Tote bag
+        promotion: null
+        quantity: 1
+        seasons:
+          - All seasons
+        status: created
+        total_price: 39.0
+    overall_status: created
+    stock_updated: true
+    total_price: 39.0
+stockkeeper:
+  metadata: {}
+  resolved_products:
+    - attributes: {}
       category: Bags
-      description: Add a pop of color to your everyday carry with our vibrant tote
-        bag. Spacious and stylish, it's the perfect companion for running errands
+      description: |-
+        Add a pop of color to your everyday carry with our vibrant tote bag.
+        Spacious and stylish, it's the perfect companion for running errands
         or carrying your essentials. The vibrant hue is sure to turn heads.
       name: Vibrant Tote
       price: 39.0
       product_id: VBT2345
       product_type: Tote bag
-      promotion: null
-      quantity: 1
       seasons:
-      - All seasons
-      status: created
-      total_price: 39.0
-    overall_status: created
-    stock_updated: true
-    total_price: 39.0
-input:
-  email_id: E002
-  message: Good morning, I'm looking to buy the VBT2345 Vibrant Tote bag. My name
-    is Jessica and I love tote bags, they're so convenient for carrying all my stuff.
-    Last summer I bought this really cute straw tote that I used at the beach. Oh,
-    and a few years ago I got this nylon tote as a free gift with purchase that I
-    still use for groceries., I'm looking to buy the VBT2345 Vibrant Tote bag. My
-    name is Jessica and I love tote bags, they're so convenient for carrying all my
-    stuff. Last summer I bought this really cute straw tote that I used at the beach.
-    Oh, and a few years ago I got this nylon tote as a free gift with purchase that
-    I still use for groceries.
-  subject: Buy Vibrant Tote with noise
-stockkeeper:
-  metadata: {}
-  resolved_products:
-  - attributes: {}
-    category: Bags
-    description: Add a pop of color to your everyday carry with our vibrant tote bag.
-      Spacious and stylish, it's the perfect companion for running errands or carrying
-      your essentials. The vibrant hue is sure to turn heads.
-    name: Vibrant Tote
-    price: 39.0
-    product_id: VBT2345
-    product_type: Tote bag
-    seasons:
-    - All seasons
-    stock: 4
+        - All seasons
+      stock: 4
   unresolved_mentions: []

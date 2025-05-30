@@ -1,32 +1,44 @@
+input:
+  email_id: E011
+  message: |-
+    Hi there, The description for the RSG8901 Retro Sunglasses says they offer
+    'a cool, nostalgic vibe'. What era are they inspired by exactly? The 1950s, 1960s?
+    I'm just curious about the style inspiration. Thank you!
+  subject: Question on Retro Sunglasses Description
+
 advisor:
   inquiry_answers:
     answered_questions:
-    - answer: The RSG8901 Retro Sunglasses are described as vintage-inspired and offering
-        a cool, nostalgic vibe. The product information available does not specify
-        a single definitive era like the 1950s or 1960s, but rather encompasses a
-        general retro aesthetic.
-      answer_type: factual
-      confidence: 0.9
-      question: What era are they inspired by exactly? The 1950s, 1960s?
-      reference_product_ids:
-      - RSG8901
+      - answer: |-
+          The RSG8901 Retro Sunglasses are described as vintage-inspired and offering
+          a cool, nostalgic vibe. The product information available does not specify
+          a single definitive era like the 1950s or 1960s, but rather encompasses a
+          general retro aesthetic.
+        answer_type: factual
+        confidence: 0.9
+        question: |-
+          What era are they inspired by exactly? The 1950s, 1960s?
+        reference_product_ids:
+          - RSG8901
     email_id: E011
     primary_products:
-    - attributes:
-        style_inspiration: General vintage, not specific to one decade in the provided
-          description.
-      category: Accessories
-      description: Transport yourself back in time with our retro sunglasses. These
-        vintage-inspired shades offer a cool, nostalgic vibe while protecting your
-        eyes from the sun's rays. Perfect for beach days or city strolls.
-      name: Retro Sunglasses
-      price: 26.99
-      product_id: RSG8901
-      product_type: Sunglasses
-      seasons:
-      - Spring
-      - Summer
-      stock: 0
+      - attributes:
+          style_inspiration: |-
+            General vintage, not specific to one decade in the provided
+            description.
+        category: Accessories
+        description: |-
+          Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        name: Retro Sunglasses
+        price: 26.99
+        product_id: RSG8901
+        product_type: Sunglasses
+        seasons:
+          - Spring
+          - Summer
+        stock: 0
     related_products: []
     unanswered_questions: []
     unsuccessful_references: []
@@ -37,100 +49,94 @@ classifier:
     language: english
     primary_intent: product inquiry
     segments:
-    - main_sentence: The description for the RSG8901 Retro Sunglasses says they offer
-        'a cool, nostalgic vibe'.
-      product_mentions:
-      - confidence: 1.0
-        product_category: Accessories
-        product_description: offer 'a cool, nostalgic vibe'
-        product_id: RSG8901
-        product_name: Retro Sunglasses
-        product_type: Sunglasses
-        quantity: 1
-      related_sentences:
-      - What era are they inspired by exactly?
-      - The 1950s, 1960s?
-      - I'm just curious about the style inspiration.
-      - Thank you!
-      segment_type: inquiry
+      - main_sentence: |-
+          The description for the RSG8901 Retro Sunglasses says they offer 'a cool, nostalgic vibe'.
+        product_mentions:
+          - confidence: 1.0
+            product_category: Accessories
+            product_description: offer 'a cool, nostalgic vibe'
+            product_id: RSG8901
+            product_name: Retro Sunglasses
+            product_type: Sunglasses
+            quantity: 1
+        related_sentences:
+          - What era are they inspired by exactly?
+          - The 1950s, 1960s?
+          - I'm just curious about the style inspiration.
+          - Thank you!
+        segment_type: inquiry
 composer:
   email_id: E011
   language: english
-  response_body: 'Hi there,
-
+  response_body: |-
+    Hi there,
 
     Thanks for your question about our RSG8901 Retro Sunglasses and their style inspiration!
 
-
-    You''re right, they do offer a cool, nostalgic vibe. While they are broadly vintage-inspired,
-    the design doesn''t pinpoint a specific decade like the 1950s or 1960s. Instead,
+    You're right, they do offer a cool, nostalgic vibe. While they are broadly vintage-inspired,
+    the design doesn't pinpoint a specific decade like the 1950s or 1960s. Instead,
     they aim to capture a general retro aesthetic that can be appreciated by fans
     of various vintage styles.
 
-
     We hope this helps clarify the inspiration behind them!
-
 
     Thank you,
 
     Hermes - Delivering divine fashion
 
-    '
   response_points:
-  - content: Hi there,
-    content_type: greeting
-    priority: 10
-    related_to: null
-  - content: Thanks for your question about our RSG8901 Retro Sunglasses and their
-      style inspiration!
-    content_type: acknowledgement
-    priority: 9
-    related_to: RSG8901
-  - content: You're right, they do offer a cool, nostalgic vibe. While they are broadly
-      vintage-inspired, the design doesn't pinpoint a specific decade like the 1950s
-      or 1960s. Instead, they aim to capture a general retro aesthetic that can be
-      appreciated by fans of various vintage styles.
-    content_type: answer
-    priority: 10
-    related_to: RSG8901
-  - content: We hope this helps clarify the inspiration behind them!
-    content_type: clarification
-    priority: 7
-    related_to: null
-  - content: 'Thank you,
-
-      Hermes - Delivering divine fashion
-
-      '
-    content_type: closing
-    priority: 10
-    related_to: null
+    - content_type: greeting
+      content: Hi there,
+      priority: 10
+      related_to: null
+    - content_type: acknowledgement
+      content: |-
+        Thanks for your question about our RSG8901 Retro Sunglasses and their
+        style inspiration!
+      priority: 9
+      related_to: RSG8901
+    - content_type: answer
+      content: |-
+        You're right, they do offer a cool, nostalgic vibe. While they are broadly
+        vintage-inspired, the design doesn't pinpoint a specific decade like the 1950s
+        or 1960s. Instead, they aim to capture a general retro aesthetic that can be
+        appreciated by fans of various vintage styles.
+      priority: 10
+      related_to: RSG8901
+    - content_type: clarification
+      content: |-
+        We hope this helps clarify the inspiration behind them!
+      priority: 7
+      related_to: null
+    - content_type: closing
+      content: |-
+        Thank you,
+        Hermes - Delivering divine fashion
+      priority: 10
+      related_to: null
   subject: Regarding your question about RSG8901 Retro Sunglasses
   tone: friendly
 errors: null
 fulfiller: null
-input:
-  email_id: E011
-  message: Hi there, The description for the RSG8901 Retro Sunglasses says they offer
-    'a cool, nostalgic vibe'. What era are they inspired by exactly? The 1950s, 1960s?
-    I'm just curious about the style inspiration. Thank you!
-  subject: Question on Retro Sunglasses Description
+
 stockkeeper:
   metadata: {}
   resolved_products:
-  - attributes:
-      style_inspiration: General vintage, not specific to one decade in the provided
-        description.
-    category: Accessories
-    description: Transport yourself back in time with our retro sunglasses. These
-      vintage-inspired shades offer a cool, nostalgic vibe while protecting your eyes
-      from the sun's rays. Perfect for beach days or city strolls.
-    name: Retro Sunglasses
-    price: 26.99
-    product_id: RSG8901
-    product_type: Sunglasses
-    seasons:
-    - Spring
-    - Summer
-    stock: 0
+    - attributes:
+        style_inspiration: |-
+          General vintage, not specific to one decade in the provided
+          description.
+      category: Accessories
+      description: |-
+        Transport yourself back in time with our retro sunglasses. These
+        vintage-inspired shades offer a cool, nostalgic vibe while protecting your eyes
+        from the sun's rays. Perfect for beach days or city strolls.
+      name: Retro Sunglasses
+      price: 26.99
+      product_id: RSG8901
+      product_type: Sunglasses
+      seasons:
+        - Spring
+        - Summer
+      stock: 0
   unresolved_mentions: []

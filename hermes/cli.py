@@ -20,11 +20,12 @@ def create_parser():
 Examples:
   hermes run PRODUCTS_SRC EMAILS_SRC                                          # Process with default output directory
   hermes run PRODUCTS_SRC EMAILS_SRC --out-dir path/to/output                 # Specify output directory
-  hermes run PRODUCTS_SRC EMAILS_SRC --output-gsheet-id YOUR_SHEET_ID       # Output to Google Sheets
+  hermes run PRODUCTS_SRC EMAILS_SRC --output-gsheet-id YOUR_SHEET_ID         # Output to Google Sheets
   hermes run PRODUCTS_SRC EMAILS_SRC --limit 5                                # Process only 5 emails
-  hermes run PRODUCTS_SRC EMAILS_SRC --email-id especific_email_id            # Process only a specific email ID
+  hermes run PRODUCTS_SRC EMAILS_SRC --email-id specific_email_id             # Process only a specific email ID
   hermes run PRODUCTS_SRC EMAILS_SRC --email-id id1,id2                       # Process a comma-separated list of email IDs
-  hermes run PRODUCTS_SRC EMAILS_SRC --email-id id1 --email-id id2           # Process multiple specific email IDs
+  hermes run PRODUCTS_SRC EMAILS_SRC --email-id id1 --email-id id2            # Process multiple specific email IDs
+  hermes run PRODUCTS_SRC EMAILS_SRC --stop-on-error                          # Stop processing if an error occurs
 
   A source can be a Google Sheet (format: 'Gsheet_Id#SheetName') or a path to a local CSV.
 
@@ -82,6 +83,12 @@ Environment Variables:
         type=str,
         action="append",
         help="Process only specific email IDs. Can be used multiple times or as a comma-separated list (e.g., --email-id id1 --email-id id2,id3).",
+    )
+
+    run_parser.add_argument(
+        "--stop-on-error",
+        action="store_true",
+        help="Stop processing immediately if an error occurs with any email.",
     )
 
     return parser
@@ -145,14 +152,12 @@ def handle_run_command(args):
                 processing_limit=limit,
                 target_email_ids=final_target_email_ids,  # Pass the processed list of email IDs
                 output_dir=output_dir,  # Pass output_dir
+                stop_on_error=args.stop_on_error,  # Pass the new flag
             )
         )
         print(f"Final result: {result}")
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error: {e}")
         sys.exit(1)
 
 

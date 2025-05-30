@@ -1,21 +1,30 @@
+input:
+  email_id: E006
+  message: |-
+    Hey there, I was thinking of ordering a pair of CBT8901 Chelsea Boots,
+    but I'll wait until Fall to actually place the order. My name is Sam and I need
+    some new boots for the colder months.
+  subject: null
+
 advisor:
   inquiry_answers:
     answered_questions: []
     email_id: E006
     primary_products:
-    - attributes: {}
-      category: Men's Shoes
-      description: Elevate your casual looks with our Chelsea boots. These stylish
-        ankle boots feature a sleek leather construction, elastic side panels, and
-        a sturdy lug sole. An essential for completing modern, edgy outfits.
-      name: Chelsea Boots
-      price: 65.0
-      product_id: CBT8901
-      product_type: Boots
-      seasons:
-      - Fall
-      - Winter
-      stock: 2
+      - attributes: {}
+        category: Men's Shoes
+        description: |-
+          Elevate your casual looks with our Chelsea boots. These stylish
+          ankle boots feature a sleek leather construction, elastic side panels, and
+          a sturdy lug sole. An essential for completing modern, edgy outfits.
+        name: Chelsea Boots
+        price: 65.0
+        product_id: CBT8901
+        product_type: Boots
+        seasons:
+          - Fall
+          - Winter
+        stock: 2
     related_products: []
     unanswered_questions: []
     unsuccessful_references: []
@@ -27,31 +36,34 @@ classifier:
     language: english
     primary_intent: product inquiry
     segments:
-    - main_sentence: I was thinking of ordering a pair of CBT8901 Chelsea Boots, but
-        I'll wait until Fall to actually place the order.
-      product_mentions:
-      - confidence: 1.0
-        product_category: Men's Shoes
-        product_description: null
-        product_id: CBT8901
-        product_name: Chelsea Boots
-        product_type: Boots
-        quantity: 1
-      related_sentences:
-      - My name is Sam and I need some new boots for the colder months.
-      segment_type: inquiry
-    - main_sentence: My name is Sam and I need some new boots for the colder months.
-      product_mentions: []
-      related_sentences: []
-      segment_type: personal_statement
+      - main_sentence: |-
+          I was thinking of ordering a pair of CBT8901 Chelsea Boots, but
+          I'll wait until Fall to actually place the order.
+        product_mentions:
+          - confidence: 1.0
+            product_category: Men's Shoes
+            product_description: null
+            product_id: CBT8901
+            product_name: Chelsea Boots
+            product_type: Boots
+            quantity: 1
+        related_sentences:
+          - My name is Sam and I need some new boots for the colder months.
+        segment_type: inquiry
+      - main_sentence: |-
+          My name is Sam and I need some new boots for the colder months.
+        product_mentions: []
+        related_sentences: []
+        segment_type: personal_statement
 composer:
   email_id: E006
   language: english
-  response_body: 'Hey Sam,
+  response_body: |-
+    Hey Sam,
 
 
     Thanks for reaching out and for your interest in our CBT8901 Chelsea Boots! We
-    understand you''re thinking of ordering them for the Fall, which is a great choice
+    understand you're thinking of ordering them for the Fall, which is a great choice
     as they are perfect for the colder months.
 
 
@@ -60,7 +72,7 @@ composer:
     for Fall and Winter.
 
 
-    We''ll have them ready for you when you decide to place your order. Feel free
+    We'll have them ready for you when you decide to place your order. Feel free
     to reach out then, or if you have any questions in the meantime!
 
 
@@ -68,61 +80,58 @@ composer:
 
     Hermes - Delivering divine fashion
 
-    '
   response_points:
-  - content: Hey Sam,
-    content_type: greeting
-    priority: 10
-    related_to: null
-  - content: Thanks for reaching out and for your interest in our CBT8901 Chelsea
-      Boots! We understand you're thinking of ordering them for the Fall, which is
-      a great choice as they are perfect for the colder months.
-    content_type: acknowledgement
-    priority: 9
-    related_to: CBT8901
-  - content: The CBT8901 Chelsea Boots are a stylish option, featuring a sleek leather
-      construction and a sturdy lug sole, ideal for modern, edgy outfits. They are
-      indeed designed for Fall and Winter.
-    content_type: product_info
-    priority: 8
-    related_to: CBT8901
-  - content: We'll have them ready for you when you decide to place your order. Feel
-      free to reach out then, or if you have any questions in the meantime!
-    content_type: future_action
-    priority: 7
-    related_to: null
-  - content: 'Best regards,
+    - content: Hey Sam,
+      content_type: greeting
+      priority: 10
+      related_to: null
+    - content: |-
+        Thanks for reaching out and for your interest in our CBT8901 Chelsea
+        Boots! We understand you're thinking of ordering them for the Fall, which is
+        a great choice as they are perfect for the colder months.
+      content_type: acknowledgement
+      priority: 9
+      related_to: CBT8901
+    - content: |-
+        The CBT8901 Chelsea Boots are a stylish option, featuring a sleek leather
+        construction and a sturdy lug sole, ideal for modern, edgy outfits. They are
+        indeed designed for Fall and Winter.
+      content_type: product_info
+      priority: 8
+      related_to: CBT8901
+    - content: |-
+        We'll have them ready for you when you decide to place your order. Feel
+        free to reach out then, or if you have any questions in the meantime!
+      content_type: future_action
+      priority: 7
+      related_to: null
+    - content: |-
+        Best regards,
 
-      Hermes - Delivering divine fashion
+        Hermes - Delivering divine fashion
 
-      '
-    content_type: closing
-    priority: 10
-    related_to: null
+      content_type: closing
+      priority: 10
+      related_to: null
   subject: Regarding your interest in CBT8901 Chelsea Boots
   tone: friendly
 errors: null
 fulfiller: null
-input:
-  email_id: E006
-  message: Hey there, I was thinking of ordering a pair of CBT8901 Chelsea Boots,
-    but I'll wait until Fall to actually place the order. My name is Sam and I need
-    some new boots for the colder months.
-  subject: null
 stockkeeper:
   metadata: {}
   resolved_products:
-  - attributes: {}
-    category: Men's Shoes
-    description: Elevate your casual looks with our Chelsea boots. These stylish ankle
-      boots feature a sleek leather construction, elastic side panels, and a sturdy
-      lug sole. An essential for completing modern, edgy outfits.
-    name: Chelsea Boots
-    price: 65.0
-    product_id: CBT8901
-    product_type: Boots
-    seasons:
-    - Fall
-    - Winter
-    stock: 2
+    - attributes: {}
+      category: Men's Shoes
+      description: |-
+        Elevate your casual looks with our Chelsea boots. These stylish ankle
+        boots feature a sleek leather construction, elastic side panels, and a sturdy
+        lug sole. An essential for completing modern, edgy outfits.
+      name: Chelsea Boots
+      price: 65.0
+      product_id: CBT8901
+      product_type: Boots
+      seasons:
+        - Fall
+        - Winter
+      stock: 2
   unresolved_mentions: []

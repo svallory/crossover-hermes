@@ -89,8 +89,17 @@ hermes/
 ### Running the Application
 
 ```bash
-# Run the main email processing workflow
+# Run the main email processing workflow using poe (often with pre-configured sources)
 poe run
+
+# For more control, you can call the hermes CLI directly.
+# This allows you to specify data sources, limits, output behavior, and other options.
+# For example, to process emails from specific CSV files, limit to 10 emails,
+# and stop immediately if any error occurs:
+# hermes run path/to/your/products.csv path/to/your/emails.csv --limit 10 --stop-on-error
+
+# To see all available command-line options for email processing:
+# hermes run --help
 
 # Run with LangGraph development server
 poe dev-graph
@@ -140,16 +149,16 @@ poe evaluate
 
 The project uses `poethepoet` (poe) for task management. Available tasks defined in `pyproject.toml`:
 
-| Task | Description |
-|------|-------------|
-| `poe run` | Load environment and run main application |
-| `poe dev-graph` | Start LangGraph development server |
-| `poe run-workflow` | Load environment and run workflow tools |
-| `poe check` | Run linting and tests |
-| `poe lint` | Check code with ruff linter |
-| `poe format` | Format code with ruff formatter |
-| `poe test` | Run all tests with pytest |
-| `poe evaluate` | Run evaluation with dataset and auto-upload |
+| Task               | Description                                 |
+| ------------------ | ------------------------------------------- |
+| `poe run`          | Load environment and run main application   |
+| `poe dev-graph`    | Start LangGraph development server          |
+| `poe run-workflow` | Load environment and run workflow tools     |
+| `poe check`        | Run linting and tests                       |
+| `poe lint`         | Check code with ruff linter                 |
+| `poe format`       | Format code with ruff formatter             |
+| `poe test`         | Run all tests with pytest                   |
+| `poe evaluate`     | Run evaluation with dataset and auto-upload |
 
 ## Testing
 
@@ -157,7 +166,7 @@ The project includes comprehensive tests for all tools and components:
 
 - **Unit Tests**: Located in `tests/` directory
   - `test_catalog_tools.py`: Tests for product catalog search and retrieval
-  - `test_order_tools.py`: Tests for order processing and stock management  
+  - `test_order_tools.py`: Tests for order processing and stock management
   - `test_promotion_tools.py`: Tests for promotion and discount application
 - **Test Fixtures**: Mock and test data in `tests/fixtures/`
   - `mock_product_catalog.py`: Mock product data for unit testing

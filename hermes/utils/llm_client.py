@@ -4,22 +4,13 @@ from typing import Literal
 
 from langchain_core.tools import BaseTool
 from langchain_core.runnables import Runnable
-from langchain_core.output_parsers import PydanticToolsParser
+from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import ChatOpenAI
+from langchain_openai.chat_models.base import ChatOpenAI, BaseChatOpenAI
 from pydantic import BaseModel, SecretStr
 
-from ..config import HermesConfig  # Relative import
-
-
-def _model_supports_tool_choice(model: str) -> bool:
-    return (
-        "openai" in model
-        or "gemini-1.5-pro" in model
-        or "gemini-1.5-flash" in model
-        or "gemini-2" in model
-    )
+from ..config import HermesConfig
 
 
 def _bind_tools_with_structured_output(
@@ -44,44 +35,53 @@ def _bind_tools_with_structured_output(
     Raises:
         ValueError: If the LLM type is not supported
     """
-    # Handle ChatOpenAI
-    if not isinstance(llm, ChatOpenAI) and not isinstance(llm, ChatGoogleGenerativeAI):
-        raise ValueError(
-            f"Unsupported LLM type: {type(llm)}. Only ChatOpenAI and ChatGoogleGenerativeAI are supported."
+    if isinstance(llm, BaseChatOpenAI):
+        return llm.with_structured_output(
+            schema=schema,
+            method="json_schema",
+            tools=tools,
+            strict=True,
         )
 
-    model_name = getattr(llm, "model", getattr(llm, "model_name", ""))
+    elif isinstance(llm, ChatGoogleGenerativeAI):
+        model_supports_tool_choice = lambda model: (
+            "gemini-1.5-pro" in model
+            or "gemini-1.5-flash" in model
+            or "gemini-2" in model
+        )
 
-    # Convert schema to a tool
-    output_schema = convert_to_openai_tool(schema)
+        tool_choice = schema.__name__ if model_supports_tool_choice(llm.model) else None
 
-    # For OpenAI, we can use tool_choice to force calling the structured output tool
-    # But not all Gemini models support tool_choice
-    tool_choice = (
-        output_schema["name"] if _model_supports_tool_choice(model_name) else None
+        # Add a parser to extract the arguments of the schema tool call into an instance of the schema.
+        parser = PydanticToolsParser(tools=[schema], first_tool_only=True)
+
+        try:
+            # Bind all tools (user tools + schema tool)
+            # and set tool_choice to force schema output.
+            # Include ls_structured_output_format for LangSmith if supported.
+            bound_llm = llm.bind_tools(
+                tools=list(tools) + [schema],
+                tool_choice=tool_choice,
+                ls_structured_output_format={
+                    "kwargs": {"method": "function_calling"},
+                    "schema": convert_to_openai_tool(schema),
+                },
+            )
+        except Exception as e:
+            print(
+                f"Gemini bind_tools with ls_structured_output_format failed with {type(e).__name__}: {e}. Falling back."
+            )
+            # Fallback without ls_structured_output_format
+            bound_llm = llm.bind_tools(
+                tools=list(tools) + [schema],
+                tool_choice=tool_choice,
+            )
+
+        return bound_llm | parser
+
+    raise ValueError(
+        f"Unsupported LLM type: {type(llm)}. Only ChatOpenAI and ChatGoogleGenerativeAI are supported."
     )
-
-    # Create all tools list (user tools + schema tool)
-    all_tools = list(tools) + [schema]
-
-    # Use PydanticToolsParser since we only accept BaseModel schemas
-    parser = PydanticToolsParser(tools=[schema], first_tool_only=True)
-
-    try:
-        # Bind all tools with tool_choice set to our schema tool
-        llm_with_tools = llm.bind_tools(
-            tools=all_tools,
-            tool_choice=tool_choice,
-            ls_structured_output_format={
-                "kwargs": {"method": "function_calling"},
-                "schema": output_schema,
-            },
-        )
-    except Exception:
-        # Fallback without ls_structured_output_format
-        llm_with_tools = llm.bind_tools(all_tools, tool_choice=tool_choice)
-
-    return llm_with_tools | parser
 
 
 def get_llm_client(
@@ -114,20 +114,12 @@ def get_llm_client(
             "The llm_provider in HermesConfig must be 'OpenAI' or 'Gemini'."
         )
 
-    # Determine which model to use based on model_strength
-    model_name = None
-    if model_strength == "strong":
-        model_name = config.llm_strong_model_name
-    elif model_strength == "weak":
-        model_name = config.llm_weak_model_name
-    else:
-        # Use model_name for backward compatibility
-        model_name = config.llm_model_name
-
-    if not model_name:
-        raise ValueError(
-            f"LLM model name for {model_strength or 'default'} strength is not configured for {config.llm_provider} in HermesConfig."
-        )
+    # Use a default name if none is provided
+    model_name = (
+        config.llm_weak_model_name
+        if model_strength == "weak"
+        else config.llm_strong_model_name
+    )
 
     if config.llm_provider == "OpenAI":
         if not config.llm_api_key:
@@ -136,32 +128,26 @@ def get_llm_client(
             raise ValueError(
                 "OpenAI API key is not set in HermesConfig or environment for OpenAI provider."
             )
-        return _bind_tools_with_structured_output(
-            ChatOpenAI(
-                model=model_name,
-                api_key=SecretStr(config.llm_api_key),
-                base_url=config.llm_base_url,  # base_url is specific to OpenAI in our config
-                temperature=temperature,
-            ),
-            schema,
-            tools,
+        llm = ChatOpenAI(
+            model=model_name,
+            api_key=SecretStr(config.llm_api_key),
+            base_url=config.llm_base_url,  # base_url is specific to OpenAI in our config
+            temperature=temperature,
         )
+
     elif config.llm_provider == "Gemini":
         if not config.llm_api_key:
             # Google client will also raise an error, but a preemptive check is good.
             raise ValueError(
                 "Gemini API key is not set in HermesConfig or environment for Gemini provider."
             )
-        return _bind_tools_with_structured_output(
-            ChatGoogleGenerativeAI(
-                model=model_name,
-                google_api_key=config.llm_api_key,
-                temperature=temperature,
-                type=schema,
-            ),
-            schema,
-            tools,
+        llm = ChatGoogleGenerativeAI(
+            model=model_name,
+            google_api_key=config.llm_api_key,
+            temperature=temperature,
         )
     else:
         # This case should be caught by the initial check, but as a safeguard:
         raise ValueError(f"Unsupported LLM provider: {config.llm_provider}")
+
+    return _bind_tools_with_structured_output(llm, schema, tools)

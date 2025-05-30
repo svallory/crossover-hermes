@@ -1,13 +1,15 @@
-import asyncio
 import os
 from typing import Any
+import asyncio
+import nest_asyncio  # type: ignore
+import pandas as pd  # type: ignore
+from rich.console import Console
+from rich.traceback import Traceback
 
 # Apply nest_asyncio for Jupyter compatibility
 from hermes.utils.output import create_output_csv
 from hermes.utils.output import save_workflow_result_as_yaml
 from hermes.utils.gsheets import create_output_spreadsheet
-import nest_asyncio  # type: ignore
-import pandas as pd  # type: ignore
 
 from hermes.workflow.states import WorkflowInput, WorkflowOutput
 from hermes.workflow.run import run_workflow
@@ -32,6 +34,7 @@ async def process_emails(
     config_obj: HermesConfig,
     results_dir: str,
     limit_processing: int | None = None,
+    stop_on_error: bool = False,
 ) -> dict[str, dict[str, Any]]:
     """Process a batch of emails using the Hermes workflow.
 
@@ -40,6 +43,7 @@ async def process_emails(
         config_obj: HermesConfig object with system configuration
         results_dir: Directory to save individual YAML results.
         limit_processing: Optional limit on number of emails to process
+        stop_on_error: If True, stop processing on the first error.
 
     Returns:
         Dictionary mapping email_id to processed results
@@ -117,11 +121,17 @@ async def process_emails(
             processed_count += 1
 
         except Exception as e:
-            import traceback
+            console = Console(stderr=True)  # Ensure output goes to stderr
+            rich_tb = Traceback.from_exception(
+                exc_type=type(e),
+                exc_value=e,
+                traceback=e.__traceback__,
+                show_locals=True,
+                width=console.width,
+            )
+            # print(f"  Error processing email {email_id}: {e}")
+            console.print(rich_tb)  # Removed explicit Rich printing
 
-            print(f"  Error processing email {email_id}: {e}")
-            print(f"  Traceback:")
-            traceback.print_exc()
             results[email_id] = {
                 "email_id": email_id,
                 "error": str(e),
@@ -129,6 +139,11 @@ async def process_emails(
                 "order_status": [],
                 "response": None,
             }
+            if stop_on_error:
+                print(
+                    f"Error processing email {email_id}. Stopping due to --stop-on-error flag."
+                )
+                raise  # Re-raise the exception to stop further processing
             processed_count += 1
 
     return results
@@ -141,6 +156,7 @@ async def run_email_processing(
     processing_limit: int | None = None,
     target_email_ids: list[str] | None = None,
     output_dir: str = "output",
+    stop_on_error: bool = False,
 ) -> str:
     """Core function implementing the email processing workflow.
 
@@ -152,6 +168,7 @@ async def run_email_processing(
         processing_limit: Optional limit on the number of emails to process.
         target_email_ids: Optional list of specific email IDs to process.
         output_dir: Directory to save output CSV files.
+        stop_on_error: If True, stop processing on the first error.
 
     Returns:
         Message indicating where the results were saved (CSV path and/or GSheet link).
@@ -174,7 +191,9 @@ async def run_email_processing(
     # If not, we only save CSVs.
     gsheet_output_target = output_spreadsheet_id
 
-    print(f"Config loaded, using model: {hermes_config.llm_model_name}")
+    print(
+        f"Config loaded, using models: {hermes_config.llm_weak_model_name} and {hermes_config.llm_strong_model_name}"
+    )
     print(f"Products source: {products_source}")
     print(f"Emails source: {emails_source}")
     print(f"Output directory for CSVs: {output_dir}")
@@ -240,6 +259,7 @@ async def run_email_processing(
         config_obj=hermes_config,
         results_dir=RESULTS_DIR,
         limit_processing=processing_limit,
+        stop_on_error=stop_on_error,
     )
 
     print(f"\nProcessed {len(processing_results)} emails successfully.")

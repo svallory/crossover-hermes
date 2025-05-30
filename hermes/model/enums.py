@@ -45,6 +45,6 @@ class Season(str, Enum):
 
     SPRING = "Spring"
     SUMMER = "Summer"
-    AUTUMN = "Autumn"
     WINTER = "Winter"
+    FALL = "Fall"
     ALL_SEASONS = "All seasons"

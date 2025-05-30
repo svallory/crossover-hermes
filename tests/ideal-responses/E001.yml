@@ -1,13 +1,15 @@
 input:
   email_id: E001
   subject: Leather Wallets
-  message: Hi there, I want to order all the remaining LTH0976 Leather Bifold Wallets
+  message: |-
+    Hi there, I want to order all the remaining LTH0976 Leather Bifold Wallets
     you have in stock. I'm opening up a small boutique shop and these would be perfect
     for my inventory. Thank you!
+
 classifier:
   email_analysis:
-  email_id: E001
-  language: english
+    email_id: E001
+    language: english
     primary_intent: order request
     customer_pii: {}
     segments:
@@ -30,7 +32,8 @@ stockkeeper:
   resolved_products:
     - product_id: LTH0976
       name: Leather Bifold Wallet
-      description: Upgrade your everyday carry with our leather bifold wallet. Crafted
+      description: |-
+        Upgrade your everyday carry with our leather bifold wallet. Crafted
         from premium, full-grain leather, this sleek wallet features multiple card
         slots, a billfold compartment, and a timeless, minimalist design. A sophisticated
         choice for any occasion.
@@ -43,17 +46,19 @@ stockkeeper:
       attributes: {}
   unresolved_mentions: []
   metadata:
-    notes: Customer requested all remaining stock for LTH0976. Initial stock was 4
+    notes: |-
+      Customer requested all remaining stock for LTH0976. Initial stock was 4
       units.
 advisor: null
 fulfiller:
   order_result:
-  email_id: E001
+    email_id: E001
     overall_status: created
     ordered_items:
       - product_id: LTH0976
         name: Leather Bifold Wallet
-        description: Upgrade your everyday carry with our leather bifold wallet. Crafted
+        description: |-
+          Upgrade your everyday carry with our leather bifold wallet. Crafted
           from premium, full-grain leather, this sleek wallet features multiple card
           slots, a billfold compartment, and a timeless, minimalist design. A sophisticated
           choice for any occasion.
@@ -69,66 +74,72 @@ fulfiller:
         alternatives: []
         promotion: null
     total_price: 84.00
-    message: Successfully processed order for all 4 units of LTH0976 Leather Bifold
+    message: |-
+      Successfully processed order for all 4 units of LTH0976 Leather Bifold
       Wallet.
     stock_updated: true
 composer:
-
   email_id: E001
   subject: Your Order for LTH0976 Leather Bifold Wallets is Confirmed
-  response_body: |
-      Dear Customer,
+  response_body: |-
+    Dear Customer,
 
-      Thank you for your order and for your interest in our LTH0976 Leather Bifold Wallets for your new boutique shop! We're excited for your new venture.
+    Thank you for your order and for your interest in our LTH0976 Leather Bifold Wallets
+    for your new boutique shop! We're excited for your new venture.
 
-      We are pleased to confirm that we have processed your request for all remaining stock of the LTH0976 Leather Bifold Wallets. Your order for 4 units has been created.
+    We are pleased to confirm that we have processed your request for all remaining stock
+    of the LTH0976 Leather Bifold Wallets. Your order for 4 units has been created.
 
-      Product Details:
-      - Item: LTH0976 Leather Bifold Wallet
-      - Quantity: 4
-      - Price per unit: $21.00
-      - Total: $84.00
+    Product Details:
+    - Item: LTH0976 Leather Bifold Wallet
+    - Quantity: 4
+    - Price per unit: $21.00
+    - Total: $84.00
 
-      We will notify you once your order has shipped. We appreciate your business and look forward to potentially partnering with your new boutique.
+    We will notify you once your order has shipped. We appreciate your business and look
+    forward to potentially partnering with your new boutique.
 
-      Best regards,
-      Hermes - Delivering divine fashion
+    Best regards,
+    Hermes - Delivering divine fashion
   language: english
   tone: professional
   response_points:
-      - content_type: greeting
-        content: Dear Customer,
-        priority: 10
-        related_to: null
-      - content_type: acknowledgement
-        content: Thank you for your order and for your interest in our LTH0976 Leather
-          Bifold Wallets for your new boutique shop! We're excited for your new venture.
-        priority: 9
-        related_to: LTH0976
-      - content_type: order_confirmation
-        content: We are pleased to confirm that we have processed your request for all
-          remaining stock of the LTH0976 Leather Bifold Wallets. Your order for 4
-          units has been created.
-        priority: 10
-        related_to: LTH0976
-      - content_type: product_details
-        content: |
-          Product Details:
-          - Item: LTH0976 Leather Bifold Wallet
-          - Quantity: 4
-          - Price per unit: $21.00
-          - Total: $84.00
-        priority: 8
-        related_to: LTH0976
-      - content_type: next_steps
-        content: We will notify you once your order has shipped. We appreciate your business
-          and look forward to potentially partnering with your new boutique.
-        priority: 7
-        related_to: null
-      - content_type: closing
-        content: |
-          Best regards,
-          Hermes - Delivering divine fashion
-        priority: 10
-        related_to: null
+    - content_type: greeting
+      content: Hello,
+      priority: 10
+      related_to: null
+    - content_type: acknowledgement
+      content: |-
+        Thank you for your order and for your interest in our LTH0976 Leather
+        Bifold Wallets for your new boutique shop! We're excited for your new venture.
+      priority: 9
+      related_to: LTH0976
+    - content_type: order_confirmation
+      content: |-
+        We are pleased to confirm that we have processed your request for all
+        remaining stock of the LTH0976 Leather Bifold Wallets. Your order for 4
+        units has been created.
+      priority: 10
+      related_to: LTH0976
+    - content_type: product_details
+      content: |-
+        Product Details:
+        - Item: LTH0976 Leather Bifold Wallet
+        - Quantity: 4
+        - Price per unit: $21.00
+        - Total: $84.00
+      priority: 8
+      related_to: LTH0976
+    - content_type: next_steps
+      content: |-
+        We will notify you once your order has shipped. We appreciate your business
+        and look forward to potentially partnering with your new boutique.
+      priority: 7
+      related_to: null
+    - content_type: closing
+      content: |-
+        Best regards,
+        Hermes - Delivering divine fashion
+      priority: 10
+      related_to: null
 errors: null

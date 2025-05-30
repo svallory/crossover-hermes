@@ -39,9 +39,20 @@ IMPORTANT GUIDELINES:
    - COMBINATION PROMOTIONS: When a product has a promotion that requires multiple products (like "Buy vest, get matching shirt 50% off"), include ALL required products in the order if mentioned by the customer
    - BOGO PROMOTIONS: For "Buy one get one X% off" promotions, ensure the quantity is at least 2 to trigger the promotion
 6. For emails with mixed intent (both order and inquiry segments), focus only on the order segments
-7. Calculate the total price based on available items only:
-   - Set the base price per unit and quantity × price for total
-   - The promotion system will apply any applicable discounts after your processing
+7. PRICING AND OUTPUT STRUCTURE FOR EACH ORDER LINE:
+   - `product_id`: From the resolved product.
+   - `description`: From the resolved product.
+   - `quantity`: As determined from the customer\'s request.
+   - `base_price`: **CRITICAL: This MUST be taken directly from the `price` field of the corresponding `resolved_product`. Do NOT modify or pre-calculate this value, even if the product description or `promotion_text` mentions a discount.**
+   - `unit_price`: **CRITICAL: Initially, this MUST be set to be IDENTICAL to the `base_price`. Do NOT pre-calculate any discounts into this initial `unit_price`.**
+   - `total_price`: Calculated as `base_price * quantity`.
+   - `status`: `created` or `out_of_stock`.
+   - `stock`: Current stock level of the resolved product.
+   - `promotion_applied`: **CRITICAL: Set this to `false` initially.**
+   - `promotion_description`: From `resolved_product.promotion_text` if available, otherwise `null`.
+   - `promotion`: The `PromotionSpec` object from `resolved_product.promotion` if available, otherwise `null`.
+   - `alternatives`: List of alternatives if out of stock.
+   - The downstream promotion system will use `base_price`, `unit_price` (which is initially same as base_price), and the `promotion` spec to correctly apply discounts and update `unit_price` and `total_discount`. Your role is to provide the raw, undiscounted pricing information.
 8. Set the overall_status based on the status of all items:
    - "created" if all items are available
    - "out_of_stock" if no items are available
@@ -90,7 +101,7 @@ PROMOTION SPECIFICATION EXAMPLES:
 }
 ```
 
-Example output format:
+Example output format (Illustrating correct initial pricing for a product with a promotion):
 ```json
 {
   "email_id": "E001",
@@ -98,16 +109,16 @@ Example output format:
   "lines": [
     {
       "product_id": "ABC123",
-      "description": "A beautiful elegant dress for formal occasions",
+      "description": "A beautiful elegant dress for formal occasions. Special offer: 15% off!", // Description might mention promotion
       "quantity": 2,
-      "base_price": 129.99,
-      "unit_price": 129.99,
-      "total_price": 259.98,
+      "base_price": 129.99, // Taken directly from resolved_product.price
+      "unit_price": 129.99, // Initially identical to base_price
+      "total_price": 259.98, // base_price * quantity
       "status": "created",
       "stock": 8,
-      "promotion_applied": false,
-      "promotion_description": "15% off when you buy 2 or more",
-      "promotion": {
+      "promotion_applied": false, // CRITICAL: Must be false initially
+      "promotion_description": "15% off when you buy 2 or more", // From resolved_product.promotion_text
+      "promotion": { // From resolved_product.promotion
         "conditions": {"min_quantity": 2},
         "effects": {"apply_discount": {"type": "percentage", "amount": 15.0}}
       },
@@ -143,8 +154,8 @@ Example output format:
       ]
     }
   ],
-  "total_price": 509.97,
-  "total_discount": 0.0,
+  "total_price": 509.97, // Sum of initial total_prices for available items
+  "total_discount": 0.0, // CRITICAL: Must be 0.0 initially
   "message": "Your order is partially fulfilled. One item is out of stock.",
   "stock_updated": true
 }

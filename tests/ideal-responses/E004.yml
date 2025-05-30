@@ -1,3 +1,10 @@
+input:
+  email_id: E004
+  message: |-
+    Hi, I'd like to order three to four SFT1098 Infinity Scarves please. My
+    wife loves collecting scarves in different colors and patterns.
+  subject: Buy Infinity Scarves Order
+
 advisor: null
 classifier:
   email_analysis:
@@ -6,8 +13,9 @@ classifier:
     language: english
     primary_intent: order request
     segments:
-    - main_sentence: I'd like to order three to four SFT1098 Infinity Scarves please.
-      product_mentions:
+      - main_sentence: |-
+          I'd like to order three to four SFT1098 Infinity Scarves please.
+    product_mentions:
       - confidence: 1.0
         product_category: Accessories
         product_description: null
@@ -15,16 +23,17 @@ classifier:
         product_name: Infinity Scarves
         product_type: Scarf
         quantity: 4
-      related_sentences:
+    related_sentences:
       - My wife loves collecting scarves in different colors and patterns.
-      segment_type: order
+    segment_type: order
 composer:
   email_id: E004
   language: english
-  response_body: 'Hi there,
+  response_body: |-
+    Hi there,
 
 
-    Thank you for your order! We''ve processed your request for the SFT1098 Infinity
+    Thank you for your order! We've processed your request for the SFT1098 Infinity
     Scarves.
 
 
@@ -50,93 +59,93 @@ composer:
 
     Hermes - Delivering divine fashion
 
-    '
   response_points:
-  - content: Hi there,
-    content_type: greeting
-    priority: 10
-    related_to: null
-  - content: Thank you for your order! We've processed your request for the SFT1098
-      Infinity Scarves.
-    content_type: acknowledgement
-    priority: 9
-    related_to: SFT1098
-  - content: Your order for 4 SFT1098 Infinity Scarves has been created. We hope your
-      wife loves them!
-    content_type: order_confirmation
-    priority: 10
-    related_to: SFT1098
-  - content: 'Product Details:
+    - content: Hi there,
+      content_type: greeting
+      priority: 10
+      related_to: null
+    - content: |-
+        Thank you for your order! We've processed your request for the SFT1098
+        Infinity Scarves.
+      content_type: acknowledgement
+      priority: 9
+      related_to: SFT1098
+    - content: |-
+        Your order for 4 SFT1098 Infinity Scarves has been created. We hope your
+        wife loves them!
+      content_type: order_confirmation
+      priority: 10
+      related_to: SFT1098
+    - content: |-
+        Product Details:
 
-      - Item: SFT1098 Infinity Scarf
+        - Item: SFT1098 Infinity Scarf
 
-      - Quantity: 4
+        - Quantity: 4
 
-      - Price per unit: $28.00
+        - Price per unit: $28.00
 
-      - Total: $112.00
+        - Total: $112.00
 
-      '
-    content_type: product_details
-    priority: 8
-    related_to: SFT1098
-  - content: We will notify you once your order has shipped.
-    content_type: next_steps
-    priority: 7
-    related_to: null
-  - content: 'Best regards,
+      content_type: product_details
+      priority: 8
+      related_to: SFT1098
+    - content: |-
+        We will notify you once your order has shipped.
+      content_type: next_steps
+      priority: 7
+      related_to: null
+    - content: |-
+        Best regards,
 
-      Hermes - Delivering divine fashion
+        Hermes - Delivering divine fashion
 
-      '
-    content_type: closing
-    priority: 10
-    related_to: null
+      content_type: closing
+      priority: 10
+      related_to: null
   subject: Your Order for SFT1098 Infinity Scarves is Confirmed
   tone: friendly
 errors: null
 fulfiller:
   order_result:
     email_id: E004
-    message: Successfully processed order for 4 units of SFT1098 Infinity Scarf.
+    message: |-
+      Successfully processed order for 4 units of SFT1098 Infinity Scarf.
     ordered_items:
-    - alternatives: []
-      available_stock: 4
+      - alternatives: []
+        available_stock: 4
+        category: Accessories
+        description: |-
+          Stay cozy and stylish with our infinity scarf. This versatile accessory
+          features a soft, chunky knit construction and an endless loop design for easy
+          wearing. Perfect for adding a touch of warmth and texture to your winter ensembles.
+        name: Infinity Scarf
+        price: 28.0
+        product_id: SFT1098
+        product_type: Scarf
+        promotion: null
+        quantity: 4
+        seasons:
+          - Winter
+        status: created
+        total_price: 112.0
+    overall_status: created
+    stock_updated: true
+    total_price: 112.0
+stockkeeper:
+  metadata: {}
+  resolved_products:
+    - attributes: {}
       category: Accessories
-      description: Stay cozy and stylish with our infinity scarf. This versatile accessory
+      description: |-
+        Stay cozy and stylish with our infinity scarf. This versatile accessory
         features a soft, chunky knit construction and an endless loop design for easy
         wearing. Perfect for adding a touch of warmth and texture to your winter ensembles.
       name: Infinity Scarf
       price: 28.0
       product_id: SFT1098
       product_type: Scarf
-      promotion: null
-      quantity: 4
       seasons:
-      - Winter
-      status: created
-      total_price: 112.0
-    overall_status: created
-    stock_updated: true
-    total_price: 112.0
-input:
-  email_id: E004
-  message: Hi, I'd like to order three to four SFT1098 Infinity Scarves please. My
-    wife loves collecting scarves in different colors and patterns.
-  subject: Buy Infinity Scarves Order
-stockkeeper:
-  metadata: {}
-  resolved_products:
-  - attributes: {}
-    category: Accessories
-    description: Stay cozy and stylish with our infinity scarf. This versatile accessory
-      features a soft, chunky knit construction and an endless loop design for easy
-      wearing. Perfect for adding a touch of warmth and texture to your winter ensembles.
-    name: Infinity Scarf
-    price: 28.0
-    product_id: SFT1098
-    product_type: Scarf
-    seasons:
-    - Winter
-    stock: 8
+        - Winter
+      stock: 8
   unresolved_mentions: []

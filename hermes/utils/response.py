@@ -1,4 +1,5 @@
 from typing import TypeVar
+import traceback
 
 from ..workflow.types import WorkflowNodeOutput
 from hermes.model.enums import Agents
@@ -28,7 +29,25 @@ def create_node_response(
     if isinstance(output_or_error, Exception):
         # Error case
         # Create and return the error structure
-        return {"errors": {agent: Error(message=str(output_or_error), source=agent)}}
+        error_details = output_or_error.__dict__
+        if (
+            hasattr(output_or_error, "__traceback__")
+            and output_or_error.__traceback__ is not None
+        ):
+            error_details["traceback"] = "".join(
+                traceback.format_tb(output_or_error.__traceback__)
+            )
+
+        return {
+            "errors": {
+                agent: Error(
+                    message=str(output_or_error),
+                    source=agent.value,
+                    exception_type=output_or_error.__class__.__name__,
+                    details=error_details,
+                )
+            }
+        }
     else:
         # Success case (assuming output_or_error is OutputType)
         # Return the success structure

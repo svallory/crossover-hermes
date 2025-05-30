@@ -1,17 +1,20 @@
 input:
   email_id: E008
   subject: Ordering a Versatile Scarf-like item
-  message: "Hello, I'd want to order one of your Versatile Scarves, the one that\
-    \ can be worn as a scarf, shawl, or headwrap. Thanks!"
+  message: |-
+    Hello, I'd want to order one of your Versatile Scarves, the one that
+    can be worn as a scarf, shawl, or headwrap. Thanks!
+
 classifier:
   email_analysis:
-  email_id: E008
-  language: english
+    email_id: E008
+    language: english
     primary_intent: order request
     customer_pii: {}
     segments:
       - segment_type: order
-        main_sentence: I'd want to order one of your Versatile Scarves, the one that
+        main_sentence: |-
+          I'd want to order one of your Versatile Scarves, the one that
           can be worn as a scarf, shawl, or headwrap.
         related_sentences:
           - Thanks!
@@ -27,7 +30,8 @@ stockkeeper:
   resolved_products:
     - product_id: VSC6789
       name: Versatile Scarf
-      description: Add a touch of versatility to your wardrobe with our versatile
+      description: |-
+        Add a touch of versatility to your wardrobe with our versatile
         scarf. This lightweight, multi-purpose accessory can be worn as a scarf, shawl,
         or even a headwrap. Perfect for transitional seasons or travel.
       category: Accessories
@@ -43,12 +47,13 @@ stockkeeper:
 advisor: null
 fulfiller:
   order_result:
-  email_id: E008
+    email_id: E008
     overall_status: created
     ordered_items:
       - product_id: VSC6789
         name: Versatile Scarf
-        description: Add a touch of versatility to your wardrobe with our versatile
+        description: |-
+          Add a touch of versatility to your wardrobe with our versatile
           scarf. This lightweight, multi-purpose accessory can be worn as a scarf,
           shawl, or even a headwrap. Perfect for transitional seasons or travel.
         category: Accessories
@@ -64,65 +69,69 @@ fulfiller:
         alternatives: []
         promotion: null
     total_price: 23.00
-    message: Successfully processed order for 1 unit of VSC6789 Versatile Scarf.
+    message: |-
+      Successfully processed order for 1 unit of VSC6789 Versatile Scarf.
     stock_updated: true
 composer:
-
   email_id: E008
   subject: Your Order for the Versatile Scarf (VSC6789) is Confirmed
-  response_body: |
-      Hello,
+  response_body: |-
+    Hello,
 
-      Thank you for your order! We've processed your request for the Versatile Scarf.
+    Thank you for your order! We've processed your request for the Versatile Scarf.
 
-      We're pleased to confirm that your order for 1 VSC6789 Versatile Scarf (the one that can be worn as a scarf, shawl, or headwrap) has been created.
+    We're pleased to confirm that your order for 1 VSC6789 Versatile Scarf
+    (the one that can be worn as a scarf, shawl, or headwrap) has been created.
 
-      Product Details:
-      - Item: VSC6789 Versatile Scarf
-      - Quantity: 1
-      - Price: $23.00
+    Product Details:
+    - Item: VSC6789 Versatile Scarf
+    - Quantity: 1
+    - Price: $23.00
 
-      We will notify you once your order has shipped.
+    We will notify you once your order has shipped.
 
-      Thanks!
+    Thanks!
 
-      Best regards,
-      Hermes - Delivering divine fashion
+    Best regards,
+    Hermes - Delivering divine fashion
   language: english
   tone: friendly
   response_points:
-      - content_type: greeting
-        content: Hello,
-        priority: 10
-        related_to: null
-      - content_type: acknowledgement
-        content: Thank you for your order! We've processed your request for the Versatile
-          Scarf.
-        priority: 9
-        related_to: VSC6789
-      - content_type: order_confirmation
-        content: We're pleased to confirm that your order for 1 VSC6789 Versatile Scarf
-          (the one that can be worn as a scarf, shawl, or headwrap) has been created.
-        priority: 10
-        related_to: VSC6789
-      - content_type: product_details
-        content: |
-          Product Details:
-          - Item: VSC6789 Versatile Scarf
-          - Quantity: 1
-          - Price: $23.00
-        priority: 8
-        related_to: VSC6789
-      - content_type: next_steps
-        content: We will notify you once your order has shipped.
-        priority: 7
-        related_to: null
-      - content_type: closing
-        content: |
-          Thanks!
+    - content_type: greeting
+      content: Hello,
+      priority: 10
+      related_to: null
+    - content_type: acknowledgement
+      content: |-
+        Thank you for your order! We've processed your request for the Versatile
+        Scarf.
+      priority: 9
+      related_to: VSC6789
+    - content_type: order_confirmation
+      content: |-
+        We're pleased to confirm that your order for 1 VSC6789 Versatile Scarf
+        (the one that can be worn as a scarf, shawl, or headwrap) has been created.
+      priority: 10
+      related_to: VSC6789
+    - content_type: product_details
+      content: |-
+        Product Details:
+        - Item: VSC6789 Versatile Scarf
+        - Quantity: 1
+        - Price: $23.00
+      priority: 8
+      related_to: VSC6789
+    - content_type: next_steps
+      content: |-
+        We will notify you once your order has shipped.
+      priority: 7
+      related_to: null
+    - content_type: closing
+      content: |-
+        Thanks!
 
-          Best regards,
-          Hermes - Delivering divine fashion
-        priority: 10
-        related_to: null
+        Best regards,
+        Hermes - Delivering divine fashion
+      priority: 10
+      related_to: null
 errors: null

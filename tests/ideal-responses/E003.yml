@@ -1,10 +1,12 @@
 input:
   email_id: E003
   subject: Need your help
-  message: "Hello, I need a new bag to carry my laptop and documents for work. My\
-    \ name is David and I'm having a hard time deciding which would be better - the\
-    \ LTH1098 Leather Backpack or the Leather Tote? Does one have more organizational\
-    \ pockets than the other? Any insight would be appreciated!"
+  message: |-
+    Hello, I need a new bag to carry my laptop and documents for work. My
+    name is David and I'm having a hard time deciding which would be better - the
+    LTH1098 Leather Backpack or the Leather Tote? Does one have more organizational
+    pockets than the other? Any insight would be appreciated!
+
 classifier:
   email_analysis:
     email_id: E003
@@ -14,10 +16,12 @@ classifier:
       name: David
     segments:
       - segment_type: inquiry
-        main_sentence: "I need a new bag to carry my laptop and documents for work."
+        main_sentence: |-
+          "I need a new bag to carry my laptop and documents for work."
         related_sentences:
-          - "My name is David and I'm having a hard time deciding which would be better\
-            \ - the LTH1098 Leather Backpack or the Leather Tote?"
+          - |-
+              "My name is David and I'm having a hard time deciding which would be better\
+              \ - the LTH1098 Leather Backpack or the Leather Tote?"
           - Does one have more organizational pockets than the other?
           - Any insight would be appreciated!
         product_mentions:
@@ -39,7 +43,8 @@ stockkeeper:
   resolved_products:
     - product_id: LTH1098
       name: Leather Backpack
-      description: Upgrade your daily carry with our leather backpack. Crafted from
+      description: |-
+        Upgrade your daily carry with our leather backpack. Crafted from
         premium leather, this stylish backpack features multiple compartments, a padded
         laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
         travel, or everyday use.
@@ -53,7 +58,8 @@ stockkeeper:
         features: multiple compartments, padded laptop sleeve
     - product_id: LTH5432
       name: Leather Tote
-      description: Elevate your everyday carry with our leather tote bag. Crafted
+      description: |-
+        Elevate your everyday carry with our leather tote bag. Crafted
         from premium, full-grain leather, this bag features a spacious interior,
         multiple pockets, and sturdy handles. Perfect for work, travel, or running
         errands in style.
@@ -73,10 +79,11 @@ advisor:
     primary_products:
       - product_id: LTH1098
         name: Leather Backpack
-        description: Upgrade your daily carry with our leather backpack. Crafted from
-          premium leather, this stylish backpack features multiple compartments, a
-          padded laptop sleeve, and adjustable straps for a comfortable fit. Perfect
-          for work, travel, or everyday use.
+        description: |-
+          Upgrade your daily carry with our leather backpack. Crafted from
+          premium leather, this stylish backpack features multiple compartments, a padded
+          laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
+          travel, or everyday use.
         category: Bags
         product_type: Backpack
         stock: 7
@@ -87,7 +94,8 @@ advisor:
           features: multiple compartments, padded laptop sleeve
       - product_id: LTH5432
         name: Leather Tote
-        description: Elevate your everyday carry with our leather tote bag. Crafted
+        description: |-
+          Elevate your everyday carry with our leather tote bag. Crafted
           from premium, full-grain leather, this bag features a spacious interior,
           multiple pockets, and sturdy handles. Perfect for work, travel, or running
           errands in style.
@@ -100,9 +108,11 @@ advisor:
         attributes:
           features: spacious interior, multiple pockets
     answered_questions:
-      - question: "which would be better - the LTH1098 Leather Backpack or the Leather\
-          \ Tote?"
-        answer: Both the LTH1098 Leather Backpack and the LTH5432 Leather Tote are
+      - question: |-
+          which would be better - the LTH1098 Leather Backpack or the Leather
+          Tote?
+        answer: |-
+          Both the LTH1098 Leather Backpack and the LTH5432 Leather Tote are
           suitable for carrying a laptop and documents. The LTH1098 Leather Backpack
           is described as having multiple compartments and a padded laptop sleeve.
           The LTH5432 Leather Tote features a spacious interior and multiple pockets.
@@ -114,7 +124,8 @@ advisor:
           - LTH5432
         answer_type: factual
       - question: Does one have more organizational pockets than the other?
-        answer: The LTH1098 Leather Backpack is specified to have 'multiple compartments'
+        answer: |-
+          The LTH1098 Leather Backpack is specified to have 'multiple compartments'
           including a padded laptop sleeve. The LTH5432 Leather Tote is described
           as having 'multiple pockets' and a 'spacious interior'. While both offer
           organization, the backpack explicitly mentions compartments which might imply
@@ -131,7 +142,7 @@ fulfiller: null
 composer:
   email_id: E003
   subject: Helping you choose the perfect work bag
-  response_body: |
+  response_body: |-
     Hello David,
 
     Thank you for reaching out! I understand you're looking for a new bag for work to carry your laptop and documents, and you're considering our LTH1098 Leather Backpack and our Leather Tote (LTH5432).
@@ -157,46 +168,53 @@ composer:
       priority: 10
       related_to: null
     - content_type: acknowledgement
-      content: Thank you for reaching out! I understand you're looking for a new
+      content: |-
+        Thank you for reaching out! I understand you're looking for a new
         bag for work to carry your laptop and documents, and you're considering
         our LTH1098 Leather Backpack and our Leather Tote (LTH5432).
       priority: 9
       related_to: LTH1098
     - content_type: answer_intro
-      content: Both are excellent choices and popular for work. Here's a bit more
+      content: |-
+        Both are excellent choices and popular for work. Here's a bit more
         insight to help you decide:
       priority: 8
       related_to: null
     - content_type: product_info
-      content: The LTH1098 Leather Backpack ($43.99) is designed with multiple compartments,
+      content: |-
+        The LTH1098 Leather Backpack ($43.99) is designed with multiple compartments,
         including a padded laptop sleeve, which offers structured organization and
         protection for your devices.
       priority: 10
       related_to: LTH1098
     - content_type: product_info
-      content: The LTH5432 Leather Tote ($28.00) offers a spacious interior with
+      content: |-
+        The LTH5432 Leather Tote ($28.00) offers a spacious interior with
         multiple pockets, providing flexibility in how you organize your items.
       priority: 10
       related_to: LTH5432
     - content_type: answer
-      content: Regarding organizational pockets, the LTH1098 Leather Backpack explicitly
+      content: |-
+        Regarding organizational pockets, the LTH1098 Leather Backpack explicitly
         mentions multiple compartments, which often means more dedicated sections.
         The LTH5432 Leather Tote has multiple pockets within its spacious main area.
       priority: 9
       related_to: LTH1098
     - content_type: advice
-      content: Ultimately, the best choice depends on your preferred carrying style
+      content: |-
+        Ultimately, the best choice depends on your preferred carrying style
         and how you like to organize your belongings. Both are crafted from premium
         leather and are suitable for professional use.
       priority: 7
       related_to: null
     - content_type: further_assistance
-      content: I hope this helps your decision! Let me know if you have any more
+      content: |-
+        I hope this helps your decision! Let me know if you have any more
         questions.
       priority: 6
       related_to: null
     - content_type: closing
-      content: |
+      content: |-
         Best regards,
         Hermes - Delivering divine fashion
       priority: 10

@@ -15,6 +15,9 @@ class Error(BaseModel):
     code: str | None = Field(
         default=None, description="Error code for programmatic handling"
     )
+    exception_type: str | None = Field(
+        default=None, description="The type of the exception that occurred"
+    )
     details: dict[str, Any] | None = Field(
         default=None, description="Additional error details and context information"
     )

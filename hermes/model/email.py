@@ -1,7 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, Field
 
-from typing import Any, Literal
+from typing import Literal
 
 from .enums import ProductCategory
 
@@ -41,6 +41,7 @@ class ProductMention(BaseModel):
         product_type: Specific type within a general category (e.g., "shirt" within "Men's Clothing")
         quantity: Number of items requested, defaults to 1
         confidence: Confidence level in this product mention (0.0-1.0)
+        mention_text: The original text that led to this product mention
     """
 
     product_id: str | None = None
@@ -56,6 +57,10 @@ class ProductMention(BaseModel):
         ge=0.0,
         le=1.0,
         description="Confidence level in this product mention",
+    )
+    mention_text: str | None = Field(
+        default=None,
+        description="The original text from the email that led to this product mention (e.g., 'LTH0976', 'these wallets', 'Alpine Explorer backpack')",
     )
 
 
@@ -78,9 +83,9 @@ class EmailAnalysis(BaseModel):
         description="The main purpose of the customer's email"
     )
 
-    customer_pii: dict[str, Any] | None = Field(
-        default_factory=dict,
-        description="Personal identifiable information like name, email, phone, etc.",
+    customer_name: str | None = Field(
+        default=None,
+        description="The name of the customer",
     )
 
     segments: list[Segment] = Field(default_factory=list)

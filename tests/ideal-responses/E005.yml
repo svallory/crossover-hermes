@@ -1,7 +1,22 @@
+input:
+  email_id: E005
+  message: |-
+    Good day,Keep your head toasty with our chunky knit beanie. Knitted from
+    thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a touch
+    of rustic charm. A versatile accessory to elevate your cold-weather looks.our
+    chunky knit beanie. Knitted from thick, cozy yarn, this trendy beanie offers a
+    slouchy, oversized fit and a touch of rustic charm. A versatile accessory to elevate
+    your cold-weather looks., the description mentions it can be worn as a lightweight
+    blanket. At $22, is the material good enough quality to use as a lap blanket?
+    Or is it more like a thick wrapping scarf? I'm considering buying it as a gift
+    for my grandmother. Thank you!
+  subject: Inquiry on Cozy Shawl Details
+
 advisor:
   inquiry_answers:
     answered_questions:
-    - answer: The CSH1098 Cozy Shawl is knitted from soft, warm yarn and its description
+    - answer: |-
+        The CSH1098 Cozy Shawl is knitted from soft, warm yarn and its description
         states it can be worn as a lightweight blanket. While it offers comfort and
         warmth, its primary design is as a versatile accessory (shawl/scarf). It could
         serve as a light lap blanket for added coziness.
@@ -10,7 +25,8 @@ advisor:
       question: is the material good enough quality to use as a lap blanket?
       reference_product_ids:
       - CSH1098
-    - answer: The CSH1098 Cozy Shawl is versatile and can be used as a scarf. It's
+    - answer: |-
+        The CSH1098 Cozy Shawl is versatile and can be used as a scarf. It's
         made from soft, warm yarn, so it would function well as a substantial wrapping
         scarf in addition to its potential use as a lightweight blanket or shawl.
       answer_type: factual
@@ -22,7 +38,8 @@ advisor:
     primary_products:
     - attributes: {}
       category: Accessories
-      description: Wrap yourself in comfort with our cozy shawl. Knitted from soft,
+      description: |-
+        Wrap yourself in comfort with our cozy shawl. Knitted from soft,
         warm yarn, this versatile accessory can be worn as a shawl, scarf, or even
         a lightweight blanket. Perfect for chilly evenings or adding a cozy layer
         to your outfit.
@@ -44,52 +61,59 @@ classifier:
     language: english
     primary_intent: product inquiry
     segments:
-    - main_sentence: the description mentions it can be worn as a lightweight blanket.
-      product_mentions:
-      - confidence: 0.7
-        product_category: Accessories
-        product_description: can be worn as a lightweight blanket
-        product_id: null
-        product_name: Cozy Shawl
-        product_type: Shawl
-        quantity: 1
-      related_sentences:
-      - At $22, is the material good enough quality to use as a lap blanket?
-      - Or is it more like a thick wrapping scarf?
-      - I'm considering buying it as a gift for my grandmother.
-      - Thank you!
-      segment_type: inquiry
-    - main_sentence: I'm considering buying it as a gift for my grandmother.
+    - main_sentence: |-
+        the description mentions it can be worn as a lightweight blanket.
+    product_mentions:
+    - confidence: 0.7
+      product_category: Accessories
+      product_description: can be worn as a lightweight blanket
+      product_id: null
+      product_name: Cozy Shawl
+      product_type: Shawl
+      quantity: 1
+    related_sentences:
+    - At $22, is the material good enough quality to use as a lap blanket?
+    - Or is it more like a thick wrapping scarf?
+    - I'm considering buying it as a gift for my grandmother.
+    - Thank you!
+    segment_type: inquiry
+    - main_sentence: |-
+        I'm considering buying it as a gift for my grandmother.
       product_mentions: []
       related_sentences: []
       segment_type: personal_statement
-    - main_sentence: Keep your head toasty with our chunky knit beanie.
+    - main_sentence: |-
+        Keep your head toasty with our chunky knit beanie.
       product_mentions:
       - confidence: 0.5
         product_category: Accessories
-        product_description: Knitted from thick, cozy yarn, this trendy beanie offers
+        product_description: |-
+          Knitted from thick, cozy yarn, this trendy beanie offers
           a slouchy, oversized fit and a touch of rustic charm.
         product_id: null
         product_name: chunky knit beanie
         product_type: Beanie
         quantity: 1
       related_sentences:
-      - Knitted from thick, cozy yarn, this trendy beanie offers a slouchy, oversized
+      - |-
+        Knitted from thick, cozy yarn, this trendy beanie offers a slouchy, oversized
         fit and a touch of rustic charm.
-      - A versatile accessory to elevate your cold-weather looks.
+      - |-
+        A versatile accessory to elevate your cold-weather looks.
       segment_type: inquiry
 composer:
   email_id: E005
   language: english
-  response_body: 'Good day,
+  response_body: |-
+    Good day,
 
 
-    Thank you for your interest in our Cozy Shawl (CSH1098). We understand you''re
+    Thank you for your interest in our Cozy Shawl (CSH1098). We understand you're
     considering it as a gift for your grandmother and have a few questions about its
     use.
 
 
-    The Cozy Shawl is indeed versatile! It''s knitted from soft, warm yarn. The description
+    The Cozy Shawl is indeed versatile! It's knitted from soft, warm yarn. The description
     mentions it can be worn as a shawl, a scarf, or even as a lightweight blanket.
 
 
@@ -99,7 +123,7 @@ composer:
     an extra layer of comfort and warmth, especially for someone like your grandmother.
     While it provides coziness, its primary design is as a fashion accessory.
 
-    - As a thick wrapping scarf: Yes, given it''s made from soft, warm yarn, it would
+    - As a thick wrapping scarf: Yes, given it's made from soft, warm yarn, it would
     also function very well as a thick and cozy wrapping scarf.
 
 
@@ -110,49 +134,56 @@ composer:
 
     Hermes - Delivering divine fashion
 
-    '
+
   response_points:
   - content: Good day,
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Thank you for your interest in our Cozy Shawl (CSH1098). We understand
+  - content: |-
+      Thank you for your interest in our Cozy Shawl (CSH1098). We understand
       you're considering it as a gift for your grandmother and have a few questions
       about its use.
     content_type: acknowledgement
     priority: 9
     related_to: CSH1098
-  - content: The Cozy Shawl is indeed versatile! It's knitted from soft, warm yarn.
+  - content: |-
+      The Cozy Shawl is indeed versatile! It's knitted from soft, warm yarn.
       The description mentions it can be worn as a shawl, a scarf, or even as a lightweight
       blanket.
     content_type: product_info
     priority: 8
     related_to: CSH1098
-  - content: 'Regarding your questions:'
+  - content: |-
+      Regarding your questions:
     content_type: answer_intro
     priority: 10
     related_to: CSH1098
-  - content: As a lap blanket It can certainly be used as a lightweight lap blanket
+  - content: |-
+      As a lap blanket It can certainly be used as a lightweight lap blanket
       for an extra layer of comfort and warmth, especially for someone like your grandmother.
       While it provides coziness, its primary design is as a fashion accessory.
     content_type: answer
     priority: 9
     related_to: CSH1098
-  - content: As a thick wrapping scarf Yes, given it's made from soft, warm yarn,
+  - content: |-
+      As a thick wrapping scarf Yes, given it's made from soft, warm yarn,
       it would also function very well as a thick and cozy wrapping scarf.
     content_type: answer
     priority: 9
     related_to: CSH1098
-  - content: It sounds like a thoughtful gift idea! We hope this information helps
+  - content: |-
+      It sounds like a thoughtful gift idea! We hope this information helps
       you decide.
     content_type: encouragement
     priority: 7
     related_to: null
-  - content: 'Best regards,
+  - content: |-
+      Best regards,
 
       Hermes - Delivering divine fashion
 
-      '
+
     content_type: closing
     priority: 10
     related_to: null
@@ -160,24 +191,13 @@ composer:
   tone: friendly
 errors: null
 fulfiller: null
-input:
-  email_id: E005
-  message: Good day,Keep your head toasty with our chunky knit beanie. Knitted from
-    thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a touch
-    of rustic charm. A versatile accessory to elevate your cold-weather looks.our
-    chunky knit beanie. Knitted from thick, cozy yarn, this trendy beanie offers a
-    slouchy, oversized fit and a touch of rustic charm. A versatile accessory to elevate
-    your cold-weather looks., the description mentions it can be worn as a lightweight
-    blanket. At $22, is the material good enough quality to use as a lap blanket?
-    Or is it more like a thick wrapping scarf? I'm considering buying it as a gift
-    for my grandmother. Thank you!
-  subject: Inquiry on Cozy Shawl Details
 stockkeeper:
   metadata: {}
   resolved_products:
   - attributes: {}
     category: Accessories
-    description: Wrap yourself in comfort with our cozy shawl. Knitted from soft,
+    description: |-
+      Wrap yourself in comfort with our cozy shawl. Knitted from soft,
       warm yarn, this versatile accessory can be worn as a shawl, scarf, or even a
       lightweight blanket. Perfect for chilly evenings or adding a cozy layer to your
       outfit.
@@ -192,7 +212,8 @@ stockkeeper:
   unresolved_mentions:
   - confidence: 0.5
     product_category: Accessories
-    product_description: Knitted from thick, cozy yarn, this trendy beanie offers
+    product_description: |-
+      Knitted from thick, cozy yarn, this trendy beanie offers
       a slouchy, oversized fit and a touch of rustic charm.
     product_id: null
     product_name: chunky knit beanie

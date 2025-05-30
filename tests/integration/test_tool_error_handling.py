@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 from pydantic import ValidationError
+from langchain_core.exceptions import OutputParserException
 
 from hermes.agents.composer.agent import run_composer
 from hermes.agents.composer.models import ComposerInput, ComposerOutput
@@ -10,6 +11,8 @@ from hermes.agents.classifier.models import ClassifierOutput, EmailAnalysis
 from hermes.model.email import CustomerEmail
 from hermes.config import HermesConfig
 from hermes.utils.tool_error_handler import ToolCallError
+from hermes.agents.composer.agent import Agents
+from hermes.model.errors import Error
 
 
 @pytest.fixture
@@ -51,8 +54,6 @@ def mock_hermes_config():
     return HermesConfig(
         llm_provider="OpenAI",
         llm_api_key="test-key",
-        llm_model_weak="gpt-3.5-turbo",
-        llm_model_strong="gpt-4",
         vector_store_path="./test_chroma_db",
     )
 
@@ -61,106 +62,45 @@ class TestToolErrorHandling:
     """Integration tests for tool error handling."""
 
     @pytest.mark.asyncio
-    async def test_composer_handles_validation_error_with_retry(
+    async def test_composer_handles_validation_error_with_parser_retry(
         self, mock_composer_input, mock_hermes_config
     ):
-        """Test that composer handles validation errors with retry logic."""
-
-        # Mock the LLM client to simulate validation error then success
+        """Test composer when PydanticToolsParser retries on ValidationError and succeeds."""
         with patch("hermes.agents.composer.agent.get_llm_client") as mock_get_llm:
-            # Create mock chain that fails first, succeeds second
             mock_chain = AsyncMock()
 
-            # First call raises ValidationError (simulating tool calling failure)
+            # Simulate parser raising OutputParserException (wrapping ValidationError) first, then success
             validation_error = ValidationError.from_exception_data(
                 "ComposerOutput",
-                [{"type": "missing", "loc": ("composer",), "msg": "Field required"}],
+                [{"type": "missing", "loc": ("subject",), "msg": "Field required"}],
             )
-
-            # Second call succeeds
-            success_response = ComposerOutput(
-                email_id="TEST001",
-                subject="Re: Looking for a work bag",
-                response_body="Thank you for your inquiry about work bags...",
-                language="English",
-                tone="professional and helpful",
-                response_points=[],
+            parser_exception = OutputParserException(
+                error="Failed to parse",
+                llm_output="invalid output",
+                observation="",
             )
+            parser_exception.__cause__ = validation_error  # Simulate original cause
 
-            mock_chain.ainvoke.side_effect = [validation_error, success_response]
-
-            # Mock LLM client to return our mock chain
-            mock_llm = MagicMock()
-            mock_llm.__or__ = MagicMock(return_value=mock_chain)
-            mock_get_llm.return_value = mock_llm
-
-            # Mock the prompt
-            with patch("hermes.agents.composer.agent.COMPOSER_PROMPT") as mock_prompt:
-                mock_prompt.__or__ = MagicMock(return_value=mock_chain)
-
-                # Run the composer
-                result = await run_composer(
-                    state=mock_composer_input,
-                    runnable_config={
-                        "configurable": {"hermes_config": mock_hermes_config}
-                    },
-                )
-
-                # Verify success
-                assert "composer" in result
-                assert isinstance(result["composer"], ComposerOutput)
-                assert result["composer"].email_id == "TEST001"
-
-                # Verify retry was attempted (chain called twice)
-                assert mock_chain.ainvoke.call_count == 2
-
-    @pytest.mark.asyncio
-    async def test_composer_falls_back_to_no_tools_on_persistent_failure(
-        self, mock_composer_input, mock_hermes_config
-    ):
-        """Test that composer falls back to no-tools execution when retries fail."""
-
-        with patch("hermes.agents.composer.agent.get_llm_client") as mock_get_llm:
-            # Create mock chains - one that always fails, one that succeeds
-            mock_failing_chain = AsyncMock()
-            mock_success_chain = AsyncMock()
-
-            # Failing chain always raises ValidationError
-            validation_error = ValidationError.from_exception_data(
-                "ComposerOutput",
-                [{"type": "missing", "loc": ("composer",), "msg": "Field required"}],
-            )
-            mock_failing_chain.ainvoke.side_effect = validation_error
-
-            # Success chain returns valid response
             success_response = ComposerOutput(
                 email_id="TEST001",
                 subject="Re: Looking for a work bag",
                 response_body="Thank you for your inquiry...",
                 language="English",
-                tone="professional and helpful",
+                tone="professional",
                 response_points=[],
             )
-            mock_success_chain.ainvoke.return_value = success_response
+            # The chain.ainvoke is called multiple times by the parser's retry mechanism
+            mock_chain.ainvoke.side_effect = [parser_exception, success_response]
 
-            # Mock LLM clients - first with tools (fails), second without tools (succeeds)
-            def mock_llm_side_effect(*args, **kwargs):
-                mock_llm = MagicMock()
-                if kwargs.get("tools", []):  # Has tools - will fail
-                    mock_llm.__or__ = MagicMock(return_value=mock_failing_chain)
-                else:  # No tools - will succeed
-                    mock_llm.__or__ = MagicMock(return_value=mock_success_chain)
-                return mock_llm
+            mock_llm = MagicMock()
+            # The PydanticToolsParser is part of the chain returned by get_llm_client
+            # So, its retry mechanism will call mock_chain.ainvoke multiple times.
+            mock_llm.__or__ = MagicMock(return_value=mock_chain)
+            mock_get_llm.return_value = mock_llm
 
-            mock_get_llm.side_effect = mock_llm_side_effect
-
-            # Mock the prompt
             with patch("hermes.agents.composer.agent.COMPOSER_PROMPT") as mock_prompt:
-                mock_prompt.__or__ = MagicMock(
-                    side_effect=[mock_failing_chain, mock_success_chain]
-                )
+                mock_prompt.__or__ = MagicMock(return_value=mock_chain)
 
-                # Run the composer
                 result = await run_composer(
                     state=mock_composer_input,
                     runnable_config={
@@ -168,72 +108,116 @@ class TestToolErrorHandling:
                     },
                 )
 
-                # Verify success with fallback
-                assert "composer" in result
-                assert isinstance(result["composer"], ComposerOutput)
-                assert result["composer"].email_id == "TEST001"
+                assert Agents.COMPOSER in result
+                assert isinstance(result[Agents.COMPOSER], ComposerOutput)
+                assert mock_chain.ainvoke.call_count == 2  # Due to parser retry
 
-                # Verify both LLM clients were created (with and without tools)
-                assert mock_get_llm.call_count >= 2
+    @pytest.mark.asyncio
+    async def test_composer_fails_on_persistent_validation_error(
+        self, mock_composer_input, mock_hermes_config
+    ):
+        """Test composer fails gracefully when PydanticToolsParser retries are exhausted."""
+        with patch("hermes.agents.composer.agent.get_llm_client") as mock_get_llm:
+            mock_chain = AsyncMock()
+
+            validation_error = ValidationError.from_exception_data(
+                "ComposerOutput",
+                [{"type": "missing", "loc": ("subject",), "msg": "Field required"}],
+            )
+            parser_exception = OutputParserException(
+                error="Failed to parse after retries",
+                llm_output="invalid output",
+                observation="",
+            )
+            parser_exception.__cause__ = validation_error
+
+            # Simulate parser failing after all its retries
+            # PydanticToolsParser retries 3 times by default.
+            mock_chain.ainvoke.side_effect = [parser_exception] * 3  # Should be 3
+
+            mock_llm = MagicMock()
+            mock_llm.__or__ = MagicMock(return_value=mock_chain)
+            mock_get_llm.return_value = mock_llm
+
+            with patch("hermes.agents.composer.agent.COMPOSER_PROMPT") as mock_prompt:
+                mock_prompt.__or__ = MagicMock(return_value=mock_chain)
+
+                result = await run_composer(
+                    state=mock_composer_input,
+                    runnable_config={
+                        "configurable": {"hermes_config": mock_hermes_config}
+                    },
+                )
+
+                assert "errors" in result
+                assert Agents.COMPOSER in result["errors"]
+                error_output = result["errors"][Agents.COMPOSER]
+                # With the new ToolCallRetryHandler, we expect an Error wrapper containing a ToolCallError
+                assert isinstance(error_output, Error)
+                assert error_output.exception_type == "ToolCallError"
+                assert error_output.exception_type == "ToolCallError"
+                # The retry handler would be called 3 times (max_retries=2 + 1 initial)
+                assert mock_chain.ainvoke.call_count == 3
 
     @pytest.mark.asyncio
     async def test_composer_handles_tool_call_error_gracefully(
         self, mock_composer_input, mock_hermes_config
     ):
-        """Test that composer handles ToolCallError gracefully."""
-
+        """Test composer handles ToolCallError by returning an error node."""
         with patch("hermes.agents.composer.agent.get_llm_client") as mock_get_llm:
-            # Create mock retry handler that raises ToolCallError
-            with patch(
-                "hermes.agents.composer.agent.ToolCallRetryHandler"
-            ) as mock_retry_handler_class:
-                mock_retry_handler = AsyncMock()
-                mock_retry_handler.retry_with_tool_calling.side_effect = ToolCallError(
-                    "Tool calling failed after retries",
-                    missing_tools=["find_products_for_occasion"],
+            mock_chain = AsyncMock()
+            tool_call_err = ToolCallError(
+                "Tool calling failed", missing_tools=["some_tool"]
+            )
+            mock_chain.ainvoke.side_effect = tool_call_err  # Direct error from chain
+
+            mock_llm = MagicMock()
+            mock_llm.__or__ = MagicMock(return_value=mock_chain)
+            mock_get_llm.return_value = mock_llm
+
+            with patch("hermes.agents.composer.agent.COMPOSER_PROMPT") as mock_prompt:
+                mock_prompt.__or__ = MagicMock(return_value=mock_chain)
+
+                result = await run_composer(
+                    state=mock_composer_input,
+                    runnable_config={
+                        "configurable": {"hermes_config": mock_hermes_config}
+                    },
                 )
-                mock_retry_handler_class.return_value = mock_retry_handler
 
-                # Mock fallback chain that succeeds
-                mock_fallback_chain = AsyncMock()
-                success_response = ComposerOutput(
-                    email_id="TEST001",
-                    subject="Re: Looking for a work bag",
-                    response_body="Thank you for your inquiry...",
-                    language="English",
-                    tone="professional and helpful",
-                    response_points=[],
+                assert "errors" in result
+                assert Agents.COMPOSER in result["errors"]
+                error_output = result["errors"][Agents.COMPOSER]
+                assert isinstance(error_output, Error)
+                assert error_output.exception_type == "ToolCallError"
+
+    @pytest.mark.asyncio
+    async def test_composer_handles_unexpected_error_gracefully(
+        self, mock_composer_input, mock_hermes_config
+    ):
+        """Test composer handles unexpected errors by returning an error node."""
+        with patch("hermes.agents.composer.agent.get_llm_client") as mock_get_llm:
+            mock_chain = AsyncMock()
+            unexpected_error = ValueError("Something broke unexpectedly")
+            mock_chain.ainvoke.side_effect = unexpected_error  # Direct error from chain
+
+            mock_llm = MagicMock()
+            mock_llm.__or__ = MagicMock(return_value=mock_chain)
+            mock_get_llm.return_value = mock_llm
+
+            with patch("hermes.agents.composer.agent.COMPOSER_PROMPT") as mock_prompt:
+                mock_prompt.__or__ = MagicMock(return_value=mock_chain)
+
+                result = await run_composer(
+                    state=mock_composer_input,
+                    runnable_config={
+                        "configurable": {"hermes_config": mock_hermes_config}
+                    },
                 )
-                mock_fallback_chain.ainvoke.return_value = success_response
 
-                # Mock LLM clients
-                def mock_llm_side_effect(*args, **kwargs):
-                    mock_llm = MagicMock()
-                    if kwargs.get("tools", []):  # Has tools
-                        mock_llm.__or__ = MagicMock(return_value=AsyncMock())
-                    else:  # No tools - fallback
-                        mock_llm.__or__ = MagicMock(return_value=mock_fallback_chain)
-                    return mock_llm
+                assert "errors" in result
+                assert Agents.COMPOSER in result["errors"]
+                error_output = result["errors"][Agents.COMPOSER]
+                assert isinstance(error_output, Error)
 
-                mock_get_llm.side_effect = mock_llm_side_effect
-
-                # Mock the prompt
-                with patch(
-                    "hermes.agents.composer.agent.COMPOSER_PROMPT"
-                ) as mock_prompt:
-                    mock_prompt.__or__ = MagicMock(return_value=mock_fallback_chain)
-
-                    # Run the composer
-                    result = await run_composer(
-                        state=mock_composer_input,
-                        runnable_config={
-                            "configurable": {"hermes_config": mock_hermes_config}
-                        },
-                    )
-
-                    # Verify success with fallback
-                    assert "composer" in result
-                    assert isinstance(result["composer"], ComposerOutput)
-                    assert result["composer"].email_id == "TEST001"
-                    # Verify retry was attempted
-                    mock_retry_handler.retry_with_tool_calling.assert_called_once()
+    # Test for the skip functionality has been removed as the associated fallback logic in the agent was removed.

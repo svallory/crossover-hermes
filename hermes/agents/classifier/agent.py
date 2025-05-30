@@ -47,35 +47,31 @@ async def run_classifier(
             config=hermes_config,
             schema=EmailAnalysis,
             tools=[],
-            model_strength="weak",
+            model_strength="strong",
             temperature=0.0,
         )
 
         analysis_chain = CLASSIFIER_PROMPT | llm
 
-        try:
-            chain_result = await analysis_chain.ainvoke(state.email.model_dump())
+        # chain_result should now be an EmailAnalysis instance directly
+        email_analysis_result: EmailAnalysis = await analysis_chain.ainvoke(
+            state.email.model_dump()
+        )
 
-            email_analysis = EmailAnalysis.model_validate(chain_result)
+        # Set the email_id in the analysis, as it's not part of the LLM's direct output
+        email_analysis_result.email_id = state.email.email_id
 
-            # Set the email_id in the analysis
-            email_analysis.email_id = state.email.email_id
+        print(f"  Analysis for {state.email.email_id} complete.")
 
-            print(f"  Analysis for {state.email.email_id} complete.")
-
-            return create_node_response(
-                Agents.CLASSIFIER,
-                ClassifierOutput(
-                    email_analysis=email_analysis,
-                ),
-            )
-
-        except Exception as e:
-            print(f"Error analyzing email {state.email.email_id}: {e}")
-
-            return create_node_response(Agents.CLASSIFIER, e)
+        return create_node_response(
+            Agents.CLASSIFIER,
+            ClassifierOutput(
+                email_analysis=email_analysis_result,
+            ),
+        )
 
     except Exception as e:
+        raise e
         # Return errors in the format expected by LangGraph
-        print(f"Outer error in analyze_email for {state.email.email_id}: {e}")
-        return create_node_response(Agents.CLASSIFIER, e)
+        # print(f"Outer error in analyze_email for {state.email.email_id}: {e}")
+        # return create_node_response(Agents.CLASSIFIER, e)

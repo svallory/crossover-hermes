@@ -19,6 +19,7 @@ from .models import (
 )
 from .prompts import ADVISOR_PROMPT
 from hermes.tools.toolkits import CatalogToolkit
+from hermes.utils.tool_error_handler import ToolCallRetryHandler, DEFAULT_RETRY_TEMPLATE
 
 
 @traceable(
@@ -73,6 +74,9 @@ async def run_advisor(
         # Create the chain using LangChain composition
         inquiry_response_chain = ADVISOR_PROMPT | llm
 
+        # Use the retry handler to handle validation errors
+        retry_handler = ToolCallRetryHandler(max_retries=2, backoff_factor=0.0)
+
         try:
             # Prepare input data
             email_analysis_data = (
@@ -82,11 +86,13 @@ async def run_advisor(
             )
 
             # Generate the inquiry response using the chain
-            response_data = await inquiry_response_chain.ainvoke(
-                {
+            response_data = await retry_handler.retry_with_tool_calling(
+                chain=inquiry_response_chain,
+                input_data={
                     "email_analysis": email_analysis_data,
                     "retrieved_products_context": product_context,
-                }
+                },
+                retry_prompt_template=DEFAULT_RETRY_TEMPLATE,
             )
 
             # Ensure we get the right type
@@ -111,41 +117,17 @@ async def run_advisor(
             # Ensure email_id is set correctly
             inquiry_response.email_id = email_id
 
-            # Log the results
-            print(f"  Response generated for {email_id}")
-            print(f"  Answered {len(inquiry_response.answered_questions)} questions")
-            print(
-                f"  Identified {len(inquiry_response.primary_products)} primary products"
-            )
-            print(
-                f"  Suggested {len(inquiry_response.related_products)} related products"
-            )
-
             return create_node_response(
                 Agents.ADVISOR, AdvisorOutput(inquiry_answers=inquiry_response)
             )
 
         except Exception as e:
-            print(f"Error generating inquiry response for {email_id}: {e}")
-
-            # Create a factual fallback response
-            fallback_response = InquiryAnswers(
-                email_id=email_id,
-                primary_products=[],
-                answered_questions=[],
-                unanswered_questions=["Unable to process inquiry due to system error."],
-                related_products=[],
-                unsuccessful_references=[],
-            )
-
-            return create_node_response(
-                Agents.ADVISOR, AdvisorOutput(inquiry_answers=fallback_response)
-            )
+            # This will catch OutputParserException if retries fail,
+            # ToolCallError if tools fail, or any other unexpected error.
+            print(f"Advisor: Error during processing for email {email_id}: {e}")
+            # Return errors in the format expected by LangGraph
+            return create_node_response(Agents.ADVISOR, e)
 
     except Exception as e:
         # Return errors in the format expected by LangGraph
         return create_node_response(Agents.ADVISOR, e)
-
-
-# Note: format_resolved_products and search_vector_store functions removed
-# as part of simplification - we now pass raw product data directly to LLM

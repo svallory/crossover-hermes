@@ -22,12 +22,12 @@ class TestClassifierAgent:
 
         email_analysis = EmailAnalysis(
             email_id="test_001",
-            language="english",
+            language="English",
             primary_intent="order request",
-            customer_pii={"name": "Test User"},
+            customer_name="Test User",
             segments=[],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         assert classifier_output.email_analysis.email_id == "test_001"
-        assert isinstance(classifier_output.email_analysis.customer_pii, dict)
+        assert isinstance(classifier_output.email_analysis.customer_name, str)

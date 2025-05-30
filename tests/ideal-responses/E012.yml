@@ -1,51 +1,68 @@
+input:
+  email_id: E012
+  message: |-
+    Hey, hope you're doing well. Last year for my birthday, my wife Emily got
+    me a really nice leather briefcase from your store. I loved it and used it every
+    day for work until the strap broke a few months ago. Speaking of broken things,
+    I also need to get my lawnmower fixed before spring. Anyway, what were some of
+    the other messenger bag or briefcase style options you have? I could go for something
+    slightly smaller than my previous one. Oh and we also need to make dinner reservations
+    for our anniversary next month. Maybe a nice Italian place downtown. What was
+    I saying again? Oh right, work bags! Let me know what you'd recommend. Thanks!
+  subject: Rambling About a New Work Bag
+
 advisor:
   inquiry_answers:
     answered_questions:
-    - answer: "We have a few excellent options for work bags that might suit you.\n\
-        \          \nThe LTH2109 Leather Messenger Bag ($37.99) is a timeless choice,\
-        \ crafted from premium full-grain leather with a spacious main compartment\
-        \ and multiple pockets. It offers a classic messenger style.\nIf you're open\
-        \ to other styles for work, our LTH1098 Leather Backpack ($43.99) is also\
-        \ very popular, featuring multiple compartments and a padded laptop sleeve.\
-        \ \nBoth could be good replacements, and you can compare their dimensions\
-        \ to your previous briefcase to see if they meet your preference for something\
-        \ slightly smaller."
-      answer_type: factual
-      confidence: 0.9
-      question: what were some of the other messenger bag or briefcase style options
-        you have? I could go for something slightly smaller than my previous one.
-      reference_product_ids:
-      - LTH2109
-      - LTH1098
+      - answer: |-
+          We have a few excellent options for work bags that might suit you.
+          The LTH2109 Leather Messenger Bag ($37.99) is a timeless choice,
+          crafted from premium full-grain leather with a spacious main compartment
+          and multiple pockets. It offers a classic messenger style.
+          If you're open to other styles for work, our LTH1098 Leather Backpack ($43.99)
+          is also very popular, featuring multiple compartments and a padded laptop sleeve.
+          Both could be good replacements, and you can compare their dimensions
+          to your previous briefcase to see if they meet your preference for something
+          slightly smaller.
+        answer_type: factual
+        confidence: 0.9
+        question: |-
+          what were some of the other messenger bag or briefcase style options
+          you have? I could go for something slightly smaller than my previous one.
+        reference_product_ids:
+          - LTH2109
+          - LTH1098
     email_id: E012
     primary_products: []
     related_products:
-    - attributes: {}
-      category: Bags
-      description: Carry your essentials in style with our leather messenger bag.
-        Crafted from premium, full-grain leather, this bag features a spacious main
-        compartment, multiple pockets, and an adjustable strap for a comfortable fit.
-        A timeless choice for work, travel, or everyday use.
-      name: Leather Messenger Bag
-      price: 37.99
-      product_id: LTH2109
-      product_type: Messenger Bag
-      seasons:
-      - All seasons
-      stock: 4
-    - attributes: {}
-      category: Bags
-      description: Upgrade your daily carry with our leather backpack. Crafted from
-        premium leather, this stylish backpack features multiple compartments, a padded
-        laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
-        travel, or everyday use.
-      name: Leather Backpack
-      price: 43.99
-      product_id: LTH1098
-      product_type: Backpack
-      seasons:
-      - All seasons
-      stock: 7
+      - attributes: {}
+        category: Bags
+        description: |-
+          Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable fit.
+          A timeless choice for work, travel, or everyday use.
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: Messenger Bag
+        seasons:
+          - All seasons
+        stock: 4
+      - attributes: {}
+        category: Bags
+        description: |-
+          Upgrade your daily carry with our leather backpack. Crafted from
+          premium leather, this stylish backpack features multiple compartments, a padded
+          laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
+          travel, or everyday use.
+        name: Leather Backpack
+        price: 43.99
+        product_id: LTH1098
+        product_type: Backpack
+        seasons:
+          - All seasons
+        stock: 7
     unanswered_questions: []
     unsuccessful_references: []
 classifier:
@@ -56,56 +73,68 @@ classifier:
     language: english
     primary_intent: product inquiry
     segments:
-    - main_sentence: Last year for my birthday, my wife Emily got me a really nice
-        leather briefcase from your store.
-      product_mentions: []
-      related_sentences:
-      - I loved it and used it every day for work until the strap broke a few months
-        ago.
-      - Speaking of broken things, I also need to get my lawnmower fixed before spring.
-      - Oh and we also need to make dinner reservations for our anniversary next month.
-      - Maybe a nice Italian place downtown.
-      segment_type: personal_statement
-    - main_sentence: Anyway, what were some of the other messenger bag or briefcase
-        style options you have?
-      product_mentions:
-      - confidence: 0.8
-        product_category: Bags
-        product_description: messenger bag or briefcase style options, slightly smaller
-          than previous one
-        product_id: null
-        product_name: null
-        product_type: Messenger Bag
-        quantity: 1
-      related_sentences:
-      - I could go for something slightly smaller than my previous one.
-      - What was I saying again? Oh right, work bags!
-      - Let me know what you'd recommend.
-      - Thanks!
-      segment_type: inquiry
+      - main_sentence: |-
+          Last year for my birthday, my wife Emily got me a really nice
+          leather briefcase from your store.
+        product_mentions: []
+        related_sentences:
+          - |-
+              I loved it and used it every day for work until the strap broke a few months
+              ago.
+          - |-
+              Speaking of broken things, I also need to get my lawnmower fixed before spring.
+          - |-
+              Oh and we also need to make dinner reservations for our anniversary next month.
+          - |-
+              Maybe a nice Italian place downtown.
+        segment_type: personal_statement
+      - main_sentence: |-
+          Anyway, what were some of the other messenger bag or briefcase
+          style options you have?
+        product_mentions:
+          - confidence: 0.8
+            product_category: Bags
+            product_description: |-
+              messenger bag or briefcase style options, slightly smaller
+              than previous one
+            product_id: null
+            product_name: null
+            product_type: Messenger Bag
+            quantity: 1
+        related_sentences:
+          - |-
+              I could go for something slightly smaller than my previous one.
+          - |-
+              What was I saying again? Oh right, work bags!
+          - |-
+              Let me know what you'd recommend.
+          - |-
+              Thanks!
+        segment_type: inquiry
 composer:
   email_id: E012
   language: english
-  response_body: 'Hey there,
+  response_body: |-
+    Hey there,
 
 
-    Hope you''re doing well too! I understand your leather briefcase met an untimely
-    end – that''s a shame, especially when it was a gift from Emily!
+    Hope you're doing well too! I understand your leather briefcase met an untimely
+    end – that's a shame, especially when it was a gift from Emily!
 
 
-    No worries about the rambling, let''s get you sorted with a new work bag. You''re
+    No worries about the rambling, let's get you sorted with a new work bag. You're
     looking for messenger bag or briefcase style options, possibly a bit smaller than
     your last one. Here are a couple of recommendations:
 
 
-    1.  **LTH2109 Leather Messenger Bag ($37.99):** This is a classic choice. It''s
-    made from premium full-grain leather, has a spacious main compartment, and multiple
-    pockets for organization. It''s a great all-rounder for work.
+    1.  **LTH2109 Leather Messenger Bag ($37.99):** This is a classic choice. It's
+    made from premium full-grain leather, has a spacious main compartment,
+    and multiple pockets for organization. It's a great all-rounder for work.
 
 
-    2.  **LTH1098 Leather Backpack ($43.99):** If you''re open to a backpack style,
-    this one is also excellent for work. It features multiple compartments and a padded
-    laptop sleeve, offering good organization and protection.
+    2.  **LTH1098 Leather Backpack ($43.99):** If you're open to a backpack style,
+    this one is also excellent for work. It features multiple compartments
+    and a padded laptop sleeve, offering good organization and protection.
 
 
     You can compare the dimensions of these with your previous briefcase to see if
@@ -123,99 +152,95 @@ composer:
 
     Hermes - Delivering divine fashion
 
-    '
   response_points:
-  - content: Hey there,
-    content_type: greeting
-    priority: 10
-    related_to: null
-  - content: Hope you're doing well too! I understand your leather briefcase met an
-      untimely end – that's a shame, especially when it was a gift from Emily!
-    content_type: empathy
-    priority: 9
-    related_to: null
-  - content: No worries about the rambling, let's get you sorted with a new work bag.
-      You're looking for messenger bag or briefcase style options, possibly a bit
-      smaller than your last one. Here are a couple of recommendations
-    content_type: answer_intro
-    priority: 10
-    related_to: null
-  - content: '1. LTH2109 Leather Messenger Bag ($37.99): This is a classic choice.
-      It''s made from premium full-grain leather, has a spacious main compartment,
-      and multiple pockets for organization. It''s a great all-rounder for work.'
-    content_type: product_recommendation
-    priority: 9
-    related_to: LTH2109
-  - content: '2. LTH1098 Leather Backpack ($43.99): If you''re open to a backpack
-      style, this one is also excellent for work. It features multiple compartments
-      and a padded laptop sleeve, offering good organization and protection.'
-    content_type: product_recommendation
-    priority: 8
-    related_to: LTH1098
-  - content: You can compare the dimensions of these with your previous briefcase
-      to see if they fit your preference for something a bit smaller. Both are durable
-      and stylish for professional use.
-    content_type: advice
-    priority: 7
-    related_to: null
-  - content: Let me know if either of these catch your eye or if you have more questions!
-    content_type: further_assistance
-    priority: 6
-    related_to: null
-  - content: (And good luck with the lawnmower and anniversary dinner plans!)
-    content_type: personal_touch
-    priority: 5
-    related_to: null
-  - content: 'Best regards,
+    - content_type: greeting
+      content: Hey there,
+      priority: 10
+      related_to: null
+    - content_type: empathy
+      content: |-
+        Hope you're doing well too! I understand your leather briefcase met an
+        untimely end – that's a shame, especially when it was a gift from Emily!
+      priority: 9
+      related_to: null
+    - content_type: answer_intro
+      content: |-
+        No worries about the rambling, let's get you sorted with a new work bag.
+        You're looking for messenger bag or briefcase style options, possibly a bit
+        smaller than your last one. Here are a couple of recommendations
+      priority: 10
+      related_to: null
+    - content_type: product_recommendation
+      content: |-
+        1. LTH2109 Leather Messenger Bag ($37.99): This is a classic choice. It's
+        made from premium full-grain leather, has a spacious main compartment,
+        and multiple pockets for organization. It's a great all-rounder for work.
+      priority: 9
+      related_to: LTH2109
+    - content_type: product_recommendation
+      content: |-
+        2. LTH1098 Leather Backpack ($43.99): If you're open to a backpack
+        style, this one is also excellent for work. It features multiple compartments
+        and a padded laptop sleeve, offering good organization and protection.
+      priority: 8
+      related_to: LTH1098
+    - content_type: advice
+      content: |-
+        You can compare the dimensions of these with your previous briefcase
+        to see if they fit your preference for something a bit smaller. Both are durable
+        and stylish for professional use.
+      priority: 7
+      related_to: null
+    - content_type: further_assistance
+      content: |-
+        Let me know if either of these catch your eye or if you have more questions!
+      priority: 6
+      related_to: null
+    - content_type: personal_touch
+      content: |-
+        (And good luck with the lawnmower and anniversary dinner plans!)
+      priority: 5
+      related_to: null
+    - content_type: closing
+      content: |-
+        Best regards,
 
-      Hermes - Delivering divine fashion
-
-      '
-    content_type: closing
-    priority: 10
-    related_to: null
+        Hermes - Delivering divine fashion
+      priority: 10
+      related_to: null
   subject: Recommendations for your new work bag
   tone: friendly
 errors: null
 fulfiller: null
-input:
-  email_id: E012
-  message: Hey, hope you're doing well. Last year for my birthday, my wife Emily got
-    me a really nice leather briefcase from your store. I loved it and used it every
-    day for work until the strap broke a few months ago. Speaking of broken things,
-    I also need to get my lawnmower fixed before spring. Anyway, what were some of
-    the other messenger bag or briefcase style options you have? I could go for something
-    slightly smaller than my previous one. Oh and we also need to make dinner reservations
-    for our anniversary next month. Maybe a nice Italian place downtown. What was
-    I saying again? Oh right, work bags! Let me know what you'd recommend. Thanks!
-  subject: Rambling About a New Work Bag
 stockkeeper:
   metadata: {}
   resolved_products:
-  - attributes: {}
-    category: Bags
-    description: Carry your essentials in style with our leather messenger bag. Crafted
-      from premium, full-grain leather, this bag features a spacious main compartment,
-      multiple pockets, and an adjustable strap for a comfortable fit. A timeless
-      choice for work, travel, or everyday use.
-    name: Leather Messenger Bag
-    price: 37.99
-    product_id: LTH2109
-    product_type: Messenger Bag
-    seasons:
-    - All seasons
-    stock: 4
-  - attributes: {}
-    category: Bags
-    description: Upgrade your daily carry with our leather backpack. Crafted from
-      premium leather, this stylish backpack features multiple compartments, a padded
-      laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
-      travel, or everyday use.
-    name: Leather Backpack
-    price: 43.99
-    product_id: LTH1098
-    product_type: Backpack
-    seasons:
-    - All seasons
-    stock: 7
+    - attributes: {}
+      category: Bags
+      description: |-
+        Carry your essentials in style with our leather messenger bag.
+        Crafted from premium, full-grain leather, this bag features a spacious main
+        compartment, multiple pockets, and an adjustable strap for a comfortable fit.
+        A timeless choice for work, travel, or everyday use.
+      name: Leather Messenger Bag
+      price: 37.99
+      product_id: LTH2109
+      product_type: Messenger Bag
+      seasons:
+        - All seasons
+      stock: 4
+    - attributes: {}
+      category: Bags
+      description: |-
+        Upgrade your daily carry with our leather backpack. Crafted from
+        premium leather, this stylish backpack features multiple compartments, a padded
+        laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
+        travel, or everyday use.
+      name: Leather Backpack
+      price: 43.99
+      product_id: LTH1098
+      product_type: Backpack
+      seasons:
+        - All seasons
+      stock: 7
   unresolved_mentions: []
