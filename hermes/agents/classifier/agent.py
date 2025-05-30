@@ -7,13 +7,14 @@ from typing import Literal
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
 
+from ...utils.response import create_node_response
+
 from ...model.email import EmailAnalysis
 from .models import ClassifierInput, ClassifierOutput
 
 from ...config import HermesConfig
 from ...model.enums import Agents
 from ...workflow.types import WorkflowNodeOutput
-from ...utils.response import create_node_response
 from hermes.utils.llm_client import get_llm_client
 
 from .prompts import CLASSIFIER_PROMPT
@@ -61,8 +62,6 @@ async def run_classifier(
         # Set the email_id in the analysis, as it's not part of the LLM's direct output
         email_analysis_result.email_id = state.email.email_id
 
-        print(f"  Analysis for {state.email.email_id} complete.")
-
         return create_node_response(
             Agents.CLASSIFIER,
             ClassifierOutput(
@@ -71,7 +70,6 @@ async def run_classifier(
         )
 
     except Exception as e:
-        raise e
-        # Return errors in the format expected by LangGraph
-        # print(f"Outer error in analyze_email for {state.email.email_id}: {e}")
-        # return create_node_response(Agents.CLASSIFIER, e)
+        raise RuntimeError(
+            f"Classifier: Error during analysis for email {state.email.email_id}"
+        ) from e

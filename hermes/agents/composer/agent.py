@@ -102,5 +102,7 @@ async def run_composer(
         )
         # This will catch OutputParserException if retries fail,
         # ToolCallError if tools fail, or any other unexpected error.
-        print(f"Composer: Error during composition for email {error_email_id}: {e}")
-        return create_node_response(Agents.COMPOSER, e)
+        # print(f"Composer: Error during composition for email {error_email_id}: {e}") # Keep or remove print as preferred
+        raise RuntimeError(
+            f"Composer: Error during composition for email {error_email_id}"
+        ) from e  # MODIFIED

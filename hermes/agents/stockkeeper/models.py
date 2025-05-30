@@ -5,12 +5,14 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from hermes.agents.classifier import ClassifierOutput
-from hermes.model.email import ProductMention
+from hermes.model.email import CustomerEmail, ProductMention
 from hermes.model.product import Product
 
 
 class StockkeeperInput(BaseModel):
     """Input model for the product resolver function."""
+
+    email: CustomerEmail = Field(description="Email object containing the email_id")
 
     classifier: ClassifierOutput = Field(
         description="Complete EmailAnalysisResult from the analyzer"

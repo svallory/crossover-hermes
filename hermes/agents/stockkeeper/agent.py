@@ -168,4 +168,6 @@ async def run_stockkeeper(
         return create_node_response(Agents.STOCKKEEPER, output)
 
     except Exception as e:
-        return create_node_response(Agents.STOCKKEEPER, e)
+        raise RuntimeError(
+            f"Stockkeeper: Error during processing for email {state.email.email_id}"
+        ) from e

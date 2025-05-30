@@ -21,6 +21,7 @@ from hermes.tools.order_tools import (
 from hermes.tools.promotion_tools import apply_promotion
 from hermes.utils.response import create_node_response
 from hermes.utils.llm_client import get_llm_client
+from hermes.utils.tool_error_handler import ToolCallRetryHandler, DEFAULT_RETRY_TEMPLATE
 from hermes.workflow.types import WorkflowNodeOutput
 from hermes.model.enums import Agents
 from .prompts import FULFILLER_PROMPT
@@ -59,9 +60,13 @@ async def run_fulfiller(
         # Create the chain for order processing
         chain = FULFILLER_PROMPT | llm
 
+        # Use the retry handler
+        retry_handler = ToolCallRetryHandler(max_retries=2, backoff_factor=0.0)
+
         # Process the order using the LLM
-        llm_response = await chain.ainvoke(
-            {
+        llm_response = await retry_handler.retry_with_tool_calling(
+            chain=chain,
+            input_data={
                 "email_analysis": analysis_dict,
                 "resolved_products": [
                     product.model_dump()
@@ -71,7 +76,8 @@ async def run_fulfiller(
                     mention.model_dump()
                     for mention in stockkeeper_output.unresolved_mentions
                 ],
-            }
+            },
+            retry_prompt_template=DEFAULT_RETRY_TEMPLATE,
         )
 
         order_response = Order.model_validate(llm_response)
@@ -143,4 +149,6 @@ async def run_fulfiller(
         return create_node_response(Agents.FULFILLER, output)
 
     except Exception as e:
-        return create_node_response(Agents.FULFILLER, e)
+        raise RuntimeError(
+            f"Fulfiller: Error during processing for email {state.email.email_id}"
+        ) from e

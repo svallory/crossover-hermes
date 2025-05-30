@@ -93,7 +93,7 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
         )
 
     # Create StockkeeperInput from classifier
-    stockkeeper_input = StockkeeperInput(classifier=classifier)
+    stockkeeper_input = StockkeeperInput(email=state.email, classifier=classifier)
 
     # Call resolve_product_mentions with the StockkeeperInput
     return await run_stockkeeper(state=stockkeeper_input, runnable_config=config)
