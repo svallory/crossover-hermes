@@ -1,97 +1,120 @@
 advisor:
   inquiry_answers:
-    answered_questions: []
+    answered_questions:
+    - answer: The CBT8901 Chelsea Boots are suitable for Fall and Winter.
+      answer_type: factual
+      confidence: 1.0
+      question: Are the CBT8901 Chelsea Boots suitable for the colder months?
+      reference_product_ids:
+      - CBT8901
+    - answer: The CBT8901 Chelsea Boots is currently in stock with 2 units available.
+      answer_type: factual
+      confidence: 1.0
+      question: Is the CBT8901 Chelsea Boots available for order?
+      reference_product_ids:
+      - CBT8901
     email_id: E006
-    primary_products: []
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      description: Elevate your casual looks with our Chelsea boots. These stylish
+        ankle boots feature a sleek leather construction, elastic side panels, and
+        a sturdy lug sole. An essential for completing modern, edgy outfits.
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: Chelsea Boots (ID: CBT8901, Type: boots, Category:
+        Men''s Shoes, Quantity: 1)'
+      name: Chelsea Boots
+      price: 65.0
+      product_id: CBT8901
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 2
     related_products: []
-    unanswered_questions:
-    - Unable to process inquiry due to system error.
+    unanswered_questions: []
     unsuccessful_references: []
 classifier:
   email_analysis:
     customer_name: Sam
     email_id: E006
-    language: English
+    language: en
     primary_intent: product inquiry
     segments:
-    - main_sentence: Hey there, I was thinking of ordering a pair of CBT8901 Chelsea
-        Boots, but I'll wait until Fall to actually place the order.
+    - main_sentence: I was thinking of ordering a pair of CBT8901 Chelsea Boots, but
+        I'll wait until Fall to actually place the order.
       product_mentions:
       - confidence: 1.0
         mention_text: CBT8901 Chelsea Boots
-        product_category: null
-        product_description: null
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        product_description: pair of CBT8901 Chelsea Boots
         product_id: CBT8901
         product_name: Chelsea Boots
-        product_type: Boots
+        product_type: boots
         quantity: 1
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
     - main_sentence: My name is Sam and I need some new boots for the colder months.
       product_mentions:
-      - confidence: 0.7
-        mention_text: some new boots
-        product_category: null
-        product_description: null
+      - confidence: 0.6
+        mention_text: new boots
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        product_description: new boots for the colder months
         product_id: null
         product_name: null
-        product_type: Boots
-        quantity: 1
+        product_type: boots
+        quantity: null
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - personal_statement
 composer:
   email_id: E006
-  language: English
-  response_body: 'Dear Sam,
-
-
-    Thank you for reaching out to Hermes! It''s great to hear you''re planning ahead
-    for the colder months and are interested in our Chelsea Boots.
-
-
-    Regarding your inquiry about the CBT8901 Chelsea Boots, I encountered a system
-    error and am currently unable to access detailed information about them. I sincerely
-    apologize for this inconvenience.
-
-
-    Please feel free to check back later, or visit our website, and hopefully, the
-    system will be fully operational soon so I can provide you with the details you
-    need.
-
-
-    We look forward to helping you find the perfect boots for the Fall season.
-
-
-    Best regards,
-
-    Hermes - Delivering divine fashion'
+  language: en
+  response_body: "Dear Sam,\n\nThank you for reaching out and sharing your plans for\
+    \ the upcoming colder months. We're delighted to hear that you're considering\
+    \ our CBT8901 Chelsea Boots.\n\nTo answer your question, the CBT8901 Chelsea Boots\
+    \ are an excellent choice for both Fall and Winter. Their sleek leather construction,\
+    \ elastic side panels, and sturdy lug sole not only elevate your style but also\
+    \ offer comfort and durability ideally suited for the season. Currently, we have\
+    \ 2 pairs available in stock, so when you're ready to place your order in the\
+    \ Fall, they should be available\u2014but please keep in mind that our popular\
+    \ items can sell quickly as the season approaches.\n\nIf you would like any advice\
+    \ on styling these boots or recommendations for complementary pieces to complete\
+    \ your look, feel free to let us know. We're here to help you step into the colder\
+    \ months in style.\n\nBest regards,\nHermes - Delivering divine fashion"
   response_points:
-  - content: Greet the customer by name and acknowledge their interest in Chelsea
-      Boots.
+  - content: Thank the customer by name and reference their interest in new boots
+      for the colder months.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Inform the customer about the system error preventing access to product
-      details.
-    content_type: problem_explanation
+  - content: Confirm that the CBT8901 Chelsea Boots are suitable for Fall and Winter.
+    content_type: product_info
     priority: 9
     related_to: CBT8901
-  - content: Apologize for the inconvenience caused by the system error.
-    content_type: apology
-    priority: 8
-    related_to: null
-  - content: Suggest checking back later or visiting the website for information.
-    content_type: suggested_action
+  - content: Inform the customer that 2 pairs of the Chelsea Boots are currently in
+      stock.
+    content_type: product_info
+    priority: 9
+    related_to: CBT8901
+  - content: Encourage the customer to reach out for styling advice or complementary
+      product recommendations.
+    content_type: advice_offer
     priority: 7
     related_to: null
-  - content: Closing remarks and signature.
+  - content: Warm closing with Hermes signature.
     content_type: closing
-    priority: 1
+    priority: 5
     related_to: null
-  subject: Regarding your inquiry about Chelsea Boots
-  tone: helpful and apologetic
+  subject: Your Inquiry About Chelsea Boots for the Colder Months
+  tone: professional and warm
 email:
   email_id: E006
   message: Hey there, I was thinking of ordering a pair of CBT8901 Chelsea Boots,
@@ -101,37 +124,17 @@ email:
 errors: {}
 fulfiller: null
 stockkeeper:
-  metadata:
-    candidate_log:
-    - candidate_ids:
-      - CBT8901
-      confidence_scores:
-      - 1.0
-      mention: product_id='CBT8901' product_name='Chelsea Boots' product_description=None
-        product_category=None product_type='Boots' quantity=1 confidence=1.0 mention_text='CBT8901
-        Chelsea Boots'
-      num_candidates: 1
-    candidates_resolved: 1
-    resolution_attempts: 2
-    resolution_time_ms: 768
-    total_mentions: 2
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 1 candidates;
+    Processing took 420ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Men's Shoes
     description: Elevate your casual looks with our Chelsea boots. These stylish ankle
       boots feature a sleek leather construction, elastic side panels, and a sturdy
       lug sole. An essential for completing modern, edgy outfits.
-    metadata:
-      original_mention:
-        product_category: null
-        product_description: null
-        product_id: CBT8901
-        product_name: Chelsea Boots
-        product_type: Boots
-        quantity: 1
-      requested_quantity: 1
-      resolution_confidence: 1.0
-      resolution_method: exact_id_match
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: Chelsea Boots (ID: CBT8901, Type: boots, Category:
+      Men''s Shoes, Quantity: 1)'
     name: Chelsea Boots
     price: 65.0
     product_id: CBT8901
@@ -140,16 +143,17 @@ stockkeeper:
     promotion_text: null
     seasons:
     - !!python/object/apply:hermes.model.enums.Season
-      - Autumn
+      - Fall
     - !!python/object/apply:hermes.model.enums.Season
       - Winter
     stock: 2
   unresolved_mentions:
-  - confidence: 0.7
-    mention_text: some new boots
-    product_category: null
-    product_description: null
+  - confidence: 0.6
+    mention_text: new boots
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Shoes
+    product_description: new boots for the colder months
     product_id: null
     product_name: null
-    product_type: Boots
-    quantity: 1
+    product_type: boots
+    quantity: null

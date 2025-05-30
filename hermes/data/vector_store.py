@@ -90,7 +90,7 @@ def metadata_to_product(metadata: Dict[str, Any]) -> Product:
         product_type=str(metadata.get("type", "")),
         price=float(metadata["price"]),
         seasons=seasons,
-        metadata=None,
+        metadata=None,  # Simple string format, None by default
     )
 
 

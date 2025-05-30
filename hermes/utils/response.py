@@ -1,5 +1,6 @@
-from typing import TypeVar
+from typing import TypeVar, cast, Any
 import traceback
+import json
 
 from ..workflow.types import WorkflowNodeOutput
 from hermes.model.enums import Agents
@@ -27,28 +28,44 @@ def create_node_response(
 
     """
     if isinstance(output_or_error, Exception):
-        # Error case
-        # Create and return the error structure
-        error_details = output_or_error.__dict__
+        # Error case - create natural language error details
+        error_details_parts = []
+
+        # Add traceback if available
         if (
             hasattr(output_or_error, "__traceback__")
             and output_or_error.__traceback__ is not None
         ):
-            error_details["traceback"] = "".join(
-                traceback.format_tb(output_or_error.__traceback__)
-            )
+            traceback_str = "".join(traceback.format_tb(output_or_error.__traceback__))
+            error_details_parts.append(f"Traceback: {traceback_str}")
 
-        return {
+        # Add any additional exception attributes
+        exception_dict = output_or_error.__dict__
+        if exception_dict:
+            try:
+                exception_info = json.dumps(exception_dict)
+                error_details_parts.append(f"Exception details: {exception_info}")
+            except (TypeError, ValueError):
+                # If serialization fails, store as string representation
+                error_details_parts.append(f"Exception details: {str(exception_dict)}")
+
+        # Combine all details into a natural language string
+        details_str = "; ".join(error_details_parts) if error_details_parts else None
+
+        # Create the error response using dict casting
+        error_dict: dict[str, Any] = {
             "errors": {
                 agent: Error(
                     message=str(output_or_error),
                     source=agent.value,
                     exception_type=output_or_error.__class__.__name__,
-                    details=error_details,
+                    details=details_str,
                 )
             }
         }
+        return cast(WorkflowNodeOutput[SpecificAgent, OutputType], error_dict)
     else:
         # Success case (assuming output_or_error is OutputType)
         # Return the success structure
-        return {agent: output_or_error}
+        success_dict: dict[SpecificAgent, OutputType] = {agent: output_or_error}
+        return cast(WorkflowNodeOutput[SpecificAgent, OutputType], success_dict)

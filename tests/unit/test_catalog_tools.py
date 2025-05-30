@@ -169,7 +169,7 @@ class TestCatalogTools:
             price=29.99,
             product_type="",
             seasons=[Season.SPRING],
-            metadata=None,
+            metadata={},
         )
 
         with patch("hermes.tools.catalog_tools.find_product_by_id", mock_tool):
@@ -635,7 +635,7 @@ class TestCatalogToolsWithTestData:
             price=45.0,
             product_type="",
             seasons=[Season.SPRING],
-            metadata=None,
+            metadata={},
         )
 
         with patch("hermes.tools.catalog_tools.find_product_by_id", mock_tool):

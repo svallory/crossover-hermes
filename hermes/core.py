@@ -126,7 +126,8 @@ async def process_emails(
                 exc_type=type(e),
                 exc_value=e,
                 traceback=e.__traceback__,
-                show_locals=False,
+                show_locals=True,
+                max_frames=1,
                 width=console.width,
             )
             # print(f"  Error processing email {email_id}: {e}")

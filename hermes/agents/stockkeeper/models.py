@@ -1,7 +1,5 @@
 """Pydantic models for the product resolver agent."""
 
-from typing import Any
-
 from pydantic import BaseModel, Field
 
 from hermes.agents.classifier import ClassifierOutput
@@ -32,9 +30,9 @@ class StockkeeperOutput(BaseModel):
         description="Product mentions that could not be resolved to catalog products",
     )
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Metadata about the resolution process",
+    metadata: str | None = Field(
+        default=None,
+        description="Metadata about the resolution process in natural language",
     )
 
     @property

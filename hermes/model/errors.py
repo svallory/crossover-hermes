@@ -1,7 +1,5 @@
 """Common error models used across the Hermes system."""
 
-from typing import Any
-
 from pydantic import BaseModel, Field
 
 
@@ -18,8 +16,9 @@ class Error(BaseModel):
     exception_type: str | None = Field(
         default=None, description="The type of the exception that occurred"
     )
-    details: dict[str, Any] | None = Field(
-        default=None, description="Additional error details and context information"
+    details: str | None = Field(
+        default=None,
+        description="Additional error details and context information in natural language",
     )
 
 

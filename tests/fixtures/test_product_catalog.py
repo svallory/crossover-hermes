@@ -179,7 +179,7 @@ def get_product_by_id(product_id: str) -> Product | None:
         product_type=str(row.get("type", "")),
         price=float(row["price"]),
         seasons=seasons,
-        metadata=None,
+        metadata={},
     )
 
 
@@ -224,7 +224,7 @@ def get_products_matching_description(
                 product_type=str(row.get("type", "")),
                 price=float(row["price"]),
                 seasons=seasons,
-                metadata=None,
+                metadata={},
             )
             matching_products.append(product)
 
@@ -267,7 +267,7 @@ def get_products_by_category(category: str, limit: int = 5) -> list[Product]:
             product_type=str(row.get("type", "")),
             price=float(row["price"]),
             seasons=seasons,
-            metadata=None,
+            metadata={},
         )
         products.append(product)
 

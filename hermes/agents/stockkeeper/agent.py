@@ -2,6 +2,7 @@
 
 import time
 from typing import Literal
+import re
 
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
@@ -14,6 +15,45 @@ from hermes.model.enums import Agents
 from hermes.workflow.types import WorkflowNodeOutput
 from hermes.utils.response import create_node_response
 from hermes.tools.catalog_tools import resolve_product_mention
+
+
+def extract_confidence_from_metadata(metadata_str: str | None) -> float:
+    """Extract resolution confidence from metadata string."""
+    if not metadata_str:
+        return 0.0
+
+    # Look for "Resolution confidence: XX%" pattern
+    match = re.search(r"Resolution confidence: (\d+)%", metadata_str)
+    if match:
+        return float(match.group(1)) / 100.0
+
+    return 0.0
+
+
+def create_stockkeeper_metadata_string(
+    total_mentions: int,
+    resolution_attempts: int,
+    resolution_time_ms: int,
+    candidates_resolved: int,
+    candidate_log: list,
+) -> str:
+    """Create a natural language metadata string for stockkeeper output."""
+    parts = []
+
+    parts.append(f"Processed {total_mentions} product mentions")
+    parts.append(f"Made {resolution_attempts} resolution attempts")
+    parts.append(f"Resolved {candidates_resolved} candidates")
+    parts.append(f"Processing took {resolution_time_ms}ms")
+
+    if candidate_log:
+        successful_resolutions = len(
+            [log for log in candidate_log if log["num_candidates"] > 0]
+        )
+        parts.append(
+            f"Successfully resolved {successful_resolutions} out of {len(candidate_log)} mentions"
+        )
+
+    return "; ".join(parts)
 
 
 @traceable(run_type="chain", name="Product Resolution Agent")
@@ -115,18 +155,19 @@ async def run_stockkeeper(
                 # during their LLM calls, eliminating the need for a separate disambiguation step
                 for candidate in candidates_result:
                     # Add mention context to help downstream agents
-                    if not candidate.metadata:
-                        candidate.metadata = {}
-                    candidate.metadata["original_mention"] = {
-                        "product_id": mention.product_id,
-                        "product_name": mention.product_name,
-                        "product_type": mention.product_type,
-                        "product_category": mention.product_category.value
-                        if mention.product_category
-                        else None,
-                        "product_description": mention.product_description,
-                        "quantity": mention.quantity,
-                    }
+                    # Append to existing metadata string
+                    mention_info = (
+                        f"Original mention: {mention.product_name or 'N/A'} "
+                        f"(ID: {mention.product_id or 'N/A'}, "
+                        f"Type: {mention.product_type or 'N/A'}, "
+                        f"Category: {mention.product_category.value if mention.product_category else 'N/A'}, "
+                        f"Quantity: {mention.quantity})"
+                    )
+
+                    if candidate.metadata:
+                        candidate.metadata = f"{candidate.metadata}; {mention_info}"
+                    else:
+                        candidate.metadata = mention_info
 
                 resolved_products.extend(candidates_result)
                 candidates_resolved += len(candidates_result)
@@ -138,9 +179,7 @@ async def run_stockkeeper(
                         "num_candidates": len(candidates_result),
                         "candidate_ids": [c.product_id for c in candidates_result],
                         "confidence_scores": [
-                            c.metadata.get("resolution_confidence", 0.0)
-                            if c.metadata
-                            else 0.0
+                            extract_confidence_from_metadata(c.metadata)
                             for c in candidates_result
                         ],
                     }
@@ -153,16 +192,18 @@ async def run_stockkeeper(
         resolution_time_ms = int((time.time() - start_time) * 1000)
 
         # Build output with metadata
+        metadata_str = create_stockkeeper_metadata_string(
+            total_mentions=total_mentions,
+            resolution_attempts=resolution_attempts,
+            resolution_time_ms=resolution_time_ms,
+            candidates_resolved=candidates_resolved,
+            candidate_log=candidate_log,
+        )
+
         output = StockkeeperOutput(
             resolved_products=resolved_products,
             unresolved_mentions=unresolved_mentions,
-            metadata={
-                "total_mentions": total_mentions,
-                "resolution_attempts": resolution_attempts,
-                "resolution_time_ms": resolution_time_ms,
-                "candidates_resolved": candidates_resolved,
-                "candidate_log": candidate_log,
-            },
+            metadata=metadata_str,
         )
 
         return create_node_response(Agents.STOCKKEEPER, output)

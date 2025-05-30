@@ -164,7 +164,7 @@ class TestComposerIntegration:
                     season_list.append(Season.SPRING)
                 elif season_name == "Summer":
                     season_list.append(Season.SUMMER)
-                elif season_name == "Fall" or season_name == "Autumn":
+                elif season_name == "Fall":
                     season_list.append(Season.FALL)
                 elif season_name == "Winter":
                     season_list.append(Season.WINTER)

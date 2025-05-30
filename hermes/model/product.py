@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,8 +19,9 @@ class Product(BaseModel):
     stock: int = Field(description="The number of items in stock")
     seasons: list[Season] = Field(description="The seasons the product is ideal for")
     price: float = Field(description="The price of the product")
-    metadata: dict[str, Any] | None = Field(
-        default=None, description="Additional metadata for the product"
+    metadata: str | None = Field(
+        default=None,
+        description="Additional product information in natural language (e.g., 'Made of leather, available in black and brown')",
     )
     promotion: Optional[PromotionSpec | None] = Field(
         default=None, description="Specification of the active promotion if any"

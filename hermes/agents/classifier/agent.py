@@ -70,6 +70,7 @@ async def run_classifier(
         )
 
     except Exception as e:
-        raise RuntimeError(
-            f"Classifier: Error during analysis for email {state.email.email_id}"
-        ) from e
+        e.add_note(
+            f"Error in Classifier for email {state.email.email_id} (type: {e.__module__}.{e.__class__.__name__})"
+        )
+        raise e
