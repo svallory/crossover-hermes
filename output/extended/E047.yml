@@ -1,0 +1,149 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E047
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - 'Could you give me pricing for: 1 quilted tote bag, 1 floral dress, and 2 beach
+      bags?'
+    - What would be my total cost?
+    unsuccessful_references:
+    - quilted tote bag
+    - floral dress
+    - beach bag
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E047
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: 'Good morning, could you give me pricing for: 1 quilted tote
+        bag, 1 floral dress, and 2 beach bags?'
+      product_mentions:
+      - confidence: 0.95
+        mention_text: quilted tote bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: quilted tote bag
+        product_id: null
+        product_name: null
+        product_type: tote bag
+        quantity: 1
+      - confidence: 0.95
+        mention_text: floral dress
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: floral dress
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      - confidence: 0.95
+        mention_text: beach bags
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: beach bag
+        product_id: null
+        product_name: null
+        product_type: beach bag
+        quantity: 2
+      related_sentences:
+      - What would be my total cost?
+      - Thanks!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E047
+  language: English
+  response_body: 'Good morning,
+
+
+    Thank you so much for reaching out to Hermes with your interest in our quilted
+    tote bag, floral dress, and beach bags. We truly appreciate your discerning taste
+    in selecting these beautiful pieces.
+
+
+    At the moment, I do not have the specific pricing details for the quilted tote
+    bag, floral dress, and beach bags you mentioned. To ensure we provide you with
+    the most accurate information and options, could you please share any additional
+    details about your preferences? For example, if there is a particular collection,
+    size, color, or material you are interested in, kindly let us know. This will
+    help us quickly locate the exact products and provide you with precise pricing
+    and total cost.
+
+
+    Once we have these details, I will promptly follow up with all the information
+    you need to complete your selection.
+
+
+    Thank you for considering Hermes. I look forward to assisting you further and
+    making your shopping experience exceptional.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Good morning and thank you for your inquiry.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Currently, we do not have specific pricing for the quilted tote bag,
+      floral dress, and beach bags mentioned, as additional details are needed.
+    content_type: answer
+    priority: 9
+    related_to: 'Could you give me pricing for: 1 quilted tote bag, 1 floral dress,
+      and 2 beach bags?'
+  - content: Asked the customer to provide more details such as collection, size,
+      color, or material for the products of interest.
+    content_type: request for information
+    priority: 8
+    related_to: quilted tote bag, floral dress, beach bag
+  - content: Expressed appreciation for the customer's interest and reaffirmed commitment
+      to exceptional service.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: Your Inquiry About Quilted Tote Bag, Floral Dress, and Beach Bags
+  tone: professional and warm
+email:
+  email_id: E047
+  message: 'Good morning, could you give me pricing for: 1 quilted tote bag, 1 floral
+    dress, and 2 beach bags? What would be my total cost? Thanks!'
+  subject: Multiple items pricing
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 3 product mentions; Made 3 resolution attempts; Resolved 0 candidates;
+    Processing took 1049ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.95
+    mention_text: quilted tote bag
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: quilted tote bag
+    product_id: null
+    product_name: null
+    product_type: tote bag
+    quantity: 1
+  - confidence: 0.95
+    mention_text: floral dress
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: floral dress
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1
+  - confidence: 0.95
+    mention_text: beach bags
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: beach bag
+    product_id: null
+    product_name: null
+    product_type: beach bag
+    quantity: 2

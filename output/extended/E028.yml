@@ -1,0 +1,138 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The Floral Maxi Dress features a vibrant floral pattern, is lightweight,
+        and is suitable for garden parties. It is available in stock (7 units) and
+        is priced at $56.00. It is ideal for the Spring season.
+      answer_type: factual
+      confidence: 0.95
+      question: Could you help me find a beautiful maxi dress with floral patterns
+        suitable for a garden party?
+      reference_product_ids:
+      - FLD9876
+    email_id: E028
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Embrace the blooming season with our floral maxi dress. This breezy,
+        lightweight dress features a vibrant floral pattern and a flattering silhouette
+        that flows gracefully with every step. Perfect for garden parties, beach vacations,
+        or romantic evenings. Act now and get 20% off!
+      metadata: 'Resolution confidence: 75%; Found through semantic search; Requested
+        quantity: 1; Search query: ''beautiful maxi dress with floral patterns, suitable
+        for a garden party dress''; Similarity score: 0.497; Original mention: N/A
+        (ID: N/A, Type: dress, Category: Women''s Clothing, Quantity: 1)'
+      name: Floral Maxi Dress
+      price: 56.0
+      product_id: FLD9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      stock: 7
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Emma
+    email_id: E028
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Hi, I need a dress for a garden party next weekend. I love floral
+        patterns and I remember seeing a beautiful maxi dress on your site. Could
+        you help me find it?
+      product_mentions:
+      - confidence: 0.8
+        mention_text: a beautiful maxi dress
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: beautiful maxi dress with floral patterns, suitable for
+          a garden party
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - Hi, I need a dress for a garden party next weekend.
+      - I love floral patterns and I remember seeing a beautiful maxi dress on your
+        site.
+      - Could you help me find it?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E028
+  language: English
+  response_body: "Dear Emma,\n\nThank you for reaching out to us! It\u2019s wonderful\
+    \ to hear that you\u2019re preparing for a garden party next weekend, and we\u2019\
+    re delighted to help you find the perfect dress for the occasion.\n\nBased on\
+    \ your love for floral patterns, we highly recommend our Floral Maxi Dress. This\
+    \ breezy, lightweight dress features a vibrant floral print and a flattering silhouette\
+    \ that flows gracefully with every step\u2014making it an ideal choice for garden\
+    \ parties. We currently have it in stock, and it is available for $56.00. The\
+    \ dress is especially perfect for the Spring season and is sure to make you feel\
+    \ both elegant and comfortable outdoors.\n\nIf you\u2019d like to reserve one\
+    \ or have any questions about sizing or styling, just let us know\u2014we would\
+    \ be happy to assist further!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thanking Emma for reaching out and referencing her upcoming garden party.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: 'Recommended the Floral Maxi Dress: vibrant floral pattern, lightweight,
+      flattering silhouette, ideal for garden parties, $56.00, in stock.'
+    content_type: product_info
+    priority: 9
+    related_to: FLD9876
+  - content: Confirmed the dress is suitable for the Spring season and the event she
+      mentioned.
+    content_type: answer
+    priority: 8
+    related_to: FLD9876
+  - content: Invited Emma to reserve the dress or ask for more assistance with sizing
+      or styling.
+    content_type: offer_help
+    priority: 7
+    related_to: null
+  - content: Warm closing and brand signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Your Perfect Floral Maxi Dress for the Garden Party
+  tone: friendly and enthusiastic
+email:
+  email_id: E028
+  message: Hi, I need a dress for a garden party next weekend. I love floral patterns
+    and I remember seeing a beautiful maxi dress on your site. Could you help me find
+    it? Best regards, Emma
+  subject: Garden party dress
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 334ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Embrace the blooming season with our floral maxi dress. This breezy,
+      lightweight dress features a vibrant floral pattern and a flattering silhouette
+      that flows gracefully with every step. Perfect for garden parties, beach vacations,
+      or romantic evenings. Act now and get 20% off!
+    metadata: 'Resolution confidence: 75%; Found through semantic search; Requested
+      quantity: 1; Search query: ''beautiful maxi dress with floral patterns, suitable
+      for a garden party dress''; Similarity score: 0.497; Original mention: N/A (ID:
+      N/A, Type: dress, Category: Women''s Clothing, Quantity: 1)'
+    name: Floral Maxi Dress
+    price: 56.0
+    product_id: FLD9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 7
+  unresolved_mentions: []

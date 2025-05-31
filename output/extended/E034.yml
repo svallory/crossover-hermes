@@ -1,0 +1,227 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Alex
+    email_id: E034
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I want to order the plaid vest PLV8765 and I think there's a
+        matching shirt that goes with it? I'd like both pieces if possible.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: plaid vest PLV8765
+        product_category: null
+        product_description: plaid vest
+        product_id: PLV8765
+        product_name: null
+        product_type: vest
+        quantity: 1
+      - confidence: 0.7
+        mention_text: matching shirt that goes with it
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Shirts
+        product_description: matching shirt that goes with it
+        product_id: null
+        product_name: null
+        product_type: shirt
+        quantity: 1
+      related_sentences:
+      - Hi, I want to order the plaid vest PLV8765 and I think there's a matching
+        shirt that goes with it? I'd like both pieces if possible.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E034
+  language: English
+  response_body: "Dear Alex,\n\nThank you for your interest in the plaid vest (PLV8765)\
+    \ and your thoughtful inquiry about a matching shirt. We truly appreciate your\
+    \ enthusiasm for coordinating your look.\n\nUnfortunately, the Plaid Flannel Vest\
+    \ (PLV8765) is currently out of stock, and as a result, we are unable to fulfill\
+    \ your request for both the vest and its matching shirt at this time. We understand\
+    \ this may be disappointing, and we sincerely apologize for any inconvenience.\n\
+    \nHowever, we would love to help you find the perfect alternative. Based on your\
+    \ style preference, we recommend the following in-stock options:\n\n\u2022 Camo\
+    \ Print Tee \u2013 A bold, military-inspired tee crafted from soft, breathable\
+    \ cotton, perfect for casual outings and layering. ($43.00)\n\u2022 Linen Shorts\
+    \ \u2013 Lightweight, relaxed-fit shorts ideal for summer days and lounging. ($43.00)\n\
+    \u2022 Rugged Denim Jacket \u2013 A timeless denim jacket with a vintage-inspired\
+    \ wash, great for layering and versatile styling. ($41.00)\n\nIf any of these\
+    \ pieces catch your eye, please let us know, and we\u2019d be delighted to reserve\
+    \ them for you. If you\u2019re interested in other styles or specific looks, we\u2019\
+    re here to assist with personal recommendations as well.\n\nThank you again for\
+    \ choosing Hermes. We look forward to helping you find your next favorite piece.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Dear Alex,
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: The Plaid Flannel Vest (PLV8765) and its matching shirt are unfortunately
+      out of stock and cannot be fulfilled at this time.
+    content_type: order_update
+    priority: 10
+    related_to: PLV8765
+  - content: We understand this may be disappointing and sincerely apologize for any
+      inconvenience caused.
+    content_type: apology
+    priority: 9
+    related_to: PLV8765
+  - content: 'Recommended alternatives: Camo Print Tee ($43.00), Linen Shorts ($43.00),
+      Rugged Denim Jacket ($41.00), all in-stock and similar in style or price.'
+    content_type: alternative
+    priority: 8
+    related_to: PLV8765
+  - content: Acknowledged Alex's interest in a coordinated look and offer to help
+      with further recommendations if desired.
+    content_type: personalization
+    priority: 7
+    related_to: null
+  - content: Thanked the customer for choosing Hermes and expressed eagerness to assist
+      with future selections.
+    content_type: closing
+    priority: 5
+    related_to: null
+  - content: 'Best regards,
+
+      Hermes - Delivering divine fashion'
+    content_type: signature
+    priority: 1
+    related_to: null
+  subject: 'Update on Your Order Request: Plaid Flannel Vest and Matching Shirt'
+  tone: professional and warm
+email:
+  email_id: E034
+  message: Hi, I want to order the plaid vest PLV8765 and I think there's a matching
+    shirt that goes with it? I'd like both pieces if possible. Thanks, Alex
+  subject: Vest and shirt together
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E034
+    lines:
+    - alternatives:
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Men's Clothing
+          description: Embrace the military-inspired trend with our camo print tee.
+            This casual t-shirt features a bold camo print and is crafted from soft,
+            breathable cotton. Perfect for casual outings, weekend wear, or layering
+            under a jacket.
+          metadata: 'Resolution confidence: 97%; Found by price similarity'
+          name: Camo Print Tee
+          price: 43.0
+          product_id: CML7654
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          - !!python/object/apply:hermes.model.enums.Season
+            - Summer
+          - !!python/object/apply:hermes.model.enums.Season
+            - Fall
+          stock: 2
+        reason: Very similar price ($43.00 vs $42.00) and currently in stock
+        similarity_score: 0.9767441860465116
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Men's Clothing
+          description: Beat the heat in style with our linen shorts. Crafted from
+            lightweight, breathable linen, these shorts offer a relaxed fit and a
+            classic, timeless look. Perfect for lounging, beach days, or casual summer
+            outings. Limited stock - don't miss out!
+          metadata: 'Resolution confidence: 97%; Found by price similarity'
+          name: Linen Shorts
+          price: 43.0
+          product_id: LNS3210
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          - !!python/object/apply:hermes.model.enums.Season
+            - Summer
+          stock: 3
+        reason: Very similar price ($43.00 vs $42.00) and currently in stock
+        similarity_score: 0.9767441860465116
+      - product:
+          category: !!python/object/apply:hermes.model.enums.ProductCategory
+          - Men's Clothing
+          description: Embrace the classic with our rugged denim jacket. Crafted from
+            durable, high-quality denim, this jacket features a vintage-inspired wash
+            and distressed details. Layer it over a tee for a casual, cool vibe or
+            dress it up with a button-down.
+          metadata: 'Resolution confidence: 97%; Found by price similarity'
+          name: Rugged Denim Jacket
+          price: 41.0
+          product_id: RGD7654
+          product_type: ''
+          promotion: null
+          promotion_text: null
+          seasons:
+          - !!python/object/apply:hermes.model.enums.Season
+            - Spring
+          - !!python/object/apply:hermes.model.enums.Season
+            - Fall
+          stock: 5
+        reason: Very similar price ($41.00 vs $42.00) and currently in stock
+        similarity_score: 0.9761904761904762
+      base_price: 42.0
+      description: Layer up with our plaid flannel vest. This cozy vest features a
+        classic plaid pattern and is crafted from soft, warm flannel. Perfect for
+        adding a touch of ruggedness to your casual or outdoor looks. Buy one, get
+        a matching plaid shirt at 50% off!
+      product_id: PLV8765
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - out of stock
+      stock: 0
+      total_price: 42.0
+      unit_price: 42.0
+    message: Unfortunately, the Plaid Flannel Vest (PLV8765) is out of stock. We have
+      suggested similar vests that are currently available.
+    overall_status: out of stock
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 0.0
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 1 candidates;
+    Processing took 573ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Layer up with our plaid flannel vest. This cozy vest features a classic
+      plaid pattern and is crafted from soft, warm flannel. Perfect for adding a touch
+      of ruggedness to your casual or outdoor looks. Buy one, get a matching plaid
+      shirt at 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: N/A,
+      Quantity: 1)'
+    name: Plaid Flannel Vest
+    price: 42.0
+    product_id: PLV8765
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 0
+  unresolved_mentions:
+  - confidence: 0.7
+    mention_text: matching shirt that goes with it
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Shirts
+    product_description: matching shirt that goes with it
+    product_id: null
+    product_name: null
+    product_type: shirt
+    quantity: 1

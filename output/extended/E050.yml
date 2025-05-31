@@ -1,0 +1,133 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The plaid flannel vest PLV8765 is currently out of stock.
+      answer_type: factual
+      confidence: 1.0
+      question: What sizes do you have for the plaid flannel vest PLV8765?
+      reference_product_ids:
+      - PLV8765
+    email_id: E050
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Layer up with our plaid flannel vest. This cozy vest features a
+        classic plaid pattern and is crafted from soft, warm flannel. Perfect for
+        adding a touch of ruggedness to your casual or outdoor looks. Buy one, get
+        a matching plaid shirt at 50% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: N/A,
+        Quantity: 1)'
+      name: Plaid Flannel Vest
+      price: 42.0
+      product_id: PLV8765
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 0
+    related_products: []
+    unanswered_questions:
+    - Does the plaid flannel vest PLV8765 coordinate with anything else you sell?
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E050
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm interested in the plaid flannel vest PLV8765. What sizes
+        do you have and does it coordinate with anything else you sell?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: plaid flannel vest PLV8765
+        product_category: null
+        product_description: plaid flannel vest
+        product_id: PLV8765
+        product_name: null
+        product_type: vest
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E050
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out with your interest\
+    \ in our plaid flannel vest (PLV8765). We appreciate your keen eye for style!\n\
+    \nAt the moment, the plaid flannel vest PLV8765 is unfortunately out of stock.\
+    \ We understand this may be disappointing, as it is a popular choice for the fall\
+    \ and winter seasons, known for its cozy feel and classic plaid pattern.\n\nWhile\
+    \ the vest is unavailable, we do have coordinating items in our collection that\
+    \ can help you achieve a similar look, such as matching plaid shirts, which are\
+    \ designed to complement our outerwear. If you\u2019re interested, I\u2019d be\
+    \ happy to recommend some stylish alternatives or notify you as soon as the vest\
+    \ is back in stock.\n\nPlease let us know how you\u2019d like to proceed, or if\
+    \ you\u2019d like suggestions for other coordinating pieces.\n\nBest regards,\n\
+    Hermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their interest and inquiry about the plaid flannel
+      vest PLV8765.
+    content_type: greeting
+    priority: 9
+    related_to: PLV8765
+  - content: Inform the customer that the plaid flannel vest PLV8765 is currently
+      out of stock.
+    content_type: answer
+    priority: 10
+    related_to: PLV8765
+  - content: "Acknowledge the customer\u2019s interest in coordinating items, mention\
+      \ that matching plaid shirts and other complementary pieces are available."
+    content_type: answer
+    priority: 8
+    related_to: PLV8765
+  - content: Offer to recommend alternatives or provide notification when the vest
+      is back in stock.
+    content_type: alternative
+    priority: 7
+    related_to: PLV8765
+  - content: Invite further questions or requests for suggestions, and close warmly
+      with the Hermes signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: 'Regarding Your Inquiry: Plaid Flannel Vest PLV8765'
+  tone: professional and warm
+email:
+  email_id: E050
+  message: Hi, I'm interested in the plaid flannel vest PLV8765. What sizes do you
+    have and does it coordinate with anything else you sell?
+  subject: Flannel vest sizing
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 9ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Layer up with our plaid flannel vest. This cozy vest features a classic
+      plaid pattern and is crafted from soft, warm flannel. Perfect for adding a touch
+      of ruggedness to your casual or outdoor looks. Buy one, get a matching plaid
+      shirt at 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: N/A,
+      Quantity: 1)'
+    name: Plaid Flannel Vest
+    price: 42.0
+    product_id: PLV8765
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 0
+  unresolved_mentions: []

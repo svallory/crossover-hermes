@@ -51,10 +51,11 @@ The composed response (ComposerOutput) includes:
 
 - **email_id**: The ID of the email being responded to
 - **subject**: An appropriate subject line for the response email
-- **response_body**: The complete natural language response
-- **language**: Matches the customer's original language
+- **response_body**: The complete natural language response (written in the language detected by the classifier)
 - **tone**: Descriptive tone that captures the response style (e.g., "professional and warm", "friendly and enthusiastic")
 - **response_points**: Structured breakdown of response elements (used internally for LLM reasoning)
+
+The composer automatically writes the response in the language detected by the classifier agent, eliminating the need for a separate language field in the output.
 
 ## Model Simplification
 

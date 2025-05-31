@@ -1,0 +1,132 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The Plaid Button-Down (PLD9876) is sold as an individual shirt and does
+        not come with any additional items.
+      answer_type: factual
+      confidence: 1.0
+      question: Can I buy just the shirt or does it come with something else?
+      reference_product_ids:
+      - PLD9876
+    email_id: E057
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Add a touch of classic style to your wardrobe with our plaid button-down
+        shirt. Crafted from soft, lightweight cotton, this shirt features a timeless
+        plaid pattern and a relaxed, comfortable fit. A go-to choice for casual Fridays
+        at the office or weekend brunch.
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: PLD9876, Type: shirt, Category: Shirts,
+        Quantity: 1)'
+      name: Plaid Button-Down
+      price: 49.0
+      product_id: PLD9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 8
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E057
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Hello, I saw a plaid shirt mentioned somewhere - PLD9876 I think?
+        Can I buy just the shirt or does it come with something else?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: PLD9876
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Shirts
+        product_description: plaid shirt
+        product_id: PLD9876
+        product_name: null
+        product_type: shirt
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E057
+  language: English
+  response_body: "Hello,\n\nThank you for reaching out to us about the plaid shirt\
+    \ you mentioned\u2014PLD9876. I\u2019m pleased to confirm that our Plaid Button-Down\
+    \ is available for purchase as an individual item and does not come with any additional\
+    \ pieces. This shirt is crafted from soft, lightweight cotton and features a timeless\
+    \ plaid pattern, making it a stylish and comfortable addition to your wardrobe.\n\
+    \nIf you would like to proceed with your purchase or have any further questions\
+    \ about this shirt or coordinating pieces, please let us know. We\u2019re here\
+    \ to help you discover the perfect additions to your collection.\n\nBest regards,\n\
+    Hermes - Delivering divine fashion"
+  response_points:
+  - content: "Thank you for reaching out to us about the plaid shirt you mentioned\u2014\
+      PLD9876."
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: The Plaid Button-Down (PLD9876) is sold as an individual shirt and does
+      not come with any additional items.
+    content_type: product_info
+    priority: 9
+    related_to: PLD9876
+  - content: The shirt is crafted from soft, lightweight cotton and features a timeless
+      plaid pattern with a relaxed fit.
+    content_type: product_info
+    priority: 8
+    related_to: PLD9876
+  - content: If you would like to proceed with your purchase or have any further questions
+      about this shirt or coordinating pieces, please let us know.
+    content_type: answer
+    priority: 7
+    related_to: null
+  - content: 'Best regards,
+
+      Hermes - Delivering divine fashion'
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Your Inquiry About the Plaid Button-Down Shirt (PLD9876)
+  tone: professional and warm
+email:
+  email_id: E057
+  message: Hello, I saw a plaid shirt mentioned somewhere - PLD9876 I think? Can I
+    buy just the shirt or does it come with something else?
+  subject: Plaid shirt standalone
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 10ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Add a touch of classic style to your wardrobe with our plaid button-down
+      shirt. Crafted from soft, lightweight cotton, this shirt features a timeless
+      plaid pattern and a relaxed, comfortable fit. A go-to choice for casual Fridays
+      at the office or weekend brunch.
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: PLD9876, Type: shirt, Category: Shirts,
+      Quantity: 1)'
+    name: Plaid Button-Down
+    price: 49.0
+    product_id: PLD9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 8
+  unresolved_mentions: []

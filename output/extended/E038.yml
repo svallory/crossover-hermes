@@ -1,0 +1,193 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The price for the Bomber Jacket (BMX5432) is $62.99.
+      answer_type: factual
+      confidence: 1.0
+      question: What's the price for just the jacket?
+      reference_product_ids:
+      - BMX5432
+    email_id: E038
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+        lightweight material, this jacket features a classic bomber silhouette and
+        a trendy, cropped length. Perfect for layering or making a statement on its
+        own. Buy now and get a free matching beanie!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: BMX5432, Type: bomber jacket, Category:
+        Women''s Clothing, Quantity: 1)'
+      name: Bomber Jacket
+      price: 62.99
+      product_id: BMX5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 6
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E038
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I'd like to purchase the women's bomber jacket BMX5432.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: women's bomber jacket BMX5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: women's bomber jacket
+        product_id: BMX5432
+        product_name: null
+        product_type: bomber jacket
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: What's the price for just the jacket?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: the jacket
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: women's bomber jacket
+        product_id: BMX5432
+        product_name: null
+        product_type: bomber jacket
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E038
+  language: English
+  response_body: "Dear Customer,\n\nThank you for your order and your interest in\
+    \ our women's bomber jacket (BMX5432).\n\nWe are delighted to confirm that your\
+    \ order for 1 Bomber Jacket has been successfully placed. The jacket is crafted\
+    \ from a soft, lightweight material, offering a classic bomber silhouette with\
+    \ a trendy, cropped length\u2014perfect for layering or making a statement. As\
+    \ a special bonus, your purchase includes a free matching beanie.\n\nThe price\
+    \ for the Bomber Jacket is $62.99, and your total order amount is $62.99. We currently\
+    \ have your selected item in stock and will begin processing your order immediately.\n\
+    \nIf you have any further questions or would like assistance with styling or additional\
+    \ products, please let us know. We are here to ensure your shopping experience\
+    \ is exceptional.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their order and interest in the women's bomber
+      jacket.
+    content_type: greeting
+    priority: 10
+    related_to: BMX5432
+  - content: 'Confirm successful order placement: 1 Bomber Jacket (BMX5432), $62.99
+      total price, item is in stock.'
+    content_type: order_confirmation
+    priority: 10
+    related_to: BMX5432
+  - content: 'Describe the Bomber Jacket: soft, lightweight material, classic bomber
+      silhouette, trendy cropped length, perfect for layering or making a statement.
+      Includes a free matching beanie.'
+    content_type: product_info
+    priority: 8
+    related_to: BMX5432
+  - content: 'Answer to price inquiry: The price for the Bomber Jacket is $62.99.'
+    content_type: answer
+    priority: 9
+    related_to: BMX5432
+  - content: Invite the customer to reach out for further assistance or styling advice.
+    content_type: help_offer
+    priority: 6
+    related_to: null
+  - content: Warm closing with signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Order Confirmation for the Women's Bomber Jacket (BMX5432)
+  tone: professional and warm
+email:
+  email_id: E038
+  message: Hello, I'd like to purchase the women's bomber jacket BMX5432. What's the
+    price for just the jacket?
+  subject: Just the bomber jacket
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E038
+    lines:
+    - alternatives: []
+      base_price: 62.99
+      description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+        lightweight material, this jacket features a classic bomber silhouette and
+        a trendy, cropped length. Perfect for layering or making a statement on its
+        own. Buy now and get a free matching beanie!
+      product_id: BMX5432
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 5
+      total_price: 62.99
+      unit_price: 62.99
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 62.99
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 2 candidates;
+    Processing took 3ms; Successfully resolved 2 out of 2 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+      lightweight material, this jacket features a classic bomber silhouette and a
+      trendy, cropped length. Perfect for layering or making a statement on its own.
+      Buy now and get a free matching beanie!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: BMX5432, Type: bomber jacket, Category:
+      Women''s Clothing, Quantity: 1)'
+    name: Bomber Jacket
+    price: 62.99
+    product_id: BMX5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 6
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+      lightweight material, this jacket features a classic bomber silhouette and a
+      trendy, cropped length. Perfect for layering or making a statement on its own.
+      Buy now and get a free matching beanie!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: BMX5432, Type: bomber jacket, Category:
+      Women''s Clothing, Quantity: 1)'
+    name: Bomber Jacket
+    price: 62.99
+    product_id: BMX5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 6
+  unresolved_mentions: []

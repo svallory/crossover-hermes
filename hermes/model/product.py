@@ -21,7 +21,7 @@ class Product(BaseModel):
     price: float = Field(description="The price of the product")
     metadata: str | None = Field(
         default=None,
-        description="Additional product information in natural language (e.g., 'Made of leather, available in black and brown')",
+        description="Additional product information in natural language (e.g., resolution method, confidence, etc.)",
     )
     promotion: Optional[PromotionSpec | None] = Field(
         default=None, description="Specification of the active promotion if any"

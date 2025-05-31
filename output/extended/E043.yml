@@ -1,0 +1,106 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E043
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Hi, I want to order those beach bags I saw.
+      product_mentions:
+      - confidence: 0.7
+        mention_text: beach bags
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: beach bags, code might be CBG9867 or CBG9876
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 2
+      related_sentences:
+      - I think the code is CBG9867? Or maybe it was CBG9876?
+      - Anyway, I want 2 of them.
+      - Thanks!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E043
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to us and for your interest in our beach bags. We noticed
+    that you mentioned the product codes CBG9867 or CBG9876 in your request. Unfortunately,
+    we were unable to identify any valid products matching these codes in our system.
+
+
+    To ensure we assist you accurately and promptly, could you kindly double-check
+    the product code or provide us with any additional details about the beach bags
+    you are interested in? For example, if you recall the collection name, color,
+    or any distinct feature, that information would be very helpful.
+
+
+    We are eager to help you find the perfect beach bags and process your order as
+    soon as we receive the correct details.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Thank the customer for their interest and reaching out.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that the product codes provided (CBG9867 or CBG9876)
+      could not be identified in our system.
+    content_type: order_issue
+    priority: 9
+    related_to: null
+  - content: Request the customer to double-check the product code or provide more
+      details (such as collection, color, or features) to assist further.
+    content_type: clarification_request
+    priority: 8
+    related_to: null
+  - content: Express eagerness to help find the perfect beach bags and fulfill the
+      order as soon as details are clarified.
+    content_type: commitment
+    priority: 7
+    related_to: null
+  - content: Close with a warm, professional signature from Hermes.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Assistance Needed with Your Beach Bag Order
+  tone: professional and warm
+email:
+  email_id: E043
+  message: Hi, I want to order those beach bags I saw. I think the code is CBG9867?
+    Or maybe it was CBG9876? Anyway, I want 2 of them. Thanks!
+  subject: Beach bag confusion
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E043
+    lines: []
+    message: We could not identify any valid products matching your request for beach
+      bags (codes CBG9867 or CBG9876). Please double-check the product code or provide
+      more details so we can assist you further.
+    overall_status: no_valid_products
+    stock_updated: false
+    total_discount: 0.0
+    total_price: 0.0
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 925ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.7
+    mention_text: beach bags
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: beach bags, code might be CBG9867 or CBG9876
+    product_id: null
+    product_name: null
+    product_type: bag
+    quantity: 2

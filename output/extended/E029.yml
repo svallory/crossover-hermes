@@ -1,0 +1,169 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The Bomber Jacket (BMX5432) comes with a free matching beanie included.
+      answer_type: factual
+      confidence: 1.0
+      question: What comes with the bomber jacket for women (BMX5432)? Are there extras
+        included?
+      reference_product_ids:
+      - BMX5432
+    email_id: E029
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+        lightweight material, this jacket features a classic bomber silhouette and
+        a trendy, cropped length. Perfect for layering or making a statement on its
+        own. Buy now and get a free matching beanie!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: BMX5432, Type: jacket, Category: Women''s
+        Clothing, Quantity: 1)'
+      name: Bomber Jacket
+      price: 62.99
+      product_id: BMX5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 6
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Lisa
+    email_id: E029
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm interested in that bomber jacket for women - BMX5432 I think?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: bomber jacket for women - BMX5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: bomber jacket for women
+        product_id: BMX5432
+        product_name: null
+        product_type: jacket
+        quantity: 1
+      related_sentences:
+      - Good afternoon,
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: What comes with it? A friend mentioned something about extras
+        included?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: bomber jacket for women - BMX5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: bomber jacket for women
+        product_id: BMX5432
+        product_name: null
+        product_type: jacket
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E029
+  language: English
+  response_body: "Good afternoon, Lisa,\n\nThank you for reaching out and expressing\
+    \ your interest in our bomber jacket (BMX5432) for women. We're delighted to see\
+    \ your enthusiasm for this stylish piece!\n\nOur Bomber Jacket is crafted from\
+    \ soft, lightweight material, showcasing a classic bomber silhouette in a trendy,\
+    \ cropped length. It's perfect for layering or making a bold fashion statement\
+    \ on its own\u2014ideal for both spring and fall.\n\nTo answer your specific question:\
+    \ yes, when you purchase the Bomber Jacket (BMX5432), you will receive a free\
+    \ matching beanie as an extra. This special inclusion adds both style and value,\
+    \ making the ensemble truly unique.\n\nIf you have any more questions or would\
+    \ like assistance with your order, feel free to reply to this email. We're here\
+    \ to help you find the perfect look.\n\nBest regards,\nHermes - Delivering divine\
+    \ fashion"
+  response_points:
+  - content: Good afternoon, Lisa, and thank you for your interest in our bomber jacket.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Provided a detailed description of the Bomber Jacket (BMX5432), highlighting
+      its material, silhouette, and versatility.
+    content_type: product_info
+    priority: 9
+    related_to: BMX5432
+  - content: Confirmed that the Bomber Jacket (BMX5432) comes with a free matching
+      beanie included.
+    content_type: answer
+    priority: 10
+    related_to: BMX5432
+  - content: Invited Lisa to ask further questions or request assistance with her
+      order.
+    content_type: offer_help
+    priority: 8
+    related_to: null
+  - content: Warm closing and signature.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: Details About the Bomber Jacket (BMX5432) and Its Extras
+  tone: professional and warm
+email:
+  email_id: E029
+  message: Good afternoon, I'm interested in that bomber jacket for women - BMX5432
+    I think? What comes with it? A friend mentioned something about extras included?
+    Thank you, Lisa
+  subject: Women's jacket inquiry
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 2 candidates;
+    Processing took 4ms; Successfully resolved 2 out of 2 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+      lightweight material, this jacket features a classic bomber silhouette and a
+      trendy, cropped length. Perfect for layering or making a statement on its own.
+      Buy now and get a free matching beanie!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: BMX5432, Type: jacket, Category: Women''s
+      Clothing, Quantity: 1)'
+    name: Bomber Jacket
+    price: 62.99
+    product_id: BMX5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 6
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+      lightweight material, this jacket features a classic bomber silhouette and a
+      trendy, cropped length. Perfect for layering or making a statement on its own.
+      Buy now and get a free matching beanie!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: BMX5432, Type: jacket, Category: Women''s
+      Clothing, Quantity: 1)'
+    name: Bomber Jacket
+    price: 62.99
+    product_id: BMX5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 6
+  unresolved_mentions: []

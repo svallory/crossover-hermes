@@ -1,0 +1,100 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E025
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - Could you tell me what quilted tote bags for work are available?
+    - What are the prices of the quilted tote bags for work?
+    unsuccessful_references:
+    - quilted tote bag for work
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E025
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm looking for a quilted tote bag for work.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: quilted tote bag for work
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: quilted tote bag for work
+        product_id: null
+        product_name: null
+        product_type: tote bag
+        quantity: 1
+      related_sentences:
+      - A colleague mentioned you had some nice ones at a good price recently.
+      - Could you tell me what you have available?
+      - Thank you!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E025
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out to Hermes and for your\
+    \ interest in our quilted tote bags for work. We greatly appreciate your colleague\u2019\
+    s recommendation and are delighted to assist you in finding the perfect work bag.\n\
+    \nAt the moment, we do not have specific quilted tote bags for work listed in\
+    \ our available collection. However, we frequently update our selection and offer\
+    \ a variety of elegant and functional tote bags in luxurious materials that could\
+    \ suit your professional needs. If you have any particular preferences regarding\
+    \ color, size, or features, please let us know so we can make more personalized\
+    \ recommendations or notify you as soon as quilted styles become available.\n\n\
+    We are committed to helping you find the ideal bag for your workday. Should you\
+    \ wish to explore our current range or have any questions about styles and pricing,\
+    \ please don\u2019t hesitate to reply to this email.\n\nBest regards,\nHermes\
+    \ - Delivering divine fashion"
+  response_points:
+  - content: "Thank the customer for their interest and reference their colleague\u2019\
+      s recommendation."
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that specific quilted tote bags for work are not
+      currently listed, but Hermes offers a range of elegant tote bags suitable for
+      work.
+    content_type: answer
+    priority: 9
+    related_to: quilted tote bag for work
+  - content: Invite the customer to share preferences for more tailored recommendations
+      or to be notified when quilted options become available.
+    content_type: alternative
+    priority: 7
+    related_to: quilted tote bag for work
+  - content: Offer assistance for further inquiries about current styles or pricing.
+    content_type: help_offer
+    priority: 5
+    related_to: null
+  - content: Sign off warmly and include the Hermes signature.
+    content_type: closing
+    priority: 1
+    related_to: null
+  subject: Our Selection of Quilted Tote Bags for Work
+  tone: professional and warm
+email:
+  email_id: E025
+  message: Good morning, I'm looking for a quilted tote bag for work. A colleague
+    mentioned you had some nice ones at a good price recently. Could you tell me what
+    you have available? Thank you!
+  subject: Work bag inquiry
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 287ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: quilted tote bag for work
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: quilted tote bag for work
+    product_id: null
+    product_name: null
+    product_type: tote bag
+    quantity: 1

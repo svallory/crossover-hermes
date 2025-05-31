@@ -1,0 +1,153 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The Floral Maxi Dress is available. It features a vibrant floral pattern,
+        is lightweight, and is suitable for garden parties. There are 7 in stock for
+        the Spring season, priced at $56.00.
+      answer_type: factual
+      confidence: 0.95
+      question: What floral pattern maxi dresses are available?
+      reference_product_ids:
+      - FLD9876
+    email_id: E042
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Embrace the blooming season with our floral maxi dress. This breezy,
+        lightweight dress features a vibrant floral pattern and a flattering silhouette
+        that flows gracefully with every step. Perfect for garden parties, beach vacations,
+        or romantic evenings. Act now and get 20% off!
+      metadata: 'Resolution confidence: 75%; Found through semantic search; Search
+        query: ''floral pattern maxi dresses dress''; Similarity score: 0.490; Original
+        mention: N/A (ID: N/A, Type: dress, Category: Women''s Clothing, Quantity:
+        None)'
+      name: Floral Maxi Dress
+      price: 56.0
+      product_id: FLD9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      stock: 7
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E042
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I need a dress for a garden party next month.
+      product_mentions:
+      - confidence: 0.8
+        mention_text: a dress for a garden party
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: a dress for a garden party next month
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: I love floral patterns - what do you have in maxi dresses?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: floral pattern maxi dresses
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: floral pattern maxi dresses
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: null
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E042
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out to us about finding\
+    \ the perfect dress for your upcoming garden party. We\u2019re delighted to help\
+    \ you make this occasion special!\n\nBased on your love for floral patterns and\
+    \ interest in maxi dresses, we recommend our Floral Maxi Dress. This elegant piece\
+    \ features a vibrant floral design and a breezy, lightweight fabric. Its flattering\
+    \ silhouette flows gracefully with every step, making it an ideal choice for garden\
+    \ parties, spring gatherings, or romantic evenings. Currently, we have 7 dresses\
+    \ in stock for the Spring season, each priced at $56.00.\n\nIf you would like\
+    \ more details or wish to reserve your size, please let us know. We\u2019re happy\
+    \ to assist further or suggest complementary accessories to complete your look.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for reaching out and express enthusiasm about assisting
+      with their garden party dress search.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: 'Recommend the Floral Maxi Dress with details: vibrant floral pattern,
+      lightweight, flattering silhouette, ideal for garden parties. Mention stock
+      (7 available) and price ($56.00).'
+    content_type: product_info
+    priority: 10
+    related_to: FLD9876
+  - content: Directly address the customer's love for floral patterns and maxi dresses,
+      confirming availability of a suitable option.
+    content_type: answer
+    priority: 9
+    related_to: What floral pattern maxi dresses are available?
+  - content: Invite the customer to request more details, reserve a size, or ask for
+      accessory suggestions to complete their look.
+    content_type: help_offer
+    priority: 8
+    related_to: null
+  - content: Sign off with a warm closing and the Hermes branding.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: Your Perfect Floral Maxi Dress for the Garden Party
+  tone: professional and warm
+email:
+  email_id: E042
+  message: Hello! I need a dress for a garden party next month. I love floral patterns
+    - what do you have in maxi dresses?
+  subject: Floral dress for event
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 1 candidates;
+    Processing took 958ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Embrace the blooming season with our floral maxi dress. This breezy,
+      lightweight dress features a vibrant floral pattern and a flattering silhouette
+      that flows gracefully with every step. Perfect for garden parties, beach vacations,
+      or romantic evenings. Act now and get 20% off!
+    metadata: 'Resolution confidence: 75%; Found through semantic search; Search query:
+      ''floral pattern maxi dresses dress''; Similarity score: 0.490; Original mention:
+      N/A (ID: N/A, Type: dress, Category: Women''s Clothing, Quantity: None)'
+    name: Floral Maxi Dress
+    price: 56.0
+    product_id: FLD9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 7
+  unresolved_mentions:
+  - confidence: 0.8
+    mention_text: a dress for a garden party
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: a dress for a garden party next month
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1

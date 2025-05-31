@@ -62,8 +62,9 @@ check = "poe lint && poe load_env && poe test"
 lint = "ruff check ."
 format = "ruff format ."
 
-test = "pytest -x -n auto --dist loadscope --cov=hermes --cov-report=xml --cov-report=html tests/unit"
-integration-tests = "pytest -x -n auto --dist loadscope --cov=hermes --cov-report=xml --cov-report=html tests/integration"
+# coverage args:  --cov=hermes --cov-report=xml --cov-report=html
+test = "pytest -x -n auto --dist loadscope tests/unit"
+integration-tests = "pytest -x -n auto --dist loadscope tests/integration"
 evaluate = "python -m tools.evaluate.main --dataset-id b43d1e52-72ae-47c8-9a49-55198eb6dd87 --auto-upload"
 
 [dependency-groups]

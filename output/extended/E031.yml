@@ -1,0 +1,325 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Las opciones disponibles incluyen el Canvas Beach Bag, ideal para playa
+        y disponible en primavera y verano, y el Quilted Tote, adecuado para trabajo
+        y disponible para todas las estaciones.
+      answer_type: factual
+      confidence: 0.95
+      question: "\xBFQu\xE9 opciones tienen en bolsos de playa y bolsos para trabajo?"
+      reference_product_ids:
+      - CBG9876
+      - QTP5432
+    - answer: "El modelo CBG9876 es el Canvas Beach Bag, un bolso de playa de lona\
+        \ con estampado n\xE1utico y bolsillos interiores. El modelo QTP5432 es el\
+        \ Quilted Tote, un bolso tipo tote acolchado con varios bolsillos interiores\
+        \ y asas resistentes, adecuado para trabajo o uso diario."
+      answer_type: factual
+      confidence: 1.0
+      question: "\xBFCu\xE1les son los modelos CBG9876 y QTP5432?"
+      reference_product_ids:
+      - CBG9876
+      - QTP5432
+    - answer: 'El Canvas Beach Bag tiene un precio de 24.0 y el Quilted Tote tiene
+        un precio de 29.0. Ambos modelos cuentan con promociones: el Canvas Beach
+        Bag tiene una oferta de compra uno y el segundo al 50% y el Quilted Tote tiene
+        un 25% de descuento por tiempo limitado.'
+      answer_type: factual
+      confidence: 0.95
+      question: "\xBFTienen buenos precios en bolsos?"
+      reference_product_ids:
+      - CBG9876
+      - QTP5432
+    email_id: E031
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Pack your essentials in style with our canvas beach bag. Spacious
+        and durable, this bag features a nautical-inspired print and interior pockets
+        for organization. Perfectly sized for a day at the beach or a weekend getaway.
+        Buy one, get one 50% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: CBG9876, Type: N/A, Category: Bags,
+        Quantity: 1)'
+      name: Canvas Beach Bag
+      price: 24.0
+      product_id: CBG9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      stock: 1
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our quilted tote bag. This
+        spacious bag features a classic quilted design, multiple interior pockets,
+        and sturdy handles. A chic and practical choice for work, travel, or everyday
+        use. Limited-time sale - get 25% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: QTP5432, Type: N/A, Category: Bags,
+        Quantity: 1)'
+      name: Quilted Tote
+      price: 29.0
+      product_id: QTP5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 7
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Pack your essentials in style with our canvas beach bag. Spacious
+        and durable, this bag features a nautical-inspired print and interior pockets
+        for organization. Perfectly sized for a day at the beach or a weekend getaway.
+        Buy one, get one 50% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: CBG9876, Type: N/A, Category: Bags,
+        Quantity: 1)'
+      name: Canvas Beach Bag
+      price: 24.0
+      product_id: CBG9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      stock: 1
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our quilted tote bag. This
+        spacious bag features a classic quilted design, multiple interior pockets,
+        and sturdy handles. A chic and practical choice for work, travel, or everyday
+        use. Limited-time sale - get 25% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: QTP5432, Type: N/A, Category: Bags,
+        Quantity: 1)'
+      name: Quilted Tote
+      price: 29.0
+      product_id: QTP5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 7
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: "Mar\xEDa"
+    email_id: E031
+    language: Spanish
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: "Hola, estoy buscando bolsos y he o\xEDdo que tienen buenos precios."
+      product_mentions:
+      - confidence: 0.8
+        mention_text: bolsos
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: bolsos
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: "\xBFQu\xE9 opciones tienen en bolsos de playa y bolsos para\
+        \ trabajo?"
+      product_mentions:
+      - confidence: 0.9
+        mention_text: bolsos de playa
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: bolsos de playa
+        product_id: null
+        product_name: null
+        product_type: beach bag
+        quantity: 1
+      - confidence: 0.9
+        mention_text: bolsos para trabajo
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: bolsos para trabajo
+        product_id: null
+        product_name: null
+        product_type: work bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: Me interesan especialmente los modelos CBG9876 y QTP5432.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: CBG9876
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: null
+        product_id: CBG9876
+        product_name: null
+        product_type: null
+        quantity: 1
+      - confidence: 1.0
+        mention_text: QTP5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: null
+        product_id: QTP5432
+        product_name: null
+        product_type: null
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E031
+  language: es
+  response_body: "Hola Mar\xEDa,\n\nMuchas gracias por contactarnos y por tu inter\xE9\
+    s en nuestra colecci\xF3n de bolsos. Nos alegra saber que has escuchado buenos\
+    \ comentarios sobre nuestros precios y productos.\n\nEn respuesta a tu consulta,\
+    \ actualmente contamos con dos opciones destacadas que se adaptan perfectamente\
+    \ a lo que buscas:\n\n- **Canvas Beach Bag (CBG9876):** Un bolso de playa de lona,\
+    \ amplio, resistente y con estampado n\xE1utico. Incluye bolsillos interiores\
+    \ para una organizaci\xF3n f\xE1cil y es ideal para tus d\xEDas de playa o escapadas\
+    \ de fin de semana. \xA1Ahora con la promoci\xF3n de compra uno y el segundo al\
+    \ 50%!\n\n- **Quilted Tote (QTP5432):** Un bolso tipo tote acolchado, espacioso\
+    \ y elegante. Cuenta con varios bolsillos interiores y asas resistentes, siendo\
+    \ una opci\xF3n pr\xE1ctica y sofisticada para el trabajo, viajes o uso diario.\
+    \ Aprovecha el 25% de descuento por tiempo limitado.\n\nEl Canvas Beach Bag tiene\
+    \ un precio de 24,00\u202F\u20AC y el Quilted Tote est\xE1 disponible por 29,00\u202F\
+    \u20AC. Ambas piezas destacan por su calidad y funcionalidad, y est\xE1n pensadas\
+    \ para acompa\xF1arte tanto en temporadas de primavera/verano como durante todo\
+    \ el a\xF1o.\n\nSi deseas m\xE1s informaci\xF3n, ver fotos adicionales o realizar\
+    \ tu pedido, no dudes en dec\xEDrnoslo. Estamos aqu\xED para ayudarte a encontrar\
+    \ el bolso perfecto.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: "Saludo personalizado a Mar\xEDa y agradecimiento por su inter\xE9s en\
+      \ los bolsos y en los precios de Hermes."
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: "Descripci\xF3n del Canvas Beach Bag: bolso de playa de lona, espacioso,\
+      \ resistente, con estampado n\xE1utico y bolsillos interiores. Promoci\xF3n\
+      \ de compra uno y el segundo al 50%."
+    content_type: product_info
+    priority: 9
+    related_to: CBG9876
+  - content: "Descripci\xF3n del Quilted Tote: bolso tipo tote acolchado, espacioso,\
+      \ con varios bolsillos interiores y asas resistentes. 25% de descuento por tiempo\
+      \ limitado."
+    content_type: product_info
+    priority: 9
+    related_to: QTP5432
+  - content: "Canvas Beach Bag a 24,00\u202F\u20AC. Quilted Tote a 29,00\u202F\u20AC\
+      . Resaltando la calidad y funcionalidad de ambos modelos."
+    content_type: pricing
+    priority: 8
+    related_to: null
+  - content: "Respuesta clara a la consulta sobre opciones de bolsos de playa y para\
+      \ trabajo, se\xF1alando la disponibilidad de ambos modelos y sus promociones."
+    content_type: answer
+    priority: 8
+    related_to: null
+  - content: "Invitaci\xF3n a solicitar m\xE1s informaci\xF3n, fotos adicionales o\
+      \ realizar el pedido."
+    content_type: offer_help
+    priority: 7
+    related_to: null
+  - content: Firma amable y elegante de Hermes.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Opciones exclusivas de bolsos para playa y trabajo en Hermes
+  tone: profesional y cordial
+email:
+  email_id: E031
+  message: "Hola, estoy buscando bolsos y he o\xEDdo que tienen buenos precios. \xBF\
+    Qu\xE9 opciones tienen en bolsos de playa y bolsos para trabajo? Me interesan\
+    \ especialmente los modelos CBG9876 y QTP5432. Gracias, Mar\xEDa"
+  subject: Pregunta sobre bolsos
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 5 product mentions; Made 5 resolution attempts; Resolved 2 candidates;
+    Processing took 3746ms; Successfully resolved 2 out of 2 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    description: Pack your essentials in style with our canvas beach bag. Spacious
+      and durable, this bag features a nautical-inspired print and interior pockets
+      for organization. Perfectly sized for a day at the beach or a weekend getaway.
+      Buy one, get one 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: CBG9876, Type: N/A, Category: Bags,
+      Quantity: 1)'
+    name: Canvas Beach Bag
+    price: 24.0
+    product_id: CBG9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    stock: 1
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    description: Carry your essentials in style with our quilted tote bag. This spacious
+      bag features a classic quilted design, multiple interior pockets, and sturdy
+      handles. A chic and practical choice for work, travel, or everyday use. Limited-time
+      sale - get 25% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: QTP5432, Type: N/A, Category: Bags,
+      Quantity: 1)'
+    name: Quilted Tote
+    price: 29.0
+    product_id: QTP5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - All seasons
+    stock: 7
+  unresolved_mentions:
+  - confidence: 0.8
+    mention_text: bolsos
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: bolsos
+    product_id: null
+    product_name: null
+    product_type: bag
+    quantity: 1
+  - confidence: 0.9
+    mention_text: bolsos de playa
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: bolsos de playa
+    product_id: null
+    product_name: null
+    product_type: beach bag
+    quantity: 1
+  - confidence: 0.9
+    mention_text: bolsos para trabajo
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: bolsos para trabajo
+    product_id: null
+    product_name: null
+    product_type: work bag
+    quantity: 1

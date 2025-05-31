@@ -60,9 +60,6 @@ class ComposerOutput(BaseModel):
     email_id: str = Field(description="The ID of the email being responded to")
     subject: str = Field(description="Subject line for the response email")
     response_body: str = Field(description="Full text of the response")
-    language: str = Field(
-        description="Language code of the response (should match customer's language)"
-    )
     tone: str = Field(
         description="The tone used in the response (e.g., professional, friendly, enthusiastic)"
     )

@@ -88,7 +88,7 @@ async def debug_fulfiller():
         llm_api_key="test-key",
         llm_model_weak="gpt-3.5-turbo",
         llm_model_strong="gpt-4",
-        vector_store_path="./test_chroma_db",
+        chroma_db_path="./test_chroma_db",
     )
 
     # Run the fulfiller agent

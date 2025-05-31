@@ -1,0 +1,138 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The bomber jacket BMX5432 comes with a free matching beanie.
+      answer_type: factual
+      confidence: 1.0
+      question: What comes with the bomber jacket BMX5432?
+      reference_product_ids:
+      - BMX5432
+    - answer: The available product data does not specify color options for the bomber
+        jacket BMX5432.
+      answer_type: factual
+      confidence: 0.7
+      question: What color options are available for the bomber jacket BMX5432?
+      reference_product_ids:
+      - BMX5432
+    email_id: E044
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+        lightweight material, this jacket features a classic bomber silhouette and
+        a trendy, cropped length. Perfect for layering or making a statement on its
+        own. Buy now and get a free matching beanie!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: BMX5432, Type: jacket, Category: Men''s
+        Clothing, Quantity: 1)'
+      name: Bomber Jacket
+      price: 62.99
+      product_id: BMX5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 5
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E044
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: What comes with it and what color options do you have?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: bomber jacket BMX5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: bomber jacket
+        product_id: BMX5432
+        product_name: null
+        product_type: jacket
+        quantity: 1
+      related_sentences:
+      - Hi, I'm planning to buy the bomber jacket BMX5432.
+      - I want to make sure everything matches my style.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E044
+  language: English
+  response_body: "Hello,\n\nThank you for your interest in our bomber jacket BMX5432!\
+    \ We\u2019re delighted to help you find the perfect piece to match your style.\n\
+    \nTo answer your questions:\n- The bomber jacket BMX5432 comes with a complimentary\
+    \ matching beanie, so you\u2019ll receive both the jacket and the beanie with\
+    \ your purchase.\n- Regarding color options, we currently do not have specific\
+    \ details available in our product database for this jacket. If you\u2019re looking\
+    \ for a particular color or style, let us know what you have in mind and we\u2019\
+    ll be happy to assist further or check for you.\n\nIf you\u2019d like suggestions\
+    \ to complement your new bomber jacket or need more details, please don\u2019\
+    t hesitate to reach out. We\u2019re here to make sure your look is exactly what\
+    \ you envision.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their interest and greet them warmly.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform that the bomber jacket BMX5432 comes with a free matching beanie.
+    content_type: product_info
+    priority: 9
+    related_to: BMX5432
+  - content: Explain that color options for the bomber jacket BMX5432 are not specified
+      in the current product data.
+    content_type: product_info
+    priority: 8
+    related_to: BMX5432
+  - content: Invite the customer to specify their preferred color or style, and offer
+      further assistance with matching suggestions.
+    content_type: answer
+    priority: 7
+    related_to: BMX5432
+  - content: Offer further help and sign off with a warm closing and signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: "Details on the Bomber Jacket BMX5432 \u2013 What\u2019s Included & Color\
+    \ Options"
+  tone: professional and warm
+email:
+  email_id: E044
+  message: Hi, I'm planning to buy the bomber jacket BMX5432. What comes with it and
+    what color options do you have? I want to make sure everything matches my style.
+  subject: Bomber jacket colors
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 9ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Channel your inner rebel with our bomber jacket. Crafted from soft,
+      lightweight material, this jacket features a classic bomber silhouette and a
+      trendy, cropped length. Perfect for layering or making a statement on its own.
+      Buy now and get a free matching beanie!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: BMX5432, Type: jacket, Category: Men''s
+      Clothing, Quantity: 1)'
+    name: Bomber Jacket
+    price: 62.99
+    product_id: BMX5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 5
+  unresolved_mentions: []

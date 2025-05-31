@@ -24,9 +24,6 @@ from hermes.agents.advisor.agent import run_advisor
 from hermes.agents.classifier.agent import run_classifier
 
 # Import agent models
-from hermes.agents.classifier import (
-    ClassifierInput,
-)
 from hermes.agents.composer.agent import run_composer
 from hermes.agents.fulfiller.agent import run_fulfiller
 from hermes.agents.stockkeeper.agent import run_stockkeeper
@@ -34,7 +31,6 @@ from hermes.agents.stockkeeper.models import StockkeeperInput
 from hermes.workflow.states import OverallState, WorkflowInput, WorkflowOutput
 from hermes.config import HermesConfig
 from hermes.model import Nodes
-from hermes.agents.fulfiller.models import FulfillerInput
 
 
 def route_resolver_result(
@@ -54,18 +50,6 @@ def route_resolver_result(
             return Nodes.FULFILLER
 
     return END
-
-
-async def analyze_email_node(state: OverallState, config: RunnableConfig) -> dict:
-    # Extract email from OverallState
-    email = state.email
-
-    # Convert to ClassifierInput before passing to analyze_email
-    classifier_input = ClassifierInput(email=email)
-    result = await run_classifier(state=classifier_input, runnable_config=config)
-
-    # Return the result as-is - the email is already in the state
-    return result
 
 
 async def resolve_products_node(state: OverallState, config: RunnableConfig) -> dict:
@@ -99,44 +83,6 @@ async def resolve_products_node(state: OverallState, config: RunnableConfig) -> 
     return await run_stockkeeper(state=stockkeeper_input, runnable_config=config)
 
 
-async def process_order_node(state: OverallState, config: RunnableConfig) -> dict:
-    """Wrapper function for run_fulfiller that converts OverallState to FulfillerInput.
-
-    Args:
-        state: The workflow state containing classifier and stockkeeper outputs
-        config: Runnable configuration for the agent
-
-    Returns:
-        Result from run_fulfiller function in dictionary format
-
-    """
-    # Extract classifier and stockkeeper outputs from state
-    classifier = state.classifier
-    stockkeeper_output = state.stockkeeper
-
-    if classifier is None or stockkeeper_output is None:
-        # If classifier or stockkeeper_output is None, return an error
-        from hermes.model import Agents
-        from hermes.utils.response import create_node_response
-
-        error_message = (
-            "Email analyzer output is required for order processing"
-            if classifier is None
-            else "Stockkeeper output is required for order processing"
-        )
-        return create_node_response(Agents.FULFILLER, Exception(error_message))
-
-    # Create FulfillerInput from the state
-    fulfiller_input = FulfillerInput(
-        email=state.email,
-        classifier=classifier,
-        stockkeeper=stockkeeper_output,
-    )
-
-    # Call run_fulfiller with the FulfillerInput
-    return await run_fulfiller(state=fulfiller_input, runnable_config=config)
-
-
 # Build the graph
 graph_builder = StateGraph(
     input=WorkflowInput,
@@ -146,11 +92,11 @@ graph_builder = StateGraph(
 )
 
 # Add nodes with the agent functions directly, specifying that they expect runnable_config
-graph_builder.add_node(Nodes.CLASSIFIER, analyze_email_node)
-graph_builder.add_node(Nodes.STOCKKEEPER, resolve_products_node)
+graph_builder.add_node(Nodes.CLASSIFIER, run_classifier)
+graph_builder.add_node(Nodes.STOCKKEEPER, run_stockkeeper)
 graph_builder.add_node(
     Nodes.FULFILLER,
-    process_order_node,
+    run_fulfiller,
 )
 graph_builder.add_node(
     Nodes.ADVISOR,

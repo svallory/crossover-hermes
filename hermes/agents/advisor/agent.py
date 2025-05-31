@@ -30,7 +30,7 @@ from hermes.utils.logger import logger, get_agent_logger
 )
 async def run_advisor(
     state: AdvisorInput,
-    runnable_config: RunnableConfig | None = None,
+    config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.ADVISOR], AdvisorOutput]:
     """Run the advisor agent to analyze customer inquiries and provide factual responses.
 
@@ -39,7 +39,7 @@ async def run_advisor(
 
     Args:
         state: AdvisorInput containing classifier output and optional stockkeeper output
-        runnable_config: Optional configuration for the runnable
+        config: Optional configuration for the runnable
 
     Returns:
         WorkflowNodeOutput containing the advisor's factual response
@@ -69,7 +69,7 @@ async def run_advisor(
 
         # Get LLM instance
         llm = get_llm_client(
-            config=HermesConfig.from_runnable_config(runnable_config),
+            config=HermesConfig.from_runnable_config(config),
             schema=InquiryAnswers,
             tools=CatalogToolkit.get_tools(),
             model_strength="strong",
@@ -160,10 +160,9 @@ async def run_advisor(
         return create_node_response(
             Agents.ADVISOR, AdvisorOutput(inquiry_answers=inquiry_response)
         )
-    except Exception as e:  # ADDED except block
-        # Removed: # print(f"Advisor: Top-level error during processing: {e}")
+    except Exception as e:
         error_message = f"Error in {agent_name} for email {email_id}: {e}"
         logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
         raise RuntimeError(
             f"Advisor: Error during processing for email {email_id}"
-        ) from e  # MODIFIED to raise with context from e
+        ) from e

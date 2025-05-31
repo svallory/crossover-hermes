@@ -1,0 +1,102 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E036
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - Is there a special offer on knit style dresses?
+    - Can you help identify the knit style dress with a special offer mentioned by
+      the customer?
+    unsuccessful_references:
+    - knit style dress, special offer
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E036
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Hey, I was browsing around and I think I saw something about
+        a special offer on dresses?
+      product_mentions:
+      - confidence: 0.7
+        mention_text: special offer on dresses
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: knit style dress, special offer
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - It was a knit style I think?
+      - Can you help me figure out what I saw?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E036
+  language: English
+  response_body: "Hello,\n\nThank you for reaching out to us and for your interest\
+    \ in our dresses! We appreciate your keen eye for style and are delighted to assist\
+    \ you.\n\nAt the moment, we do not have a special offer on knit style dresses\
+    \ listed in our current collection. It\u2019s possible you may have seen an earlier\
+    \ promotion or a different product. However, we are always introducing new collections\
+    \ and exclusive offers, so we encourage you to visit our website or boutique regularly\
+    \ to stay updated. If you are looking for a particular knit style dress, please\
+    \ let us know any additional details you remember, and we will do our best to\
+    \ help you find it or suggest a similar piece from our latest arrivals.\n\nIf\
+    \ you have any other questions or would like personalized recommendations, we\
+    \ are here to help.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for reaching out and express appreciation for their
+      interest in our dresses.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that there is currently no special offer on knit
+      style dresses in our collection.
+    content_type: answer
+    priority: 10
+    related_to: Is there a special offer on knit style dresses?
+  - content: Acknowledge that we could not identify the specific knit style dress
+      with a special offer as described, but invite the customer to provide more details
+      for further assistance.
+    content_type: answer
+    priority: 9
+    related_to: Can you help identify the knit style dress with a special offer mentioned
+      by the customer?
+  - content: Encourage the customer to check the website or boutique for new collections
+      and future offers.
+    content_type: alternative
+    priority: 7
+    related_to: null
+  - content: Invite further questions, offer personalized recommendations, and close
+      with a warm signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Regarding Your Inquiry About Special Offers on Knit Style Dresses
+  tone: professional and warm
+email:
+  email_id: E036
+  message: Hey, I was browsing around and I think I saw something about a special
+    offer on dresses? It was a knit style I think? Can you help me figure out what
+    I saw?
+  subject: Saw a dress deal somewhere
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 689ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.7
+    mention_text: special offer on dresses
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: knit style dress, special offer
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1

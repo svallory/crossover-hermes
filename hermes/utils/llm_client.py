@@ -48,7 +48,7 @@ def _bind_tools_with_structured_output(
         model_supports_tool_choice = lambda model: (
             "gemini-1.5-pro" in model
             or "gemini-1.5-flash" in model
-            or "gemini-2" in model
+            or "gemini-2.5" in model
         )
 
         tool_choice = schema.__name__ if model_supports_tool_choice(llm.model) else None
@@ -142,7 +142,7 @@ def get_llm_client(
         llm = ChatOpenAI(
             model=model_name,  # Now guaranteed to be a string
             api_key=SecretStr(config.llm_api_key),
-            base_url=config.llm_base_url,  # base_url is specific to OpenAI in our config
+            base_url=config.llm_provider_url,
             temperature=temperature,
         )
 
@@ -155,6 +155,7 @@ def get_llm_client(
         llm = ChatGoogleGenerativeAI(
             model=model_name,  # Now guaranteed to be a string
             google_api_key=config.llm_api_key,
+            base_url=config.llm_provider_url,
             temperature=temperature,
         )
     else:

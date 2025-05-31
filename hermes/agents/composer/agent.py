@@ -36,14 +36,14 @@ ComposerToolkit: list[BaseTool] = [
 @traceable(run_type="chain", name="Composer agent Agent")  # type: ignore
 async def run_composer(
     state: ComposerInput,
-    runnable_config: RunnableConfig | None = None,
+    config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.COMPOSER], ComposerOutput]:
     """Composes a natural, personalized customer email response by combining information
     from the Classifier agent, Advisor agent, and Fulfiller agent agents.
 
     Args:
         state: The validated ComposerInput containing outputs from previous agents
-        runnable_config: Optional config dict with HermesConfig instance
+        config: Optional config dict with HermesConfig instance
 
     Returns:
         WorkflowNodeOutput containing the composed response or error
@@ -52,7 +52,7 @@ async def run_composer(
     agent_name = Agents.COMPOSER.value.capitalize()
     email_analysis = state.classifier.email_analysis
     email_id = state.email.email_id
-    hermes_config = HermesConfig.from_runnable_config(runnable_config)
+    hermes_config = HermesConfig.from_runnable_config(config)
 
     logger.info(
         get_agent_logger(
@@ -63,7 +63,7 @@ async def run_composer(
 
     prompt_input_dict = {"email_analysis": email_analysis.model_dump()}
     if state.advisor and state.advisor.inquiry_answers:
-        prompt_input_dict["inquiry_response"] = (
+        prompt_input_dict["inquiry_answers"] = (
             state.advisor.inquiry_answers.model_dump()
         )
     if state.fulfiller and state.fulfiller.order_result:
@@ -120,4 +120,4 @@ async def run_composer(
         logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
         raise RuntimeError(
             f"Composer: Error during composition for email {error_email_id}"
-        ) from e  # MODIFIED
+        ) from e

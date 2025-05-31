@@ -11,12 +11,8 @@ from hermes.data.load_data import load_products_df
 from hermes.model import ProductCategory, Season
 from hermes.model.product import Product
 from hermes.utils.logger import logger, get_agent_logger
+from hermes.config import HermesConfig
 
-# Vector store config
-CHROMA_DB_DIR = "./chroma_db"
-COLLECTION_NAME = "products_catalog"
-EMBEDDING_MODEL = "text-embedding-3-small"
-EMBEDDING_DIM = 1536
 
 # Global cache
 _vector_store: Optional[Chroma] = None
@@ -95,7 +91,7 @@ def metadata_to_product(metadata: Dict[str, Any]) -> Product:
     )
 
 
-def get_vector_store() -> Chroma:
+def get_vector_store(config: HermesConfig = HermesConfig()) -> Chroma:
     """Get or create the persistent Chroma vector store for the product catalog."""
     global _vector_store
     if _vector_store is not None:
@@ -104,12 +100,15 @@ def get_vector_store() -> Chroma:
     logger.info(get_agent_logger("Data", "Initializing vector store..."))
 
     # Ensure persistent directory exists
-    os.makedirs(CHROMA_DB_DIR, exist_ok=True)
+    os.makedirs(config.chroma_db_path, exist_ok=True)
 
-    # Create embeddings
-    embeddings = OpenAIEmbeddings(
-        model=EMBEDDING_MODEL,
-    )
+    # Create embeddings - let OpenAIEmbeddings pick up API key from environment
+    # Use default OpenAI API endpoint (no custom base_url)
+    embedding_kwargs = {
+        "model": config.embedding_model_name,
+    }
+
+    embeddings = OpenAIEmbeddings(**embedding_kwargs)
 
     # Load products
     products_df = load_products_df()
@@ -129,13 +128,13 @@ def get_vector_store() -> Chroma:
     _vector_store = Chroma.from_documents(
         documents=documents,
         embedding=embeddings,
-        collection_name=COLLECTION_NAME,
-        persist_directory=CHROMA_DB_DIR,
+        collection_name=config.chroma_collection_name,
+        persist_directory=config.chroma_db_path,
     )
     logger.info(
         get_agent_logger(
             "Data",
-            f"Vector store initialized. Collection '[yellow]{COLLECTION_NAME}[/yellow]' in '[cyan underline]{CHROMA_DB_DIR}[/cyan underline]'. Documents: [yellow]{_vector_store._collection.count()}[/yellow]",
+            f"Vector store initialized. Collection '[yellow]{config.chroma_collection_name}[/yellow]' in '[cyan underline]{config.chroma_db_path}[/cyan underline]'. Documents: [yellow]{_vector_store._collection.count()}[/yellow]",
         )
     )
     return _vector_store

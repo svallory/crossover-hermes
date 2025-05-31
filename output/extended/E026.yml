@@ -1,0 +1,138 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E026
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - Do you have any complete suits available?
+    - I heard you might have some kind of package deal?
+    unsuccessful_references:
+    - new suit for job interviews
+    - complete suits
+    - package deal
+classifier:
+  email_analysis:
+    customer_name: Michael
+    email_id: E026
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I need a new suit for job interviews ASAP.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: a new suit for job interviews
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: new suit for job interviews
+        product_id: null
+        product_name: null
+        product_type: suit
+        quantity: 1
+      related_sentences:
+      - I'm on a tight budget.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: Do you have any complete suits available?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: complete suits
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: complete suits, package deal
+        product_id: null
+        product_name: null
+        product_type: suit
+        quantity: 1
+      related_sentences:
+      - I heard you might have some kind of package deal?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E026
+  language: English
+  response_body: 'Dear Michael,
+
+
+    Thank you very much for reaching out to us and sharing your need for a new suit
+    for upcoming job interviews. We understand how important it is to feel confident
+    and look your best, especially when on a tight budget.
+
+
+    At this time, we regret to inform you that we do not have specific information
+    regarding complete suits or package deals available in our current collection.
+    However, we would be delighted to assist you in finding a stylish and appropriate
+    suit that aligns with your budget and professional needs.
+
+
+    If you could share your preferred size, color, or any particular style you are
+    interested in, our team will promptly recommend the best options we have in store.
+    We are also happy to notify you if any package deals or special offers become
+    available.
+
+
+    Please let us know how we can further support you in your search for the perfect
+    interview suit.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Addressed the customer by name and acknowledged his situation and budget.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Explained that there is no information on complete suits or package deals
+      currently available.
+    content_type: answer
+    priority: 10
+    related_to: Do you have any complete suits available?
+  - content: Expressed willingness to help find a suit suitable for job interviews
+      and budget.
+    content_type: answer
+    priority: 9
+    related_to: I need a new suit for job interviews ASAP.
+  - content: Offered to recommend suits based on the customer's preferences and to
+      notify if package deals become available.
+    content_type: alternative
+    priority: 8
+    related_to: I heard you might have some kind of package deal?
+  - content: Encouraged customer to provide more details for personalized recommendations
+      and signed off warmly.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: Your Inquiry About Suits and Package Deals at Hermes
+  tone: professional and warm
+email:
+  email_id: E026
+  message: Hello, I need a new suit for job interviews ASAP. My name is Michael and
+    I'm on a tight budget. Do you have any complete suits available? I heard you might
+    have some kind of package deal? Thanks!
+  subject: Need a suit urgently
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
+    Processing took 1286ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: a new suit for job interviews
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    product_description: new suit for job interviews
+    product_id: null
+    product_name: null
+    product_type: suit
+    quantity: 1
+  - confidence: 0.9
+    mention_text: complete suits
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    product_description: complete suits, package deal
+    product_id: null
+    product_name: null
+    product_type: suit
+    quantity: 1

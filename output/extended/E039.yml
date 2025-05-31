@@ -1,0 +1,137 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E039
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What suit options do you have?
+    - I'm looking for the best value for a complete outfit.
+    unsuccessful_references:
+    - professional suit
+    - suit options for a complete outfit
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E039
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm job hunting and need a professional suit.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: professional suit
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: professional suit
+        product_id: null
+        product_name: null
+        product_type: suit
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: What suit options do you have?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: suit options
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: suit options for a complete outfit
+        product_id: null
+        product_name: null
+        product_type: suit
+        quantity: 1
+      related_sentences:
+      - I'm looking for the best value for a complete outfit.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E039
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to Hermes regarding your search for a professional
+    suit. We understand that finding the perfect attire is essential, especially when
+    preparing for important opportunities like job interviews.
+
+
+    Currently, it appears we do not have specific suit options or complete outfit
+    packages available in our inventory database. However, our men''s collection is
+    renowned for its elegance, craftsmanship, and timeless style. We would be delighted
+    to assist you further in finding the best value and most suitable pieces for your
+    professional needs.
+
+
+    If you have preferences regarding color, fabric, or fit, please let us know so
+    we can provide tailored recommendations. Additionally, should you wish to complement
+    your suit with shirts, ties, or shoes, we are happy to suggest options to complete
+    your look.
+
+
+    We look forward to helping you create a confident and polished ensemble for your
+    job search.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Thank the customer for reaching out and acknowledge the importance of
+      their job hunt.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that there are currently no specific suit options
+      or complete outfits available in the inventory database.
+    content_type: product_info
+    priority: 9
+    related_to: What suit options do you have?
+  - content: Offer further personalized assistance and ask about preferences in color,
+      fabric, or fit to provide tailored recommendations.
+    content_type: answer
+    priority: 8
+    related_to: I'm looking for the best value for a complete outfit.
+  - content: Mention the availability of shirts, ties, or shoes to help complete the
+      professional look.
+    content_type: alternative
+    priority: 7
+    related_to: suit options for a complete outfit
+  - content: Express eagerness to assist further and wish the customer success in
+      their job search.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Discover Professional Suit Options for Your Job Hunt
+  tone: professional and warm
+email:
+  email_id: E039
+  message: Hi, I'm job hunting and need a professional suit. What suit options do
+    you have? I'm looking for the best value for a complete outfit.
+  subject: Professional suit needed
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
+    Processing took 1118ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: professional suit
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    product_description: professional suit
+    product_id: null
+    product_name: null
+    product_type: suit
+    quantity: 1
+  - confidence: 0.9
+    mention_text: suit options
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    product_description: suit options for a complete outfit
+    product_id: null
+    product_name: null
+    product_type: suit
+    quantity: 1

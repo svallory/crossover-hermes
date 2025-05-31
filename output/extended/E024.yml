@@ -1,0 +1,149 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Canvas Beach Bag is available. Only 1 unit is currently in stock.
+      answer_type: factual
+      confidence: 0.95
+      question: Do you sell canvas beach bags?
+      reference_product_ids:
+      - CBG9876
+    - answer: The Canvas Beach Bag is listed with a 'Buy one, get one 50% off' promotion
+        in the product description, but there is no active promotion currently set
+        in the system.
+      answer_type: factual
+      confidence: 0.7
+      question: Is there a deal if we buy multiple canvas beach bags?
+      reference_product_ids:
+      - CBG9876
+    email_id: E024
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Pack your essentials in style with our canvas beach bag. Spacious
+        and durable, this bag features a nautical-inspired print and interior pockets
+        for organization. Perfectly sized for a day at the beach or a weekend getaway.
+        Buy one, get one 50% off!
+      metadata: 'Resolution confidence: 76%; Found through semantic search; Requested
+        quantity: 2; Search query: ''canvas beach bags beach bag''; Similarity score:
+        0.460; Original mention: N/A (ID: N/A, Type: beach bag, Category: Bags, Quantity:
+        2)'
+      name: Canvas Beach Bag
+      price: 24.0
+      product_id: CBG9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      stock: 1
+    related_products: []
+    unanswered_questions:
+    - Can you help us out with buying multiple canvas beach bags? (Specific assistance
+      or custom deal request cannot be answered with available product data.)
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Sarah
+    email_id: E024
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: My sister and I are planning a beach vacation next month.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: We both need new beach bags. I think you sell canvas beach bags?
+        Someone mentioned there might be a good deal if we buy multiple ones. Could
+        you help us out?
+      product_mentions:
+      - confidence: 0.8
+        mention_text: canvas beach bags
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: canvas beach bags
+        product_id: null
+        product_name: null
+        product_type: beach bag
+        quantity: 2
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E024
+  language: English
+  response_body: "Dear Sarah,\n\nThank you for reaching out to us and sharing your\
+    \ excitement about your upcoming beach vacation with your sister! That sounds\
+    \ absolutely wonderful, and we\u2019re delighted to help you prepare for your\
+    \ getaway.\n\nRegarding your inquiry about our canvas beach bags: We currently\
+    \ have our stylish Canvas Beach Bag in stock\u2014perfect for both the beach and\
+    \ travel, featuring a nautical-inspired print and plenty of room for essentials.\
+    \ However, at the moment, we only have one unit available in our boutique.\n\n\
+    You also mentioned hearing about a possible deal for purchasing multiple bags.\
+    \ While the product description references a \"Buy one, get one 50% off\" offer,\
+    \ there is no active promotion currently running for this item.\n\nIf you\u2019\
+    re interested in the available bag, or would like recommendations for other chic\
+    \ beach accessories, please let us know. We\u2019d be happy to help you and your\
+    \ sister find the perfect pieces for your trip!\n\nBest regards,\nHermes - Delivering\
+    \ divine fashion"
+  response_points:
+  - content: Thank Sarah for her email and reference her upcoming beach vacation with
+      her sister.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform Sarah that the Canvas Beach Bag is available, but only 1 unit
+      is currently in stock.
+    content_type: product_info
+    priority: 9
+    related_to: CBG9876
+  - content: Clarify that although the product description mentions a 'Buy one, get
+      one 50% off' deal, there is no active promotion at this time.
+    content_type: promotion_info
+    priority: 8
+    related_to: CBG9876
+  - content: Offer further assistance and invite Sarah to ask for recommendations
+      on other beach accessories.
+    content_type: answer
+    priority: 7
+    related_to: null
+  - content: Warm closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Availability and Promotions for Canvas Beach Bags
+  tone: professional and warm
+email:
+  email_id: E024
+  message: Hi! My sister and I are planning a beach vacation next month and we both
+    need new beach bags. I think you sell canvas beach bags? Someone mentioned there
+    might be a good deal if we buy multiple ones. Could you help us out? Thanks, Sarah
+  subject: Beach bags for vacation
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 292ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    description: Pack your essentials in style with our canvas beach bag. Spacious
+      and durable, this bag features a nautical-inspired print and interior pockets
+      for organization. Perfectly sized for a day at the beach or a weekend getaway.
+      Buy one, get one 50% off!
+    metadata: 'Resolution confidence: 76%; Found through semantic search; Requested
+      quantity: 2; Search query: ''canvas beach bags beach bag''; Similarity score:
+      0.460; Original mention: N/A (ID: N/A, Type: beach bag, Category: Bags, Quantity:
+      2)'
+    name: Canvas Beach Bag
+    price: 24.0
+    product_id: CBG9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 1
+  unresolved_mentions: []

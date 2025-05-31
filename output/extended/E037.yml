@@ -1,0 +1,178 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The current price of the Canvas Beach Bag (CBG9876) is $24.00.
+      answer_type: factual
+      confidence: 1.0
+      question: What's the current price?
+      reference_product_ids:
+      - CBG9876
+    email_id: E037
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Pack your essentials in style with our canvas beach bag. Spacious
+        and durable, this bag features a nautical-inspired print and interior pockets
+        for organization. Perfectly sized for a day at the beach or a weekend getaway.
+        Buy one, get one 50% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: CBG9876, Type: beach bag, Category:
+        Bags, Quantity: 1)'
+      name: Canvas Beach Bag
+      price: 24.0
+      product_id: CBG9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      stock: 1
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E037
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I just need one canvas beach bag for my upcoming trip.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: canvas beach bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: canvas beach bag
+        product_id: CBG9876
+        product_name: null
+        product_type: beach bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: for my upcoming trip.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: What's the current price?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: canvas beach bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: canvas beach bag
+        product_id: CBG9876
+        product_name: null
+        product_type: beach bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E037
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to Hermes regarding your upcoming trip! We are delighted
+    to assist you in finding the perfect accessory for your travels.
+
+
+    Our Canvas Beach Bag (CBG9876) is currently available for $24.00. This stylish
+    and spacious bag features a nautical-inspired print and interior pockets, making
+    it ideal for both a day at the beach and a weekend getaway. We have one in stock,
+    so you can travel in style and keep your essentials organized.
+
+
+    If you would like to proceed with your order or have any further questions, please
+    let us know. We''re here to ensure you have everything you need for your trip.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Thank the customer for reaching out and reference their upcoming trip.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: 'Provide the current price and a brief description of the Canvas Beach
+      Bag (CBG9876): $24.00, nautical-inspired print, spacious and durable, interior
+      pockets, perfect for the beach or getaway.'
+    content_type: product_info
+    priority: 9
+    related_to: CBG9876
+  - content: State that one Canvas Beach Bag is in stock, matching their requested
+      quantity.
+    content_type: availability
+    priority: 8
+    related_to: CBG9876
+  - content: Invite the customer to proceed with the order or ask further questions.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Close warmly and sign off as Hermes - Delivering divine fashion.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Your Canvas Beach Bag Inquiry
+  tone: professional and warm
+email:
+  email_id: E037
+  message: Hi, I just need one canvas beach bag for my upcoming trip. I think the
+    product ID is CBG9876. What's the current price? Thanks!
+  subject: Single beach bag needed
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 2 candidates;
+    Processing took 7ms; Successfully resolved 2 out of 2 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    description: Pack your essentials in style with our canvas beach bag. Spacious
+      and durable, this bag features a nautical-inspired print and interior pockets
+      for organization. Perfectly sized for a day at the beach or a weekend getaway.
+      Buy one, get one 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: CBG9876, Type: beach bag, Category:
+      Bags, Quantity: 1)'
+    name: Canvas Beach Bag
+    price: 24.0
+    product_id: CBG9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    stock: 1
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    description: Pack your essentials in style with our canvas beach bag. Spacious
+      and durable, this bag features a nautical-inspired print and interior pockets
+      for organization. Perfectly sized for a day at the beach or a weekend getaway.
+      Buy one, get one 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: CBG9876, Type: beach bag, Category:
+      Bags, Quantity: 1)'
+    name: Canvas Beach Bag
+    price: 24.0
+    product_id: CBG9876
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    stock: 1
+  unresolved_mentions: []

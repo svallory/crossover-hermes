@@ -30,13 +30,13 @@ from hermes.utils.logger import logger, get_agent_logger
 
 @traceable(run_type="chain", name="Order Processing Agent")
 async def run_fulfiller(
-    state: FulfillerInput, runnable_config: RunnableConfig
+    state: FulfillerInput, config: RunnableConfig
 ) -> WorkflowNodeOutput[Literal[Agents.FULFILLER], FulfillerOutput]:
     """Process customer order requests with stock checking and promotion application.
 
     Args:
         state: The input model containing classifier output and stockkeeper results
-        runnable_config: Configuration for the runnable
+        config: Configuration for the runnable
 
     Returns:
         A WorkflowNodeOutput containing the processed order or an error
@@ -51,7 +51,7 @@ async def run_fulfiller(
     )
 
     try:
-        hermes_config = HermesConfig.from_runnable_config(runnable_config)
+        hermes_config = HermesConfig.from_runnable_config(config)
         llm = get_llm_client(
             config=hermes_config,
             schema=Order,

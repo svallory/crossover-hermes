@@ -7,6 +7,7 @@ class Error(BaseModel):
     """Represents an error that occurred during processing."""
 
     message: str = Field(description="Human-readable error message")
+
     source: str | None = Field(
         default=None, description="Source of the error (e.g., agent name)"
     )

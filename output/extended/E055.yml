@@ -1,0 +1,95 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E055
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What dresses are available quickly that are fun but not too formal for a party
+      this weekend?
+    unsuccessful_references:
+    - fun but not too formal, for a party this weekend
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E055
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I need a dress for a party this weekend.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: a dress for a party this weekend
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: fun but not too formal, for a party this weekend
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - Help!
+      - Something fun but not too formal.
+      - What do you have available quickly?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E055
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out to Hermes! We understand\
+    \ you're looking for a fun yet not too formal dress for a party this weekend,\
+    \ and we're excited to help you find the perfect piece on short notice.\n\nWhile\
+    \ we don't have a specific list of dresses available for immediate delivery in\
+    \ our current system, we would love to recommend some stylish options tailored\
+    \ to your needs. Could you please share your preferred color, size, and any style\
+    \ preferences? This will allow us to provide you with a curated selection that\
+    \ matches your vision and can be delivered as quickly as possible.\n\nIf you are\
+    \ open to accessories or other outfit ideas to complement your look, let us know\
+    \ \u2013 we would be delighted to suggest complete ensemble inspirations for your\
+    \ event.\n\nWe look forward to assisting you and making sure you shine at your\
+    \ party!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for reaching out and acknowledge their request for
+      a fun, not too formal dress for a party this weekend.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Explain that while a specific list of suitable dresses for immediate
+      delivery isn't available, Hermes is eager to help and requests more details
+      (color, size, style).
+    content_type: answer
+    priority: 9
+    related_to: What dresses are available quickly that are fun but not too formal
+      for a party this weekend?
+  - content: Offer to provide accessory or complete outfit suggestions if the customer
+      is interested.
+    content_type: alternative
+    priority: 7
+    related_to: null
+  - content: Express enthusiasm to assist and sign off warmly.
+    content_type: closing
+    priority: 8
+    related_to: null
+  subject: "Your Request for a Party-Ready Dress \u2013 Hermes Assistance"
+  tone: friendly and attentive
+email:
+  email_id: E055
+  message: Help! I need a dress for a party this weekend. Something fun but not too
+    formal. What do you have available quickly?
+  subject: Party dress emergency
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 778ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: a dress for a party this weekend
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: fun but not too formal, for a party this weekend
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1

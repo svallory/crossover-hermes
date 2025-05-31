@@ -201,14 +201,13 @@ class TestFulfillerPromotionDetection:
         )
 
         # Run the fulfiller agent (no mocking - real integration test)
-        result = await run_fulfiller(
-            state=fulfiller_input, runnable_config=mock_runnable_config
-        )
+        result = await run_fulfiller(state=fulfiller_input, config=mock_runnable_config)
 
         # Verify the result
         assert Agents.FULFILLER in result
-        fulfiller_output = result[Agents.FULFILLER]
-        assert isinstance(fulfiller_output, FulfillerOutput)
+        output_or_error = result[Agents.FULFILLER]
+        assert isinstance(output_or_error, FulfillerOutput)
+        fulfiller_output = cast(FulfillerOutput, output_or_error)
 
         order = fulfiller_output.order_result
         assert order.email_id == "test_001"
@@ -228,14 +227,17 @@ class TestFulfillerPromotionDetection:
         # For 2 items at $24 each: 1 full price + 1 at 50% off = $24 + $12 = $36
         # Discount = $24 - $12 = $12
         expected_discount = 12.0
+        assert order.total_discount is not None
         assert abs(order.total_discount - expected_discount) < 0.01
 
         # Total should be $36 (not $24 as in the original incorrect output)
         expected_total = 36.0
+        assert order.total_price is not None
         assert abs(order.total_price - expected_total) < 0.01
 
         # Unit price should be $18 (average of $24 + $12 = $36 / 2 items)
         expected_unit_price = 18.0
+        assert line.unit_price is not None
         assert abs(line.unit_price - expected_unit_price) < 0.01
 
     @pytest.mark.asyncio
@@ -312,14 +314,13 @@ class TestFulfillerPromotionDetection:
         )
 
         # Run the fulfiller agent (no mocking - real integration test)
-        result = await run_fulfiller(
-            state=fulfiller_input, runnable_config=mock_runnable_config
-        )
+        result = await run_fulfiller(state=fulfiller_input, config=mock_runnable_config)
 
         # Verify the result
         assert Agents.FULFILLER in result
-        fulfiller_output = result[Agents.FULFILLER]
-        assert isinstance(fulfiller_output, FulfillerOutput)
+        output_or_error = result[Agents.FULFILLER]
+        assert isinstance(output_or_error, FulfillerOutput)
+        fulfiller_output = cast(FulfillerOutput, output_or_error)
 
         order = fulfiller_output.order_result
         assert order.email_id == "test_002"
@@ -337,14 +338,17 @@ class TestFulfillerPromotionDetection:
 
         # Check that total discount was calculated (25% off $29 = $7.25 discount)
         expected_discount = 29.0 * 0.25
+        assert order.total_discount is not None
         assert abs(order.total_discount - expected_discount) < 0.01
 
         # Check final price is correct ($29 - $7.25 = $21.75)
         expected_total = 29.0 - expected_discount
+        assert order.total_price is not None
         assert abs(order.total_price - expected_total) < 0.01
 
         # Check unit price is correct ($21.75)
         expected_unit_price = 29.0 - expected_discount
+        assert line.unit_price is not None
         assert abs(line.unit_price - expected_unit_price) < 0.01
 
     @pytest.mark.asyncio
@@ -437,14 +441,13 @@ class TestFulfillerPromotionDetection:
         )
 
         # Run the fulfiller agent (no mocking - real integration test)
-        result = await run_fulfiller(
-            state=fulfiller_input, runnable_config=mock_runnable_config
-        )
+        result = await run_fulfiller(state=fulfiller_input, config=mock_runnable_config)
 
         # Verify the result
         assert Agents.FULFILLER in result
-        fulfiller_output = result[Agents.FULFILLER]
-        assert isinstance(fulfiller_output, FulfillerOutput)
+        output_or_error = result[Agents.FULFILLER]
+        assert isinstance(output_or_error, FulfillerOutput)
+        fulfiller_output = cast(FulfillerOutput, output_or_error)
 
         order = fulfiller_output.order_result
         assert order.email_id == "test_combination"
@@ -470,10 +473,12 @@ class TestFulfillerPromotionDetection:
 
         # Check total discount (50% off $49 = $24.50 discount)
         expected_discount = 49.0 * 0.50
+        assert order.total_discount is not None
         assert abs(order.total_discount - expected_discount) < 0.01
 
         # Total should be $42 + $24.50 = $66.50
         expected_total = 42.0 + 24.5
+        assert order.total_price is not None
         assert abs(order.total_price - expected_total) < 0.01
 
     @pytest.mark.asyncio
@@ -567,13 +572,14 @@ class TestFulfillerPromotionDetection:
 
             # Run the fulfiller agent
             result = await run_fulfiller(
-                state=fulfiller_input, runnable_config=mock_runnable_config
+                state=fulfiller_input, config=mock_runnable_config
             )
 
         # Verify the result
         assert Agents.FULFILLER in result
-        fulfiller_output = result[Agents.FULFILLER]
-        assert isinstance(fulfiller_output, FulfillerOutput)
+        output_or_error = result[Agents.FULFILLER]
+        assert isinstance(output_or_error, FulfillerOutput)
+        fulfiller_output = cast(FulfillerOutput, output_or_error)
 
         order = fulfiller_output.order_result
         assert order.email_id == "test_004"
@@ -691,13 +697,14 @@ class TestFulfillerPromotionDetection:
 
             # Run the fulfiller agent
             result = await run_fulfiller(
-                state=fulfiller_input, runnable_config=mock_runnable_config
+                state=fulfiller_input, config=mock_runnable_config
             )
 
         # Verify the result
         assert Agents.FULFILLER in result
-        fulfiller_output = result[Agents.FULFILLER]
-        assert isinstance(fulfiller_output, FulfillerOutput)
+        output_or_error = result[Agents.FULFILLER]
+        assert isinstance(output_or_error, FulfillerOutput)
+        fulfiller_output = cast(FulfillerOutput, output_or_error)
 
         order = fulfiller_output.order_result
         assert order.email_id == "test_005"
@@ -715,6 +722,7 @@ class TestFulfillerPromotionDetection:
 
         # Check that total discount was calculated (50% off total = $53 discount)
         expected_discount = 53.0  # 50% off $106 total
+        assert order.total_discount is not None
         assert abs(order.total_discount - expected_discount) < 0.01
         assert order.total_price == 53.0  # Price of one dress
 
@@ -806,13 +814,14 @@ class TestFulfillerPromotionDetection:
 
             # Run the fulfiller agent
             result = await run_fulfiller(
-                state=fulfiller_input, runnable_config=mock_runnable_config
+                state=fulfiller_input, config=mock_runnable_config
             )
 
         # Verify the result
         assert Agents.FULFILLER in result
-        fulfiller_output = result[Agents.FULFILLER]
-        assert isinstance(fulfiller_output, FulfillerOutput)
+        output_or_error = result[Agents.FULFILLER]
+        assert isinstance(output_or_error, FulfillerOutput)
+        fulfiller_output = cast(FulfillerOutput, output_or_error)
 
         order = fulfiller_output.order_result
         assert order.email_id == "test_006"

@@ -1,0 +1,173 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The TLR5432 is a full tailored suit, not just the jacket. The product
+        includes the complete outfit as indicated by the description and the current
+        promotion, which offers the full suit for the price of the blazer.
+      answer_type: factual
+      confidence: 1.0
+      question: What exactly comes with the TLR5432? Is it just the jacket or a complete
+        outfit?
+      reference_product_ids:
+      - TLR5432
+    email_id: E045
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Exude confidence and professionalism with our tailored suit. Crafted
+        from premium wool, this suit features a sleek, modern fit and impeccable tailoring.
+        Perfect for important meetings, job interviews, or formal events. Limited-time
+        sale - get the full suit for the price of the blazer!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+        mention: N/A (ID: TLR5432, Type: suit, Category: Men''s Clothing, Quantity:
+        None)'
+      name: Tailored Suit
+      price: 55.0
+      product_id: TLR5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      stock: 4
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references:
+    - tailored suits
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E045
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm interested in your tailored suits.
+      product_mentions:
+      - confidence: 0.8
+        mention_text: tailored suits
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: tailored suits
+        product_id: null
+        product_name: null
+        product_type: suit
+        quantity: null
+      related_sentences:
+      - Hello, I'm interested in your tailored suits.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: What exactly comes with the TLR5432? Is it just the jacket or
+        a complete outfit?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: TLR5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: null
+        product_id: TLR5432
+        product_name: null
+        product_type: suit
+        quantity: null
+      related_sentences:
+      - What exactly comes with the TLR5432?
+      - Is it just the jacket or a complete outfit?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E045
+  language: English
+  response_body: "Hello,\n\nThank you for reaching out and for your interest in our\
+    \ tailored suits. I\u2019m delighted to provide more information to help you find\
+    \ the perfect fit.\n\nRegarding your question about the TLR5432: this item is\
+    \ a complete tailored suit, not just the jacket. For a limited time, you\u2019\
+    ll receive the full outfit\u2014including both the jacket and trousers\u2014at\
+    \ the price of the blazer. The suit is crafted from premium wool, features a modern,\
+    \ sleek fit, and showcases our signature impeccable tailoring, making it ideal\
+    \ for important meetings, job interviews, or formal events. Currently, we have\
+    \ a few of these suits left in stock.\n\nIf you have any other questions about\
+    \ our tailored suit collection or would like personalized style recommendations,\
+    \ please let me know\u2014I\u2019m here to help.\n\nBest regards,\nHermes - Delivering\
+    \ divine fashion"
+  response_points:
+  - content: Thank the customer for their interest and greet them warmly.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Clarify that the TLR5432 is a full tailored suit, including both the
+      jacket and trousers, not just the jacket.
+    content_type: product_info
+    priority: 10
+    related_to: TLR5432
+  - content: 'Highlight the limited-time offer: full suit for the price of the blazer.'
+    content_type: product_info
+    priority: 9
+    related_to: TLR5432
+  - content: 'Describe the suit: premium wool, modern fit, impeccable tailoring, suitable
+      for important occasions.'
+    content_type: product_info
+    priority: 8
+    related_to: TLR5432
+  - content: Mention that the item is currently in stock, but with limited availability.
+    content_type: availability_info
+    priority: 7
+    related_to: TLR5432
+  - content: Encourage further questions and offer personalized recommendations on
+      tailored suits.
+    content_type: offer_help
+    priority: 6
+    related_to: null
+  - content: End with a professional closing and Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Details About the TLR5432 Tailored Suit
+  tone: professional and warm
+email:
+  email_id: E045
+  message: Hello, I'm interested in your tailored suits. What exactly comes with the
+    TLR5432? Is it just the jacket or a complete outfit?
+  subject: Complete suit details
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 1 candidates;
+    Processing took 1066ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Exude confidence and professionalism with our tailored suit. Crafted
+      from premium wool, this suit features a sleek, modern fit and impeccable tailoring.
+      Perfect for important meetings, job interviews, or formal events. Limited-time
+      sale - get the full suit for the price of the blazer!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+      mention: N/A (ID: TLR5432, Type: suit, Category: Men''s Clothing, Quantity:
+      None)'
+    name: Tailored Suit
+    price: 55.0
+    product_id: TLR5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 4
+  unresolved_mentions:
+  - confidence: 0.8
+    mention_text: tailored suits
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    product_description: tailored suits
+    product_id: null
+    product_name: null
+    product_type: suit
+    quantity: null

@@ -1,0 +1,124 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E048
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What would you recommend for the best value in a party dress?
+    - What would you recommend for the best value in a work bag?
+    unsuccessful_references:
+    - party dress
+    - work bag
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E048
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm shopping for my daughters.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: One wants a party dress and the other needs a work bag. What
+        would you recommend for the best value?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: party dress
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: party dress
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      - confidence: 0.9
+        mention_text: work bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: work bag
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E048
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out to us at Hermes and\
+    \ for sharing that you are shopping for your daughters. It\u2019s wonderful to\
+    \ hear you are looking for both a party dress and a work bag\u2014two essentials\
+    \ for style and confidence!\n\nFor your daughter seeking the perfect party dress,\
+    \ we recommend exploring our current collection of elegant dresses featuring timeless\
+    \ silhouettes, luxurious fabrics, and vibrant colors. Our designers focus on blending\
+    \ sophistication with a touch of modern flair, ensuring each piece offers both\
+    \ style and excellent value. \n\nFor your other daughter in need of a work bag,\
+    \ our selection of bags is designed to combine practicality with luxury. Look\
+    \ for options crafted from premium leather, offering ample space for daily essentials,\
+    \ and featuring refined details that transition seamlessly from the office to\
+    \ after-work events.\n\nIf you would like, I can provide specific recommendations\
+    \ or current bestsellers in each category, including pricing and availability.\
+    \ Please let us know your daughters\u2019 style preferences or any specific features\
+    \ they might need, and we\u2019ll be delighted to tailor our suggestions.\n\n\
+    Best regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for reaching out and acknowledge they are shopping
+      for their daughters.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Recommend exploring the collection of elegant party dresses, highlighting
+      value, style, and quality.
+    content_type: answer
+    priority: 9
+    related_to: What would you recommend for the best value in a party dress?
+  - content: Suggest the work bag collection, emphasizing practicality, luxury, and
+      value.
+    content_type: answer
+    priority: 9
+    related_to: What would you recommend for the best value in a work bag?
+  - content: Offer to provide personalized recommendations if the customer shares
+      more style preferences or specific needs.
+    content_type: alternative
+    priority: 8
+    related_to: null
+  - content: Close with a warm signature from Hermes.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: 'Recommendations for Your Daughters: Party Dress & Work Bag'
+  tone: professional and warm
+email:
+  email_id: E048
+  message: Hi, I'm shopping for my daughters. One wants a party dress and the other
+    needs a work bag. What would you recommend for the best value?
+  subject: Gifts for daughters
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
+    Processing took 1113ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: party dress
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: party dress
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1
+  - confidence: 0.9
+    mention_text: work bag
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: work bag
+    product_id: null
+    product_name: null
+    product_type: bag
+    quantity: 1

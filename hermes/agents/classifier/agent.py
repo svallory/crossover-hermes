@@ -23,14 +23,14 @@ from .prompts import CLASSIFIER_PROMPT
 
 @traceable(run_type="chain")
 async def run_classifier(
-    state: ClassifierInput, runnable_config: RunnableConfig
+    state: ClassifierInput, config: RunnableConfig
 ) -> WorkflowNodeOutput[Literal[Agents.CLASSIFIER], ClassifierOutput]:
     """Analyzes a customer email to extract structured information about intent, product references,
     and customer signals.
 
     Args:
         state (ClassifierInput): The input model containing email_id, subject, and message.
-        runnable_config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'],
+        config (Optional[Dict[Literal['configurable'], Dict[Literal['hermes_config'],
             HermesConfig]]]): Optional config dict with key 'configurable' containing a HermesConfig instance.
 
     Returns:
@@ -39,7 +39,7 @@ async def run_classifier(
     """
     agent_name = Agents.CLASSIFIER.value.capitalize()
     try:
-        hermes_config = HermesConfig.from_runnable_config(runnable_config)
+        hermes_config = HermesConfig.from_runnable_config(config)
 
         logger.info(
             get_agent_logger(
@@ -53,7 +53,7 @@ async def run_classifier(
             config=hermes_config,
             schema=EmailAnalysis,
             tools=[],
-            model_strength="weak",
+            model_strength="strong",
             temperature=0.0,
         )
 
@@ -70,7 +70,7 @@ async def run_classifier(
         logger.info(
             get_agent_logger(
                 agent_name,
-                f"Email [cyan]{state.email.email_id}[/cyan] analysis complete.",
+                f"Email [cyan]{state.email.email_id}[/cyan] analysis complete: {email_analysis_result.primary_intent}",
             )
         )
 
@@ -82,7 +82,5 @@ async def run_classifier(
         )
 
     except Exception as e:
-        error_message = f"Error in {agent_name} for email {state.email.email_id} (type: {e.__module__}.{e.__class__.__name__})"
-        logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
-        e.add_note(error_message)
+        e.add_note(f"Error in {agent_name} for email {state.email.email_id}")
         raise e

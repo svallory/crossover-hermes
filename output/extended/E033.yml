@@ -1,0 +1,126 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E033
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I'd like to order that plaid flannel vest.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: plaid flannel vest
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: plaid flannel vest
+        product_id: PLV8765
+        product_name: null
+        product_type: vest
+        quantity: 1
+      related_sentences:
+      - Just the vest for now, thanks.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E033
+  language: English
+  response_body: "Dear Customer,\n\nThank you for your order! We are delighted to\
+    \ confirm that your order for the plaid flannel vest has been successfully created\
+    \ and will be processed shortly.\n\nOrder Details:\n- Item: Plaid Flannel Vest\n\
+    - Quantity: 1\n- Price: $42.00\n\nThis cozy vest features a classic plaid pattern\
+    \ and is crafted from soft, warm flannel\u2014perfect for layering and adding\
+    \ a touch of ruggedness to your casual or outdoor looks.\n\nIf you are interested,\
+    \ we would like to mention that a matching plaid shirt is currently available\
+    \ at 50% off with the purchase of the vest. Let us know if you would like to take\
+    \ advantage of this offer!\n\nShould you have any further questions or wish to\
+    \ add anything to your order, please feel free to reach out. We are here to help.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their order and express delight in processing
+      it.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirm the order for 1 plaid flannel vest at $42.00 and state the order
+      will be processed shortly.
+    content_type: order_confirmation
+    priority: 10
+    related_to: PLV8765
+  - content: 'Highlight the vest''s features: classic plaid pattern, soft, warm flannel,
+      ideal for layering and a rugged look.'
+    content_type: product_info
+    priority: 8
+    related_to: PLV8765
+  - content: Mention the matching plaid shirt offer at 50% off with the vest purchase
+      and invite the customer to inquire further.
+    content_type: promotion
+    priority: 7
+    related_to: PLV8765
+  - content: Invite the customer to ask further questions or add items to their order.
+    content_type: help_offer
+    priority: 6
+    related_to: null
+  - content: Close with a warm signature from Hermes.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: 'Order Confirmation: Plaid Flannel Vest'
+  tone: professional and warm
+email:
+  email_id: E033
+  message: Hello, I'd like to order that plaid flannel vest. I think the code was
+    PLV8765? Just the vest for now, thanks.
+  subject: Just want the vest
+errors: {}
+fulfiller:
+  order_result:
+    email_id: E033
+    lines:
+    - alternatives: []
+      base_price: 42.0
+      description: Layer up with our plaid flannel vest. This cozy vest features a
+        classic plaid pattern and is crafted from soft, warm flannel. Perfect for
+        adding a touch of ruggedness to your casual or outdoor looks. Buy one, get
+        a matching plaid shirt at 50% off!
+      product_id: PLV8765
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 0
+      total_price: 42.0
+      unit_price: 42.0
+    message: Your order for the plaid flannel vest has been created and will be processed
+      shortly.
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 42.0
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 7ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Layer up with our plaid flannel vest. This cozy vest features a classic
+      plaid pattern and is crafted from soft, warm flannel. Perfect for adding a touch
+      of ruggedness to your casual or outdoor looks. Buy one, get a matching plaid
+      shirt at 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: Men''s
+      Clothing, Quantity: 1)'
+    name: Plaid Flannel Vest
+    price: 42.0
+    product_id: PLV8765
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 1
+  unresolved_mentions: []

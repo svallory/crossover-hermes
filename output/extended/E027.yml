@@ -1,0 +1,178 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The plaid flannel vest does not come with additional items, but there
+        is a promotion offering a matching plaid shirt at 50% off with the purchase
+        of the vest.
+      answer_type: factual
+      confidence: 1.0
+      question: Does the plaid flannel vest come with anything else or is there a
+        matching piece available?
+      reference_product_ids:
+      - PLV8765
+    email_id: E027
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Layer up with our plaid flannel vest. This cozy vest features a
+        classic plaid pattern and is crafted from soft, warm flannel. Perfect for
+        adding a touch of ruggedness to your casual or outdoor looks. Buy one, get
+        a matching plaid shirt at 50% off!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: N/A,
+        Quantity: 1)'
+      name: Plaid Flannel Vest
+      price: 42.0
+      product_id: PLV8765
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 1
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Jake
+    email_id: E027
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm interested in that plaid flannel vest you carry. Product
+        PLV8765 I think?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: plaid flannel vest
+        product_category: null
+        product_description: plaid flannel vest
+        product_id: PLV8765
+        product_name: null
+        product_type: vest
+        quantity: 1
+      related_sentences:
+      - Hey there,
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: Does it come with anything else or is there a matching piece
+        I could get?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: plaid flannel vest
+        product_category: null
+        product_description: plaid flannel vest
+        product_id: PLV8765
+        product_name: null
+        product_type: vest
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E027
+  language: English
+  response_body: "Hey Jake,\n\nThank you for reaching out and for your interest in\
+    \ our plaid flannel vest (product PLV8765)! This vest is a customer favorite,\
+    \ known for its cozy feel and classic plaid style\u2014perfect for adding some\
+    \ rugged flair to your casual or outdoor wardrobe.\n\nTo answer your question:\
+    \ the plaid flannel vest itself doesn\u2019t come with any additional items, but\
+    \ we\u2019re excited to let you know there\u2019s a special offer! When you purchase\
+    \ the vest, you can get a matching plaid shirt at 50% off. It\u2019s a great way\
+    \ to complete the look and make the most of your outfit.\n\nIf you\u2019d like\
+    \ more details about the matching shirt or help placing an order, just let us\
+    \ know\u2014we\u2019re here to help!\n\nBest regards,\nHermes - Delivering divine\
+    \ fashion"
+  response_points:
+  - content: Hey Jake, thank you for reaching out and showing interest in our plaid
+      flannel vest!
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: The plaid flannel vest (PLV8765) is cozy, features a classic plaid pattern,
+      and is a popular choice for casual or outdoor looks.
+    content_type: product_info
+    priority: 9
+    related_to: PLV8765
+  - content: The vest does not come with additional items, but there is a matching
+      plaid shirt available at 50% off with the purchase of the vest.
+    content_type: answer
+    priority: 10
+    related_to: PLV8765
+  - content: 'We have a special promotion: buy the plaid flannel vest and get a matching
+      plaid shirt at half price.'
+    content_type: offer
+    priority: 8
+    related_to: PLV8765
+  - content: "If you\u2019d like more details or help placing an order, we\u2019re\
+      \ here to assist."
+    content_type: help_offer
+    priority: 6
+    related_to: null
+  - content: 'Best regards,
+
+      Hermes - Delivering divine fashion'
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: "Your Inquiry About the Plaid Flannel Vest \u2013 Matching Options & Exclusive\
+    \ Offer"
+  tone: friendly and helpful
+email:
+  email_id: E027
+  message: Hey there, I'm interested in that plaid flannel vest you carry. Product
+    PLV8765 I think? Does it come with anything else or is there a matching piece
+    I could get? Thanks, Jake
+  subject: Plaid vest question
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 2 candidates;
+    Processing took 9ms; Successfully resolved 2 out of 2 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Layer up with our plaid flannel vest. This cozy vest features a classic
+      plaid pattern and is crafted from soft, warm flannel. Perfect for adding a touch
+      of ruggedness to your casual or outdoor looks. Buy one, get a matching plaid
+      shirt at 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: N/A,
+      Quantity: 1)'
+    name: Plaid Flannel Vest
+    price: 42.0
+    product_id: PLV8765
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 1
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Layer up with our plaid flannel vest. This cozy vest features a classic
+      plaid pattern and is crafted from soft, warm flannel. Perfect for adding a touch
+      of ruggedness to your casual or outdoor looks. Buy one, get a matching plaid
+      shirt at 50% off!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: PLV8765, Type: vest, Category: N/A,
+      Quantity: 1)'
+    name: Plaid Flannel Vest
+    price: 42.0
+    product_id: PLV8765
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    stock: 1
+  unresolved_mentions: []

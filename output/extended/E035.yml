@@ -1,0 +1,119 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E035
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - Could you tell me about your plaid shirt options and any special offers?
+    unsuccessful_references:
+    - plaid shirts
+    - the shirt
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E035
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm interested in plaid shirts.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: plaid shirts
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Shirts
+        product_description: plaid shirts
+        product_id: null
+        product_name: null
+        product_type: shirt
+        quantity: null
+      related_sentences:
+      - I think I saw one mentioned somewhere as part of some kind of deal?
+      - Could you tell me about your plaid shirt options and any special offers?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: I might just want the shirt.
+      product_mentions:
+      - confidence: 0.7
+        mention_text: the shirt
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Shirts
+        product_description: the shirt
+        product_id: null
+        product_name: null
+        product_type: shirt
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E035
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out to us with your interest\
+    \ in plaid shirts. We truly appreciate your keen eye for timeless fashion and\
+    \ are delighted to assist you!\n\nAt the moment, it appears we do not have plaid\
+    \ shirts featured in our current collection or as part of any special offers.\
+    \ However, our inventory is constantly evolving, and exclusive designs are introduced\
+    \ regularly. If you're searching for a particular style or have specific preferences,\
+    \ please let us know\u2014we would be more than happy to recommend alternatives\
+    \ or notify you as soon as new plaid shirts become available.\n\nShould you wish\
+    \ to explore other shirt styles or receive personalized recommendations, simply\
+    \ share your preferences with us. Your satisfaction is our highest priority.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their interest in plaid shirts and their inquiry.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that plaid shirts are not currently available and
+      there are no special offers on them at this time.
+    content_type: answer
+    priority: 9
+    related_to: Could you tell me about your plaid shirt options and any special offers?
+  - content: Offer to recommend alternative shirt styles or notify the customer when
+      plaid shirts become available.
+    content_type: alternative
+    priority: 8
+    related_to: plaid shirts
+  - content: Encourage the customer to share their preferences for personalized recommendations.
+    content_type: invitation
+    priority: 7
+    related_to: null
+  - content: Express commitment to customer satisfaction and sign off with the Hermes
+      signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Discover Our Plaid Shirt Collection & Special Offers
+  tone: professional and warm
+email:
+  email_id: E035
+  message: Good morning, I'm interested in plaid shirts. I think I saw one mentioned
+    somewhere as part of some kind of deal? Could you tell me about your plaid shirt
+    options and any special offers? I might just want the shirt.
+  subject: About your plaid shirts
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
+    Processing took 68627ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: plaid shirts
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Shirts
+    product_description: plaid shirts
+    product_id: null
+    product_name: null
+    product_type: shirt
+    quantity: null
+  - confidence: 0.7
+    mention_text: the shirt
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Shirts
+    product_description: the shirt
+    product_id: null
+    product_name: null
+    product_type: shirt
+    quantity: 1

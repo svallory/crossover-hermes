@@ -60,13 +60,13 @@ def create_stockkeeper_metadata_string(
 @traceable(run_type="chain", name="Product Resolution Agent")
 async def run_stockkeeper(
     state: StockkeeperInput,
-    runnable_config: RunnableConfig | None = None,
+    config: RunnableConfig | None = None,
 ) -> WorkflowNodeOutput[Literal[Agents.STOCKKEEPER], StockkeeperOutput]:
     """Resolves ProductMention objects to actual Product objects from the catalog.
 
     Args:
         state: The input model containing the email analyzer output with product mentions
-        runnable_config: Configuration for the runnable
+        config: Configuration for the runnable
 
     Returns:
         A WorkflowNodeOutput containing either resolved products or an error

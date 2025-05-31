@@ -138,6 +138,37 @@ def get_test_products_df() -> pd.DataFrame:
             "season": "Fall, Winter",
             "type": "",
         },
+        # For complementary product testing with TST005
+        {
+            "product_id": "TST005",
+            "name": "Women's Blazer",
+            "description": "A stylish blazer for women.",
+            "category": "Women's Clothing",
+            "stock": 10,
+            "price": 75.00,
+            "season": "Spring, Fall",
+            "type": "Professional",
+        },
+        {
+            "product_id": "ACC001",
+            "name": "Silk Scarf",
+            "description": "A luxurious silk scarf.",
+            "category": "Accessories",
+            "stock": 15,
+            "price": 45.00,
+            "season": "All seasons",
+            "type": "Fashion",
+        },
+        {
+            "product_id": "BAG001",
+            "name": "Leather Tote Bag",
+            "description": "A versatile leather tote bag.",
+            "category": "Bags",
+            "stock": 5,
+            "price": 120.00,
+            "season": "All seasons",
+            "type": "",
+        },
     ]
 
     return pd.DataFrame(test_products_data)
@@ -179,7 +210,7 @@ def get_product_by_id(product_id: str) -> Product | None:
         product_type=str(row.get("type", "")),
         price=float(row["price"]),
         seasons=seasons,
-        metadata={},
+        metadata=None,
     )
 
 
@@ -224,7 +255,7 @@ def get_products_matching_description(
                 product_type=str(row.get("type", "")),
                 price=float(row["price"]),
                 seasons=seasons,
-                metadata={},
+                metadata=None,
             )
             matching_products.append(product)
 
@@ -267,7 +298,7 @@ def get_products_by_category(category: str, limit: int = 5) -> list[Product]:
             product_type=str(row.get("type", "")),
             price=float(row["price"]),
             seasons=seasons,
-            metadata={},
+            metadata=None,
         )
         products.append(product)
 

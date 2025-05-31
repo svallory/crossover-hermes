@@ -1,0 +1,608 @@
+Poe => pytest -x -n auto --dist loadscope tests/integration
+============================= test session starts ==============================
+platform darwin -- Python 3.11.12, pytest-8.3.5, pluggy-1.6.0
+rootdir: /work/crossover/hermes
+configfile: pyproject.toml
+plugins: xdist-3.7.0, anyio-4.9.0, langsmith-0.3.43, cov-6.1.1, asyncio-1.0.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+created: 10/10 workers
+10 workers [74 items]
+
+................................x..X...xF...F...F.......
+=================================== FAILURES ===================================
+_____________ TestAdvisorIntegration.test_winter_hats_inquiry_e021 _____________
+[gw3] darwin -- Python 3.11.12 /work/crossover/hermes/.venv/bin/python3
+
+self = <tests.integration.test_advisor_integration.TestAdvisorIntegration object at 0x11840f710>
+mock_runnable_config = {'configurable': {'hermes_config': HermesConfig(promotion_specs=[], llm_provider='Gemini', llm_api_key='AIzaSyD-SSKODj...output_spreadsheet_id=None, output_spreadsheet_name='Hermes - Email Analyzer Test Output', hermes_processing_limit=0)}}
+
+    @pytest.mark.asyncio
+    async def test_winter_hats_inquiry_e021(self, mock_runnable_config):
+        """Test E021: Inquiry about winter hats after mentioning previous purchases."""
+        # Create product mentions for the previously purchased items and winter hats inquiry
+        product_mentions = [
+            ProductMention(
+                product_id="SDE2345",
+                product_name="Saddle Bag",
+                product_category=ProductCategory.BAGS,
+                mention_text="SDE2345",
+                confidence=1.0,
+            ),
+            ProductMention(
+                product_id="DJN8901",
+                product_name="Distressed Jeans",
+                product_category=ProductCategory.MENS_CLOTHING,
+                mention_text="DJN8901",
+                confidence=1.0,
+            ),
+            ProductMention(
+                product_name="winter hats",
+                product_category=ProductCategory.ACCESSORIES,
+                mention_text="winter hats",
+                confidence=0.8,
+            ),
+        ]
+    
+        # Create the classifier output
+        classifier_output = self.create_classifier_output_with_inquiry(
+            email_id="E021",
+            message="So I've bought quite large collection of vintage items from your store: SDE2345, DJN8901, RGD7654, CRD3210, those are perfect fit for my style! I need your advice if there are any winter hats in your store? Thank you!",
+            product_mentions=product_mentions,
+        )
+    
+        # Create winter hat products and some previously mentioned items
+        resolved_products = [
+            self.create_product(
+                product_id="CHN0987",
+                name="Chunky Knit Beanie",
+                category="Accessories",
+                description="Keep your head toasty with our chunky knit beanie. Knitted from thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a touch of rustic charm. A versatile accessory to elevate your cold-weather looks.",
+                stock=2,
+                seasons="Fall, Winter",
+                price=22.0,
+                product_type="beanie",
+            ),
+            self.create_product(
+                product_id="CLF2109",
+                name="Cable Knit Beanie",
+                category="Accessories",
+                description="Bundle up in our cable knit beanie. Knitted from premium wool, this classic beanie features a timeless cable knit pattern and a soft, stretchy fit. A versatile accessory for adding a touch of warmth and texture to your cold-weather looks.",
+                stock=2,
+                seasons="Winter",
+                price=16.0,
+                product_type="beanie",
+            ),
+            self.create_product(
+                product_id="SDE2345",
+                name="Saddle Bag",
+                category="Bags",
+                description="Channel vintage charm with our saddle bag. This compact crossbody features a classic saddle shape and a trendy, minimalist design. Perfect for adding a touch of retro flair to any ensemble. Limited stock available!",
+                stock=1,
+                seasons="All seasons",
+                price=39.0,
+                product_type="crossbody",
+            ),
+        ]
+    
+        stockkeeper_output = self.create_stockkeeper_output_with_products(
+            resolved_products
+        )
+    
+        # Create the advisor input
+        advisor_input = AdvisorInput(
+            classifier=classifier_output,
+            stockkeeper=stockkeeper_output,
+        )
+    
+        # Run the advisor agent
+        result = await run_advisor(state=advisor_input, config=mock_runnable_config)
+    
+        # Verify the result structure
+        assert Agents.ADVISOR in result
+        output_or_error = result[Agents.ADVISOR]
+        assert isinstance(output_or_error, AdvisorOutput)
+        advisor_output = cast(AdvisorOutput, output_or_error)
+        assert isinstance(advisor_output, AdvisorOutput)
+    
+        inquiry_answers = advisor_output.inquiry_answers
+        assert inquiry_answers.email_id == "E021"
+    
+        # Should have answered questions about winter hats availability
+        assert len(inquiry_answers.answered_questions) > 0
+    
+        # Check that questions are about winter hats
+        answered_questions_text = " ".join(
+            [qa.question.lower() for qa in inquiry_answers.answered_questions]
+        )
+        assert (
+            "winter" in answered_questions_text
+            or "hat" in answered_questions_text
+            or "beanie" in answered_questions_text
+        )
+    
+        # Should identify winter hat products as related
+>       assert len(inquiry_answers.related_products) >= 1
+E       AssertionError: assert 0 >= 1
+E        +  where 0 = len([])
+E        +    where [] = InquiryAnswers(email_id='E021', primary_products=[Product(product_id='SDE2345', name='Saddle Bag', description='Channe... answer_type='factual')], unanswered_questions=[], related_products=[], unsuccessful_references=['RGD7654', 'CRD3210']).related_products
+
+tests/integration/test_advisor_integration.py:895: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Advisor] Running for email E021                                                
+Tool calling succeeded on attempt 1                                             
+[Advisor] Factual response generation complete for email E021                   
+------------------------------ Captured log call -------------------------------
+WARNING  langchain_google_genai.chat_models:chat_models.py:1104 Unexpected argument 'base_url' provided to ChatGoogleGenerativeAI.
+_______________ TestOffersIntegration.test_partial_bundle_order ________________
+[gw1] darwin -- Python 3.11.12 /work/crossover/hermes/.venv/bin/python3
+
+self = <tests.integration.test_offers_integration.TestOffersIntegration object at 0x1188b2f90>
+workflow_graph = <langgraph.graph.state.CompiledStateGraph object at 0x10fe5b950>
+
+    @pytest.mark.asyncio
+    async def test_partial_bundle_order(self, workflow_graph):
+        """Test E033: Order for just the vest (partial bundle)."""
+        email_data = {
+            "email_id": "E033",
+            "subject": "Just want the vest",
+            "message": "Hello, I'd like to order that plaid flannel vest. I think the code was PLV8765? Just the vest for now, thanks.",
+        }
+    
+        customer_email = self.create_customer_email(email_data)
+        workflow_input = WorkflowInput(email=customer_email)
+    
+        # Run the complete workflow
+        result = await workflow_graph.ainvoke(workflow_input)
+    
+        # Verify workflow completion
+        assert Agents.CLASSIFIER in result
+        assert Agents.STOCKKEEPER in result
+        assert Agents.FULFILLER in result
+        assert Agents.COMPOSER in result
+    
+        # Check stockkeeper resolved PLV8765 vest
+        stockkeeper_output = result[Agents.STOCKKEEPER]
+        product_ids = [p.product_id for p in stockkeeper_output.resolved_products]
+        assert "PLV8765" in product_ids
+    
+        # Check fulfiller processed single vest order
+        fulfiller_output = result[Agents.FULFILLER]
+>       assert fulfiller_output.order_result.overall_status == "created"
+E       AssertionError: assert 'partially_fulfilled' == 'created'
+E         
+E         - created
+E         + partially_fulfilled
+
+tests/integration/test_offers_integration.py:234: AssertionError
+----------------------------- Captured stdout call -----------------------------
+[Classifier] Analyzing email E033 - Subject: 'Just want the vest'...            
+[Classifier] Email E033 analysis complete.                                      
+[Stockkeeper] Resolving products for email E033                                 
+[Stockkeeper] Product resolution complete for email E033. Metadata: Processed 1 
+product mentions; Made 1 resolution attempts; Resolved 1 candidates; Processing 
+took 3ms; Successfully resolved 1 out of 1 mentions                             
+[Fulfiller] Processing order for email E033                                     
+Tool calling succeeded on attempt 1                                             
+[Fulfiller] Order processing complete for email E033. Order status:             
+partially_fulfilled                                                             
+[Composer] Attempting to compose response for email E033                        
+Tool calling succeeded on attempt 1                                             
+[Composer] Response composition complete for email E033. Response length: 617   
+chars.                                                                          
+------------------------------ Captured log call -------------------------------
+WARNING  langchain_google_genai.chat_models:chat_models.py:1104 Unexpected argument 'base_url' provided to ChatGoogleGenerativeAI.
+WARNING  langchain_google_genai.chat_models:chat_models.py:1104 Unexpected argument 'base_url' provided to ChatGoogleGenerativeAI.
+WARNING  langchain_google_genai.chat_models:chat_models.py:1104 Unexpected argument 'base_url' provided to ChatGoogleGenerativeAI.
+________ TestClassifierIntegration.test_e019_product_id_with_formatting ________
+[gw0] darwin -- Python 3.11.12 /work/crossover/hermes/.venv/bin/python3
+
+self = <tests.integration.test_classifier_integration.TestClassifierIntegration object at 0x12123d890>
+mock_runnable_config = {'configurable': {'hermes_config': HermesConfig(promotion_specs=[], llm_provider='Gemini', llm_api_key='AIzaSyD-SSKODj...output_spreadsheet_id=None, output_spreadsheet_name='Hermes - Email Analyzer Test Output', hermes_processing_limit=0)}}
+
+    @pytest.mark.asyncio
+    async def test_e019_product_id_with_formatting(self, mock_runnable_config):
+        """Test E019: Product ID with formatting ([CBT 89 01] + FZZ1098)."""
+        email = CustomerEmail(
+            email_id="E019",
+            subject="Hi",
+            message="Hey there, I would like to buy Chelsea Boots [CBT 89 01] from you guys! You're so awesome I'm so impressed with the quality of Fuzzy Slippers - FZZ1098 I've bought from you before. I hope the quality stays. I would like to order Retro sunglasses from you, but probably next time! Thanks",
+        )
+    
+        classifier_input = ClassifierInput(email=email)
+>       result = await run_classifier(
+            state=classifier_input, config=mock_runnable_config
+        )
+
+tests/integration/test_classifier_integration.py:725: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:287: in __await__
+    yield self  # This tells Task to wait for completion.
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:349: in __wakeup
+    future.result()
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:203: in result
+    raise self._exception.with_traceback(self._exception_tb)
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:277: in __step
+    result = coro.send(None)
+hermes/agents/classifier/agent.py:88: in run_classifier
+    raise e
+hermes/agents/classifier/agent.py:63: in run_classifier
+    email_analysis_result: EmailAnalysis = await analysis_chain.ainvoke(
+.venv/lib/python3.11/site-packages/langchain_core/runnables/base.py:3089: in ainvoke
+    input_ = await coro_with_context(part(), context, create_task=True)
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:287: in __await__
+    yield self  # This tells Task to wait for completion.
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:349: in __wakeup
+    future.result()
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:203: in result
+    raise self._exception.with_traceback(self._exception_tb)
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:277: in __step
+    result = coro.send(None)
+.venv/lib/python3.11/site-packages/langchain_core/output_parsers/base.py:219: in ainvoke
+    return await self._acall_with_config(
+.venv/lib/python3.11/site-packages/langchain_core/runnables/base.py:1991: in _acall_with_config
+    output: Output = await coro_with_context(coro, context)
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:287: in __await__
+    yield self  # This tells Task to wait for completion.
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:349: in __wakeup
+    future.result()
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:203: in result
+    raise self._exception.with_traceback(self._exception_tb)
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:279: in __step
+    result = coro.throw(exc)
+.venv/lib/python3.11/site-packages/langchain_core/output_parsers/base.py:280: in aparse_result
+    return await run_in_executor(None, self.parse_result, result, partial=partial)
+.venv/lib/python3.11/site-packages/langchain_core/runnables/config.py:616: in run_in_executor
+    return await asyncio.get_running_loop().run_in_executor(
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:287: in __await__
+    yield self  # This tells Task to wait for completion.
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/tasks.py:349: in __wakeup
+    future.result()
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/futures.py:203: in result
+    raise self._exception.with_traceback(self._exception_tb)
+/Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+.venv/lib/python3.11/site-packages/langchain_core/runnables/config.py:607: in wrapper
+    return func(*args, **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PydanticToolsParser(first_tool_only=True, tools=[<class 'hermes.model.email.EmailAnalysis'>])
+result = [ChatGeneration(message=AIMessage(content='', additional_kwargs={'function_call': {'name': 'EmailAnalysis', 'arguments...'input_tokens': 1631, 'output_tokens': 239, 'total_tokens': 1870, 'input_token_details': {'cache_read': 0}}), text='')]
+
+    def parse_result(self, result: list[Generation], *, partial: bool = False) -> Any:
+        """Parse the result of an LLM call to a list of Pydantic objects.
+    
+        Args:
+            result: The result of the LLM call.
+            partial: Whether to parse partial JSON.
+                If True, the output will be a JSON object containing
+                all the keys that have been returned so far.
+                If False, the output will be the full JSON object.
+                Default is False.
+    
+        Returns:
+            The parsed Pydantic objects.
+    
+        Raises:
+            OutputParserException: If the output is not valid JSON.
+        """
+        json_results = super().parse_result(result, partial=partial)
+        if not json_results:
+            return None if self.first_tool_only else []
+    
+        json_results = [json_results] if self.first_tool_only else json_results
+        name_dict = {tool.__name__: tool for tool in self.tools}
+        pydantic_objects = []
+        for res in json_results:
+            if not isinstance(res["args"], dict):
+                if partial:
+                    continue
+                msg = (
+                    f"Tool arguments must be specified as a dict, received: "
+                    f"{res['args']}"
+                )
+                raise ValueError(msg)
+            try:
+>               pydantic_objects.append(name_dict[res["type"]](**res["args"]))
+E               pydantic_core._pydantic_core.ValidationError: 1 validation error for EmailAnalysis
+E               segments.1.product_mentions.0.product_category
+E                 Input should be 'Accessories', 'Bags', "Kid's Clothing", 'Loungewear', "Men's Accessories", "Men's Clothing", "Men's Shoes", "Women's Clothing", "Women's Shoes" or 'Shirts' [type=enum, input_value='None', input_type=str]
+E                   For further information visit https://errors.pydantic.dev/2.11/v/enum
+E               Error in Classifier for email E019 (type: pydantic_core._pydantic_core.ValidationError)
+
+.venv/lib/python3.11/site-packages/langchain_core/output_parsers/openai_tools.py:306: ValidationError
+----------------------------- Captured stdout call -----------------------------
+[Classifier] Analyzing email E019 - Subject: 'Hi'...                            
+[Classifier] Error in Classifier for email E019 (type:                          
+pydantic_core._pydantic_core.ValidationError)                                   
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /work/crossover/hermes/hermes/agents/classifier/agent.py:63 in               │
+│ run_classifier                                                               │
+│                                                                              │
+│   60 │   │   analysis_chain = CLASSIFIER_PROMPT | llm                        │
+│   61 │   │                                                                   │
+│   62 │   │   # chain_result should now be an EmailAnalysis instance directly │
+│ ❱ 63 │   │   email_analysis_result: EmailAnalysis = await analysis_chain.ain │
+│   64 │   │   │   state.email.model_dump()                                    │
+│   65 │   │   )                                                               │
+│   66                                                                         │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/run │
+│ nables/base.py:3089 in ainvoke                                               │
+│                                                                              │
+│   3086 │   │   │   │   │   │   part = functools.partial(step.ainvoke, input_ │
+│   3087 │   │   │   │   │   else:                                             │
+│   3088 │   │   │   │   │   │   part = functools.partial(step.ainvoke, input_ │
+│ ❱ 3089 │   │   │   │   │   input_ = await coro_with_context(part(), context, │
+│   3090 │   │   │   # finish the root run                                     │
+│   3091 │   │   except BaseException as e:                                    │
+│   3092 │   │   │   await run_manager.on_chain_error(e)                       │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/futures.py:287 in __await__                             │
+│                                                                              │
+│   284 │   def __await__(self):                                               │
+│   285 │   │   if not self.done():                                            │
+│   286 │   │   │   self._asyncio_future_blocking = True                       │
+│ ❱ 287 │   │   │   yield self  # This tells Task to wait for completion.      │
+│   288 │   │   if not self.done():                                            │
+│   289 │   │   │   raise RuntimeError("await wasn't used with future")        │
+│   290 │   │   return self.result()  # May raise too.                         │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/tasks.py:349 in __wakeup                                │
+│                                                                              │
+│   346 │                                                                      │
+│   347 │   def __wakeup(self, future):                                        │
+│   348 │   │   try:                                                           │
+│ ❱ 349 │   │   │   future.result()                                            │
+│   350 │   │   except BaseException as exc:                                   │
+│   351 │   │   │   # This may also be a cancellation.                         │
+│   352 │   │   │   self.__step(exc)                                           │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/futures.py:203 in result                                │
+│                                                                              │
+│   200 │   │   │   raise exceptions.InvalidStateError('Result is not ready.') │
+│   201 │   │   self.__log_traceback = False                                   │
+│   202 │   │   if self._exception is not None:                                │
+│ ❱ 203 │   │   │   raise self._exception.with_traceback(self._exception_tb)   │
+│   204 │   │   return self._result                                            │
+│   205 │                                                                      │
+│   206 │   def exception(self):                                               │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/tasks.py:277 in __step                                  │
+│                                                                              │
+│   274 │   │   │   if exc is None:                                            │
+│   275 │   │   │   │   # We use the `send` method directly, because coroutine │
+│   276 │   │   │   │   # don't have `__iter__` and `__next__` methods.        │
+│ ❱ 277 │   │   │   │   result = coro.send(None)                               │
+│   278 │   │   │   else:                                                      │
+│   279 │   │   │   │   result = coro.throw(exc)                               │
+│   280 │   │   except StopIteration as exc:                                   │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/out │
+│ put_parsers/base.py:219 in ainvoke                                           │
+│                                                                              │
+│   216 │   │   **kwargs: Optional[Any],                                       │
+│   217 │   ) -> T:                                                            │
+│   218 │   │   if isinstance(input, BaseMessage):                             │
+│ ❱ 219 │   │   │   return await self._acall_with_config(                      │
+│   220 │   │   │   │   lambda inner_input: self.aparse_result(                │
+│   221 │   │   │   │   │   [ChatGeneration(message=inner_input)]              │
+│   222 │   │   │   │   ),                                                     │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/run │
+│ nables/base.py:1991 in _acall_with_config                                    │
+│                                                                              │
+│   1988 │   │   │   │   coro = acall_func_with_variable_args(                 │
+│   1989 │   │   │   │   │   func, input_, config, run_manager, **kwargs       │
+│   1990 │   │   │   │   )                                                     │
+│ ❱ 1991 │   │   │   │   output: Output = await coro_with_context(coro, contex │
+│   1992 │   │   except BaseException as e:                                    │
+│   1993 │   │   │   await run_manager.on_chain_error(e)                       │
+│   1994 │   │   │   raise                                                     │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/futures.py:287 in __await__                             │
+│                                                                              │
+│   284 │   def __await__(self):                                               │
+│   285 │   │   if not self.done():                                            │
+│   286 │   │   │   self._asyncio_future_blocking = True                       │
+│ ❱ 287 │   │   │   yield self  # This tells Task to wait for completion.      │
+│   288 │   │   if not self.done():                                            │
+│   289 │   │   │   raise RuntimeError("await wasn't used with future")        │
+│   290 │   │   return self.result()  # May raise too.                         │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/tasks.py:349 in __wakeup                                │
+│                                                                              │
+│   346 │                                                                      │
+│   347 │   def __wakeup(self, future):                                        │
+│   348 │   │   try:                                                           │
+│ ❱ 349 │   │   │   future.result()                                            │
+│   350 │   │   except BaseException as exc:                                   │
+│   351 │   │   │   # This may also be a cancellation.                         │
+│   352 │   │   │   self.__step(exc)                                           │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/futures.py:203 in result                                │
+│                                                                              │
+│   200 │   │   │   raise exceptions.InvalidStateError('Result is not ready.') │
+│   201 │   │   self.__log_traceback = False                                   │
+│   202 │   │   if self._exception is not None:                                │
+│ ❱ 203 │   │   │   raise self._exception.with_traceback(self._exception_tb)   │
+│   204 │   │   return self._result                                            │
+│   205 │                                                                      │
+│   206 │   def exception(self):                                               │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/tasks.py:279 in __step                                  │
+│                                                                              │
+│   276 │   │   │   │   # don't have `__iter__` and `__next__` methods.        │
+│   277 │   │   │   │   result = coro.send(None)                               │
+│   278 │   │   │   else:                                                      │
+│ ❱ 279 │   │   │   │   result = coro.throw(exc)                               │
+│   280 │   │   except StopIteration as exc:                                   │
+│   281 │   │   │   if self._must_cancel:                                      │
+│   282 │   │   │   │   # Task is cancelled right before coro stops.           │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/out │
+│ put_parsers/base.py:280 in aparse_result                                     │
+│                                                                              │
+│   277 │   │   Returns:                                                       │
+│   278 │   │   │   Structured output.                                         │
+│   279 │   │   """                                                            │
+│ ❱ 280 │   │   return await run_in_executor(None, self.parse_result, result,  │
+│   281 │                                                                      │
+│   282 │   async def aparse(self, text: str) -> T:                            │
+│   283 │   │   """Async parse a single string model output into some structur │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/run │
+│ nables/config.py:616 in run_in_executor                                      │
+│                                                                              │
+│   613 │                                                                      │
+│   614 │   if executor_or_config is None or isinstance(executor_or_config, di │
+│   615 │   │   # Use default executor with context copied from current contex │
+│ ❱ 616 │   │   return await asyncio.get_running_loop().run_in_executor(       │
+│   617 │   │   │   None,                                                      │
+│   618 │   │   │   cast("Callable[..., T]", partial(copy_context().run, wrapp │
+│   619 │   │   )                                                              │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/futures.py:287 in __await__                             │
+│                                                                              │
+│   284 │   def __await__(self):                                               │
+│   285 │   │   if not self.done():                                            │
+│   286 │   │   │   self._asyncio_future_blocking = True                       │
+│ ❱ 287 │   │   │   yield self  # This tells Task to wait for completion.      │
+│   288 │   │   if not self.done():                                            │
+│   289 │   │   │   raise RuntimeError("await wasn't used with future")        │
+│   290 │   │   return self.result()  # May raise too.                         │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/tasks.py:349 in __wakeup                                │
+│                                                                              │
+│   346 │                                                                      │
+│   347 │   def __wakeup(self, future):                                        │
+│   348 │   │   try:                                                           │
+│ ❱ 349 │   │   │   future.result()                                            │
+│   350 │   │   except BaseException as exc:                                   │
+│   351 │   │   │   # This may also be a cancellation.                         │
+│   352 │   │   │   self.__step(exc)                                           │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/asyncio/futures.py:203 in result                                │
+│                                                                              │
+│   200 │   │   │   raise exceptions.InvalidStateError('Result is not ready.') │
+│   201 │   │   self.__log_traceback = False                                   │
+│   202 │   │   if self._exception is not None:                                │
+│ ❱ 203 │   │   │   raise self._exception.with_traceback(self._exception_tb)   │
+│   204 │   │   return self._result                                            │
+│   205 │                                                                      │
+│   206 │   def exception(self):                                               │
+│                                                                              │
+│ /Users/svallory/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/li │
+│ b/python3.11/concurrent/futures/thread.py:58 in run                          │
+│                                                                              │
+│    55 │   │   │   return                                                     │
+│    56 │   │                                                                  │
+│    57 │   │   try:                                                           │
+│ ❱  58 │   │   │   result = self.fn(*self.args, **self.kwargs)                │
+│    59 │   │   except BaseException as exc:                                   │
+│    60 │   │   │   self.future.set_exception(exc)                             │
+│    61 │   │   │   # Break a reference cycle with the exception 'exc'         │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/run │
+│ nables/config.py:607 in wrapper                                              │
+│                                                                              │
+│   604 │                                                                      │
+│   605 │   def wrapper() -> T:                                                │
+│   606 │   │   try:                                                           │
+│ ❱ 607 │   │   │   return func(*args, **kwargs)                               │
+│   608 │   │   except StopIteration as exc:                                   │
+│   609 │   │   │   # StopIteration can't be set on an asyncio.Future          │
+│   610 │   │   │   # it raises a TypeError and leaves the Future pending fore │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/langchain_core/out │
+│ put_parsers/openai_tools.py:306 in parse_result                              │
+│                                                                              │
+│   303 │   │   │   │   )                                                      │
+│   304 │   │   │   │   raise ValueError(msg)                                  │
+│   305 │   │   │   try:                                                       │
+│ ❱ 306 │   │   │   │   pydantic_objects.append(name_dict[res["type"]](**res[" │
+│   307 │   │   │   except (ValidationError, ValueError):                      │
+│   308 │   │   │   │   if partial:                                            │
+│   309 │   │   │   │   │   continue                                           │
+│                                                                              │
+│ /work/crossover/hermes/.venv/lib/python3.11/site-packages/pydantic/main.py:2 │
+│ 53 in __init__                                                               │
+│                                                                              │
+│    250 │   │   """                                                           │
+│    251 │   │   # `__tracebackhide__` tells pytest and some other tools to om │
+│        from tracebacks                                                       │
+│    252 │   │   __tracebackhide__ = True                                      │
+│ ❱  253 │   │   validated_self = self.__pydantic_validator__.validate_python( │
+│        self_instance=self)                                                   │
+│    254 │   │   if self is not validated_self:                                │
+│    255 │   │   │   warnings.warn(                                            │
+│    256 │   │   │   │   'A custom validator is returning a value other than ` │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ValidationError: 1 validation error for EmailAnalysis                           
+segments.1.product_mentions.0.product_category                                  
+  Input should be 'Accessories', 'Bags', "Kid's Clothing", 'Loungewear', "Men's 
+Accessories", "Men's Clothing", "Men's Shoes", "Women's Clothing", "Women's     
+Shoes" or 'Shirts' [type=enum, input_value='None', input_type=str]              
+    For further information visit https://errors.pydantic.dev/2.11/v/enum       
+------------------------------ Captured log call -------------------------------
+WARNING  langchain_google_genai.chat_models:chat_models.py:1104 Unexpected argument 'base_url' provided to ChatGoogleGenerativeAI.
+=============================== warnings summary ===============================
+tests/integration/test_classifier_integration.py: 18 warnings
+tests/integration/test_offers_integration.py: 4 warnings
+  /work/crossover/hermes/hermes/agents/classifier/agent.py:52: UserWarning: WARNING! base_url is not default parameter.
+                  base_url was transferred to model_kwargs.
+                  Please confirm that base_url is what you intended.
+    llm = get_llm_client(
+
+tests/integration/test_fulfiller_promotions.py::TestFulfillerPromotionDetection::test_canvas_beach_bag_bogo_promotion
+tests/integration/test_fulfiller_promotions.py::TestFulfillerPromotionDetection::test_quilted_tote_percentage_promotion
+tests/integration/test_offers_integration.py::TestOffersIntegration::test_no_promotion_for_standard_order
+tests/integration/test_fulfiller_promotions.py::TestFulfillerPromotionDetection::test_plaid_flannel_vest_combination_promotion
+tests/integration/test_fulfiller_promotions.py::TestFulfillerPromotionDetection::test_bomber_jacket_free_beanie_promotion
+tests/integration/test_fulfiller_promotions.py::TestFulfillerPromotionDetection::test_knit_mini_dress_bogo_promotion
+tests/integration/test_fulfiller_promotions.py::TestFulfillerPromotionDetection::test_no_promotion_product
+tests/integration/test_offers_integration.py::TestOffersIntegration::test_partial_bundle_order
+  /work/crossover/hermes/hermes/agents/fulfiller/agent.py:55: UserWarning: WARNING! base_url is not default parameter.
+                  base_url was transferred to model_kwargs.
+                  Please confirm that base_url is what you intended.
+    llm = get_llm_client(
+
+tests/integration/test_advisor_integration.py: 8 warnings
+tests/integration/test_offers_integration.py: 2 warnings
+  /work/crossover/hermes/hermes/agents/advisor/agent.py:71: UserWarning: WARNING! base_url is not default parameter.
+                  base_url was transferred to model_kwargs.
+                  Please confirm that base_url is what you intended.
+    llm = get_llm_client(
+
+tests/integration/test_offers_integration.py::TestOffersIntegration::test_no_promotion_for_standard_order
+tests/integration/test_offers_integration.py::TestOffersIntegration::test_bogo_beach_bag_explicit_order
+tests/integration/test_offers_integration.py::TestOffersIntegration::test_vague_beach_bag_inquiry
+tests/integration/test_offers_integration.py::TestOffersIntegration::test_partial_bundle_order
+  /work/crossover/hermes/.venv/lib/python3.11/site-packages/langgraph/utils/fields.py:162: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    defaults = {k: v.default for k, v in input.model_fields.items()}
+
+tests/integration/test_offers_integration.py: 4 warnings
+tests/integration/test_composer_integration.py: 7 warnings
+  /work/crossover/hermes/hermes/agents/composer/agent.py:74: UserWarning: WARNING! base_url is not default parameter.
+                  base_url was transferred to model_kwargs.
+                  Please confirm that base_url is what you intended.
+    llm_with_tools = get_llm_client(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_advisor_integration.py::TestAdvisorIntegration::test_winter_hats_inquiry_e021
+FAILED tests/integration/test_offers_integration.py::TestOffersIntegration::test_partial_bundle_order
+FAILED tests/integration/test_classifier_integration.py::TestClassifierIntegration::test_e019_product_id_with_formatting
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 3 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!!
+= 3 failed, 50 passed, 2 xfailed, 1 xpassed, 55 warnings in 168.82s (0:02:48) ==

@@ -1,0 +1,111 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E040
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What is the current pricing on quilted tote bags for work?
+    unsuccessful_references:
+    - quilted tote bag for work
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E040
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I need a quilted tote bag for work. What's your current pricing
+        on those?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: quilted tote bag for work
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: quilted tote bag for work
+        product_id: null
+        product_name: null
+        product_type: tote bag
+        quantity: 1
+      related_sentences:
+      - Good afternoon, I need a quilted tote bag for work.
+      - What's your current pricing on those?
+      - Thank you.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E040
+  language: English
+  response_body: 'Good afternoon,
+
+
+    Thank you for reaching out to Hermes with your inquiry about quilted tote bags
+    suitable for work. We truly appreciate your interest in our collection.
+
+
+    At this moment, we do not have specific information on quilted tote bags for work
+    in our current catalog. However, we would be delighted to assist you further.
+    If you have a particular style, color, or size in mind, please let us know so
+    we can recommend the closest matches from our exclusive range or provide updates
+    on upcoming collections.
+
+
+    Alternatively, if you are open to exploring similar elegant and functional bags
+    perfect for work, we can share details and pricing for other tote bags and professional
+    handbags from Hermes.
+
+
+    Thank you again for considering Hermes. We look forward to helping you find the
+    perfect accessory for your workday.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Good afternoon and thank you for your inquiry.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Currently, we do not have specific information on quilted tote bags for
+      work in our catalog.
+    content_type: product_info
+    priority: 9
+    related_to: quilted tote bag for work
+  - content: Requested more details on style, color, or size to better assist the
+      customer.
+    content_type: answer
+    priority: 8
+    related_to: quilted tote bag for work
+  - content: Offered to share information about similar elegant and functional bags
+      suitable for work.
+    content_type: alternative
+    priority: 7
+    related_to: quilted tote bag for work
+  - content: Thanked the customer and expressed eagerness to assist further.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: "Quilted Tote Bags for Work \u2013 Pricing Inquiry"
+  tone: professional and warm
+email:
+  email_id: E040
+  message: Good afternoon, I need a quilted tote bag for work. What's your current
+    pricing on those? Thank you.
+  subject: Work tote bag
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 318ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: quilted tote bag for work
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: quilted tote bag for work
+    product_id: null
+    product_name: null
+    product_type: tote bag
+    quantity: 1

@@ -1,0 +1,102 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E060
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What are your best deals on dresses right now? (including casual and party options)
+    unsuccessful_references:
+    - dresses
+    - casual and party options
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E060
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Hi, what are your best deals on dresses right now?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: dresses
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: casual and party options
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - I'm looking for casual and party options.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E060
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to Hermes with your interest in our dresses. We are
+    delighted to assist you in finding the perfect pieces for both casual and party
+    occasions.
+
+
+    Currently, our collection features a range of stylish dresses ideal for everyday
+    wear as well as elegant options for special celebrations. While we do not have
+    specific promotional deals at this moment, we take great pride in offering exclusive,
+    high-quality designs each season. If you share your preferences for style, color,
+    or occasion, we would be happy to provide personalized recommendations from our
+    latest arrivals.
+
+
+    Please let us know your preferences or any particular looks you have in mind,
+    and we will ensure you receive options tailored to your taste.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Thank the customer for their interest and reaching out.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that there are currently no special deals, but highlight
+      the exclusive and high-quality dresses available for both casual and party occasions.
+    content_type: answer
+    priority: 9
+    related_to: What are your best deals on dresses right now? (including casual and
+      party options)
+  - content: Invite the customer to share their style, color, or occasion preferences
+      for tailored recommendations.
+    content_type: personalization
+    priority: 8
+    related_to: casual and party options
+  - content: Offer further assistance and sign off warmly.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: "Discover Our Latest Dresses \u2013 Casual & Party Styles Await!"
+  tone: professional and warm
+email:
+  email_id: E060
+  message: Hi, what are your best deals on dresses right now? I'm looking for casual
+    and party options.
+  subject: Best dress deals
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 17399ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: dresses
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: casual and party options
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1

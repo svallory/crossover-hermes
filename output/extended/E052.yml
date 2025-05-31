@@ -1,0 +1,203 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The available stock for the Knit Mini Dress (KMN3210) is 4 units. Specific
+        size information is not provided in the product data.
+      answer_type: factual
+      confidence: 0.5
+      question: What sizes are available?
+      reference_product_ids:
+      - KMN3210
+    email_id: E052
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Effortless and chic, our knit mini dress is a must-have for your
+        wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+        features a flattering silhouette and a trendy, mini length. Perfect for date
+        nights, girls' nights out, or dressing up or down. Limited-time sale - get
+        two for the price of one!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: KMN3210, Type: dress, Category: Women''s
+        Clothing, Quantity: 1)'
+      name: Knit Mini Dress
+      price: 53.0
+      product_id: KMN3210
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 4
+    related_products: []
+    unanswered_questions:
+    - What specific sizes are available for the Knit Mini Dress (KMN3210)?
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E052
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Hi, I love the knit mini dress KMN3210.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: knit mini dress KMN3210
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: knit mini dress
+        product_id: KMN3210
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: What sizes are available?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: knit mini dress KMN3210
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: knit mini dress
+        product_id: KMN3210
+        product_name: null
+        product_type: dress
+        quantity: null
+      related_sentences:
+      - I might need more than one.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E052
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to us and for your kind words about our Knit Mini Dress
+    (KMN3210). We''re delighted to hear that you love it!
+
+
+    Our Knit Mini Dress is an effortless and chic addition to any wardrobe, crafted
+    from soft, stretchy knit material for a flattering fit. It''s perfect for a range
+    of occasions, from date nights to girls'' outings, and can be styled up or down
+    for any season.
+
+
+    Currently, we have 4 units available in stock. However, I apologize that specific
+    sizing information is not available at this time. If you have a particular size
+    in mind, please let us know, and we will be happy to check availability for you
+    or offer further assistance.
+
+
+    As a special note, we are running a limited-time offer: get two Knit Mini Dresses
+    for the price of one! This could be the perfect opportunity if you are considering
+    more than one.
+
+
+    If you have any other questions or need personalized recommendations to complete
+    your look, please don''t hesitate to ask. We''re here to help make your shopping
+    experience exceptional.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Thanked the customer for their interest and compliment about the Knit
+      Mini Dress.
+    content_type: greeting
+    priority: 10
+    related_to: KMN3210
+  - content: Described the features and appeal of the Knit Mini Dress (KMN3210), highlighting
+      its versatility and style.
+    content_type: product_info
+    priority: 9
+    related_to: KMN3210
+  - content: Informed the customer that there are 4 units in stock, but specific size
+      information is currently unavailable.
+    content_type: answer
+    priority: 10
+    related_to: KMN3210
+  - content: 'Mentioned the limited-time offer: get two Knit Mini Dresses for the
+      price of one.'
+    content_type: promotion
+    priority: 8
+    related_to: KMN3210
+  - content: Invited the customer to specify desired size or request further assistance
+      and recommendations.
+    content_type: offer_help
+    priority: 7
+    related_to: null
+  - content: Signed off with a warm closing and brand signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: 'Regarding Your Inquiry: Knit Mini Dress KMN3210 Sizes & Details'
+  tone: professional and warm
+email:
+  email_id: E052
+  message: Hi, I love the knit mini dress KMN3210. What sizes are available? I might
+    need more than one.
+  subject: Knit dress sizes
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 2 candidates;
+    Processing took 6ms; Successfully resolved 2 out of 2 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Effortless and chic, our knit mini dress is a must-have for your
+      wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+      features a flattering silhouette and a trendy, mini length. Perfect for date
+      nights, girls' nights out, or dressing up or down. Limited-time sale - get two
+      for the price of one!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: KMN3210, Type: dress, Category: Women''s
+      Clothing, Quantity: 1)'
+    name: Knit Mini Dress
+    price: 53.0
+    product_id: KMN3210
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 4
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Effortless and chic, our knit mini dress is a must-have for your
+      wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+      features a flattering silhouette and a trendy, mini length. Perfect for date
+      nights, girls' nights out, or dressing up or down. Limited-time sale - get two
+      for the price of one!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+      mention: N/A (ID: KMN3210, Type: dress, Category: Women''s Clothing, Quantity:
+      None)'
+    name: Knit Mini Dress
+    price: 53.0
+    product_id: KMN3210
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 4
+  unresolved_mentions: []

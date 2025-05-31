@@ -1,0 +1,147 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Shipping information is not available in the provided product data.
+      answer_type: unavailable
+      confidence: 0.0
+      question: Do you ship internationally?
+      reference_product_ids: []
+    - answer: 'The price for one Knit Mini Dress (KMN3210) is $53. There is a limited-time
+        promotion: get two for the price of one. Stock available: 4 units.'
+      answer_type: factual
+      confidence: 1.0
+      question: What would the total cost be for multiple Knit Mini Dresses (KMN3210)?
+      reference_product_ids:
+      - KMN3210
+    email_id: E046
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Effortless and chic, our knit mini dress is a must-have for your
+        wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+        features a flattering silhouette and a trendy, mini length. Perfect for date
+        nights, girls' nights out, or dressing up or down. Limited-time sale - get
+        two for the price of one!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+        mention: N/A (ID: KMN3210, Type: dress, Category: Women''s Clothing, Quantity:
+        None)'
+      name: Knit Mini Dress
+      price: 53.0
+      product_id: KMN3210
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 4
+    related_products: []
+    unanswered_questions:
+    - Do you ship internationally?
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E046
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Do you ship internationally and what would the total cost be
+        for multiple dresses?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: knit mini dress KMN3210
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: knit mini dress
+        product_id: KMN3210
+        product_name: null
+        product_type: dress
+        quantity: null
+      related_sentences:
+      - Hi, I'm in Canada and interested in that knit mini dress KMN3210.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E046
+  language: English
+  response_body: "Hello,\n\nThank you for reaching out to Hermes and expressing interest\
+    \ in our Knit Mini Dress (KMN3210). We're delighted to hear from you all the way\
+    \ in Canada!\n\nRegarding your inquiry about international shipping, I apologize\
+    \ as our current product data does not include detailed information about shipping\
+    \ to Canada. However, I recommend visiting our website or contacting our customer\
+    \ service directly at [Hermes Customer Service Email/Phone] for the most up-to-date\
+    \ and accurate international shipping options tailored for your location.\n\n\
+    For the Knit Mini Dress (KMN3210), it is currently available and on a limited-time\
+    \ promotion: you can get two for the price of one, at $53 USD per dress. With\
+    \ four units left in stock, this is a wonderful opportunity to add this effortless\
+    \ and chic piece to your wardrobe\u2014perfect for date nights or a girls' night\
+    \ out.\n\nIf you need assistance placing an order or have any further questions,\
+    \ please let me know. I'm here to help make your shopping experience exceptional.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their interest and mention their location in Canada.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Provide a detailed description of the Knit Mini Dress (KMN3210), including
+      its style, price, promotion (two for one), and stock availability.
+    content_type: product_info
+    priority: 9
+    related_to: KMN3210
+  - content: Address the international shipping inquiry by acknowledging the lack
+      of specific shipping information and suggest contacting customer service for
+      details.
+    content_type: answer
+    priority: 8
+    related_to: Do you ship internationally?
+  - content: Give the total cost details and promotion for multiple dresses as requested.
+    content_type: answer
+    priority: 8
+    related_to: What would the total cost be for multiple Knit Mini Dresses (KMN3210)?
+  - content: Offer further assistance and sign off warmly.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: Inquiry About International Shipping and Knit Mini Dress KMN3210
+  tone: professional and warm
+email:
+  email_id: E046
+  message: Hi, I'm in Canada and interested in that knit mini dress KMN3210. Do you
+    ship internationally and what would the total cost be for multiple dresses?
+  subject: International shipping question
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 3ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Effortless and chic, our knit mini dress is a must-have for your
+      wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+      features a flattering silhouette and a trendy, mini length. Perfect for date
+      nights, girls' nights out, or dressing up or down. Limited-time sale - get two
+      for the price of one!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+      mention: N/A (ID: KMN3210, Type: dress, Category: Women''s Clothing, Quantity:
+      None)'
+    name: Knit Mini Dress
+    price: 53.0
+    product_id: KMN3210
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 4
+  unresolved_mentions: []

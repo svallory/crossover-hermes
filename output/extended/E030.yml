@@ -1,0 +1,149 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: 'There is a limited-time sale for the Knit Mini Dress (KMN3210): get
+        two for the price of one.'
+      answer_type: factual
+      confidence: 1.0
+      question: Is there any advantage to ordering multiple Knit Mini Dresses (KMN3210)?
+      reference_product_ids:
+      - KMN3210
+    email_id: E030
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Effortless and chic, our knit mini dress is a must-have for your
+        wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+        features a flattering silhouette and a trendy, mini length. Perfect for date
+        nights, girls' nights out, or dressing up or down. Limited-time sale - get
+        two for the price of one!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+        mention: N/A (ID: KMN3210, Type: dress, Category: Women''s Clothing, Quantity:
+        None)'
+      name: Knit Mini Dress
+      price: 53.0
+      product_id: KMN3210
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 4
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Rachel
+    email_id: E030
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm organizing outfits for my girls' night outs
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: I need some knit mini dresses. The KMN3210 looks perfect! I might
+        need a few of them. Is there any advantage to ordering multiple?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: KMN3210
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: knit mini dress
+        product_id: KMN3210
+        product_name: null
+        product_type: dress
+        quantity: null
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E030
+  language: English
+  response_body: "Dear Rachel,\n\nThank you for reaching out to us and sharing your\
+    \ plans for upcoming girls' night outs \u2014 that sounds like so much fun! We're\
+    \ excited to help you find the perfect outfits for the occasion.\n\nOur Knit Mini\
+    \ Dress (KMN3210) is indeed a fantastic choice: it\u2019s effortless, chic, and\
+    \ versatile, ideal for both dressing up and down. As a special bonus, we are currently\
+    \ running a limited-time sale on this style: when you order two, you get them\
+    \ for the price of one. This is a wonderful opportunity if you need a few dresses\
+    \ for your events or perhaps to coordinate with your friends.\n\nPlease note,\
+    \ we currently have four of these dresses in stock. If you\u2019d like to proceed\
+    \ with an order or have any other questions about sizing or styling, just let\
+    \ us know \u2014 we\u2019re here to make your girls\u2019 night out truly memorable.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank Rachel for reaching out and reference her upcoming girls' night
+      outs.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Highlight the Knit Mini Dress (KMN3210) as an effortless and chic option,
+      perfect for her occasion.
+    content_type: product_info
+    priority: 9
+    related_to: KMN3210
+  - content: 'Inform Rachel of the limited-time offer: get two Knit Mini Dresses for
+      the price of one.'
+    content_type: promotion
+    priority: 10
+    related_to: KMN3210
+  - content: Notify Rachel that there are currently four dresses available in stock.
+    content_type: stock_info
+    priority: 8
+    related_to: KMN3210
+  - content: Invite Rachel to place an order or ask further questions about sizing
+      or styling.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Warm closing and Hermes signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Special Offer on Knit Mini Dresses for Your Girls' Night Out!
+  tone: friendly and enthusiastic
+email:
+  email_id: E030
+  message: Hello! I'm organizing outfits for my girls' night outs and I need some
+    knit mini dresses. The KMN3210 looks perfect! I might need a few of them. Is there
+    any advantage to ordering multiple? Thanks, Rachel
+  subject: Dresses for going out
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 5ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    description: Effortless and chic, our knit mini dress is a must-have for your
+      wardrobe. Crafted from a soft, stretchy knit material, this form-fitting dress
+      features a flattering silhouette and a trendy, mini length. Perfect for date
+      nights, girls' nights out, or dressing up or down. Limited-time sale - get two
+      for the price of one!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Original
+      mention: N/A (ID: KMN3210, Type: dress, Category: Women''s Clothing, Quantity:
+      None)'
+    name: Knit Mini Dress
+    price: 53.0
+    product_id: KMN3210
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    - !!python/object/apply:hermes.model.enums.Season
+      - Summer
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    stock: 4
+  unresolved_mentions: []

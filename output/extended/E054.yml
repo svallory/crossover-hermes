@@ -1,0 +1,137 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The product TLR5432 is listed as a tailored suit. The current promotion
+        offers the full suit for the price of the blazer, indicating that only the
+        complete suit is available for purchase, not individual pieces.
+      answer_type: factual
+      confidence: 0.95
+      question: Do you sell individual pieces or only complete suits?
+      reference_product_ids:
+      - TLR5432
+    email_id: E054
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Exude confidence and professionalism with our tailored suit. Crafted
+        from premium wool, this suit features a sleek, modern fit and impeccable tailoring.
+        Perfect for important meetings, job interviews, or formal events. Limited-time
+        sale - get the full suit for the price of the blazer!
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: TLR5432, Type: blazer, Category: Men''s
+        Clothing, Quantity: 1)'
+      name: Tailored Suit
+      price: 55.0
+      product_id: TLR5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      stock: 4
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E054
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Do you sell individual pieces or only complete suits?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: TLR5432
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        product_description: blazer for work
+        product_id: TLR5432
+        product_name: null
+        product_type: blazer
+        quantity: 1
+      related_sentences:
+      - Hi, I just need a blazer for work.
+      - I'm looking at the TLR5432.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E054
+  language: English
+  response_body: "Dear Customer,\n\nThank you for reaching out to us with your question\
+    \ regarding our tailored suit collection. We appreciate your interest in the TLR5432\
+    \ blazer for your work wardrobe.\n\nCurrently, the TLR5432 is available as a complete\
+    \ tailored suit and not as an individual blazer. However, we are pleased to share\
+    \ that, for a limited time, you can receive the entire suit for the price of the\
+    \ blazer. This exclusive promotion allows you to enjoy the full ensemble \u2013\
+    \ expertly crafted from premium wool with a modern, professional fit \u2013 at\
+    \ exceptional value.\n\nShould you wish to explore other options or need assistance\
+    \ selecting the perfect piece for your needs, please let us know. We are always\
+    \ here to help you elevate your work attire.\n\nBest regards,\nHermes - Delivering\
+    \ divine fashion"
+  response_points:
+  - content: Thank the customer for their inquiry and interest in the TLR5432 blazer.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that the TLR5432 is only available as a complete
+      tailored suit, not as individual pieces.
+    content_type: answer
+    priority: 10
+    related_to: TLR5432
+  - content: 'Highlight the current promotion: the full suit is available for the
+      price of the blazer, offering exceptional value.'
+    content_type: promotion
+    priority: 9
+    related_to: TLR5432
+  - content: Offer further assistance or recommendations to help the customer find
+      the perfect piece.
+    content_type: help_offer
+    priority: 7
+    related_to: null
+  - content: Conclude the email with a warm signature from Hermes.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: "Availability of Individual Blazers \u2013 TLR5432 Inquiry"
+  tone: professional and warm
+email:
+  email_id: E054
+  message: Hi, I just need a blazer for work. Do you sell individual pieces or only
+    complete suits? I'm looking at the TLR5432.
+  subject: Tailored blazer only
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
+    Processing took 6ms; Successfully resolved 1 out of 1 mentions
+  resolved_products:
+  - category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Men's Clothing
+    description: Exude confidence and professionalism with our tailored suit. Crafted
+      from premium wool, this suit features a sleek, modern fit and impeccable tailoring.
+      Perfect for important meetings, job interviews, or formal events. Limited-time
+      sale - get the full suit for the price of the blazer!
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: TLR5432, Type: blazer, Category: Men''s
+      Clothing, Quantity: 1)'
+    name: Tailored Suit
+    price: 55.0
+    product_id: TLR5432
+    product_type: ''
+    promotion: null
+    promotion_text: null
+    seasons:
+    - !!python/object/apply:hermes.model.enums.Season
+      - Fall
+    - !!python/object/apply:hermes.model.enums.Season
+      - Winter
+    - !!python/object/apply:hermes.model.enums.Season
+      - Spring
+    stock: 4
+  unresolved_mentions: []

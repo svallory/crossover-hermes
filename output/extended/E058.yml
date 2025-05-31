@@ -1,0 +1,110 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E058
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What options do you have for dresses with floral prints and what are the current
+      prices?
+    unsuccessful_references:
+    - dresses with floral prints
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E058
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm looking for dresses with floral prints.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: dresses with floral prints
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: dresses with floral prints
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - What options do you have and what are the current prices?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E058
+  language: English
+  response_body: 'Dear Customer,
+
+
+    Thank you for reaching out to us with your interest in floral print dresses. We
+    truly appreciate your enthusiasm for our collection.
+
+
+    At the moment, it appears we do not have detailed information available for floral
+    print dresses in our current inventory. However, we would be delighted to assist
+    you further. If you could share any specific preferences regarding style, color,
+    length, or occasion, we can recommend options that best match your vision. Alternatively,
+    you are welcome to visit our boutique or explore our website, where our latest
+    arrivals and exclusive designs are frequently showcased.
+
+
+    If you have any other questions or need assistance finding the perfect dress,
+    please let us know. We are here to help you discover the ideal piece that reflects
+    your personal style.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
+  response_points:
+  - content: Thank the customer for their interest in floral print dresses and for
+      contacting Hermes.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that detailed information on floral print dresses
+      is currently unavailable.
+    content_type: answer
+    priority: 9
+    related_to: What options do you have for dresses with floral prints and what are
+      the current prices?
+  - content: Invite the customer to share preferences for personalized recommendations,
+      or suggest visiting the boutique or website for the latest styles.
+    content_type: alternative
+    priority: 8
+    related_to: null
+  - content: Reassure the customer of assistance and encourage them to reach out with
+      further questions.
+    content_type: closing
+    priority: 7
+    related_to: null
+  - content: 'Best regards,
+
+      Hermes - Delivering divine fashion'
+    content_type: signature
+    priority: 6
+    related_to: null
+  subject: Our Floral Print Dress Collection at Hermes
+  tone: professional and warm
+email:
+  email_id: E058
+  message: Hi, I'm looking for dresses with floral prints. What options do you have
+    and what are the current prices?
+  subject: Floral print options
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 327ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: dresses with floral prints
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Women's Clothing
+    product_description: dresses with floral prints
+    product_id: null
+    product_name: null
+    product_type: dress
+    quantity: 1

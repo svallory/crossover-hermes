@@ -1,0 +1,101 @@
+advisor:
+  inquiry_answers:
+    answered_questions: []
+    email_id: E053
+    primary_products: []
+    related_products: []
+    unanswered_questions:
+    - What is your best option for a nice quilted tote bag as a gift for my mother?
+    unsuccessful_references:
+    - quilted tote bag
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E053
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm looking for a nice quilted tote bag as a gift for my mother.
+        What's your best option?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: quilted tote bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: nice quilted tote bag
+        product_id: null
+        product_name: null
+        product_type: tote bag
+        quantity: 1
+      related_sentences:
+      - Good afternoon, I'm looking for a nice quilted tote bag as a gift for my mother.
+      - What's your best option?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: as a gift for my mother
+      product_mentions: []
+      related_sentences:
+      - as a gift for my mother
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E053
+  language: English
+  response_body: "Good afternoon,\n\nThank you for reaching out to us at Hermes and\
+    \ for considering one of our pieces as a special gift for your mother. We truly\
+    \ appreciate your thoughtful gesture.\n\nAt this moment, we do not have a specific\
+    \ quilted tote bag featured in our current collection. However, we are always\
+    \ curating elegant and timeless handbags that make exceptional gifts. May I suggest\
+    \ exploring our signature tote selection, which includes luxurious leathers and\
+    \ refined craftsmanship\u2014each designed to delight and impress. If you would\
+    \ like, I can provide personalized recommendations based on your preferred colors,\
+    \ materials, or style sensibilities.\n\nPlease let me know if you have particular\
+    \ preferences or if you would like to see our most popular tote options for gifting.\
+    \ I am here to help ensure you find the perfect piece for your mother.\n\nBest\
+    \ regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for reaching out and considering Hermes for a gift
+      for their mother.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform the customer that there is currently no specific quilted tote
+      bag available, but highlight the quality and elegance of other tote options.
+    content_type: answer
+    priority: 9
+    related_to: What is your best option for a nice quilted tote bag as a gift for
+      my mother?
+  - content: Offer to provide personalized recommendations based on preferred colors,
+      materials, or style.
+    content_type: alternative
+    priority: 8
+    related_to: What is your best option for a nice quilted tote bag as a gift for
+      my mother?
+  - content: Invite the customer to share more details or preferences and sign off
+      warmly.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: Our Top Quilted Tote Bag Recommendations for a Special Gift
+  tone: professional and warm
+email:
+  email_id: E053
+  message: Good afternoon, I'm looking for a nice quilted tote bag as a gift for my
+    mother. What's your best option?
+  subject: Quilted bag for mother
+errors: {}
+fulfiller: null
+stockkeeper:
+  metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
+    Processing took 341ms
+  resolved_products: []
+  unresolved_mentions:
+  - confidence: 0.9
+    mention_text: quilted tote bag
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Bags
+    product_description: nice quilted tote bag
+    product_id: null
+    product_name: null
+    product_type: tote bag
+    quantity: 1
