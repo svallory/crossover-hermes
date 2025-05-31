@@ -123,7 +123,7 @@ class TestComposerIntegration:
         order_lines: Optional[list[OrderLine]] = None,
         total_price: float = 0.0,
         overall_status: Literal[
-            "created", "out_of_stock", "partially_fulfilled", "no_valid_products"
+            "created", "out of stock", "partially_fulfilled", "no_valid_products"
         ] = "created",
     ) -> FulfillerOutput:
         """Helper to create a FulfillerOutput."""

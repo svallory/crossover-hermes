@@ -1,22 +1,18 @@
 advisor:
   inquiry_answers:
     answered_questions:
-    - answer: The Cozy Shawl is knitted from soft, warm yarn and is described as suitable
-        to be worn as a shawl, scarf, or lightweight blanket. The product description
-        indicates it can be used as a lightweight blanket, which includes use as a
-        lap blanket.
+    - answer: The Cozy Shawl (CSH1098) is knitted from soft, warm yarn and its description
+        mentions it can be worn as a lightweight blanket. Its price is $22.0.
       answer_type: factual
-      confidence: 0.95
-      question: Is the material of the CSH1098 Cozy Shawl good enough quality to use
-        as a lap blanket?
+      confidence: 1.0
+      question: At $22, is the material good enough quality to use as a lap blanket?
       reference_product_ids:
       - CSH1098
-    - answer: The Cozy Shawl is a versatile accessory that can be worn as a shawl,
-        scarf, or lightweight blanket. It is knitted from soft, warm yarn and is suitable
-        for use as a thick wrapping scarf.
+    - answer: The Cozy Shawl (CSH1098) can be worn as a shawl, scarf, or a lightweight
+        blanket.
       answer_type: factual
-      confidence: 0.95
-      question: Is the CSH1098 Cozy Shawl more like a thick wrapping scarf?
+      confidence: 1.0
+      question: Or is it more like a thick wrapping scarf?
       reference_product_ids:
       - CSH1098
     email_id: E005
@@ -28,7 +24,7 @@ advisor:
         a lightweight blanket. Perfect for chilly evenings or adding a cozy layer
         to your outfit.
       metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
-        quantity: 1; Original mention: Cozy Shawl (ID: CSH1098, Type: shawl, Category:
+        quantity: 1; Original mention: Cozy Shawl (ID: CSH1098, Type: Shawl, Category:
         Accessories, Quantity: 1)'
       name: Cozy Shawl
       price: 22.0
@@ -49,25 +45,25 @@ classifier:
   email_analysis:
     customer_name: null
     email_id: E005
-    language: English
+    language: en
     primary_intent: product inquiry
     segments:
-    - main_sentence: For the CSH1098 Cozy Shawl, the description mentions it can be
-        worn as a lightweight blanket. At $22, is the material good enough quality
-        to use as a lap blanket? Or is it more like a thick wrapping scarf?
+    - main_sentence: At $22, is the material good enough quality to use as a lap blanket?
       product_mentions:
       - confidence: 1.0
         mention_text: CSH1098 Cozy Shawl
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Accessories
-        product_description: the description mentions it can be worn as a lightweight
-          blanket; is the material good enough quality to use as a lap blanket; is
-          it more like a thick wrapping scarf
+        product_description: description mentions it can be worn as a lightweight
+          blanket
         product_id: CSH1098
         product_name: Cozy Shawl
-        product_type: shawl
+        product_type: Shawl
         quantity: 1
-      related_sentences: []
+      related_sentences:
+      - For the CSH1098 Cozy Shawl, the description mentions it can be worn as a lightweight
+        blanket.
+      - Or is it more like a thick wrapping scarf?
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
     - main_sentence: I'm considering buying it as a gift for my grandmother.
@@ -76,10 +72,10 @@ classifier:
         mention_text: it
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Accessories
-        product_description: null
+        product_description: can be worn as a lightweight blanket
         product_id: CSH1098
         product_name: Cozy Shawl
-        product_type: shawl
+        product_type: Shawl
         quantity: 1
       related_sentences:
       - For the CSH1098 Cozy Shawl, the description mentions it can be worn as a lightweight
@@ -88,54 +84,71 @@ classifier:
       - personal_statement
 composer:
   email_id: E005
-  language: English
-  response_body: "Dear Customer,\n\nThank you for reaching out with your thoughtful\
-    \ questions about the Cozy Shawl (CSH1098). We're delighted to assist you as you\
-    \ consider this piece as a gift for your grandmother.\n\nThe Cozy Shawl is crafted\
-    \ from soft, warm yarn, making it not only a stylish accessory but also wonderfully\
-    \ practical. Its versatile design allows it to be worn as a shawl, a thick wrapping\
-    \ scarf, or even a lightweight blanket\u2014perfect for those moments when a little\
-    \ extra warmth is needed. Based on the product's description and quality, it is\
-    \ indeed suitable for use as a lap blanket, offering comfort whether draped over\
-    \ the shoulders or across the lap.\n\nWe believe your grandmother will appreciate\
-    \ both the comfort and versatility of this lovely accessory. Should you have any\
-    \ other questions or need recommendations for complementary gifts, please let\
-    \ us know\u2014our team is here to help.\n\nBest regards,\nHermes - Delivering\
-    \ divine fashion"
+  language: en
+  response_body: 'Dear Customer,
+
+
+    Thank you for your interest in our Cozy Shawl (CSH1098).
+
+
+    We understand you''re considering it as a gift for your grandmother and are wondering
+    about its suitability as a lap blanket. The Cozy Shawl is knitted from soft, warm
+    yarn and is indeed designed to be versatile. It can certainly be used as a lightweight
+    and comfortable lap blanket, perfect for providing a bit of extra warmth.
+
+
+    Additionally, as you mentioned, it can also be beautifully worn as a shawl or
+    a thick wrapping scarf, making it a truly adaptable accessory.
+
+
+    We believe it would make a wonderful and thoughtful gift for your grandmother.
+
+
+    If you have any more questions or need further assistance, please don''t hesitate
+    to ask.
+
+
+    Best regards,
+
+    Hermes - Delivering divine fashion'
   response_points:
-  - content: Thank you for reaching out with your thoughtful questions about the Cozy
-      Shawl (CSH1098).
+  - content: Dear Customer,
     content_type: greeting
     priority: 10
     related_to: null
-  - content: 'The Cozy Shawl is crafted from soft, warm yarn and is designed for versatility:
-      it can be worn as a shawl, a thick wrapping scarf, or a lightweight blanket.'
-    content_type: product_info
+  - content: Thank you for your interest in our Cozy Shawl (CSH1098).
+    content_type: acknowledgement
     priority: 9
     related_to: CSH1098
-  - content: It is suitable for use as a lap blanket and offers comfort whether worn
-      or used for warmth across the lap.
+  - content: We understand you're considering it as a gift for your grandmother and
+      are wondering about its suitability as a lap blanket. The Cozy Shawl is knitted
+      from soft, warm yarn and is indeed designed to be versatile. It can certainly
+      be used as a lightweight and comfortable lap blanket, perfect for providing
+      a bit of extra warmth.
     content_type: answer
-    priority: 9
+    priority: 8
     related_to: CSH1098
-  - content: We believe your grandmother will appreciate both the comfort and versatility
-      of this accessory.
-    content_type: personalization
+  - content: Additionally, as you mentioned, it can also be beautifully worn as a
+      shawl or a thick wrapping scarf, making it a truly adaptable accessory.
+    content_type: answer
     priority: 7
     related_to: CSH1098
-  - content: If you need further information or would like recommendations for complementary
-      gifts, please let us know.
-    content_type: helpful_offer
+  - content: We believe it would make a wonderful and thoughtful gift for your grandmother.
+    content_type: positive_statement
     priority: 6
     related_to: null
-  - content: 'Best regards,
+  - content: 'If you have any more questions or need further assistance, please don''t
+      hesitate to ask.
+
+
+      Best regards,
 
       Hermes - Delivering divine fashion'
     content_type: closing
     priority: 5
     related_to: null
-  subject: "About the Cozy Shawl \u2013 Quality, Versatility, and Gift Potential"
-  tone: professional and warm
+  subject: Regarding your inquiry about the Cozy Shawl
+  tone: friendly and helpful
 email:
   email_id: E005
   message: Good day, For the CSH1098 Cozy Shawl, the description mentions it can be
@@ -147,7 +160,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 2 candidates;
-    Processing took 5ms; Successfully resolved 2 out of 2 mentions
+    Processing took 31ms; Successfully resolved 2 out of 2 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Accessories
@@ -156,7 +169,7 @@ stockkeeper:
       lightweight blanket. Perfect for chilly evenings or adding a cozy layer to your
       outfit.
     metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
-      quantity: 1; Original mention: Cozy Shawl (ID: CSH1098, Type: shawl, Category:
+      quantity: 1; Original mention: Cozy Shawl (ID: CSH1098, Type: Shawl, Category:
       Accessories, Quantity: 1)'
     name: Cozy Shawl
     price: 22.0
@@ -177,7 +190,7 @@ stockkeeper:
       lightweight blanket. Perfect for chilly evenings or adding a cozy layer to your
       outfit.
     metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
-      quantity: 1; Original mention: Cozy Shawl (ID: CSH1098, Type: shawl, Category:
+      quantity: 1; Original mention: Cozy Shawl (ID: CSH1098, Type: Shawl, Category:
       Accessories, Quantity: 1)'
     name: Cozy Shawl
     price: 22.0

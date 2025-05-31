@@ -3,7 +3,7 @@ from typing import List, Literal
 
 from pydantic import BaseModel, Field
 
-from .product import AlternativeProduct, Product
+from .product import AlternativeProduct
 from .promotions import PromotionSpec
 
 
@@ -11,12 +11,12 @@ class OrderLineStatus(str, Enum):
     """Status of an order line item."""
 
     CREATED = "created"
-    OUT_OF_STOCK = "out_of_stock"
+    OUT_OF_STOCK = "out of stock"
 
 
 class OrderLine(BaseModel):
     """Represents a single line item in an order.
-    
+
     This model serves as both input to the order processing system (with minimal fields)
     and output after processing (with additional fields populated).
     """
@@ -27,17 +27,31 @@ class OrderLine(BaseModel):
     quantity: int = Field(ge=1, description="The quantity ordered")
 
     # Price fields
-    base_price: float = Field(description="Original price per unit before any discounts")
-    unit_price: float | None = Field(default=None, description="Final price per unit after discounts")
-    total_price: float | None = Field(default=None, description="Total price for this line (quantity × unit_price)")
+    base_price: float = Field(
+        description="Original price per unit before any discounts"
+    )
+    unit_price: float | None = Field(
+        default=None, description="Final price per unit after discounts"
+    )
+    total_price: float | None = Field(
+        default=None, description="Total price for this line (quantity × unit_price)"
+    )
 
     # Status and inventory fields
-    status: OrderLineStatus | None = Field(default=None, description="Status of this order line")
-    stock: int | None = Field(default=None, description="Current stock level for this product")
-    
+    status: OrderLineStatus | None = Field(
+        default=None, description="Status of this order line"
+    )
+    stock: int | None = Field(
+        default=None, description="Current stock level for this product"
+    )
+
     # Promotion fields
-    promotion_applied: bool = Field(default=False, description="Whether a promotion was applied to this line")
-    promotion_description: str | None = Field(default=None, description="Description of the applied promotion")
+    promotion_applied: bool = Field(
+        default=False, description="Whether a promotion was applied to this line"
+    )
+    promotion_description: str | None = Field(
+        default=None, description="Description of the applied promotion"
+    )
     promotion: PromotionSpec | None = Field(
         default=None,
         description="Detailed specification for any promotion associated with this product",
@@ -58,7 +72,7 @@ class Order(BaseModel):
     )
 
     overall_status: Literal[
-        "created", "out_of_stock", "partially_fulfilled", "no_valid_products"
+        "created", "out of stock", "partially_fulfilled", "no_valid_products"
     ] = Field(description="The overall status of this order")
 
     lines: List[OrderLine] = Field(

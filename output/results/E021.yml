@@ -1,6 +1,11 @@
 advisor:
   inquiry_answers:
-    answered_questions: []
+    answered_questions:
+    - answer: The provided product data does not list any winter hats.
+      answer_type: factual
+      confidence: 1.0
+      question: Are there any winter hats in your store?
+      reference_product_ids: []
     email_id: E021
     primary_products:
     - category: !!python/object/apply:hermes.model.enums.ProductCategory
@@ -8,7 +13,9 @@ advisor:
       description: Channel vintage charm with our saddle bag. This compact crossbody
         features a classic saddle shape and a trendy, minimalist design. Perfect for
         adding a touch of retro flair to any ensemble. Limited stock available!
-      metadata: null
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: SDE2345, Type: N/A, Category: N/A,
+        Quantity: 1)'
       name: Saddle Bag
       price: 39.0
       product_id: SDE2345
@@ -24,7 +31,9 @@ advisor:
       description: Add a touch of edgy cool to your wardrobe with our distressed jeans.
         Featuring strategic rips and fading, these jeans offer a lived-in, vintage
         vibe. Perfect for casual outings or dressing up with a blazer.
-      metadata: null
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: DJN8901, Type: N/A, Category: N/A,
+        Quantity: 1)'
       name: Distressed Jeans
       price: 57.99
       product_id: DJN8901
@@ -45,7 +54,9 @@ advisor:
         durable, high-quality denim, this jacket features a vintage-inspired wash
         and distressed details. Layer it over a tee for a casual, cool vibe or dress
         it up with a button-down.
-      metadata: null
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: RGD7654, Type: N/A, Category: N/A,
+        Quantity: 1)'
       name: Rugged Denim Jacket
       price: 41.0
       product_id: RGD7654
@@ -63,7 +74,9 @@ advisor:
       description: Embrace the retro trend with our corduroy pants. Crafted from soft,
         textured corduroy, these high-waisted pants offer a flattering fit and a touch
         of vintage charm. Dress them up with a blouse or keep it casual with a tee.
-      metadata: null
+      metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+        quantity: 1; Original mention: N/A (ID: CRD3210, Type: N/A, Category: N/A,
+        Quantity: 1)'
       name: Corduroy Pants
       price: 65.0
       product_id: CRD3210
@@ -76,27 +89,8 @@ advisor:
       - !!python/object/apply:hermes.model.enums.Season
         - Winter
       stock: 5
-    related_products:
-    - category: !!python/object/apply:hermes.model.enums.ProductCategory
-      - Women's Clothing
-      description: Embrace the retro trend with our corduroy pants. Crafted from soft,
-        textured corduroy, these high-waisted pants offer a flattering fit and a touch
-        of vintage charm. Dress them up with a blouse or keep it casual with a tee.
-      metadata: null
-      name: Corduroy Pants
-      price: 65.0
-      product_id: CRD3210
-      product_type: ''
-      promotion: null
-      promotion_text: null
-      seasons:
-      - !!python/object/apply:hermes.model.enums.Season
-        - Fall
-      - !!python/object/apply:hermes.model.enums.Season
-        - Winter
-      stock: 5
-    unanswered_questions:
-    - are there any winter hats in your store?
+    related_products: []
+    unanswered_questions: []
     unsuccessful_references: []
 classifier:
   email_analysis:
@@ -143,75 +137,68 @@ classifier:
         quantity: 1
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
-      - personal_statement
+      - order
     - main_sentence: I need your advice if there are any winter hats in your store?
       product_mentions:
       - confidence: 0.8
         mention_text: winter hats
-        product_category: null
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
         product_description: null
         product_id: null
-        product_name: winter hats
+        product_name: null
         product_type: hats
         quantity: 1
-      related_sentences:
-      - Thank you!
+      related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
 composer:
   email_id: E021
   language: English
-  response_body: 'Hello,
+  response_body: 'Dear Customer,
 
 
-    Thank you so much for your email and for being such a valued customer! We were
-    delighted to hear how much you love the vintage items you recently purchased (SDE2345,
-    DJN8901, RGD7654, CRD3210). It''s wonderful to know they are a perfect fit for
-    your style!
+    Thank you for reaching out and for being a valued customer! We''re thrilled to
+    hear you''re enjoying your collection of vintage items: the Saddle Bag (SDE2345),
+    Distressed Jeans (DJN8901), Rugged Denim Jacket (RGD7654), and Corduroy Pants
+    (CRD3210). It sounds like you have a fantastic eye for style!
 
 
-    Regarding your question about winter hats, while we don''t currently have specific
-    winter hats available in our collection, we encourage you to check our website
-    periodically for new arrivals. We are always updating our inventory with stylish
-    pieces for all seasons.
+    Regarding your inquiry about winter hats, we currently do not have any winter
+    hats listed in our collection. Our inventory is updated frequently, and we often
+    add seasonal items, so we encourage you to check back with us or explore our accessories
+    section for other unique finds.
 
 
-    We appreciate your interest and hope to assist you with future fashion finds.
+    If you have any other questions or if there''s anything else we can assist you
+    with, please don''t hesitate to ask.
 
 
     Best regards,
 
-
     Hermes - Delivering divine fashion'
   response_points:
-  - content: Greeting the customer.
+  - content: 'Thank you for reaching out and for being a valued customer! We''re thrilled
+      to hear you''re enjoying your collection of vintage items: the Saddle Bag (SDE2345),
+      Distressed Jeans (DJN8901), Rugged Denim Jacket (RGD7654), and Corduroy Pants
+      (CRD3210). It sounds like you have a fantastic eye for style!'
     content_type: greeting
-    priority: 1
-    related_to: null
-  - content: Acknowledge and appreciate the customer's positive feedback on previous
-      vintage purchases (SDE2345, DJN8901, RGD7654, CRD3210).
-    content_type: personal_statement
-    priority: 5
-    related_to: null
-  - content: Address the inquiry about winter hats, stating that they are not currently
-      available.
+    priority: 10
+    related_to: acknowledgement_of_past_purchases_SDE2345_DJN8901_RGD7654_CRD3210
+  - content: Regarding your inquiry about winter hats, we currently do not have any
+      winter hats listed in our collection. Our inventory is updated frequently, and
+      we often add seasonal items, so we encourage you to check back with us or explore
+      our accessories section for other unique finds.
     content_type: answer
-    priority: 7
-    related_to: winter hats
-  - content: Suggest checking the website for future arrivals.
-    content_type: suggestion
-    priority: 6
-    related_to: null
-  - content: Closing remarks.
+    priority: 9
+    related_to: inquiry_winter_hats
+  - content: If you have any other questions or if there's anything else we can assist
+      you with, please don't hesitate to ask.
     content_type: closing
-    priority: 2
-    related_to: null
-  - content: Signature.
-    content_type: signature
-    priority: 1
-    related_to: null
-  subject: Thank you for your feedback and inquiry about winter hats!
-  tone: friendly and helpful
+    priority: 8
+    related_to: offer_further_assistance
+  subject: Your Hermes Inquiry & Vintage Collection
+  tone: professional and warm
 email:
   email_id: E021
   message: 'So I''ve bought quite large collection of vintage items from your store:
@@ -221,57 +208,17 @@ email:
 errors: {}
 fulfiller: null
 stockkeeper:
-  metadata:
-    candidate_log:
-    - candidate_ids:
-      - SDE2345
-      confidence_scores:
-      - 1.0
-      mention: product_id='SDE2345' product_name=None product_description=None product_category=None
-        product_type=None quantity=1 confidence=1.0 mention_text='SDE2345'
-      num_candidates: 1
-    - candidate_ids:
-      - DJN8901
-      confidence_scores:
-      - 1.0
-      mention: product_id='DJN8901' product_name=None product_description=None product_category=None
-        product_type=None quantity=1 confidence=1.0 mention_text='DJN8901'
-      num_candidates: 1
-    - candidate_ids:
-      - RGD7654
-      confidence_scores:
-      - 1.0
-      mention: product_id='RGD7654' product_name=None product_description=None product_category=None
-        product_type=None quantity=1 confidence=1.0 mention_text='RGD7654'
-      num_candidates: 1
-    - candidate_ids:
-      - CRD3210
-      confidence_scores:
-      - 1.0
-      mention: product_id='CRD3210' product_name=None product_description=None product_category=None
-        product_type=None quantity=1 confidence=1.0 mention_text='CRD3210'
-      num_candidates: 1
-    candidates_resolved: 4
-    resolution_attempts: 5
-    resolution_time_ms: 1126
-    total_mentions: 5
+  metadata: Processed 5 product mentions; Made 5 resolution attempts; Resolved 4 candidates;
+    Processing took 311ms; Successfully resolved 4 out of 4 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     description: Channel vintage charm with our saddle bag. This compact crossbody
       features a classic saddle shape and a trendy, minimalist design. Perfect for
       adding a touch of retro flair to any ensemble. Limited stock available!
-    metadata:
-      original_mention:
-        product_category: null
-        product_description: null
-        product_id: SDE2345
-        product_name: null
-        product_type: null
-        quantity: 1
-      requested_quantity: 1
-      resolution_confidence: 1.0
-      resolution_method: exact_id_match
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: SDE2345, Type: N/A, Category: N/A, Quantity:
+      1)'
     name: Saddle Bag
     price: 39.0
     product_id: SDE2345
@@ -287,17 +234,9 @@ stockkeeper:
     description: Add a touch of edgy cool to your wardrobe with our distressed jeans.
       Featuring strategic rips and fading, these jeans offer a lived-in, vintage vibe.
       Perfect for casual outings or dressing up with a blazer.
-    metadata:
-      original_mention:
-        product_category: null
-        product_description: null
-        product_id: DJN8901
-        product_name: null
-        product_type: null
-        quantity: 1
-      requested_quantity: 1
-      resolution_confidence: 1.0
-      resolution_method: exact_id_match
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: DJN8901, Type: N/A, Category: N/A, Quantity:
+      1)'
     name: Distressed Jeans
     price: 57.99
     product_id: DJN8901
@@ -317,17 +256,9 @@ stockkeeper:
     description: Embrace the classic with our rugged denim jacket. Crafted from durable,
       high-quality denim, this jacket features a vintage-inspired wash and distressed
       details. Layer it over a tee for a casual, cool vibe or dress it up with a button-down.
-    metadata:
-      original_mention:
-        product_category: null
-        product_description: null
-        product_id: RGD7654
-        product_name: null
-        product_type: null
-        quantity: 1
-      requested_quantity: 1
-      resolution_confidence: 1.0
-      resolution_method: exact_id_match
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: RGD7654, Type: N/A, Category: N/A, Quantity:
+      1)'
     name: Rugged Denim Jacket
     price: 41.0
     product_id: RGD7654
@@ -345,17 +276,9 @@ stockkeeper:
     description: Embrace the retro trend with our corduroy pants. Crafted from soft,
       textured corduroy, these high-waisted pants offer a flattering fit and a touch
       of vintage charm. Dress them up with a blouse or keep it casual with a tee.
-    metadata:
-      original_mention:
-        product_category: null
-        product_description: null
-        product_id: CRD3210
-        product_name: null
-        product_type: null
-        quantity: 1
-      requested_quantity: 1
-      resolution_confidence: 1.0
-      resolution_method: exact_id_match
+    metadata: 'Resolution confidence: 100%; Found by exact product ID match; Requested
+      quantity: 1; Original mention: N/A (ID: CRD3210, Type: N/A, Category: N/A, Quantity:
+      1)'
     name: Corduroy Pants
     price: 65.0
     product_id: CRD3210
@@ -371,9 +294,10 @@ stockkeeper:
   unresolved_mentions:
   - confidence: 0.8
     mention_text: winter hats
-    product_category: null
+    product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+    - Accessories
     product_description: null
     product_id: null
-    product_name: winter hats
+    product_name: null
     product_type: hats
     quantity: 1

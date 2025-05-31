@@ -48,7 +48,7 @@ async def run_classifier(
             config=hermes_config,
             schema=EmailAnalysis,
             tools=[],
-            model_strength="strong",
+            model_strength="weak",
             temperature=0.0,
         )
 

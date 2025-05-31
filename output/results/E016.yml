@@ -5,20 +5,23 @@ advisor:
     primary_products: []
     related_products: []
     unanswered_questions:
-    - I'm looking for a dress for a summer wedding I have coming up. Any recommendations
-      on some options that might work for me?
-    - I think I need some travel bag.
-    unsuccessful_references: []
+    - What are the recommendations for a dress suitable for a summer wedding that
+      is not too short, low-cut, or super tight-fitting, not too loose or matronly,
+      and is flattering and comfortable for an outdoor ceremony?
+    - What are the recommendations for a travel bag?
+    unsuccessful_references:
+    - a dress
+    - some travel bag
 classifier:
   email_analysis:
     customer_name: Claire
     email_id: E016
-    language: en
+    language: English
     primary_intent: product inquiry
     segments:
     - main_sentence: I'm looking for a dress for a summer wedding I have coming up.
       product_mentions:
-      - confidence: 0.5
+      - confidence: 0.8
         mention_text: a dress
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Women's Clothing
@@ -32,87 +35,87 @@ classifier:
       - But I also don't want it to be too loose or matronly.
       - Something flattering but still comfortable to wear for an outdoor ceremony.
       - Any recommendations on some options that might work for me?
-      - Thank you!
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
-    - main_sentence: My name is Claire.
-      product_mentions: []
-      related_sentences: []
-      segment_type: !!python/object/apply:hermes.model.email.SegmentType
-      - personal_statement
-    - main_sentence: And bag, I think I need some travel bag.
+    - main_sentence: I think I need some travel bag.
       product_mentions:
-      - confidence: 0.5
+      - confidence: 0.8
         mention_text: some travel bag
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
         product_description: null
         product_id: null
         product_name: null
-        product_type: bag
+        product_type: travel bag
         quantity: 1
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
 composer:
   email_id: E016
-  language: en
-  response_body: 'Dear Claire,
-
-
-    Thank you for contacting Hermes.
-
-
-    I understand you are looking for recommendations for a dress for an upcoming summer
-    wedding, keeping in mind your preferences for fit and comfort for an outdoor ceremony.
-    You also asked for suggestions for a travel bag.
-
-
-    I have reviewed your requests, but unfortunately, I was unable to find specific
-    product recommendations that perfectly match your detailed needs at this moment.
-
-
-    I sincerely apologize that I cannot provide you with immediate suggestions.
-
-
-    Best regards,
-
-    Hermes - Delivering divine fashion'
+  language: English
+  response_body: "Dear Claire,\n\nThank you for reaching out to Hermes. We understand\
+    \ you're looking for a beautiful dress for an upcoming summer wedding and a stylish\
+    \ travel bag.\n\nFor the dress, you've described wanting something flattering\
+    \ and comfortable for an outdoor ceremony \u2013 not too short, low-cut, or tight,\
+    \ but also not too loose or matronly. While we don't have specific online recommendations\
+    \ matching this detailed request at this very moment, we invite you to explore\
+    \ our 'Dresses' section on our website. You may find inspiration among our elegant\
+    \ silk midis or chic A-line silhouettes which are often perfect for such occasions.\n\
+    \nRegarding a travel bag, we offer a diverse collection known for both style and\
+    \ durability. To help narrow down the options, it would be helpful to know if\
+    \ you have a preferred size, material, or specific features in mind. In the meantime,\
+    \ you can view our full range in the 'Travel' section of our website.\n\nFor a\
+    \ more personalized shopping experience, we would be delighted to welcome you\
+    \ to one of our Hermes boutiques. Our expert advisors are on hand to provide dedicated\
+    \ assistance and help you discover the perfect items to meet your needs.\n\nWe\
+    \ hope this guidance is helpful, and we look forward to assisting you further.\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
   response_points:
   - content: Dear Claire,
     content_type: greeting
     priority: 10
     related_to: null
-  - content: I understand you are looking for recommendations for a dress for an upcoming
-      summer wedding, keeping in mind your preferences for fit and comfort for an
-      outdoor ceremony.
-    content_type: answer
+  - content: Thank you for reaching out to Hermes. We understand you're looking for
+      a beautiful dress for an upcoming summer wedding and a stylish travel bag.
+    content_type: acknowledgement
     priority: 9
-    related_to: dress inquiry
-  - content: You also asked for suggestions for a travel bag.
+    related_to: dress and travel bag inquiry
+  - content: "For the dress, you've described wanting something flattering and comfortable\
+      \ for an outdoor ceremony \u2013 not too short, low-cut, or tight, but also\
+      \ not too loose or matronly. While we don't have specific online recommendations\
+      \ matching this detailed request at this very moment, we invite you to explore\
+      \ our 'Dresses' section on our website. You may find inspiration among our elegant\
+      \ silk midis or chic A-line silhouettes which are often perfect for such occasions."
     content_type: answer
     priority: 8
-    related_to: bag inquiry
-  - content: I have reviewed your requests, but unfortunately, I was unable to find
-      specific product recommendations that perfectly match your detailed needs at
-      this moment.
+    related_to: dress inquiry
+  - content: Regarding a travel bag, we offer a diverse collection known for both
+      style and durability. To help narrow down the options, it would be helpful to
+      know if you have a preferred size, material, or specific features in mind. In
+      the meantime, you can view our full range in the 'Travel' section of our website.
     content_type: answer
     priority: 7
-    related_to: null
-  - content: I sincerely apologize that I cannot provide you with immediate suggestions.
-    content_type: answer
+    related_to: travel bag inquiry
+  - content: For a more personalized shopping experience, we would be delighted to
+      welcome you to one of our Hermes boutiques. Our expert advisors are on hand
+      to provide dedicated assistance and help you discover the perfect items to meet
+      your needs.
+    content_type: alternative_solution
     priority: 6
     related_to: null
-  - content: Best regards,
+  - content: 'We hope this guidance is helpful, and we look forward to assisting you
+      further.
+
+
+      Best regards,
+
+      Hermes - Delivering divine fashion'
     content_type: closing
     priority: 10
     related_to: null
-  - content: Hermes - Delivering divine fashion
-    content_type: closing
-    priority: 10
-    related_to: null
-  subject: Response to your inquiry
-  tone: Helpful and polite
+  subject: 'Regarding your Hermes Inquiry: Summer Wedding Attire & Travel Bag'
+  tone: professional and warm
 email:
   email_id: E016
   message: Hello, I'm looking for a dress for a summer wedding I have coming up. My
@@ -125,15 +128,11 @@ email:
 errors: {}
 fulfiller: null
 stockkeeper:
-  metadata:
-    candidate_log: []
-    candidates_resolved: 0
-    resolution_attempts: 2
-    resolution_time_ms: 1403
-    total_mentions: 2
+  metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
+    Processing took 2250ms
   resolved_products: []
   unresolved_mentions:
-  - confidence: 0.5
+  - confidence: 0.8
     mention_text: a dress
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Women's Clothing
@@ -142,12 +141,12 @@ stockkeeper:
     product_name: null
     product_type: dress
     quantity: 1
-  - confidence: 0.5
+  - confidence: 0.8
     mention_text: some travel bag
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
     product_description: null
     product_id: null
     product_name: null
-    product_type: bag
+    product_type: travel bag
     quantity: 1

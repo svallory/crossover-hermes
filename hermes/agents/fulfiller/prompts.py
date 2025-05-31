@@ -15,7 +15,7 @@ You will receive the email analysis containing product references and the stockk
 with resolved products. Your goal is to:
 1. Process the resolved products from the stockkeeper output
 2. Determine stock availability for the requested quantity
-3. Mark items as "created" if available or "out_of_stock" if unavailable
+3. Mark items as "created" if available or "out of stock" if unavailable
 4. Update inventory levels for fulfilled orders
 5. Use promotion information from the resolved products (promotion and promotion_text fields)
 6. Suggest suitable alternatives for out-of-stock items
@@ -46,7 +46,7 @@ IMPORTANT GUIDELINES:
    - `base_price`: **CRITICAL: This MUST be taken directly from the `price` field of the corresponding `resolved_product`. Do NOT modify or pre-calculate this value, even if the product description or `promotion_text` mentions a discount.**
    - `unit_price`: **CRITICAL: Initially, this MUST be set to be IDENTICAL to the `base_price`. Do NOT pre-calculate any discounts into this initial `unit_price`.**
    - `total_price`: Calculated as `base_price * quantity`.
-   - `status`: `created` or `out_of_stock`.
+   - `status`: `created` or `out of stock`.
    - `stock`: Current stock level of the resolved product.
    - `promotion_applied`: **CRITICAL: Set this to `false` initially.**
    - `promotion_description`: From `resolved_product.promotion_text` if available, otherwise `null`.
@@ -55,7 +55,7 @@ IMPORTANT GUIDELINES:
    - The downstream promotion system will use `base_price`, `unit_price` (which is initially same as base_price), and the `promotion` spec to correctly apply discounts and update `unit_price` and `total_discount`. Your role is to provide the raw, undiscounted pricing information.
 8. Set the overall_status based on the status of all items:
    - "created" if all items are available
-   - "out_of_stock" if no items are available
+   - "out of stock" if no items are available
    - "partially_fulfilled" if some items are available and others are not
    - "no_valid_products" if no products could be identified
 
@@ -131,7 +131,7 @@ Example output format (Illustrating correct initial pricing for a product with a
       "base_price": 249.99,
       "unit_price": 249.99,
       "total_price": 249.99,
-      "status": "out_of_stock",
+      "status": "out of stock",
       "stock": 0,
       "promotion_applied": false,
       "promotion_description": null,

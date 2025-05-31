@@ -92,7 +92,7 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateStat
     if current_stock < quantity_to_decrement:
         return StockUpdateStatus.INSUFFICIENT_STOCK
 
-    # Update the stock
+    # Update the stock - this modifies the cached DataFrame directly
     new_stock = current_stock - quantity_to_decrement
     products_df.loc[product_row_index, "stock"] = new_stock
 
