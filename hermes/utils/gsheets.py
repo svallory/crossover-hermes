@@ -1,11 +1,17 @@
 import pandas as pd
+from hermes.utils.logger import logger, get_agent_logger
 
 
 def read_data_from_gsheet(document_id: str, sheet_name: str) -> pd.DataFrame:
     """Reads a sheet from a Google Spreadsheet into a pandas DataFrame."""
     export_link = f"https://docs.google.com/spreadsheets/d/{document_id}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
     dataframe = pd.read_csv(export_link)
-    print(f"Successfully read {len(dataframe)} rows from sheet: {sheet_name}")
+    logger.info(
+        get_agent_logger(
+            "Utils",
+            f"Successfully read [yellow]{len(dataframe)}[/yellow] rows from GSheet: [cyan underline]{document_id}#[/cyan underline][yellow]{sheet_name}[/yellow]",
+        )
+    )
     return dataframe
 
 
@@ -18,6 +24,12 @@ async def create_output_spreadsheet(
     output_name: str = "Solving Business Problems with AI - Output",
 ) -> str:
     """Create the Google Spreadsheet with the assignment output."""
+    logger.info(
+        get_agent_logger(
+            "Utils",
+            f"Attempting to create/update GSheet: [cyan underline]{spreadsheet_id}[/cyan underline] (Output Name: [yellow]{output_name}[/yellow])",
+        )
+    )
     try:
         # Import Google Colab dependencies
         import gspread
@@ -25,8 +37,11 @@ async def create_output_spreadsheet(
         from google.colab import auth  # type: ignore
         from gspread_dataframe import set_with_dataframe  # type: ignore
     except ImportError:
-        print(
-            "Google Colab and gspread dependencies not found. Skipping spreadsheet creation."
+        logger.warning(
+            get_agent_logger(
+                "Utils",
+                "Google Colab and gspread dependencies not found. Skipping spreadsheet creation.",
+            )
         )
         return "Spreadsheet creation skipped due to missing dependencies."
 
@@ -35,8 +50,11 @@ async def create_output_spreadsheet(
         auth.authenticate_user()
         credentials, _ = default()
     except Exception as e:
-        print(
-            f"Google Colab authentication failed: {e}. Attempting local authentication."
+        logger.warning(
+            get_agent_logger(
+                "Utils",
+                f"Google Colab authentication failed: {e}. Attempting local authentication.",
+            )
         )
         # Fallback to local authentication if Colab auth fails or is not available
         try:
@@ -44,11 +62,21 @@ async def create_output_spreadsheet(
                 scopes=["https://www.googleapis.com/auth/spreadsheets"]
             )
         except Exception as auth_e:
-            print(f"Local Google authentication failed: {auth_e}")
+            logger.error(
+                get_agent_logger(
+                    "Utils", f"Local Google authentication failed: {auth_e}"
+                ),
+                exc_info=True,
+            )
             return "Spreadsheet creation skipped due to authentication failure."
 
     if not isinstance(credentials, google_credentials.Credentials):
-        print("Authentication failed: Credentials are not of the expected type.")
+        logger.error(
+            get_agent_logger(
+                "Utils",
+                "Authentication failed: Credentials are not of the expected type.",
+            )
+        )
         return "Spreadsheet creation skipped due to authentication failure."
 
     gc = gspread.authorize(credentials)
@@ -105,5 +133,10 @@ async def create_output_spreadsheet(
 
     # Return the shareable link
     shareable_link = f"https://docs.google.com/spreadsheets/d/{output_document.id}"
-    print(f"Shareable link: {shareable_link}")
+    logger.info(
+        get_agent_logger(
+            "Utils",
+            f"GSheet shareable link: [link={shareable_link}]{shareable_link}[/link]",
+        )
+    )
     return shareable_link

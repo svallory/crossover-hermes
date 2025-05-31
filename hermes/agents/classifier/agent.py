@@ -16,6 +16,7 @@ from ...config import HermesConfig
 from ...model.enums import Agents
 from ...workflow.types import WorkflowNodeOutput
 from hermes.utils.llm_client import get_llm_client
+from hermes.utils.logger import logger, get_agent_logger
 
 from .prompts import CLASSIFIER_PROMPT
 
@@ -36,11 +37,15 @@ async def run_classifier(
         Dict[str, Any]: In the LangGraph workflow, returns {"classifier": ClassifierOutput} or {"errors": Error}
 
     """
+    agent_name = Agents.CLASSIFIER.value.capitalize()
     try:
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
 
-        print(
-            f"Analyzing email {state.email.email_id} - Subject: '{state.email.subject if state.email.subject else 'No subject'}...'"
+        logger.info(
+            get_agent_logger(
+                agent_name,
+                f"Analyzing email [cyan]{state.email.email_id}[/cyan] - Subject: '[italic]{state.email.subject if state.email.subject else 'No subject'}[/italic]'...",
+            )
         )
 
         # Use a weak model for initial analysis since it's a relatively simple task
@@ -62,6 +67,13 @@ async def run_classifier(
         # Set the email_id in the analysis, as it's not part of the LLM's direct output
         email_analysis_result.email_id = state.email.email_id
 
+        logger.info(
+            get_agent_logger(
+                agent_name,
+                f"Email [cyan]{state.email.email_id}[/cyan] analysis complete.",
+            )
+        )
+
         return create_node_response(
             Agents.CLASSIFIER,
             ClassifierOutput(
@@ -70,7 +82,7 @@ async def run_classifier(
         )
 
     except Exception as e:
-        e.add_note(
-            f"Error in Classifier for email {state.email.email_id} (type: {e.__module__}.{e.__class__.__name__})"
-        )
+        error_message = f"Error in {agent_name} for email {state.email.email_id} (type: {e.__module__}.{e.__class__.__name__})"
+        logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
+        e.add_note(error_message)
         raise e

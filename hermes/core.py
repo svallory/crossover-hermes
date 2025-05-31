@@ -3,8 +3,6 @@ from typing import Any
 import asyncio
 import nest_asyncio  # type: ignore
 import pandas as pd  # type: ignore
-from rich.console import Console
-from rich.traceback import Traceback
 
 # Apply nest_asyncio for Jupyter compatibility
 from hermes.utils.output import create_output_csv
@@ -16,6 +14,7 @@ from hermes.workflow.run import run_workflow
 from hermes.config import HermesConfig
 from hermes.data import load_emails_df, load_products_df
 from hermes.model.email import CustomerEmail
+from hermes.utils.logger import logger, get_agent_logger
 
 # Set the event loop policy back to the default asyncio policy
 # This is needed because uvloop is incompatible with nest_asyncio
@@ -51,16 +50,24 @@ async def process_emails(
     """
     results = {}
     processed_count = 0
+    total_emails_to_process_count = len(emails_to_process)
     # limit_processing = 0 if limit_processing is None else limit_processing # Original logic
 
     for i, email_data in enumerate(emails_to_process):
         # Corrected logic: if limit_processing is not None and we've reached it, break.
         if limit_processing is not None and processed_count >= limit_processing:
-            print(f"Reached processing limit of {limit_processing} emails.")
+            logger.info(
+                get_agent_logger(
+                    "Core",
+                    f"Reached processing limit of [yellow]{limit_processing}[/yellow] emails.",
+                )
+            )
             break
 
         email_id = str(email_data.get("email_id", f"unknown_email_{i}"))
-        print(f"\nProcessing email {i + 1}/{len(emails_to_process)}: ID {email_id}")
+        logger.info(
+            f"\n[rule #008080][bold #008080]Processing email {i + 1}/{total_emails_to_process_count}: ID [cyan]{email_id}[/cyan][/bold #008080]"
+        )
 
         try:
             # Create ClassifierInput from email_data
@@ -94,7 +101,12 @@ async def process_emails(
                 result["classification"] = (
                     workflow_state.classifier.email_analysis.primary_intent
                 )
-                print(f"  → Classification: {result['classification']}")
+                logger.info(
+                    get_agent_logger(
+                        "Core",
+                        f"  -> Classification: [bold green_yellow]{result['classification']}[/bold green_yellow]",
+                    )
+                )
 
             # Extract order status from fulfiller output
             if workflow_state.fulfiller and workflow_state.fulfiller.order_result:
@@ -107,13 +119,21 @@ async def process_emails(
                         "status": item.status.value if item.status else "unknown",
                     }
                     result["order_status"].append(order_status)
-                print(f"  → Processed {len(result['order_status'])} order items")
+                logger.info(
+                    get_agent_logger(
+                        "Core",
+                        f"  -> Processed [yellow]{len(result['order_status'])}[/yellow] order items",
+                    )
+                )
 
             # Extract response from composer output
             if workflow_state.composer:
                 result["response"] = workflow_state.composer.response_body
-                print(
-                    f"  → Generated response: {len(str(result['response']))} characters"
+                logger.info(
+                    get_agent_logger(
+                        "Core",
+                        f"  -> Generated response: [yellow]{len(str(result['response']))}[/yellow] characters",
+                    )
                 )
 
             # Store in results dictionary
@@ -121,17 +141,10 @@ async def process_emails(
             processed_count += 1
 
         except Exception as e:
-            console = Console(stderr=True)  # Ensure output goes to stderr
-            rich_tb = Traceback.from_exception(
-                exc_type=type(e),
-                exc_value=e,
-                traceback=e.__traceback__,
-                show_locals=True,
-                max_frames=1,
-                width=console.width,
+            logger.error(
+                get_agent_logger("Core", f"Error processing email {email_id}: {e}"),
+                exc_info=True,
             )
-            # print(f"  Error processing email {email_id}: {e}")
-            console.print(rich_tb)  # Removed explicit Rich printing
 
             results[email_id] = {
                 "email_id": email_id,
@@ -141,8 +154,12 @@ async def process_emails(
                 "response": None,
             }
             if stop_on_error:
-                print(
-                    f"Error processing email {email_id}. Stopping due to --stop-on-error flag."
+                logger.error(
+                    get_agent_logger(
+                        "Core",
+                        f"Error processing email {email_id}. Stopping due to --stop-on-error flag.",
+                    ),
+                    exc_info=True,
                 )
                 raise  # Re-raise the exception to stop further processing
             processed_count += 1
@@ -192,24 +209,60 @@ async def run_email_processing(
     # If not, we only save CSVs.
     gsheet_output_target = output_spreadsheet_id
 
-    print(
-        f"Config loaded, using models: {hermes_config.llm_weak_model_name} and {hermes_config.llm_strong_model_name}"
+    logger.info(
+        get_agent_logger(
+            "Core",
+            f"Config loaded, using models: [model_name]{hermes_config.llm_weak_model_name}[/model_name] and [model_name]{hermes_config.llm_strong_model_name}[/model_name]",
+        )
     )
-    print(f"Products source: {products_source}")
-    print(f"Emails source: {emails_source}")
-    print(f"Output directory for CSVs: {output_dir}")
+    logger.info(
+        get_agent_logger(
+            "Core",
+            f"Products source: [cyan underline]{products_source}[/cyan underline]",
+        )
+    )
+    logger.info(
+        get_agent_logger(
+            "Core", f"Emails source: [cyan underline]{emails_source}[/cyan underline]"
+        )
+    )
+    logger.info(
+        get_agent_logger(
+            "Core",
+            f"Output directory for CSVs: [cyan underline]{output_dir}[/cyan underline]",
+        )
+    )
     if gsheet_output_target:
-        print(f"Output Google Sheet for upload: {gsheet_output_target}")
+        logger.info(
+            get_agent_logger(
+                "Core",
+                f"Output Google Sheet for upload: [cyan underline]{gsheet_output_target}[/cyan underline]",
+            )
+        )
 
     # 2. Load the emails dataset
     try:
-        print(f"Attempting to load emails from source: {emails_source}")
+        logger.info(
+            get_agent_logger(
+                "Core",
+                f"Attempting to load emails from source: [cyan underline]{emails_source}[/cyan underline]",
+            )
+        )
         emails_df = load_emails_df(source=emails_source)
-        print(f"Successfully loaded {len(emails_df)} emails.")
+        logger.info(
+            get_agent_logger(
+                "Core", f"Successfully loaded [yellow]{len(emails_df)}[/yellow] emails."
+            )
+        )
 
         # Filter emails if target_email_ids are provided
         if target_email_ids:
-            print(f"Filtering for specific email IDs: {target_email_ids}")
+            logger.info(
+                get_agent_logger(
+                    "Core",
+                    f"Filtering for specific email IDs: [yellow]{target_email_ids}[/yellow]",
+                )
+            )
             # Ensure 'email_id' column exists. Adjust column name if different in your actual data.
             if "email_id" not in emails_df.columns:
                 raise ValueError(
@@ -222,27 +275,54 @@ async def run_email_processing(
             initial_count = len(emails_df)
             emails_df = emails_df[emails_df["email_id"].isin(target_email_ids)]
             filtered_count = len(emails_df)
-            print(f"Filtered emails: {initial_count} -> {filtered_count}")
+            logger.info(
+                get_agent_logger(
+                    "Core",
+                    f"Filtered emails: [yellow]{initial_count}[/yellow] -> [yellow]{filtered_count}[/yellow]",
+                )
+            )
             if filtered_count == 0:
-                print(
-                    "Warning: No emails matched the provided target email IDs. No emails will be processed."
+                logger.warning(
+                    get_agent_logger(
+                        "Core",
+                        "No emails matched the provided target email IDs. No emails will be processed.",
+                    )
                 )
                 # Early exit or specific handling might be desired here
                 # For now, it will proceed with an empty batch, resulting in no processing.
 
     except Exception as e:
+        logger.error(
+            get_agent_logger(
+                "Core",
+                f"Error loading emails from source '[cyan underline]{emails_source}[/cyan underline]': {e}",
+            ),
+            exc_info=True,
+        )
         raise ValueError(f"Error loading emails from source '{emails_source}': {e}")
 
     # Load products dataset (memoized)
     try:
-        print(f"Attempting to load products from source: {products_source}")
+        logger.info(
+            get_agent_logger(
+                "Core",
+                f"Attempting to load products from source: [cyan underline]{products_source}[/cyan underline]",
+            )
+        )
         # The actual loading will only happen if _products_df is None or source changes
         # and is handled within load_products_df
         load_products_df(source=products_source)
         # No need to assign to a variable here if it's only used by other modules via the global _products_df
         # However, if HermesConfig needs it, it should be set there.
-        print(f"Products loaded/ensured available.")
+        logger.info(get_agent_logger("Core", "Products loaded/ensured available."))
     except Exception as e:
+        logger.error(
+            get_agent_logger(
+                "Core",
+                f"Error loading products from source '[cyan underline]{products_source}[/cyan underline]': {e}",
+            ),
+            exc_info=True,
+        )
         raise ValueError(f"Error loading products from source '{products_source}': {e}")
 
     # 3. Convert emails to dictionary format
@@ -263,7 +343,12 @@ async def run_email_processing(
         stop_on_error=stop_on_error,
     )
 
-    print(f"\nProcessed {len(processing_results)} emails successfully.")
+    logger.info(
+        get_agent_logger(
+            "Core",
+            f"\nProcessed [yellow]{len(processing_results)}[/yellow] emails successfully.",
+        )
+    )
 
     # 4. Prepare DataFrames for the output
     email_classification_data = []

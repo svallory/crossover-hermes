@@ -21,6 +21,7 @@ from .models import (
 from .prompts import ADVISOR_PROMPT
 from hermes.tools.toolkits import CatalogToolkit
 from hermes.utils.tool_error_handler import ToolCallRetryHandler, DEFAULT_RETRY_TEMPLATE
+from hermes.utils.logger import logger, get_agent_logger
 
 
 @traceable(
@@ -43,9 +44,14 @@ async def run_advisor(
     Returns:
         WorkflowNodeOutput containing the advisor's factual response
     """
+    agent_name = Agents.ADVISOR.value.capitalize()
     email_id = (
         state.classifier.email_analysis.email_id
     )  # Define email_id early for context in case of error
+    logger.info(
+        get_agent_logger(agent_name, f"Running for email [cyan]{email_id}[/cyan]")
+    )
+
     try:  # ADDED try block
         # Extract data from state
         email_analysis = state.classifier.email_analysis
@@ -54,8 +60,12 @@ async def run_advisor(
             state.stockkeeper.resolved_products if state.stockkeeper else []
         )
 
-        print(f"Running advisor for email {email_id}")
-        print(f"  Resolved products: {len(resolved_products)}")
+        logger.debug(
+            get_agent_logger(
+                agent_name,
+                f"  Resolved products for [cyan]{email_id}[/cyan]: [yellow]{len(resolved_products)}[/yellow]",
+            )
+        )
 
         # Get LLM instance
         llm = get_llm_client(
@@ -134,18 +144,26 @@ async def run_advisor(
         else:
             # Fallback for unexpected response type
             # This path should ideally not be hit if retry_handler works or schema is good
-            raise RuntimeError(
-                f"Advisor: Unexpected response type {type(response_data)} from LLM for email {email_id} after retries."
-            )
+            error_msg = f"Unexpected response type {type(response_data)} from LLM for email [cyan]{email_id}[/cyan] after retries."
+            logger.error(get_agent_logger(agent_name, error_msg))
+            raise RuntimeError(f"Advisor: {error_msg}")
 
         # Ensure email_id is set correctly
         inquiry_response.email_id = email_id
+        logger.info(
+            get_agent_logger(
+                agent_name,
+                f"Factual response generation complete for email [cyan]{email_id}[/cyan]",
+            )
+        )
 
         return create_node_response(
             Agents.ADVISOR, AdvisorOutput(inquiry_answers=inquiry_response)
         )
     except Exception as e:  # ADDED except block
-        # print(f"Advisor: Top-level error during processing: {e}") # Keep or remove print as preferred
+        # Removed: # print(f"Advisor: Top-level error during processing: {e}")
+        error_message = f"Error in {agent_name} for email {email_id}: {e}"
+        logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
         raise RuntimeError(
             f"Advisor: Error during processing for email {email_id}"
         ) from e  # MODIFIED to raise with context from e

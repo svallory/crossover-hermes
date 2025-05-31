@@ -10,6 +10,7 @@ from langchain_core.documents import Document
 from hermes.data.load_data import load_products_df
 from hermes.model import ProductCategory, Season
 from hermes.model.product import Product
+from hermes.utils.logger import logger, get_agent_logger
 
 # Vector store config
 CHROMA_DB_DIR = "./chroma_db"
@@ -100,6 +101,8 @@ def get_vector_store() -> Chroma:
     if _vector_store is not None:
         return _vector_store
 
+    logger.info(get_agent_logger("Data", "Initializing vector store..."))
+
     # Ensure persistent directory exists
     os.makedirs(CHROMA_DB_DIR, exist_ok=True)
 
@@ -128,5 +131,11 @@ def get_vector_store() -> Chroma:
         embedding=embeddings,
         collection_name=COLLECTION_NAME,
         persist_directory=CHROMA_DB_DIR,
+    )
+    logger.info(
+        get_agent_logger(
+            "Data",
+            f"Vector store initialized. Collection '[yellow]{COLLECTION_NAME}[/yellow]' in '[cyan underline]{CHROMA_DB_DIR}[/cyan underline]'. Documents: [yellow]{_vector_store._collection.count()}[/yellow]",
+        )
     )
     return _vector_store

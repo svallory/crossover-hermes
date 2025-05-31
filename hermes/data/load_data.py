@@ -4,6 +4,7 @@ from chromadb.api.models.Collection import Collection  # type: ignore
 
 from hermes.config import HermesConfig
 from hermes.utils.gsheets import read_data_from_gsheet
+from hermes.utils.logger import logger, get_agent_logger
 
 # Module-level ("global") variables, initialized to None
 _products_df: pd.DataFrame | None = None
@@ -35,9 +36,12 @@ def _parse_data_source(
         return None, None, source
     else:
         # Default to assuming it's a GSheet ID using the default_sheet_name
-        print(
-            f"Warning: Source '{source}' not found as a local file and does not contain '#'. "
-            f"Assuming it is a Google Sheet ID for the sheet '{default_sheet_name}'."
+        logger.warning(
+            get_agent_logger(
+                "Data",
+                f"Source '[cyan underline]{source}[/cyan underline]' not found as a local file and does not contain '#'. "
+                f"Assuming it is a Google Sheet ID for the sheet '[yellow]{default_sheet_name}[/yellow]'.",
+            )
         )
         return source, default_sheet_name, None
 
@@ -49,14 +53,26 @@ def load_emails_df(
     gsheet_id, sheet_name, file_path = _parse_data_source(source, default_sheet_name)
 
     if file_path:
-        print(f"Loading emails from local file: {file_path} (assuming CSV format)")
+        logger.info(
+            get_agent_logger(
+                "Data",
+                f"Loading emails from local file: [cyan underline]{file_path}[/cyan underline] (assuming CSV format)",
+            )
+        )
         return pd.read_csv(file_path)
     elif gsheet_id and sheet_name:
-        print(f"Loading emails from spreadsheet ID: {gsheet_id}, sheet: {sheet_name}")
+        logger.info(
+            get_agent_logger(
+                "Data",
+                f"Loading emails from spreadsheet ID: [cyan underline]{gsheet_id}[/cyan underline], sheet: [yellow]{sheet_name}[/yellow]",
+            )
+        )
         return read_data_from_gsheet(gsheet_id, sheet_name)
     else:
         # This case should ideally not be reached if _parse_data_source is robust
-        raise ValueError(f"Invalid email data source: {source}")
+        error_msg = f"Invalid email data source: {source}"
+        logger.error(get_agent_logger("Data", error_msg))
+        raise ValueError(error_msg)
 
 
 def load_products_df(
@@ -80,20 +96,32 @@ def load_products_df(
         )
 
         if file_path:
-            print(
-                f"Loading products from local file: {file_path} (assuming CSV format)"
+            logger.info(
+                get_agent_logger(
+                    "Data",
+                    f"Loading products from local file: [cyan underline]{file_path}[/cyan underline] (assuming CSV format)",
+                )
             )
             _products_df = pd.read_csv(file_path)
         elif gsheet_id and sheet_name:
-            print(
-                f"Loading products from spreadsheet ID: {gsheet_id}, sheet: {sheet_name}"
+            logger.info(
+                get_agent_logger(
+                    "Data",
+                    f"Loading products from spreadsheet ID: [cyan underline]{gsheet_id}[/cyan underline], sheet: [yellow]{sheet_name}[/yellow]",
+                )
             )
             _products_df = read_data_from_gsheet(gsheet_id, sheet_name)
         else:
             # This case should ideally not be reached
-            raise ValueError(f"Invalid product data source: {source}")
+            error_msg = f"Invalid product data source: {source}"
+            logger.error(get_agent_logger("Data", error_msg))
+            raise ValueError(error_msg)
 
         if _products_df is not None:
-            print(f"Loaded {len(_products_df)} products")
+            logger.info(
+                get_agent_logger(
+                    "Data", f"Loaded [yellow]{len(_products_df)}[/yellow] products"
+                )
+            )
 
     return _products_df

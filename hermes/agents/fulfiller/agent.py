@@ -25,6 +25,7 @@ from hermes.utils.tool_error_handler import ToolCallRetryHandler, DEFAULT_RETRY_
 from hermes.workflow.types import WorkflowNodeOutput
 from hermes.model.enums import Agents
 from .prompts import FULFILLER_PROMPT
+from hermes.utils.logger import logger, get_agent_logger
 
 
 @traceable(run_type="chain", name="Order Processing Agent")
@@ -41,6 +42,14 @@ async def run_fulfiller(
         A WorkflowNodeOutput containing the processed order or an error
 
     """
+    agent_name = Agents.FULFILLER.value.capitalize()
+    email_id = state.email.email_id
+    logger.info(
+        get_agent_logger(
+            agent_name, f"Processing order for email [cyan]{email_id}[/cyan]"
+        )
+    )
+
     try:
         hermes_config = HermesConfig.from_runnable_config(runnable_config)
         llm = get_llm_client(
@@ -145,10 +154,18 @@ async def run_fulfiller(
         output = FulfillerOutput(
             order_result=final_order,
         )
+        logger.info(
+            get_agent_logger(
+                agent_name,
+                f"Order processing complete for email [cyan]{email_id}[/cyan]. Order status: [yellow]{final_order.overall_status}[/yellow]",
+            )
+        )
 
         return create_node_response(Agents.FULFILLER, output)
 
     except Exception as e:
+        error_message = f"Error in {agent_name} for email {email_id}: {e}"
+        logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
         raise RuntimeError(
             f"Fulfiller: Error during processing for email {state.email.email_id}"
         ) from e

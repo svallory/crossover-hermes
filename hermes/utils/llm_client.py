@@ -11,6 +11,7 @@ from langchain_openai.chat_models.base import ChatOpenAI, BaseChatOpenAI
 from pydantic import BaseModel, SecretStr
 
 from ..config import HermesConfig
+from hermes.utils.logger import logger, get_agent_logger
 
 
 def _bind_tools_with_structured_output(
@@ -68,8 +69,11 @@ def _bind_tools_with_structured_output(
                 },
             )
         except Exception as e:
-            print(
-                f"Gemini bind_tools with ls_structured_output_format failed with {type(e).__name__}: {e}. Falling back."
+            logger.warning(
+                get_agent_logger(
+                    "Utils",
+                    f"Gemini bind_tools with ls_structured_output_format failed with {type(e).__name__}: {e}. Falling back.",
+                )
             )
             # Fallback without ls_structured_output_format
             bound_llm = llm.bind_tools(
@@ -114,12 +118,19 @@ def get_llm_client(
             "The llm_provider in HermesConfig must be 'OpenAI' or 'Gemini'."
         )
 
-    # Use a default name if none is provided
-    model_name = (
-        config.llm_weak_model_name
-        if model_strength == "weak"
-        else config.llm_strong_model_name
-    )
+    # Determine the model name and ensure it's set
+    if model_strength == "weak":
+        model_name = config.llm_weak_model_name
+        if not model_name:
+            raise ValueError(
+                f"LLM weak model name not set in HermesConfig for provider {config.llm_provider}."
+            )
+    else:  # Defaults to strong if model_strength is None or "strong"
+        model_name = config.llm_strong_model_name
+        if not model_name:
+            raise ValueError(
+                f"LLM strong model name not set in HermesConfig for provider {config.llm_provider}."
+            )
 
     if config.llm_provider == "OpenAI":
         if not config.llm_api_key:
@@ -129,7 +140,7 @@ def get_llm_client(
                 "OpenAI API key is not set in HermesConfig or environment for OpenAI provider."
             )
         llm = ChatOpenAI(
-            model=model_name,
+            model=model_name,  # Now guaranteed to be a string
             api_key=SecretStr(config.llm_api_key),
             base_url=config.llm_base_url,  # base_url is specific to OpenAI in our config
             temperature=temperature,
@@ -142,7 +153,7 @@ def get_llm_client(
                 "Gemini API key is not set in HermesConfig or environment for Gemini provider."
             )
         llm = ChatGoogleGenerativeAI(
-            model=model_name,
+            model=model_name,  # Now guaranteed to be a string
             google_api_key=config.llm_api_key,
             temperature=temperature,
         )

@@ -24,6 +24,7 @@ from .models import (
     ComposerOutput,
 )
 from .prompts import COMPOSER_PROMPT
+from hermes.utils.logger import logger, get_agent_logger
 
 # We don't want to make ALL catalog tools available to the composer agent
 ComposerToolkit: list[BaseTool] = [
@@ -48,9 +49,17 @@ async def run_composer(
         WorkflowNodeOutput containing the composed response or error
 
     """
+    agent_name = Agents.COMPOSER.value.capitalize()
     email_analysis = state.classifier.email_analysis
     email_id = state.email.email_id
     hermes_config = HermesConfig.from_runnable_config(runnable_config)
+
+    logger.info(
+        get_agent_logger(
+            agent_name,
+            f"Attempting to compose response for email [cyan]{email_id}[/cyan]",
+        )
+    )
 
     prompt_input_dict = {"email_analysis": email_analysis.model_dump()}
     if state.advisor and state.advisor.inquiry_answers:
@@ -62,7 +71,6 @@ async def run_composer(
 
     try:
         # Use a strong model for natural language generation with tools
-        print(f"Composer: Attempting to compose response for email {email_id}.")
         llm_with_tools = get_llm_client(
             config=hermes_config,
             schema=ComposerOutput,
@@ -94,6 +102,12 @@ async def run_composer(
             )
 
         response.email_id = email_id  # Ensure email_id is set
+        logger.info(
+            get_agent_logger(
+                agent_name,
+                f"Response composition complete for email [cyan]{email_id}[/cyan]. Response length: [yellow]{len(response.response_body)}[/yellow] chars.",
+            )
+        )
         return create_node_response(Agents.COMPOSER, response)
 
     except Exception as e:  # Catch-all for errors from chain invocation or processing
@@ -102,7 +116,8 @@ async def run_composer(
         )
         # This will catch OutputParserException if retries fail,
         # ToolCallError if tools fail, or any other unexpected error.
-        # print(f"Composer: Error during composition for email {error_email_id}: {e}") # Keep or remove print as preferred
+        error_message = f"Error during composition for email {error_email_id}: {e}"
+        logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
         raise RuntimeError(
             f"Composer: Error during composition for email {error_email_id}"
         ) from e  # MODIFIED

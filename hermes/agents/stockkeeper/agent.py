@@ -15,6 +15,7 @@ from hermes.model.enums import Agents
 from hermes.workflow.types import WorkflowNodeOutput
 from hermes.utils.response import create_node_response
 from hermes.tools.catalog_tools import resolve_product_mention
+from hermes.utils.logger import logger, get_agent_logger
 
 
 def extract_confidence_from_metadata(metadata_str: str | None) -> float:
@@ -71,6 +72,14 @@ async def run_stockkeeper(
         A WorkflowNodeOutput containing either resolved products or an error
 
     """
+    agent_name = Agents.STOCKKEEPER.value.capitalize()
+    email_id = state.email.email_id
+    logger.info(
+        get_agent_logger(
+            agent_name, f"Resolving products for email [cyan]{email_id}[/cyan]"
+        )
+    )
+
     try:
         resolved_products = []
         unresolved_mentions = []
@@ -124,8 +133,11 @@ async def run_stockkeeper(
                     all_product_mentions = classifier_output.get("unique_products", [])
 
         # Print log for debugging
-        print(
-            f"Found {len(all_product_mentions) if all_product_mentions else 0} product mentions for resolution"
+        logger.debug(
+            get_agent_logger(
+                agent_name,
+                f"Found {len(all_product_mentions) if all_product_mentions else 0} product mentions for resolution for email [cyan]{email_id}[/cyan]",
+            )
         )
 
         # Process all product mentions directly without deduplication
@@ -200,6 +212,13 @@ async def run_stockkeeper(
             candidate_log=candidate_log,
         )
 
+        logger.info(
+            get_agent_logger(
+                agent_name,
+                f"Product resolution complete for email [cyan]{email_id}[/cyan]. Metadata: {metadata_str}",
+            )
+        )
+
         output = StockkeeperOutput(
             resolved_products=resolved_products,
             unresolved_mentions=unresolved_mentions,
@@ -209,6 +228,8 @@ async def run_stockkeeper(
         return create_node_response(Agents.STOCKKEEPER, output)
 
     except Exception as e:
+        error_message = f"Error in {agent_name} for email {email_id}: {e}"
+        logger.error(get_agent_logger(agent_name, error_message), exc_info=True)
         raise RuntimeError(
             f"Stockkeeper: Error during processing for email {state.email.email_id}"
         ) from e

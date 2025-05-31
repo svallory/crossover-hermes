@@ -4,10 +4,7 @@ import os
 import sys
 
 from hermes.core import run_email_processing
-
-from rich.traceback import install
-
-install(show_locals=False)
+from hermes.utils.logger import logger, get_agent_logger
 
 
 def create_parser():
@@ -100,9 +97,12 @@ def handle_run_command(args):
     # Output directory
     output_dir = args.out_dir
     os.makedirs(output_dir, exist_ok=True)
-    global OUTPUT_DIR  # Allow modification of global OUTPUT_DIR for other modules if needed
-    OUTPUT_DIR = output_dir
-    print(f"Output directory set to: {output_dir}")
+    logger.info(
+        get_agent_logger(
+            "CLI",
+            f"Output directory set to: [cyan underline]{output_dir}[/cyan underline]",
+        )
+    )
 
     # Handle processing limit - argument takes precedence over environment variable
     limit = args.limit
@@ -118,6 +118,12 @@ def handle_run_command(args):
     # Convert limit=0 to None for the main function (0 means no limit)
     if limit is not None and limit <= 0:
         limit = None
+    if limit is not None:
+        logger.info(
+            get_agent_logger(
+                "CLI", f"Processing limit set to: [yellow]{limit}[/yellow] emails"
+            )
+        )
 
     # Process email IDs if provided
     target_email_ids_list = []
@@ -128,13 +134,25 @@ def handle_run_command(args):
             )
 
         if target_email_ids_list:
-            print(f"Targeting specific email IDs: {target_email_ids_list}")
+            logger.info(
+                get_agent_logger(
+                    "CLI",
+                    f"Targeting specific email IDs: [yellow]{target_email_ids_list}[/yellow]",
+                )
+            )
         else:
             # Handles cases like --email-id "" or --email-id ",,"
-            print(
-                "Warning: --email-id flag used but no valid IDs were extracted. No emails will be processed."
+            logger.warning(
+                get_agent_logger(
+                    "CLI",
+                    "--email-id flag used but no valid IDs were extracted. No emails will be processed.",
+                )
             )
-            print("Exiting: No valid email IDs provided with --email-id flag.")
+            logger.error(
+                get_agent_logger(
+                    "CLI", "Exiting: No valid email IDs provided with --email-id flag."
+                )
+            )
             sys.exit(1)
     # else:
     # target_email_ids = None # Process all if flag not used
@@ -155,9 +173,14 @@ def handle_run_command(args):
                 stop_on_error=args.stop_on_error,  # Pass the new flag
             )
         )
-        print(f"Final result: {result}")
+        logger.info(get_agent_logger("CLI", f"Final result: {result}"))
     except KeyboardInterrupt:
-        print("\nOperation cancelled by user.")
+        logger.info(get_agent_logger("CLI", "\nOperation cancelled by user."))
+        sys.exit(1)
+    except Exception as e:
+        logger.error(
+            get_agent_logger("CLI", f"An unexpected error occurred: {e}"), exc_info=True
+        )
         sys.exit(1)
 
 

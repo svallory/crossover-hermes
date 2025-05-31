@@ -5,6 +5,7 @@ import yaml
 from typing import Any
 
 from hermes.workflow.states import WorkflowOutput
+from hermes.utils.logger import logger, get_agent_logger
 
 
 async def create_output_csv(
@@ -61,17 +62,27 @@ async def create_output_csv(
             await asyncio.to_thread(merged_df.to_csv, file_path, index=False)
 
         except Exception as e:
-            print(f"Warning: Error merging data for {file_path}: {e}")
+            logger.warning(
+                get_agent_logger(
+                    "Utils",
+                    f"Error merging data for [cyan underline]{file_path}[/cyan underline]: {e}. Will attempt to overwrite.",
+                ),
+                exc_info=True,
+            )
             # Fallback to overwriting if merge fails
             await asyncio.to_thread(new_df.to_csv, file_path, index=False)
 
     # Save each DataFrame, merging with existing data
+    logger.info(
+        get_agent_logger(
+            "Utils",
+            f"Saving CSV files to [cyan underline]{output_dir}[/cyan underline] (merging with existing data)",
+        )
+    )
     await merge_and_save_csv(email_classification_df, email_classification_path)
     await merge_and_save_csv(order_status_df, order_status_path)
     await merge_and_save_csv(order_response_df, order_response_path)
     await merge_and_save_csv(inquiry_response_df, inquiry_response_path)
-
-    print(f"CSV files saved to {output_dir} (merged with existing data)")
 
     # Return file paths
     return {
@@ -116,6 +127,14 @@ async def save_workflow_result_as_yaml(
         # Use a simpler approach without async context manager
         yaml_str = yaml.dump(state_dict, default_flow_style=False)
         await asyncio.to_thread(write_yaml_to_file, file_path, yaml_str)
-        print(f"  → Saved workflow result to {file_path}")
+        logger.info(
+            get_agent_logger(
+                "Utils",
+                f"  -> Saved workflow result to [cyan underline]{file_path}[/cyan underline]",
+            )
+        )
     except Exception as e:
-        print(f"  → Error saving workflow result: {e}")
+        logger.error(
+            get_agent_logger("Utils", f"  -> Error saving workflow result: {e}"),
+            exc_info=True,
+        )
