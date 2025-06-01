@@ -23,6 +23,7 @@ class OrderLine(BaseModel):
 
     # Core fields (present in initial request)
     product_id: str = Field(description="Unique identifier for the product")
+    name: str = Field(description="Name of the product")
     description: str = Field(description="Description of the product")
     quantity: int = Field(ge=1, description="The quantity ordered")
 

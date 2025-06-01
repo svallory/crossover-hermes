@@ -22,62 +22,45 @@ classifier:
       - order
 composer:
   email_id: E014
-  response_body: "Dear Olivia,\n\nThank you for your email and for choosing Hermes\
-    \ \u2013 it's always a pleasure to assist you! I\u2019m delighted to confirm that\
-    \ your order for the Kelly 25 Bag in Blue Nuit (product code: HMBG-2531) has been\
-    \ successfully placed. This iconic piece is currently in stock and will be processed\
-    \ for shipment shortly. Your total comes to $9,800, which includes a promotional\
-    \ discount of $200 \u2013 I\u2019m glad we could offer you a little something\
-    \ extra.\n\nYou asked whether the Kelly 25 fits a standard tablet. Great question!\
-    \ The Kelly 25 is designed for compact elegance, so while it holds essentials\
-    \ like your wallet, phone, and a small notebook, a standard tablet (larger than\
-    \ 8 inches) might be a tight squeeze. If you\u2019re planning to carry tech on\
-    \ the go, you may want to consider our Garden Party Tote \u2013 it\u2019s roomy,\
-    \ stylish, and perfect for work or travel.\n\nSince you mentioned you love classic\
-    \ accessories, you might also like our matching Silk Twilly scarves \u2013 they\u2019\
-    re perfect for adding a personal touch to your Kelly, or even as a chic wrist\
-    \ or hair accessory. Many of our customers pair their bags with these for a signature\
-    \ Hermes look.\n\nYour order is currently being prepared, and I\u2019ll send you\
-    \ tracking details as soon as it ships. If you need gift wrapping or have a special\
-    \ occasion in mind, just let me know \u2013 we\u2019re happy to help you make\
-    \ this purchase extra special.\n\nIf you have any other questions about caring\
-    \ for your new bag or want styling tips, I\u2019m here for you. Thank you again\
-    \ for your trust in Hermes.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_body: "Hi Johny,\n\nThank you so much for your order! I'm happy to confirm\
+    \ that we've received your request for 1 Sleek Wallet, and your order has been\
+    \ created successfully.\n\nThe Sleek Wallet is a fantastic choice\u2014it's designed\
+    \ to keep your essentials organized and secure, with multiple card slots and a\
+    \ billfold compartment. Not only is it functional, but it also adds a touch of\
+    \ style to your everyday carry.\n\nYour total comes to $30.00, and your order\
+    \ will be processed shortly. We'll keep you updated as it moves through the next\
+    \ steps, and you'll receive a notification once it's on its way to you.\n\nIf\
+    \ you have any questions or would like recommendations for other accessories to\
+    \ complement your new wallet, just let me know\u2014I'm here to help!\n\nBest\
+    \ regards,\nHermes - Delivering divine fashion"
   response_points:
-  - content: Warm, personal greeting using customer's name (Olivia). Acknowledge their
-      email and choice of Hermes.
+  - content: Personalized greeting using customer's name and thanking for the order.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirm order for Kelly 25 Bag in Blue Nuit (HMBG-2531), mention status,
-      price, and applied discount. Reassure item is in stock and being processed.
+  - content: Confirmed order for 1 Sleek Wallet, referencing product details and order
+      status.
     content_type: order_confirmation
     priority: 10
-    related_to: HMBG-2531
-  - content: "Address customer\u2019s question about Kelly 25 Bag\u2019s capacity\
-      \ for a standard tablet. Explain it is compact, may not fit a standard tablet,\
-      \ and suggest Garden Party Tote as an alternative for tech carry."
+    related_to: SWL2345
+  - content: 'Highlighted features of the Sleek Wallet: multiple card slots, billfold
+      compartment, stylish and functional.'
     content_type: product_info
     priority: 9
-    related_to: HMBG-2531
-  - content: "Suggest matching Silk Twilly scarves as complementary accessories for\
-      \ the Kelly bag, referencing customer\u2019s interest in classic accessories\
-      \ and sharing customer styling trends."
-    content_type: value_addition
+    related_to: SWL2345
+  - content: Stated total price of $30.00 and confirmed order processing timeline.
+    content_type: order_total
     priority: 8
-    related_to: HMBG-2531
-  - content: Explain that shipment tracking will be sent soon. Offer gift wrapping
-      and additional support for special occasions. Invite further questions about
-      care and styling.
-    content_type: next_steps
-    priority: 7
-    related_to: null
-  - content: Express appreciation for their trust and business. Professional signature
-      included.
-    content_type: closing
+    related_to: SWL2345
+  - content: Offered to provide recommendations for complementary accessories if interested.
+    content_type: value_addition
     priority: 6
     related_to: null
-  subject: Your Order Confirmation and Product Insights from Hermes
+  - content: Professional closing with brand signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Sleek Wallet Order Confirmation
   tone: professional and warm
 email:
   email_id: E014
@@ -93,6 +76,7 @@ fulfiller:
       description: Keep your essentials organized and secure with our sleek wallet.
         Featuring multiple card slots and a billfold compartment, this stylish wallet
         is both functional and fashionable. Perfect for everyday carry.
+      name: Sleek Wallet
       product_id: SWL2345
       promotion: null
       promotion_applied: false
@@ -103,14 +87,15 @@ fulfiller:
       stock: 4
       total_price: 30.0
       unit_price: 30.0
-    message: null
+    message: Your order for 1 Sleek Wallet has been created and will be processed
+      shortly.
     overall_status: created
     stock_updated: true
     total_discount: 0.0
     total_price: 30.0
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
-    Processing took 354ms; Successfully resolved 1 out of 1 mentions
+    Processing took 396ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Accessories

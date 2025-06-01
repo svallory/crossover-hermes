@@ -61,58 +61,51 @@ classifier:
       - personal_statement
 composer:
   email_id: E006
-  response_body: "Dear Ms. Carter,\n\nThank you so much for your recent order and\
-    \ for reaching out with your questions! It's always a pleasure to help you find\
-    \ the perfect pieces from our collection.\n\nI'm delighted to confirm your order\
-    \ for the Kelly 25 in Gold Togo leather. This iconic bag, with its signature Herm\xE8\
-    s craftsmanship and timeless silhouette, is truly a treasure, and I can see why\
-    \ you were drawn to it. Your order is currently being processed, and we've reserved\
-    \ this beautiful piece for you. The total comes to $10,500, including a special\
-    \ seasonal discount of $500. We'll send you a shipping confirmation as soon as\
-    \ your bag is on its way.\n\nYou also asked about care and durability. The Togo\
-    \ leather on your Kelly is known for its supple feel and resistance to scratches,\
-    \ making it an excellent choice for everyday elegance. To keep it looking pristine,\
-    \ we recommend storing it in its dust bag when not in use and avoiding prolonged\
-    \ exposure to direct sunlight.\n\nIf you're thinking about ways to accessorize\
-    \ your new Kelly, many of our clients love pairing it with a Twilly scarf or a\
-    \ classic Herm\xE8s bag charm for a personal touch. We currently have the \"Brides\
-    \ de Gala\" Twilly in stock, which looks stunning with the Gold colorway.\n\n\
-    If you have any more questions or would like to explore additional accessories,\
-    \ just let me know. I'm here to help you make the most of your Herm\xE8s experience.\n\
-    \nBest regards,\nHermes - Delivering divine fashion"
+  response_body: "Hi Sam,\n\nThank you for reaching out and introducing yourself!\
+    \ It sounds like you're already planning ahead for the colder months, and honestly,\
+    \ that's a smart move\u2014especially when it comes to boots.\n\nThe CBT8901 Chelsea\
+    \ Boots you mentioned are a fantastic choice for Fall and Winter. They feature\
+    \ a sleek leather construction, elastic side panels, and a sturdy lug sole\u2014\
+    perfect for elevating your casual looks while keeping you comfortable and stylish\
+    \ as the temperatures drop. With only 2 pairs currently in stock at $65.00 each,\
+    \ they're definitely a popular pick for the season.\n\nIf you have any other questions\
+    \ about the Chelsea Boots or would like recommendations for other cold-weather\
+    \ essentials, just let me know. I'm here to help you find the perfect fit for\
+    \ your style and needs.\n\nWhenever you're ready to place your order\u2014whether\
+    \ now or closer to Fall\u2014I'll be happy to assist.\n\nBest regards,\nHermes\
+    \ - Delivering divine fashion"
   response_points:
-  - content: Personalized greeting using Ms. Carter's name and a warm opening that
-      acknowledges her recent order and questions.
+  - content: Warm greeting using Sam's name and acknowledging his forward planning
+      for colder months.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirmed the order for the Kelly 25 in Gold Togo leather, including
-      price, applied seasonal discount, and order status.
-    content_type: order_confirmation
-    priority: 10
-    related_to: kelly-25-gold-togo
-  - content: Addressed Ms. Carter's question about care and durability of Togo leather,
-      including practical tips for maintenance.
+  - content: 'Detailed information about the CBT8901 Chelsea Boots: suitable for Fall
+      and Winter, leather construction, elastic side panels, sturdy lug sole, price
+      $65.00, 2 pairs in stock.'
     content_type: product_info
+    priority: 10
+    related_to: CBT8901
+  - content: 'Directly answer Sam''s question about seasonal suitability: the boots
+      are perfect for Fall and Winter.'
+    content_type: answer
     priority: 9
-    related_to: kelly-25-gold-togo
-  - content: "Suggested complementary accessories like the 'Brides de Gala' Twilly\
-      \ and Herm\xE8s bag charm, referencing current stock."
+    related_to: CBT8901
+  - content: Offer to provide further recommendations for cold-weather essentials
+      or answer additional questions.
     content_type: value_addition
-    priority: 8
-    related_to: null
-  - content: Offered further assistance with questions or accessory recommendations
-      and explained order/shipping updates.
-    content_type: next_steps
     priority: 7
     related_to: null
-  - content: Professional and warm closing, expressing appreciation and including
-      the Hermes signature.
+  - content: Encourage Sam to reach out when ready to order and offer ongoing assistance.
+    content_type: next_steps
+    priority: 8
+    related_to: null
+  - content: Professional and friendly closing with Hermes signature.
     content_type: closing
     priority: 6
     related_to: null
-  subject: Your Hermes Order Confirmation & Product Recommendations
-  tone: professional and warm
+  subject: "Your Chelsea Boots Inquiry \u2013 Perfect for Fall and Winter"
+  tone: friendly and knowledgeable
 email:
   email_id: E006
   message: Hey there, I was thinking of ordering a pair of CBT8901 Chelsea Boots,
@@ -123,7 +116,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
-    Processing took 2ms; Successfully resolved 1 out of 1 mentions
+    Processing took 4ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Men's Shoes

@@ -8,7 +8,10 @@ classifier:
     segments:
     - main_sentence: I'm ready to place my order for those amazing bags I saw in your
         latest collection - you know, the ones with the geometric patterns that everyone's
-        been talking about on Instagram?
+        been talking about on Instagram? I want to get 3 of them, preferably in the
+        darker shade you showed in your social media posts last week. I have the cash
+        ready to go, just let me know where to send it! Can't wait to get my hands
+        on them.
       product_mentions:
       - confidence: 0.9
         mention_text: those amazing bags I saw in your latest collection - you know,
@@ -16,70 +19,61 @@ classifier:
           on Instagram
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
-        product_description: amazing bags with geometric patterns from the latest
-          collection, preferably in the darker shade shown on social media
+        product_description: bags from the latest collection with geometric patterns,
+          preferably in the darker shade shown on social media last week
         product_id: null
         product_name: null
         product_type: bag
         quantity: 3
       related_sentences:
-      - I want to get 3 of them, preferably in the darker shade you showed in your
-        social media posts last week.
-      - I have the cash ready to go, just let me know where to send it!
-      - Can't wait to get my hands on them.
+      - Hi!
+      - Thanks, Monica
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - order
 composer:
   email_id: E022
-  response_body: "Dear Sophia,\n\nThank you so much for your enthusiastic message!\
-    \ I'm delighted to confirm your recent order and share some extra details on the\
-    \ products you asked about.\n\nYour order for the Kelly Mini handbag in Rouge\
-    \ Casaque has been successfully placed. This iconic bag is a favorite for a reason\u2014\
-    its vibrant color and petite silhouette make it both striking and versatile. Your\
-    \ order total comes to $7,800, which includes a special seasonal promotion, so\
-    \ you've secured a wonderful deal. The current status is \"created,\" and we'll\
-    \ keep you updated every step of the way until it's on its way to you.\n\nYou\
-    \ also asked about the difference between Epsom and Swift leather. Epsom leather\
-    \ offers a structured, lightweight feel and is known for its durability and resistance\
-    \ to scratches\u2014perfect if you want a bag that keeps its shape over time.\
-    \ Swift, on the other hand, feels incredibly soft to the touch and has a slight\
-    \ sheen, which gives the color a beautiful depth. If you love a vibrant, slightly\
-    \ slouchy look, Swift is a fantastic choice!\n\nSince you mentioned loving bright\
-    \ accessories, I think you\u2019d enjoy our matching Rodeo bag charms and the\
-    \ silk Twilly scarves\u2014both are perfect for adding a playful touch to your\
-    \ new handbag. These pieces sell out quickly, especially in bold colors to match\
-    \ your new Kelly.\n\nIf you need a hand choosing between leathers or want a closer\
-    \ look at other color options, just let me know. I'm here to help you find the\
-    \ perfect match for your style.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_body: "Hi Monica,\n\nThank you so much for your excitement about our latest\
+    \ collection! I can absolutely see why the geometric pattern bags have caught\
+    \ your eye\u2014they've been a real favorite on Instagram lately.\n\nAt the moment,\
+    \ I wasn't able to identify any products in our catalog that match your request\
+    \ for the geometric pattern bags in the darker shade from our latest collection.\
+    \ It's possible that these particular styles haven't been released for sale yet,\
+    \ or we may need a bit more detail to locate the exact bags you're after.\n\n\
+    If you have a screenshot, product name, or any additional details from our social\
+    \ media posts, please send them my way\u2014I'd love to help track down the exact\
+    \ bags you want. Alternatively, you can check back soon as we regularly update\
+    \ our collection with new arrivals.\n\nIf you\u2019re interested, I\u2019d also\
+    \ be happy to suggest some other standout bags from our current collection that\
+    \ might fit your style. Just let me know!\n\nThank you again for your enthusiasm\
+    \ and for choosing Hermes. I\u2019m here to help make sure you find the perfect\
+    \ piece.\n\nBest regards,\nHermes - Delivering divine fashion"
   response_points:
-  - content: Warm greeting using customer's name and acknowledging enthusiasm.
+  - content: Warm greeting using Monica's name and acknowledging her excitement about
+      the collection.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirm order for Kelly Mini handbag in Rouge Casaque, including price,
-      promotion, and order status.
-    content_type: order_confirmation
+  - content: Explain that no products matching the geometric pattern bags in the darker
+      shade could be identified in the current catalog. Reference the order_result
+      message naturally.
+    content_type: order_info
     priority: 10
-    related_to: kelly_mini_rouge_casaque
-  - content: Explain the difference between Epsom and Swift leather as requested.
-    content_type: answered_question
+    related_to: order
+  - content: Invite Monica to provide more details, such as a screenshot or product
+      name, to help identify the bags she wants.
+    content_type: clarification_request
     priority: 9
-    related_to: leather_question
-  - content: Suggest Rodeo bag charms and silk Twilly scarves as complementary accessories,
-      referencing customer's interest in bright accessories.
-    content_type: value_added_suggestion
-    priority: 8
-    related_to: kelly_mini_rouge_casaque
-  - content: Invite further questions about leather options or color choices and offer
-      personal assistance.
-    content_type: next_steps
+    related_to: order
+  - content: Offer to suggest other standout bags from the current collection if she's
+      interested.
+    content_type: alternative_offer
     priority: 7
-    related_to: null
-  - content: Professional, friendly closing and signature.
+    related_to: order
+  - content: Express appreciation for her enthusiasm and business, and sign off professionally.
     content_type: closing
-    priority: 6
+    priority: 8
     related_to: null
-  subject: Your Order Confirmation and Product Details from Hermes
+  subject: About Your Order Request for the Geometric Pattern Bags
   tone: friendly and enthusiastic
 email:
   email_id: E022
@@ -97,14 +91,14 @@ fulfiller:
     lines: []
     message: We could not identify any products in our catalog matching your request
       for the geometric pattern bags from our latest collection. Please provide more
-      details or a product name so we can assist you further.
+      details or check back soon for availability.
     overall_status: no_valid_products
     stock_updated: false
     total_discount: 0.0
     total_price: 0.0
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
-    Processing took 487ms
+    Processing took 759ms
   resolved_products: []
   unresolved_mentions:
   - confidence: 0.9
@@ -112,8 +106,8 @@ stockkeeper:
       ones with the geometric patterns that everyone's been talking about on Instagram
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
-    product_description: amazing bags with geometric patterns from the latest collection,
-      preferably in the darker shade shown on social media
+    product_description: bags from the latest collection with geometric patterns,
+      preferably in the darker shade shown on social media last week
     product_id: null
     product_name: null
     product_type: bag

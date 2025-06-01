@@ -5,35 +5,35 @@ advisor:
     primary_products: []
     related_products: []
     unanswered_questions:
-    - What are some of the other messenger bag or briefcase style options available,
-      especially ones that are slightly smaller than the previous leather briefcase?
-    - What would you recommend for a work bag?
+    - What were some of the other messenger bag or briefcase style options you have?
+    - I could go for something slightly smaller than my previous one.
+    - Let me know what you'd recommend.
     unsuccessful_references:
-    - leather briefcase from your store
-    - messenger bag or briefcase style options, slightly smaller than previous leather
-      briefcase
+    - leather briefcase
+    - messenger bag or briefcase style options
 classifier:
   email_analysis:
-    customer_name: null
+    customer_name: Emily's husband (name not explicitly mentioned)
     email_id: E012
     language: English
     primary_intent: product inquiry
     segments:
     - main_sentence: Last year for my birthday, my wife Emily got me a really nice
-        leather briefcase from your store.
+        leather briefcase from your store. I loved it and used it every day for work
+        until the strap broke a few months ago.
       product_mentions:
-      - confidence: 0.9
+      - confidence: 0.8
         mention_text: leather briefcase
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
-        product_description: leather briefcase from your store
+        product_description: leather briefcase from your store, used every day for
+          work until the strap broke
         product_id: null
         product_name: null
         product_type: briefcase
         quantity: 1
       related_sentences:
-      - I loved it and used it every day for work until the strap broke a few months
-        ago.
+      - Hey, hope you're doing well.
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - personal_statement
     - main_sentence: Speaking of broken things, I also need to get my lawnmower fixed
@@ -45,7 +45,7 @@ classifier:
     - main_sentence: What were some of the other messenger bag or briefcase style
         options you have?
       product_mentions:
-      - confidence: 0.8
+      - confidence: 0.7
         mention_text: messenger bag or briefcase style options
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
@@ -61,73 +61,59 @@ classifier:
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
     - main_sentence: Oh and we also need to make dinner reservations for our anniversary
-        next month.
+        next month. Maybe a nice Italian place downtown.
       product_mentions: []
-      related_sentences:
-      - Maybe a nice Italian place downtown.
+      related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - personal_statement
 composer:
   email_id: E012
-  response_body: "Dear Ms. Taylor,\n\nThank you for your email and for choosing Herm\xE8\
-    s. I\u2019m delighted to confirm that your order for the Kelly 25 Sellier in Vert\
-    \ Jade Epsom leather has been successfully created. This exquisite piece (product\
-    \ code: H073123CKAVJ) is truly a standout, celebrated for its timeless lines and\
-    \ the elegance of its structured silhouette. You selected the gold hardware, which\
-    \ beautifully complements the Vert Jade shade\u2014an inspired choice! Your total\
-    \ comes to $10,500, and your order is currently being prepared for shipment. We\u2019\
-    ll send you tracking details as soon as your bag is on its way.\n\nYou asked about\
-    \ caring for Epsom leather and keeping the bag pristine. Epsom is loved for its\
-    \ durability and resistance to scratches, so it\u2019s perfect for everyday elegance.\
-    \ I recommend storing your Kelly in its dust bag when not in use and avoiding\
-    \ prolonged exposure to sunlight or moisture. If you ever need a refresh, our\
-    \ in-store spa services can help maintain its impeccable look.\n\nSince you mentioned\
-    \ this purchase is for a special anniversary, we\u2019d be delighted to include\
-    \ our signature gift wrapping at no extra charge. Please let me know if you\u2019\
-    d like to add a personalized note as well.\n\nIf you\u2019re considering building\
-    \ a collection, the Kelly wallet in matching Vert Jade or a Twilly scarf would\
-    \ pair beautifully with your new bag\u2014both are customer favorites for special\
-    \ gifts and personal flair.\n\nShould you have any further questions or if you\u2019\
-    d like recommendations on how to style your Kelly for different occasions, I\u2019\
-    m here to help.\n\nBest regards,\nHerm\xE8s \u2013 Delivering divine fashion"
+  response_body: "Hello,\n\nThank you for reaching out and sharing your story about\
+    \ the leather briefcase Emily gifted you last year. It\u2019s wonderful to hear\
+    \ how much you enjoyed using it every day for work, though I\u2019m sorry to hear\
+    \ about the strap breaking\u2014that\u2019s never what we want for our products.\n\
+    \nYou asked about other messenger bag or briefcase style options, especially something\
+    \ a bit smaller than your previous briefcase. At the moment, I don\u2019t have\
+    \ specific product details to share, but I\u2019d be more than happy to help you\
+    \ find the perfect replacement. If you have any preferences for color, material,\
+    \ or features (like extra pockets or a laptop sleeve), just let me know, and I\u2019\
+    ll make sure to recommend options that fit your needs.\n\nIf you\u2019d like,\
+    \ I can also check if we have any new arrivals or styles that might suit your\
+    \ work routine. Please let me know what you\u2019re looking for, and I\u2019ll\
+    \ get back to you with tailored suggestions as soon as possible.\n\nThank you\
+    \ again for your loyalty to Hermes. I\u2019m here to help you find a bag you\u2019\
+    ll love just as much as the last one.\n\nBest regards,\nHermes - Delivering divine\
+    \ fashion"
   response_points:
-  - content: "Warm, formal greeting using Ms. Taylor's name and thanking her for choosing\
-      \ Herm\xE8s."
+  - content: Warm greeting, referencing the customer's story about the previous briefcase
+      and acknowledging their loyalty.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: 'Confirm order for Kelly 25 Sellier in Vert Jade Epsom leather (product
-      code: H073123CKAVJ), including specific mention of gold hardware, total price
-      ($10,500), and order preparation status.'
-    content_type: order_confirmation
-    priority: 10
-    related_to: H073123CKAVJ
-  - content: "Answer about Epsom leather care: highlight durability, scratch resistance,\
-      \ storage recommendations, and Herm\xE8s spa services."
-    content_type: product_answer
+  - content: Acknowledge the inquiry about messenger bag and briefcase options, and
+      transparently explain that specific product details are not available at the
+      moment.
+    content_type: answer
     priority: 9
-    related_to: H073123CKAVJ
-  - content: Acknowledge that this is an anniversary gift, offer signature gift wrapping
-      and personalized note.
-    content_type: occasion_acknowledgment
+    related_to: What were some of the other messenger bag or briefcase style options
+      you have?
+  - content: Invite the customer to share preferences (size, color, features) to provide
+      tailored recommendations.
+    content_type: answer
     priority: 8
-    related_to: null
-  - content: Suggest Kelly wallet in Vert Jade and Twilly scarf as complementary products,
-      referencing collection-building and gifting.
-    content_type: upsell_cross_sell
-    priority: 7
-    related_to: H073123CKAVJ
-  - content: Promise tracking details, offer further assistance with questions or
-      styling suggestions.
-    content_type: next_steps
-    priority: 7
-    related_to: null
-  - content: "Professional, warm closing with Herm\xE8s signature line."
-    content_type: closing
+    related_to: I could go for something slightly smaller than my previous one.
+  - content: Offer to check for new arrivals or styles that might suit their work
+      routine.
+    content_type: value_addition
     priority: 6
     related_to: null
-  subject: "Your Herm\xE8s Order Confirmation & Product Details"
-  tone: professional and warm
+  - content: Express appreciation for their loyalty and offer further assistance,
+      closing with the Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: "Let\u2019s Find the Perfect Work Bag for You"
+  tone: professional and empathetic
 email:
   email_id: E012
   message: Hey, hope you're doing well. Last year for my birthday, my wife Emily got
@@ -143,19 +129,20 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
-    Processing took 586ms
+    Processing took 1500ms
   resolved_products: []
   unresolved_mentions:
-  - confidence: 0.9
+  - confidence: 0.8
     mention_text: leather briefcase
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
-    product_description: leather briefcase from your store
+    product_description: leather briefcase from your store, used every day for work
+      until the strap broke
     product_id: null
     product_name: null
     product_type: briefcase
     quantity: 1
-  - confidence: 0.8
+  - confidence: 0.7
     mention_text: messenger bag or briefcase style options
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags

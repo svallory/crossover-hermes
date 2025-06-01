@@ -41,6 +41,7 @@ IMPORTANT GUIDELINES:
 6. For emails with mixed intent (both order and inquiry segments), focus only on the order segments
 7. PRICING AND OUTPUT STRUCTURE FOR EACH ORDER LINE:
    - `product_id`: From the resolved product.
+   - `name`: **CRITICAL: This MUST be taken directly from the `name` field of the corresponding `resolved_product`.**
    - `description`: From the resolved product.
    - `quantity`: As determined from the customer\'s request.
    - `base_price`: **CRITICAL: This MUST be taken directly from the `price` field of the corresponding `resolved_product`. Do NOT modify or pre-calculate this value, even if the product description or `promotion_text` mentions a discount.**
@@ -109,16 +110,17 @@ Example output format (Illustrating correct initial pricing for a product with a
   "lines": [
     {
       "product_id": "ABC123",
-      "description": "A beautiful elegant dress for formal occasions. Special offer: 15% off!", // Description might mention promotion
+      "name": "Elegant Evening Dress",
+      "description": "A beautiful elegant dress for formal occasions. Special offer: 15% off!",
       "quantity": 2,
-      "base_price": 129.99, // Taken directly from resolved_product.price
-      "unit_price": 129.99, // Initially identical to base_price
-      "total_price": 259.98, // base_price * quantity
+      "base_price": 129.99,
+      "unit_price": 129.99,
+      "total_price": 259.98,
       "status": "created",
       "stock": 8,
-      "promotion_applied": false, // CRITICAL: Must be false initially
-      "promotion_description": "15% off when you buy 2 or more", // From resolved_product.promotion_text
-      "promotion": { // From resolved_product.promotion
+      "promotion_applied": false,
+      "promotion_description": "15% off when you buy 2 or more",
+      "promotion": {
         "conditions": {"min_quantity": 2},
         "effects": {"apply_discount": {"type": "percentage", "amount": 15.0}}
       },
@@ -126,6 +128,7 @@ Example output format (Illustrating correct initial pricing for a product with a
     },
     {
       "product_id": "XYZ789",
+      "name": "Luxury Handbag",
       "description": "A luxury designer handbag",
       "quantity": 1,
       "base_price": 249.99,
@@ -154,8 +157,8 @@ Example output format (Illustrating correct initial pricing for a product with a
       ]
     }
   ],
-  "total_price": 509.97, // Sum of initial total_prices for available items
-  "total_discount": 0.0, // CRITICAL: Must be 0.0 initially
+  "total_price": 509.97,
+  "total_discount": 0.0,
   "message": "Your order is partially fulfilled. One item is out of stock.",
   "stock_updated": true
 }

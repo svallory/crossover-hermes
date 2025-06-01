@@ -29,71 +29,49 @@ classifier:
         product_type: bag
         quantity: 1
       related_sentences:
-      - Hello I'd like to know how much does Saddle bag cost and if it is suitable
-        for spring season?
+      - Hello
       - Thank you, Antonio
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
 composer:
   email_id: E020
-  response_body: "Dear Olivia,\n\nThank you so much for your order and for trusting\
-    \ Hermes for your spring wardrobe refresh! I'm delighted to confirm that we've\
-    \ created your order for the Silk Iconic Scarf (SCF123) in the \"Jardin d\u2019\
-    Hiver\" print. This piece is a true classic\u2014its vibrant colors and luxurious\
-    \ silk make it a signature statement for any occasion. Your order total comes\
-    \ to $520, and we've included your spring promotion for a little extra delight.\
-    \ The scarf is currently in stock and will be shipped out right away, so you\u2019\
-    ll have it just in time for your upcoming event.\n\nYou mentioned wanting something\
-    \ versatile for both everyday style and special occasions. The Silk Iconic Scarf\
-    \ is a wonderful choice\u2014many of our clients love how easily it can elevate\
-    \ both a simple tee and a formal dress. Since you mentioned spring, I wanted to\
-    \ suggest a couple of coordinating pieces: the \"Clic H\" enamel bracelet, which\
-    \ matches beautifully with the scarf\u2019s palette, and the lightweight Cashmere\
-    \ Stole\u2014a perfect layering piece for those breezy evenings.\n\nIf you\u2019\
-    re still considering a gift, we also offer complimentary gift wrapping and can\
-    \ include a personalized message. Just let me know if you\u2019d like to add this\
-    \ touch!\n\nYour order is now being processed, and I\u2019ll send a shipping confirmation\
-    \ as soon as it\u2019s on its way. If you have any other questions about caring\
-    \ for your new scarf or styling it, I\u2019d be thrilled to help. And if you need\
-    \ anything else to complete your look, just ask\u2014I\u2019m here to make your\
-    \ Hermes experience exceptional.\n\nBest regards,\nHermes - Delivering divine\
-    \ fashion"
+  response_body: "Hello Antonio,\n\nThank you for reaching out with your questions\
+    \ about the Saddle bag. I appreciate your interest and your patience as I look\
+    \ into the details for you.\n\nAt the moment, I don't have specific information\
+    \ available regarding the price or seasonal suitability of the Saddle bag. However,\
+    \ I'd be more than happy to check with our team and get back to you as soon as\
+    \ possible with the details you need.\n\nIf you have any other preferences or\
+    \ are considering similar styles, please let me know\u2014I'm here to help you\
+    \ find the perfect bag for spring.\n\nThank you again for your inquiry, Antonio.\
+    \ I look forward to assisting you further.\n\nBest regards,\nHermes - Delivering\
+    \ divine fashion"
   response_points:
-  - content: Personal greeting using customer's name and acknowledgment of order and
-      trust in Hermes.
+  - content: Personalized greeting using Antonio's name and acknowledgment of his
+      inquiry.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirm order for Silk Iconic Scarf (SCF123), mention print, price, stock
-      status, and application of spring promotion.
-    content_type: order_confirmation
-    priority: 10
-    related_to: SCF123
-  - content: Highlight scarf versatility for both everyday and special occasions,
-      referencing customer's intent and other clients' feedback.
-    content_type: product_benefits
+  - content: Explain that specific information about the Saddle bag's price and seasonal
+      suitability is currently unavailable, but offer to follow up with details.
+    content_type: answer
     priority: 9
-    related_to: SCF123
-  - content: Suggest 'Clic H' enamel bracelet and lightweight Cashmere Stole as coordinating
-      pieces for spring and event needs.
-    content_type: cross_sell_suggestion
-    priority: 7
-    related_to: null
-  - content: Mention complimentary gift wrapping and personalized message option for
-      gift purchases.
-    content_type: gift_option
+    related_to: Saddle bag
+  - content: Acknowledge the unanswered questions and unsuccessful product reference
+      gracefully, without revealing technical limitations.
+    content_type: answer
+    priority: 8
+    related_to: Saddle bag
+  - content: Invite Antonio to share more preferences or consider similar styles,
+      offering further assistance.
+    content_type: value_addition
     priority: 6
     related_to: null
-  - content: Explain order is being processed, shipping confirmation will follow,
-      and offer further assistance for care, styling, or additional purchases.
-    content_type: next_steps
-    priority: 8
-    related_to: null
-  - content: Warm professional closing with signature.
+  - content: Express appreciation and provide a warm, professional closing with the
+      Hermes signature.
     content_type: closing
     priority: 5
     related_to: null
-  subject: Your Hermes Order Confirmation & Style Suggestions
+  subject: Regarding Your Inquiry About the Saddle Bag
   tone: professional and warm
 email:
   email_id: E020
@@ -104,7 +82,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
-    Processing took 922ms
+    Processing took 238ms
   resolved_products: []
   unresolved_mentions:
   - confidence: 0.9

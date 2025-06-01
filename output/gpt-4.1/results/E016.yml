@@ -54,73 +54,66 @@ classifier:
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
+    - main_sentence: My name is Claire.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
 composer:
   email_id: E016
-  response_body: "Dear Ms. Laurent,\n\nThank you so much for your wonderful message.\
-    \ I can feel your excitement about the Birkin bag, and it\u2019s truly contagious!\
-    \ The Etoupe Clemence Birkin 30 you selected is an absolute icon, and I\u2019\
-    m thrilled to confirm your order has been successfully created. Your order includes:\n\
-    \n- Birkin 30 in Etoupe Clemence leather, with palladium hardware\n- Quantity:\
-    \ 1\n- Price: \u20AC8,700\n\nYour total comes to \u20AC8,700, and we have secured\
-    \ this piece for you. The bag is in stock and will be prepared for shipment shortly.\
-    \ We\u2019ll keep you updated every step of the way, and you\u2019ll receive a\
-    \ tracking link as soon as your Birkin is on its way.\n\nYou had a great question\
-    \ about the difference between Clemence and Togo leather. Clemence is known for\
-    \ its softer, more relaxed feel and slightly larger grain, giving the bag an effortlessly\
-    \ elegant look. Togo is a bit more structured with finer grain and slightly more\
-    \ scratch resistance\u2014both are exceptional, but Clemence offers that beautiful\
-    \ slouchy silhouette over time.\n\nIf you\u2019re considering accessories, many\
-    \ clients love pairing their Birkin with a playful Twilly scarf wrapped around\
-    \ the handles or a Rodeo bag charm for a pop of color. We have several options\
-    \ available and would be happy to recommend a few based on your style.\n\nIf this\
-    \ Birkin is meant for a special occasion or as a gift, we also offer complimentary\
-    \ gift wrapping\u2014just let us know your preference!\n\nShould you have any\
-    \ questions about caring for Clemence leather or wish to explore additional accessories,\
-    \ I\u2019m here to help. Thank you again for choosing Hermes for such a special\
-    \ purchase.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_body: "Dear Claire,\n\nThank you so much for reaching out and sharing a\
+    \ bit about what you're looking for. I can tell you\u2019ve put a lot of thought\
+    \ into finding the perfect dress for that summer wedding, and I completely understand\
+    \ wanting something that strikes the right balance\u2014flattering, comfortable,\
+    \ and just right for an outdoor ceremony. You also mentioned needing a travel\
+    \ bag, which is always a smart addition for special occasions away from home.\n\
+    \nAt the moment, I don\u2019t have specific dress or travel bag options to recommend\
+    \ from our current collection based on your detailed preferences. However, I\u2019\
+    d love to help you find exactly what you\u2019re looking for. If you have any\
+    \ particular colors, fabrics, or styles in mind, please let me know\u2014this\
+    \ will help me narrow down the best options for you. Alternatively, I can keep\
+    \ an eye out and notify you as soon as we have new arrivals that fit your criteria.\n\
+    \nIf you\u2019d like, I can also suggest some accessories or other pieces that\
+    \ might complement your look for the wedding, or help you put together a complete\
+    \ travel set once we find the right bag.\n\nPlease let me know a bit more about\
+    \ your preferences, and I\u2019ll be delighted to assist further. Thank you again\
+    \ for considering Hermes for your special occasion.\n\nBest regards,\nHermes -\
+    \ Delivering divine fashion"
   response_points:
-  - content: Warm greeting using Ms. Laurent's name, acknowledging her excitement
-      and enthusiasm for the Birkin bag.
+  - content: Warm greeting using Claire's name and acknowledging her thoughtful inquiry.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: "Confirmed order for the Birkin 30 in Etoupe Clemence leather, including\
-      \ quantity, price (\u20AC8,700), and stock status. Order created and secured\
-      \ for customer."
-    content_type: order_confirmation
-    priority: 10
-    related_to: birkin_30_etoupe
-  - content: Order is being prepared for shipment; tracking information will be sent
-      soon.
-    content_type: order_status
-    priority: 8
-    related_to: birkin_30_etoupe
-  - content: Answered customer question about the difference between Clemence and
-      Togo leather, emphasizing the relaxed feel and grain of Clemence.
-    content_type: product_info
+  - content: Acknowledge that there are currently no specific dress or travel bag
+      options available matching her detailed preferences, but express eagerness to
+      help.
+    content_type: answer
     priority: 9
-    related_to: birkin_30_etoupe
-  - content: Suggested Twilly scarf and Rodeo bag charm as accessories that complement
-      the Birkin; offered to recommend options.
-    content_type: upsell
-    priority: 7
-    related_to: birkin_30_etoupe
-  - content: Mentioned complimentary gift wrapping in case this is a special occasion
-      or gift.
-    content_type: gift_signal
-    priority: 5
-    related_to: null
-  - content: Encouraged customer to reach out for care advice or accessory recommendations;
-      offered further assistance.
-    content_type: next_steps
+    related_to: What are some dress options suitable for a summer wedding that are
+      not too short, low-cut, or tight-fitting, but also not too loose or matronly,
+      and are flattering and comfortable for an outdoor ceremony?
+  - content: Invite Claire to share more about her style, color, or fabric preferences
+      to help with a more tailored recommendation.
+    content_type: answer
+    priority: 8
+    related_to: Are there any travel bags available that would be suitable for my
+      needs?
+  - content: Offer to suggest accessories or help assemble a complete travel set once
+      suitable products are found.
+    content_type: value_addition
     priority: 6
     related_to: null
-  - content: Professional and enthusiastic closing with appreciation and signature.
+  - content: Encourage Claire to provide more details and assure her of further assistance
+      as soon as suitable products are available.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Professional and warm closing with signature.
     content_type: closing
     priority: 5
     related_to: null
-  subject: Your Birkin Bag Order and Product Details
-  tone: professional and enthusiastic
+  subject: Your Summer Wedding Dress & Travel Bag Inquiry
+  tone: warm and attentive
 email:
   email_id: E016
   message: Hello, I'm looking for a dress for a summer wedding I have coming up. My
@@ -134,7 +127,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 2 product mentions; Made 2 resolution attempts; Resolved 0 candidates;
-    Processing took 586ms
+    Processing took 991ms
   resolved_products: []
   unresolved_mentions:
   - confidence: 0.9

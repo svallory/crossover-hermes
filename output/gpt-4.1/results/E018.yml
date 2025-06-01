@@ -23,73 +23,56 @@ classifier:
       - order
 composer:
   email_id: E018
-  response_body: "Dear Mr. Thompson,\n\nThank you so much for your wonderful email,\
-    \ and for choosing Hermes for your special gift. I can feel how much care you\u2019\
-    re putting into this birthday surprise for your wife, and I\u2019m delighted to\
-    \ help you make it memorable!\n\nI\u2019m pleased to confirm your order for the\
-    \ Kelly 25 in Etoupe Swift leather (Product Code: H-KLY25-ETP), with a palladium\
-    \ clasp. The order has been created successfully, and your total comes to $9,800.\
-    \ We\u2019ve applied your VIP loyalty discount, so you\u2019re also enjoying $500\
-    \ in savings on this purchase. The bag is currently in stock and will be prepared\
-    \ for shipment shortly. You\u2019ll receive tracking details as soon as it leaves\
-    \ our boutique. If you\u2019d like, we can include our signature Hermes gift wrapping\u2014\
-    just let me know!\n\nYou asked about the care requirements for Swift leather.\
-    \ Swift is renowned for its smooth, supple finish and vibrant color. It\u2019\
-    s lightweight and soft to the touch, making it a favorite for those who appreciate\
-    \ subtle luxury. I recommend storing it in its dust bag when not in use and avoiding\
-    \ direct contact with water or oils. If you\u2019d like, we offer a specialized\
-    \ Hermes leather care kit that pairs perfectly with Swift leather items\u2014\
-    many of our clients find it invaluable for keeping their bags pristine.\n\nSince\
-    \ this is for your wife\u2019s birthday, may I also suggest a few complementary\
-    \ pieces? Our Twilly silk scarves add a beautiful, personalized touch to the Kelly\
-    \ handles, and we have several new patterns this season. A matching Bastia coin\
-    \ purse in Etoupe Swift is also available, which makes for a charming gift set.\n\
-    \nIf you have any other questions, or if you\u2019d like to add gift wrapping\
-    \ or a personalized card to your order, just reply to this email and I\u2019ll\
-    \ take care of everything.\n\nThank you again for trusting Hermes with such a\
-    \ meaningful gift. I\u2019m here for anything you need!\n\nBest regards,\nHermes\
-    \ - Delivering divine fashion"
+  response_body: "Hello,\n\nThank you so much for reaching out with your order request\
+    \ for 2 pairs of the Retro Sunglasses (RSG8901). I\u2019m sorry to let you know\
+    \ that these vintage-inspired shades are currently out of stock. I completely\
+    \ understand how disappointing this can be, especially when you\u2019re looking\
+    \ forward to that cool, nostalgic vibe they bring to any outfit.\n\nWhile the\
+    \ Retro Sunglasses aren\u2019t available at the moment, I\u2019d love to suggest\
+    \ a few stylish alternatives that are in stock and offer a similar price point:\n\
+    \n- **Corduroy Bucket Hat** ($28.00): Keep it casual and cool with this trendy\
+    \ hat, featuring a soft corduroy construction and a relaxed, bucket silhouette.\
+    \ It\u2019s a must-have accessory for a laidback, streetwear-inspired look\u2014\
+    perfect for both fall and winter.\n\n- **Infinity Scarf** ($28.00): Stay cozy\
+    \ and stylish with this soft, chunky knit scarf. Its endless loop design makes\
+    \ it easy to wear and adds a touch of warmth and texture to your winter ensembles.\n\
+    \n- **Sleek Wallet** ($30.00): If you\u2019re looking for something practical,\
+    \ this wallet keeps your essentials organized and secure with multiple card slots\
+    \ and a billfold compartment. It\u2019s both functional and fashionable for everyday\
+    \ carry.\n\nIf any of these options catch your eye, just let me know and I\u2019\
+    ll be happy to help you place an order or provide more details. If you\u2019d\
+    \ prefer to wait for the Retro Sunglasses to come back in stock, I can keep you\
+    \ updated as soon as they\u2019re available again.\n\nThank you again for considering\
+    \ Hermes for your accessories. If you have any other preferences or need further\
+    \ assistance, I\u2019m here to help!\n\nBest regards,\nHermes - Delivering divine\
+    \ fashion"
   response_points:
-  - content: Warm greeting, using customer name; acknowledge the special occasion
-      and the emotional context.
+  - content: Warm greeting and acknowledgment of the order request for Retro Sunglasses,
+      expressing appreciation for the inquiry.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirm order for the Kelly 25 in Etoupe Swift leather, including product
-      code, price, and applied discount. State order is created and product is in
-      stock. Mention shipment and tracking details to follow.
-    content_type: order_confirmation
+  - content: Inform customer that the Retro Sunglasses are currently out of stock,
+      expressing understanding and empathy for the disappointment.
+    content_type: answer
     priority: 10
-    related_to: H-KLY25-ETP
-  - content: "Address customer\u2019s question about care requirements for Swift leather.\
-      \ Provide practical advice and mention Hermes leather care kit as a value-added\
-      \ suggestion."
-    content_type: answered_question
+    related_to: RSG8901
+  - content: 'Suggest in-stock alternatives: Corduroy Bucket Hat, Infinity Scarf,
+      and Sleek Wallet, with descriptions and prices.'
+    content_type: alternative
     priority: 9
-    related_to: H-KLY25-ETP
-  - content: "Acknowledge that this is a birthday gift for the customer\u2019s wife.\
-      \ Offer Hermes gift wrapping and a personalized card as options."
-    content_type: gift_signal_response
+    related_to: null
+  - content: Invite customer to select from alternatives or request to be notified
+      when Retro Sunglasses are back in stock. Offer further assistance.
+    content_type: next_steps
     priority: 8
     related_to: null
-  - content: 'Suggest complementary products: Twilly silk scarves for the Kelly handle
-      and Bastia coin purse in matching leather. Highlight their appropriateness as
-      a gift set.'
-    content_type: cross-sell
-    priority: 7
-    related_to: H-KLY25-ETP
-  - content: Advise customer to reply for gift wrapping, personalized card, or further
-      questions. Confirm ongoing availability for assistance.
-    content_type: next_steps
-    priority: 7
-    related_to: null
-  - content: "Express appreciation for the customer\u2019s trust. Professional and\
-      \ warm closing with Hermes signature."
+  - content: Professional closing, expressing gratitude and offering further help.
     content_type: closing
-    priority: 6
+    priority: 7
     related_to: null
-  subject: Order Confirmation & Product Details for Your Hermes Selection
-  tone: warm and professional
+  subject: Update on Your Order for Retro Sunglasses
+  tone: professional and empathetic
 email:
   email_id: E018
   message: Hello I'd like to buy 2 pairs of the retro sun glasses (RSG8901). Thanks
@@ -165,6 +148,7 @@ fulfiller:
       description: Transport yourself back in time with our retro sunglasses. These
         vintage-inspired shades offer a cool, nostalgic vibe while protecting your
         eyes from the sun's rays. Perfect for beach days or city strolls.
+      name: Retro Sunglasses
       product_id: RSG8901
       promotion: null
       promotion_applied: false
@@ -176,14 +160,14 @@ fulfiller:
       total_price: 53.98
       unit_price: 26.99
     message: Unfortunately, the Retro Sunglasses are out of stock. We have suggested
-      some similar sunglasses that are currently available.
+      some similar sunglasses you may like.
     overall_status: out of stock
     stock_updated: true
     total_discount: 0.0
     total_price: 0.0
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
-    Processing took 6ms; Successfully resolved 1 out of 1 mentions
+    Processing took 5ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Accessories

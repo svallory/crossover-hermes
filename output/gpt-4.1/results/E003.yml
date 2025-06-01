@@ -1,11 +1,12 @@
 advisor:
   inquiry_answers:
     answered_questions:
-    - answer: The LTH1098 Leather Backpack features multiple compartments, including
-        a padded laptop sleeve, designed for organization.
+    - answer: The Leather Backpack (LTH1098) features multiple compartments, including
+        a padded laptop sleeve. No information is available for the Leather Tote regarding
+        organizational pockets.
       answer_type: factual
-      confidence: 1.0
-      question: Does the LTH1098 Leather Backpack have organizational pockets?
+      confidence: 0.9
+      question: Does one have more organizational pockets than the other?
       reference_product_ids:
       - LTH1098
     email_id: E003
@@ -31,10 +32,7 @@ advisor:
       stock: 7
     related_products: []
     unanswered_questions:
-    - Does the Leather Tote have more organizational pockets than the LTH1098 Leather
-      Backpack?
-    - 'Which would be better for carrying a laptop and documents: the LTH1098 Leather
-      Backpack or the Leather Tote?'
+    - Is there information on the organizational pockets of the Leather Tote?
     unsuccessful_references:
     - Leather Tote
 classifier:
@@ -47,7 +45,7 @@ classifier:
     - main_sentence: Hello, I need a new bag to carry my laptop and documents for
         work.
       product_mentions:
-      - confidence: 0.9
+      - confidence: 0.8
         mention_text: a new bag to carry my laptop and documents for work
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
@@ -59,8 +57,14 @@ classifier:
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - personal_statement
-    - main_sentence: I'm having a hard time deciding which would be better - the LTH1098
-        Leather Backpack or the Leather Tote?
+    - main_sentence: My name is David and I'm having a hard time deciding which would
+        be better - the LTH1098 Leather Backpack or the Leather Tote?
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: Does one have more organizational pockets than the other? Any
+        insight would be appreciated!
       product_mentions:
       - confidence: 1.0
         mention_text: LTH1098 Leather Backpack
@@ -71,7 +75,7 @@ classifier:
         product_name: Leather Backpack
         product_type: backpack
         quantity: 1
-      - confidence: 0.95
+      - confidence: 0.9
         mention_text: Leather Tote
         product_category: !!python/object/apply:hermes.model.enums.ProductCategory
         - Bags
@@ -80,64 +84,55 @@ classifier:
         product_name: Leather Tote
         product_type: tote
         quantity: 1
-      related_sentences:
-      - Does one have more organizational pockets than the other?
-      - Any insight would be appreciated!
+      related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - inquiry
 composer:
   email_id: E003
-  response_body: "Dear Ms. Thompson,\n\nThank you so much for your lovely message!\
-    \ I can sense your excitement about your recent order, and I'm delighted to confirm\
-    \ that everything is set for you.\n\nYour order for the Kelly 25 in Rouge Casaque\
-    \ Epsom leather (Product Code: H-K25-RC) has been successfully created. This classic\
-    \ piece is always a showstopper, and the vibrant hue is especially striking for\
-    \ the upcoming season. Your order total comes to $9,850, and we've applied a complimentary\
-    \ silk twilly as part of our seasonal promotion \u2014 a little extra touch to\
-    \ make your new bag even more special.\n\nAs you asked, the Kelly 25 does include\
-    \ both a removable shoulder strap and gold-plated hardware. Many of our clients\
-    \ love how versatile it is \u2014 perfect for both elegant evenings and chic daytime\
-    \ looks. If you\u2019d like to make it an even fuller set, I can recommend pairing\
-    \ it with our Kelly wallet in matching Rouge Casaque, or perhaps the Oran sandals\
-    \ for a head-to-toe Hermes moment.\n\nYour order is being processed now, and you\u2019\
-    ll receive a tracking number as soon as it ships. If you\u2019d like to explore\
-    \ more accessories or have questions about caring for your Kelly, just let me\
-    \ know \u2014 I\u2019m here to help!\n\nThank you again for choosing Hermes. It\u2019\
-    s always a pleasure to assist you, and I hope your new piece brings you endless\
-    \ joy.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_body: "Hello David,\n\nThank you for reaching out and sharing a bit about\
+    \ what you\u2019re looking for in a new work bag. I completely understand how\
+    \ important it is to find something that keeps your laptop and documents organized\
+    \ and easily accessible, especially for work.\n\nBetween the two options you mentioned,\
+    \ I can provide some detailed insight on the Leather Backpack (LTH1098). This\
+    \ backpack is crafted from premium leather and is designed with multiple compartments,\
+    \ including a padded laptop sleeve\u2014making it a great choice for carrying\
+    \ your laptop and keeping your work essentials organized. The adjustable straps\
+    \ also add to the comfort, whether you\u2019re commuting or traveling.\n\nUnfortunately,\
+    \ I don\u2019t have specific information about the organizational pockets in the\
+    \ Leather Tote at this time. If you\u2019d like, I can look into this further\
+    \ or suggest some other options that might fit your needs.\n\nIf you have any\
+    \ other questions or want to explore more bags that are perfect for work, just\
+    \ let me know\u2014I\u2019m here to help you find the ideal fit.\n\nBest regards,\n\
+    Hermes - Delivering divine fashion"
   response_points:
-  - content: Warm and personal greeting using Ms. Thompson's name, acknowledging excitement
-      from her message.
+  - content: Personalized greeting using David's name and acknowledging his search
+      for a work bag.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirmed order for Kelly 25 in Rouge Casaque, referenced product code,
-      highlighted total price, and noted complimentary twilly promotion.
-    content_type: order_confirmation
-    priority: 10
-    related_to: H-K25-RC
-  - content: Answered inquiry about removable strap and hardware, emphasized versatility
-      and referenced customer enthusiasm.
+  - content: Provided detailed information about the Leather Backpack (LTH1098), highlighting
+      its multiple compartments, padded laptop sleeve, and suitability for work.
     content_type: product_info
     priority: 9
-    related_to: H-K25-RC
-  - content: 'Suggested complementary items: Kelly wallet and Oran sandals, naturally
-      integrated as styling ideas.'
-    content_type: cross_sell
-    priority: 7
-    related_to: H-K25-RC
-  - content: Explained order processing and shipping, offered further assistance for
-      accessories or product care.
-    content_type: next_steps
+    related_to: LTH1098
+  - content: 'Answered David''s question about organizational pockets: Leather Backpack
+      has multiple compartments and a padded laptop sleeve; no info available for
+      the Leather Tote.'
+    content_type: answer
     priority: 8
-    related_to: null
-  - content: Expressed appreciation for her business and included the professional
-      signature line.
+    related_to: LTH1098
+  - content: Acknowledged the lack of information on the Leather Tote's organizational
+      pockets and offered to assist further.
+    content_type: answer
+    priority: 7
+    related_to: Leather Tote
+  - content: Encouraged David to reach out with more questions and offered further
+      assistance, closing with a professional signature.
     content_type: closing
     priority: 6
     related_to: null
-  subject: Your Order Confirmation and Product Details from Hermes
-  tone: friendly and enthusiastic
+  subject: 'Choosing the Perfect Work Bag: Leather Backpack vs. Leather Tote'
+  tone: professional and warm
 email:
   email_id: E003
   message: Hello, I need a new bag to carry my laptop and documents for work. My name
@@ -149,7 +144,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 3 product mentions; Made 3 resolution attempts; Resolved 1 candidates;
-    Processing took 1404ms; Successfully resolved 1 out of 1 mentions
+    Processing took 1045ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
@@ -171,7 +166,7 @@ stockkeeper:
       - All seasons
     stock: 7
   unresolved_mentions:
-  - confidence: 0.9
+  - confidence: 0.8
     mention_text: a new bag to carry my laptop and documents for work
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags
@@ -180,7 +175,7 @@ stockkeeper:
     product_name: null
     product_type: bag
     quantity: 1
-  - confidence: 0.95
+  - confidence: 0.9
     mention_text: Leather Tote
     product_category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Bags

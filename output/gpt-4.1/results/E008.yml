@@ -19,68 +19,52 @@ classifier:
         product_type: scarf
         quantity: 1
       related_sentences:
-      - Thanks!
+      - Hello, I'd want to order one of your Versatile Scarves, the one that can be
+        worn as a scarf, shawl, or headwrap. Thanks!
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - order
 composer:
   email_id: E008
-  response_body: "Dear Ms. Taylor,\n\nThank you so much for your lovely message and\
-    \ for choosing Hermes! I\u2019m delighted to confirm that your order for the Kelly\
-    \ 25 Epsom leather bag in Gold has been successfully created. This iconic piece\
-    \ is always in high demand, and I can see why\u2014it\u2019s a genuine classic,\
-    \ with its structured silhouette and refined gold hardware. Your order total is\
-    \ $8,200, with complimentary shipping included. We\u2019ll keep you updated every\
-    \ step of the way, and if you need to make any adjustments, just let us know.\n\
-    \nYou also asked about care instructions and how best to style your new bag. The\
-    \ Kelly 25 is crafted from Epsom leather, which is known for its durability and\
-    \ beautiful texture. To keep it looking its best, I recommend storing it in the\
-    \ provided dust bag when not in use and avoiding prolonged exposure to sunlight\
-    \ or moisture. Many of our clients love pairing this shade of Gold with both neutral\
-    \ tones and vibrant prints\u2014it\u2019s surprisingly versatile and can take\
-    \ you from a business meeting to an evening out effortlessly.\n\nIf you\u2019\
-    re interested in elevating your look even further, may I suggest a silk Twilly\
-    \ scarf or our signature bag charms? These are perfect for personalizing your\
-    \ Kelly and also make wonderful gifts. If you\u2019re shopping for a special occasion\
-    \ or would like more styling ideas, I\u2019d be happy to recommend some matching\
-    \ accessories or seasonal pieces.\n\nYour order is being processed now, and you\u2019\
-    ll receive a shipping notification as soon as it\u2019s on its way. If you have\
-    \ any questions or need assistance, just reply to this email or call our customer\
-    \ care team.\n\nThank you again for your trust and enthusiasm. We can\u2019t wait\
-    \ for you to enjoy your new Hermes treasure.\n\nBest regards,\nHermes - Delivering\
-    \ divine fashion"
+  response_body: "Hello,\n\nThank you so much for your order! I'm delighted to confirm\
+    \ that we've received your request for the Versatile Scarf\u2014the one that can\
+    \ be worn as a scarf, shawl, or headwrap. This piece is truly a favorite for its\
+    \ lightweight feel and multi-purpose design, making it perfect whether you're\
+    \ traveling or just want a little extra style for the season.\n\nYour order has\
+    \ been created and will be processed shortly. Here are the details:\n- Item: Versatile\
+    \ Scarf\n- Description: Add a touch of versatility to your wardrobe with our versatile\
+    \ scarf. This lightweight, multi-purpose accessory can be worn as a scarf, shawl,\
+    \ or even a headwrap. Perfect for transitional seasons or travel.\n- Quantity:\
+    \ 1\n- Price: $23.00\n\nYour total comes to $23.00. We currently have this item\
+    \ in stock, so you can expect your order to move forward without delay.\n\nIf\
+    \ you have any questions about your order or would like recommendations for other\
+    \ accessories to complement your new scarf, just let me know\u2014I'm here to\
+    \ help!\n\nBest regards,\nHermes - Delivering divine fashion"
   response_points:
-  - content: Warm, personalized greeting addressing Ms. Taylor and expressing appreciation
-      for her message and order.
+  - content: Thank the customer for their order and acknowledge their interest in
+      the Versatile Scarf.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirmed order for the Kelly 25 Epsom leather bag in Gold, provided
-      order total ($8,200) and shipping information, reassured about order processing
-      and next steps.
+  - content: Confirm the order for the Versatile Scarf, including product description,
+      quantity, and price.
     content_type: order_confirmation
     priority: 10
-    related_to: kelly_25_gold
-  - content: Addressed Ms. Taylor's questions about care and styling for the Kelly
-      25. Provided practical care tips and suggested styling options for versatility.
-    content_type: product_info
+    related_to: VSC6789
+  - content: Inform the customer that the order has been created and will be processed
+      shortly. Confirm item is in stock.
+    content_type: order_status
     priority: 9
-    related_to: kelly_25_gold
-  - content: Suggested complementary items (silk Twilly scarf, bag charms) and offered
-      further styling advice. Positioned these as gift-worthy and suitable for personalizing
-      the bag.
-    content_type: upsell_cross-sell
-    priority: 7
-    related_to: kelly_25_gold
-  - content: Clarified order processing timeline, shipping notification, and customer
-      support contact options.
-    content_type: next_steps
-    priority: 8
-    related_to: null
-  - content: Expressed gratitude and enthusiasm, closed with professional signature.
-    content_type: closing
+    related_to: VSC6789
+  - content: Offer to provide recommendations for complementary accessories if the
+      customer is interested.
+    content_type: value_addition
     priority: 6
     related_to: null
-  subject: Your Order Confirmation and Product Details from Hermes
+  - content: Professional closing with brand signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Versatile Scarf Order Confirmation
   tone: professional and warm
 email:
   email_id: E008
@@ -97,6 +81,7 @@ fulfiller:
       description: Add a touch of versatility to your wardrobe with our versatile
         scarf. This lightweight, multi-purpose accessory can be worn as a scarf, shawl,
         or even a headwrap. Perfect for transitional seasons or travel.
+      name: Versatile Scarf
       product_id: VSC6789
       promotion: null
       promotion_applied: false
@@ -104,17 +89,18 @@ fulfiller:
       quantity: 1
       status: !!python/object/apply:hermes.model.order.OrderLineStatus
       - created
-      stock: 5
+      stock: 6
       total_price: 23.0
       unit_price: 23.0
-    message: null
+    message: Your order for the Versatile Scarf has been created and will be processed
+      shortly.
     overall_status: created
     stock_updated: true
     total_discount: 0.0
     total_price: 23.0
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
-    Processing took 434ms; Successfully resolved 1 out of 1 mentions
+    Processing took 463ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Accessories

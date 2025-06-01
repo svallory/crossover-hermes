@@ -1,11 +1,11 @@
 advisor:
   inquiry_answers:
     answered_questions:
-    - answer: The product description states that the RSG8901 Retro Sunglasses are
-        vintage-inspired and offer a nostalgic vibe, but it does not specify a particular
-        era such as the 1950s or 1960s.
+    - answer: The RSG8901 Retro Sunglasses are described as vintage-inspired and offer
+        a cool, nostalgic vibe, but the specific era of inspiration (such as the 1950s
+        or 1960s) is not specified in the product information.
       answer_type: factual
-      confidence: 0.9
+      confidence: 0.8
       question: What era are the RSG8901 Retro Sunglasses inspired by? The 1950s,
         1960s?
       reference_product_ids:
@@ -61,60 +61,45 @@ classifier:
       - inquiry
 composer:
   email_id: E011
-  response_body: "Dear Sophia,\n\nThank you so much for your enthusiastic email! I\
-    \ can absolutely sense your excitement about our new silk scarf collection\u2014\
-    so many of our clients are feeling the same way this season, and it's wonderful\
-    \ to see your keen eye for style.\n\nYour order for the \"Jardin d'Hiver\" silk\
-    \ scarf (Product Code: HSC102) has been successfully created. This design is a\
-    \ true standout with its delicate floral pattern and hand-rolled edges, and I\u2019\
-    m sure it will add a touch of elegance to any outfit. Your order totals $495,\
-    \ with our complimentary spring promotion already applied. We are preparing your\
-    \ item for dispatch, and you will receive a shipping confirmation shortly.\n\n\
-    You asked about care instructions for silk scarves. The best way to keep your\
-    \ scarf looking divine is to hand wash gently in cool water or have it professionally\
-    \ dry cleaned. Always store it flat and avoid direct sunlight to preserve those\
-    \ vibrant colors.\n\nIf you\u2019re looking to complement your new scarf, I\u2019\
-    d recommend our leather glove collection or the signature enamel bangles\u2014\
-    both are customer favorites and pair beautifully with silk accessories. Let me\
-    \ know if you\u2019d like more details or styling suggestions!\n\nIf you need\
-    \ your order by a specific date, just reply to this email and I\u2019ll be happy\
-    \ to explore expedited options for you.\n\nThank you again for choosing Hermes,\
-    \ Sophia. It\u2019s always a pleasure to help you find those extra-special pieces.\n\
-    \nBest regards,\nHermes - Delivering divine fashion"
+  response_body: "Hello,\n\nThank you for reaching out with your question about the\
+    \ RSG8901 Retro Sunglasses. I love that you're curious about the story behind\
+    \ their style!\n\nThese sunglasses are described as vintage-inspired and are designed\
+    \ to give off that cool, nostalgic vibe\u2014perfect for adding a touch of retro\
+    \ flair to your look, whether you're heading to the beach or just strolling through\
+    \ the city. However, the specific era that inspired this design (such as the 1950s\
+    \ or 1960s) isn't detailed in the product information we have available. The focus\
+    \ is really on capturing a timeless, classic feel that brings a bit of the past\
+    \ into your everyday style.\n\nIf you have any other questions about these sunglasses\
+    \ or would like recommendations for similar styles, just let me know\u2014I'm\
+    \ here to help!\n\nBest regards,\nHermes - Delivering divine fashion"
   response_points:
-  - content: Warm greeting using customer name, acknowledges enthusiasm and positive
-      style signals.
+  - content: Warm greeting and acknowledgment of the customer's curiosity about the
+      sunglasses' style inspiration.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: 'Confirms successful order of the ''Jardin d''Hiver'' silk scarf (Product
-      Code: HSC102), highlights unique design features, mentions total price and promotion,
-      and confirms order status.'
-    content_type: order_confirmation
+  - content: Explained that the RSG8901 Retro Sunglasses are vintage-inspired and
+      offer a cool, nostalgic vibe, but the specific era (1950s, 1960s) is not specified
+      in the product information.
+    content_type: answer
     priority: 10
-    related_to: HSC102
-  - content: Answers care question for silk scarf with specific advice (hand wash,
-      dry clean, avoid sunlight), integrated naturally.
+    related_to: RSG8901
+  - content: 'Highlighted the product''s features: vintage-inspired, cool, nostalgic
+      vibe, suitable for beach days or city strolls.'
     content_type: product_info
-    priority: 9
-    related_to: HSC102
-  - content: "Suggests complementary items\u2014leather gloves and enamel bangles\u2014\
-      as stylish options that pair with the scarf, inviting further interest."
-    content_type: upsell_suggestion
-    priority: 7
-    related_to: null
-  - content: Offers assistance with expedited shipping if needed, invites further
-      questions or styling requests, sets expectation for shipping confirmation.
-    content_type: next_steps
     priority: 8
-    related_to: null
-  - content: Expresses appreciation, maintains upbeat and personal tone, closes with
-      official Hermes signature.
-    content_type: closing
+    related_to: RSG8901
+  - content: Offered to help with further questions or recommendations for similar
+      styles.
+    content_type: value_addition
     priority: 6
     related_to: null
-  subject: Your Hermes Order Confirmation & Personalized Recommendations
-  tone: friendly and enthusiastic
+  - content: Professional closing with brand signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: About the Style Inspiration for the RSG8901 Retro Sunglasses
+  tone: professional and warm
 email:
   email_id: E011
   message: Hi there, The description for the RSG8901 Retro Sunglasses says they offer
@@ -125,7 +110,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 1 candidates;
-    Processing took 2ms; Successfully resolved 1 out of 1 mentions
+    Processing took 7ms; Successfully resolved 1 out of 1 mentions
   resolved_products:
   - category: !!python/object/apply:hermes.model.enums.ProductCategory
     - Accessories

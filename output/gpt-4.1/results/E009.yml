@@ -35,61 +35,43 @@ classifier:
       - inquiry
 composer:
   email_id: E009
-  response_body: "Dear Sophie,\n\nThank you so much for your lovely message! It\u2019\
-    s always a joy to help a true Hermes enthusiast, and I can absolutely sense your\
-    \ excitement about the Kelly bag in Jaune Ambre. What a vibrant, iconic choice\
-    \ \u2013 this color is stunning for the new season and truly turns heads.\n\n\
-    I\u2019m delighted to confirm your order for the Kelly 25 in Jaune Ambre (product\
-    \ code: H070123C), crafted in Togo leather with palladium hardware. We have it\
-    \ reserved for you, and your order is currently being processed. The total comes\
-    \ to \u20AC7,900, and we\u2019ve made sure to prioritize your request. You\u2019\
-    ll receive an official confirmation and tracking details as soon as it ships.\
-    \ If you\u2019d like gift wrapping or a special note included, just let me know!\n\
-    \nYou also asked about the difference between Togo and Epsom leather. Togo is\
-    \ known for its supple, grainy texture and soft durability, making it a fantastic\
-    \ choice for everyday elegance. Epsom, by contrast, offers a more structured look\
-    \ with a finer grain and is especially resistant to scratches and water. Both\
-    \ are superb, but Togo\u2019s relaxed feel really suits the bold Jaune Ambre shade\
-    \ you selected.\n\nSince you\u2019re building your Kelly collection, may I suggest\
-    \ our matching Jaune Ambre Rodeo charm and the new silk Twilly scarf in \"Soleil\
-    \ d\u2019Hiver\"? They pair beautifully with your bag and add a personal touch.\
-    \ Many collectors also love our Calvi cardholder in yellow for a coordinated look.\n\
-    \nIf you have any other questions about care, delivery, or styling, I\u2019m always\
-    \ here to help. Just reply to this email or call us directly.\n\nBest regards,\n\
-    Hermes - Delivering divine fashion"
+  response_body: "Hola,\n\nGracias por escribirnos y por tu inter\xE9s en el DHN0987\
+    \ Gorro de punto grueso. Lamentablemente, en este momento no tengo informaci\xF3\
+    n espec\xEDfica sobre los materiales o el nivel de abrigo de este gorro. Entiendo\
+    \ que estos detalles son importantes, especialmente si buscas algo adecuado para\
+    \ el invierno.\n\nSi lo deseas, puedo consultar con nuestro equipo para obtener\
+    \ m\xE1s informaci\xF3n sobre este producto o recomendarte alternativas similares\
+    \ que sean ideales para el fr\xEDo. Por favor, h\xE1zmelo saber si te gustar\xED\
+    a que te ayude con esto o si tienes alguna otra pregunta.\n\nGracias nuevamente\
+    \ por tu consulta. Estoy aqu\xED para ayudarte en lo que necesites.\n\nBest regards,\
+    \ Hermes - Delivering divine fashion"
   response_points:
-  - content: Personalized greeting using customer's name and acknowledging her enthusiasm
-      for the Kelly bag.
+  - content: "Saludo cordial y agradecimiento por el inter\xE9s en el producto."
     content_type: greeting
     priority: 10
     related_to: null
-  - content: Confirmed the order for Kelly 25 in Jaune Ambre, provided product code,
-      leather type, hardware, price, and described order status and next steps.
-    content_type: order_confirmation
+  - content: "Reconocimiento de la falta de informaci\xF3n espec\xEDfica sobre el\
+      \ material y la calidez del DHN0987 Gorro de punto grueso."
+    content_type: answer
     priority: 9
-    related_to: H070123C
-  - content: 'Answered the leather comparison question: explained Togo vs Epsom, highlighting
-      texture, durability, and suitability for the customer''s choice.'
-    content_type: product_info
+    related_to: DHN0987
+  - content: "Empat\xEDa con la importancia de estos detalles para el cliente, especialmente\
+      \ para uso en invierno."
+    content_type: answer
     priority: 8
-    related_to: H070123C
-  - content: Suggested matching Jaune Ambre Rodeo charm, silk Twilly scarf, and Calvi
-      cardholder as complementary items, referencing the customer's interest in collecting
-      and coordination.
-    content_type: upsell_cross_sell
+    related_to: DHN0987
+  - content: Oferta de consultar con el equipo o recomendar alternativas similares
+      para el invierno.
+    content_type: alternative
     priority: 7
-    related_to: null
-  - content: Offered additional assistance, options for gift wrap, and provided contact
-      info for further help.
-    content_type: next_steps
+    related_to: DHN0987
+  - content: "Cierre profesional, reafirmando la disposici\xF3n a ayudar y agradeciendo\
+      \ la consulta."
+    content_type: closing
     priority: 6
     related_to: null
-  - content: Professional, warm closing with brand signature.
-    content_type: closing
-    priority: 5
-    related_to: null
-  subject: "Your Kelly Bag Order & Inquiry \u2013 Details and Recommendations Inside"
-  tone: warm and enthusiastic
+  subject: Sobre el DHN0987 Gorro de punto grueso
+  tone: profesional y cordial
 email:
   email_id: E009
   message: "Hola, tengo una pregunta sobre el DHN0987 Gorro de punto grueso. \xBF\
@@ -100,7 +82,7 @@ errors: {}
 fulfiller: null
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
-    Processing took 727ms
+    Processing took 876ms
   resolved_products: []
   unresolved_mentions:
   - confidence: 1.0

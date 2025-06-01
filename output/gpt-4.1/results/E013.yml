@@ -21,72 +21,47 @@ classifier:
       related_sentences: []
       segment_type: !!python/object/apply:hermes.model.email.SegmentType
       - order
+    - main_sentence: Hi, my name is Marco
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
 composer:
   email_id: E013
-  response_body: "Dear Ms. Laurent,\n\nThank you so much for your order and for reaching\
-    \ out with your questions. I\u2019m delighted to confirm that we\u2019ve created\
-    \ your order for the Kelly 28 in Noir Togo leather with gold hardware. This is\
-    \ truly one of our most beloved classics, and your choice is both timeless and\
-    \ elegant.\n\nYour order is now being processed and is currently in the \"created\"\
-    \ stage. The total for your Kelly 28 comes to \u20AC8,900.00. As soon as your\
-    \ bag is ready for dispatch, we\u2019ll send you an update with tracking details\
-    \ and delivery information. If you have any preference regarding delivery times,\
-    \ please let us know and we\u2019ll do our best to accommodate you.\n\nSince you\
-    \ asked about the dimensions and care, the Kelly 28 measures 28cm x 22cm x 10cm,\
-    \ making it perfect for essentials while maintaining that iconic, structured shape.\
-    \ The Togo leather is known for its durability and soft pebble texture, and it\u2019\
-    s designed to age beautifully with proper care. We recommend storing your Kelly\
-    \ in its dust bag away from direct sunlight and using a gentle leather conditioner\
-    \ occasionally to keep it looking its best.\n\nIf you\u2019re considering a matching\
-    \ accessory, the Kelly wallet in Noir with gold hardware is a stunning complement\
-    \ and fits seamlessly inside the Kelly 28. Many of our clients also love pairing\
-    \ their bags with a silk Twilly for a splash of colour and added protection to\
-    \ the handle.\n\nShould you wish to add gift wrapping or have this order prepared\
-    \ as a special present, just let me know\u2014we\u2019re happy to arrange this\
-    \ for you.\n\nThank you again for choosing Hermes. If you have any more questions\
-    \ or would like recommendations for care or styling, I\u2019m always here to help.\n\
-    \nBest regards,\nHermes \u2013 Delivering divine fashion"
+  response_body: "Hi Marco,\n\nThank you for reaching out and letting us know what\
+    \ you're looking for. I see you're interested in a pair of men's slide sandals\
+    \ for the summer\u2014unfortunately, we currently don't have any available products\
+    \ that match your request in our Men's Shoes category.\n\nI'd be more than happy\
+    \ to help you find a great alternative that fits your needs for the season. If\
+    \ you have any preferences regarding color, material, or style, just let me know,\
+    \ and I can suggest some options that might work perfectly for you.\n\nPlease\
+    \ feel free to reply with any additional details or questions. I'm here to assist\
+    \ you in finding the right summer footwear.\n\nBest regards,\nHermes - Delivering\
+    \ divine fashion"
   response_points:
-  - content: Warm, personalized greeting using Ms. Laurent's name and expressing appreciation
-      for her order and inquiry.
+  - content: Warm greeting using Marco's name and acknowledging his request.
     content_type: greeting
     priority: 10
     related_to: null
-  - content: "Confirmed the order for the Kelly 28 in Noir Togo leather with gold\
-      \ hardware, including order status (created), and the total price (\u20AC8,900.00).\
-      \ Assured customer of future updates on shipping."
-    content_type: order_confirmation
-    priority: 10
-    related_to: Kelly 28
-  - content: Provided detailed dimensions (28cm x 22cm x 10cm), material details (Togo
-      leather), and care instructions for the Kelly 28, naturally integrated as answers
-      to her questions.
-    content_type: product_info
+  - content: Inform Marco that there are currently no available men's slide sandals
+      matching his request.
+    content_type: order_info
     priority: 9
-    related_to: Kelly 28
-  - content: Recommended the matching Kelly wallet in Noir with gold hardware and
-      suggested a silk Twilly as a complementary accessory, referencing customer interest
-      in style and coordination.
-    content_type: upsell_suggestion
+    related_to: order request
+  - content: Offer to assist Marco in finding suitable alternatives and invite him
+      to share preferences.
+    content_type: value_addition
+    priority: 8
+    related_to: order request
+  - content: Encourage Marco to reply with more details or questions for further assistance.
+    content_type: next_steps
     priority: 7
-    related_to: null
-  - content: Offered to arrange gift wrapping or special present preparation if desired,
-      referencing possible gift intent.
-    content_type: special_request_offer
+    related_to: order request
+  - content: Professional closing with Hermes signature.
+    content_type: closing
     priority: 6
     related_to: null
-  - content: 'Outlined next steps: order processing, future shipping update, invitation
-      to communicate delivery preferences, and further assistance for care or styling
-      advice.'
-    content_type: next_steps
-    priority: 8
-    related_to: null
-  - content: "Professional and warm closing with signature: \"Best regards, Hermes\
-      \ \u2013 Delivering divine fashion\"."
-    content_type: closing
-    priority: 5
-    related_to: null
-  subject: "Your Kelly 28 Order & Details \u2013 Thank You for Shopping with Hermes"
+  subject: Regarding Your Request for Men's Slide Sandals
   tone: professional and warm
 email:
   email_id: E013
@@ -100,14 +75,14 @@ fulfiller:
     lines: []
     message: We could not identify any available products matching your request for
       men's slide sandals for the summer. Please let us know if you would like assistance
-      finding alternatives.
+      finding a suitable alternative.
     overall_status: no_valid_products
     stock_updated: false
     total_discount: 0.0
     total_price: 0.0
 stockkeeper:
   metadata: Processed 1 product mentions; Made 1 resolution attempts; Resolved 0 candidates;
-    Processing took 614ms
+    Processing took 521ms
   resolved_products: []
   unresolved_mentions:
   - confidence: 0.95

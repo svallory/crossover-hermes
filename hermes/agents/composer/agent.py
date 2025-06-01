@@ -76,7 +76,7 @@ async def run_composer(
             schema=ComposerOutput,
             tools=ComposerToolkit,
             model_strength="strong",
-            temperature=0.7,
+            temperature=0.1,
         )
         chain_with_tools = COMPOSER_PROMPT | llm_with_tools
 

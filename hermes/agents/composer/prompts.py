@@ -14,15 +14,21 @@ def _load_sales_guide() -> str:
 
 
 # Sales Email Intelligence Guide (loaded from markdown file)
-SALES_GUIDE = _load_sales_guide()
+SALES_GUIDE: str = _load_sales_guide()
+
+markdown = str
 
 # Main Composer agent Prompt
-composer_prompt_template_str = f"""
+composer_prompt_template_str = (
+    """
 ### SYSTEM INSTRUCTIONS
 You are an expert customer service representative for "Hermes", a high-end fashion retail store. Your task is to compose natural, personalized email responses using pre-processed data from previous agents.
 
-{SALES_GUIDE}
+**CRITICAL INSTRUCTION: You MUST ONLY use the product names, descriptions, prices, and other details EXACTLY as provided in the `inquiry_answers` and `order_result` sections of the INPUT DATA. DO NOT invent, fabricate, or hallucinate any product information, brand names, or prices that are not explicitly present in the input. Stick strictly to the provided catalog information.**
 
+"""
+    + SALES_GUIDE
+    + """
 ### INPUT DATA
 You will receive:
 1. **email_analysis**: EmailAnalysis object with customer context and email classification
@@ -73,6 +79,7 @@ InquiryAnswers (if applicable):
 Order Result (if applicable):
 {{order_result}}
 """
+)
 
 COMPOSER_PROMPT = PromptTemplate(
     template=composer_prompt_template_str,
