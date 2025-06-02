@@ -5,6 +5,7 @@ import os
 import csv
 from typing import Literal, cast
 from dotenv import load_dotenv
+from hermes.utils.logger import logger
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,41 +16,69 @@ from hermes.model.email import CustomerEmail
 from hermes.model.enums import Agents
 from hermes.config import HermesConfig
 from hermes.agents.fulfiller import FulfillerOutput
+import hermes.data.load_data  # Import the module
 
 
 class TestOffersIntegration:
     """Integration tests for offers functionality using the complete workflow."""
 
     @pytest.fixture
-    def hermes_config(self):
-        """Create a test configuration for integration testing."""
-        # Use real API keys from environment for integration tests
-        llm_provider = cast(
-            Literal["OpenAI", "Gemini"], os.getenv("LLM_PROVIDER", "OpenAI")
-        )
+    def hermes_config(self, request):
+        """Create a test configuration for integration testing.
+        This will now primarily rely on HermesConfig to pick up defaults
+        from environment variables or its internal _DEFAULT_CONFIG,
+        ensuring test LLM configuration aligns with the project's base config.
+        """
+        # 1. Clear the cache ensure it's reset before anything
+        hermes.data.load_data._products_df = None
+        logger.info("Cleared hermes.data.load_data._products_df cache.")
 
-        if llm_provider == "OpenAI":
-            api_key = os.getenv("OPENAI_API_KEY")
-            if not api_key:
-                pytest.skip("OPENAI_API_KEY not set - skipping integration test")
-            # Use the proxy base URL for OpenAI
-            base_url = "https://47v4us7kyypinfb5lcligtc3x40ygqbs.lambda-url.us-east-1.on.aws/v1/"
-        else:  # Gemini
-            api_key = os.getenv("GEMINI_API_KEY")
-            if not api_key:
-                pytest.skip("GEMINI_API_KEY not set - skipping integration test")
-            base_url = None
+        # 2. Force populate the cache with the local CSV
+        try:
+            # This directly loads and caches the local CSV.
+            hermes.data.load_data.load_products_df(source="data/products.csv")
+            logger.info(
+                f"Force-loaded and cached data/products.csv via load_products_df for test: {request.node.name}. Loaded {len(hermes.data.load_data._products_df)} products."
+            )
+        except Exception as e:
+            pytest.fail(f"Failed to force-load data/products.csv for tests: {e}")
 
+        # Teardown function to clear the cache after the test
+        def fin():
+            hermes.data.load_data._products_df = None
+            logger.info(
+                f"Cleared hermes.data.load_data._products_df cache after test: {request.node.name}."
+            )
+
+        request.addfinalizer(fin)
+
+        # Now proceed with the rest of the config.
+        # The workflow should now use the pre-cached _products_df.
+        llm_provider_env = os.getenv("LLM_PROVIDER")
+        temp_config_for_provider = HermesConfig()
+
+        llm_provider_to_use = llm_provider_env or temp_config_for_provider.llm_provider
+
+        api_key = os.getenv(f"{llm_provider_to_use.upper()}_API_KEY")
+        if not api_key:
+            if llm_provider_to_use == "OpenAI":
+                api_key = os.getenv("OPENAI_API_KEY")
+            elif llm_provider_to_use == "Gemini":
+                api_key = os.getenv("GEMINI_API_KEY")
+
+            if not api_key:
+                pytest.skip(
+                    f"{llm_provider_to_use.upper()}_API_KEY (or fallback OPENAI/GEMINI_API_KEY) not set - skipping integration test"
+                )
+
+        # Instantiate HermesConfig. It will use its logic to determine model names
+        # and llm_provider_url based on the provider and environment variables
+        # or its internal defaults if those env vars aren't set.
         return HermesConfig(
-            llm_provider=llm_provider,
+            llm_provider=cast(Literal["OpenAI", "Gemini"], llm_provider_to_use),
             llm_api_key=api_key,
-            llm_provider_url=base_url,
-            llm_strong_model_name="gpt-4o-mini"
-            if llm_provider == "OpenAI"
-            else "gemini-1.5-flash",
-            llm_weak_model_name="gpt-4o-mini"
-            if llm_provider == "OpenAI"
-            else "gemini-1.5-flash",
+            # llm_provider_url will be handled by HermesConfig internal logic
+            # llm_strong_model_name and llm_weak_model_name will be handled by HermesConfig
         )
 
     @pytest.fixture
@@ -94,17 +123,18 @@ class TestOffersIntegration:
         assert order.total_discount == 0  # No discount should be applied
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(
-        reason="Known issue: Advisor returns NoneType for email E024. See logs for details. Deferred."
-    )
     async def test_bogo_beach_bag_explicit_order(self, workflow_graph):
         """Test E024: Explicit order for BOGO on canvas beach bag."""
         email_id = "E024"
-        customer_email = CustomerEmail(
-            email_id=email_id,
-            subject="Beach bags for vacation",
-            message="Hi! My sister and I are planning a beach vacation next month and we both need new beach bags. I think you sell canvas beach bags? Someone mentioned there might be a good deal if we buy multiple ones. Could you help us out? Thanks, Sarah",
-        )
+        # Load the specific email data from the CSV
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
+
+        customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
         final_state = await workflow_graph.ainvoke(workflow_input)
 
@@ -125,8 +155,21 @@ class TestOffersIntegration:
         print(
             f"Stockkeeper output for E024: {stockkeeper_output.model_dump_json(indent=2)}"
         )
-        assert len(stockkeeper_output.resolved_products) == 1
-        assert stockkeeper_output.resolved_products[0].product_id == "CBG9876"
+        assert (
+            len(stockkeeper_output.candidate_products_for_mention) == 1
+        ), "Should process one product mention"
+
+        # Get the list of candidate products for the first (and only) mention
+        # The [1] accesses the list of Product candidates from the tuple (ProductMention, list[Product])
+        candidates_for_first_mention = (
+            stockkeeper_output.candidate_products_for_mention[0][1]
+        )
+        assert (
+            len(candidates_for_first_mention) == 1
+        ), "Should find exactly one candidate for an explicit product ID"
+        assert (
+            candidates_for_first_mention[0].product_id == "CBG9876"
+        ), "Resolved product ID should be CBG9876"
 
         # Check fulfiller processed order with promotion
         fulfiller_output = final_state[Agents.FULFILLER]
@@ -159,16 +202,15 @@ class TestOffersIntegration:
         print(f"Total Discount: ${fulfiller_output.order_result.total_discount}")
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(
-        reason="Advisor may return None for vague inquiries with no resolved product context (E032)."
-    )
     async def test_vague_beach_bag_inquiry(self, workflow_graph):
         """Test E032: Vague inquiry about beach bag deals."""
-        email_data = {
-            "email_id": "E032",
-            "subject": "Friend mentioned beach bags",
-            "message": "Hi there, I heard from a friend that you have really nice beach bags and she said there was some kind of special offer? I'm not sure what exactly but she seemed excited about it. Could you tell me more? I might need a couple for my family. Thanks!",
-        }
+        email_id = "E032"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -206,11 +248,13 @@ class TestOffersIntegration:
     @pytest.mark.asyncio
     async def test_partial_bundle_order(self, workflow_graph):
         """Test E033: Order for just the vest (partial bundle)."""
-        email_data = {
-            "email_id": "E033",
-            "subject": "Just want the vest",
-            "message": "Hello, I'd like to order that plaid flannel vest. I think the code was PLV8765? Just the vest for now, thanks.",
-        }
+        email_id = "E033"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -226,8 +270,15 @@ class TestOffersIntegration:
 
         # Check stockkeeper resolved PLV8765 vest
         stockkeeper_output = result[Agents.STOCKKEEPER]
-        product_ids = [p.product_id for p in stockkeeper_output.resolved_products]
-        assert "PLV8765" in product_ids
+        resolved_candidate_ids_partial = []
+        if stockkeeper_output.candidate_products_for_mention:
+            for (
+                _mention,
+                candidates,
+            ) in stockkeeper_output.candidate_products_for_mention:
+                for product_candidate in candidates:
+                    resolved_candidate_ids_partial.append(product_candidate.product_id)
+        assert "PLV8765" in resolved_candidate_ids_partial
 
         # Check fulfiller processed single vest order
         fulfiller_output = result[Agents.FULFILLER]
@@ -257,16 +308,15 @@ class TestOffersIntegration:
         )
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(
-        reason="Stockkeeper may not resolve all bundle components, leading to 'out of stock' status (E034)."
-    )
     async def test_complete_bundle_order(self, workflow_graph):
         """Test E034: Order for both vest and shirt (complete bundle)."""
-        email_data = {
-            "email_id": "E034",
-            "subject": "Vest and shirt together",
-            "message": "Hi, I want to order the plaid vest PLV8765 and I think there's a matching shirt that goes with it? I'd like both pieces if possible. Thanks, Alex",
-        }
+        email_id = "E034"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -282,8 +332,15 @@ class TestOffersIntegration:
 
         # Check stockkeeper resolved both vest and shirt
         stockkeeper_output = result[Agents.STOCKKEEPER]
-        product_ids = [p.product_id for p in stockkeeper_output.resolved_products]
-        assert "PLV8765" in product_ids  # Should include vest
+        resolved_candidate_ids_complete = []
+        if stockkeeper_output.candidate_products_for_mention:
+            for (
+                _mention,
+                candidates,
+            ) in stockkeeper_output.candidate_products_for_mention:
+                for product_candidate in candidates:
+                    resolved_candidate_ids_complete.append(product_candidate.product_id)
+        assert "PLV8765" in resolved_candidate_ids_complete  # Should include vest
 
         # Check fulfiller processed bundle order
         fulfiller_output = result[Agents.FULFILLER]
@@ -313,16 +370,15 @@ class TestOffersIntegration:
         print(f"Total Discount Applied: ${total_discount}")
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(
-        reason="Advisor may return None for inquiries with no resolved product context (E035)."
-    )
     async def test_single_item_bundle_inquiry(self, workflow_graph):
         """Test E035: Inquiry about just the shirt from bundle."""
-        email_data = {
-            "email_id": "E035",
-            "subject": "About your plaid shirts",
-            "message": "Good morning, I'm interested in plaid shirts. I think I saw one mentioned somewhere as part of some kind of deal? Could you tell me about your plaid shirt options and any special offers? I might just want the shirt.",
-        }
+        email_id = "E035"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -356,11 +412,13 @@ class TestOffersIntegration:
     @pytest.mark.asyncio
     async def test_spanish_language_offers(self, workflow_graph):
         """Test E031: Spanish inquiry about bag promotions."""
-        email_data = {
-            "email_id": "E031",
-            "subject": "Pregunta sobre bolsos",
-            "message": "Hola, estoy buscando bolsos y he oído que tienen buenos precios. ¿Qué opciones tienen en bolsos de playa y bolsos para trabajo? Me interesan especialmente los modelos CBG9876 y QTP5432. Gracias, María",
-        }
+        email_id = "E031"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -383,12 +441,21 @@ class TestOffersIntegration:
 
         # Check stockkeeper resolved both bag products
         stockkeeper_output = result[Agents.STOCKKEEPER]
-        product_ids = [p.product_id for p in stockkeeper_output.resolved_products]
-        assert "CBG9876" in product_ids or "QTP5432" in product_ids
+        resolved_candidate_ids_spanish = []
+        if stockkeeper_output.candidate_products_for_mention:
+            for (
+                _mention,
+                candidates,
+            ) in stockkeeper_output.candidate_products_for_mention:
+                for product_candidate in candidates:
+                    resolved_candidate_ids_spanish.append(product_candidate.product_id)
+        assert (
+            "CBG9876" in resolved_candidate_ids_spanish
+            or "QTP5432" in resolved_candidate_ids_spanish
+        )
 
         # Check composer responded in Spanish
         composer_output = result[Agents.COMPOSER]
-        assert composer_output.language.lower() in ["spanish", "español"]
         response_body = composer_output.response_body.lower()
 
         # Check for Spanish language indicators
@@ -407,19 +474,17 @@ class TestOffersIntegration:
         assert "maría" in response_body  # Personalization
 
         print(f"✅ E031 Spanish Language Offers Test Completed")
-        print(f"Response in Spanish: {composer_output.language}")
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(
-        reason="Advisor may return None for inquiries with no resolved product context (E047)."
-    )
     async def test_multiple_promotions_inquiry(self, workflow_graph):
         """Test E047: Multiple items pricing inquiry."""
-        email_data = {
-            "email_id": "E047",
-            "subject": "Multiple items pricing",
-            "message": "Good morning, could you give me pricing for: 1 quilted tote bag, 1 floral dress, and 2 beach bags? What would be my total cost? Thanks!",
-        }
+        email_id = "E047"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -435,9 +500,22 @@ class TestOffersIntegration:
 
         # Check stockkeeper resolved multiple products
         stockkeeper_output = result[Agents.STOCKKEEPER]
+
+        # Count how many mentions have at least one candidate product
+        num_mentions_with_candidates = 0
+        if stockkeeper_output.candidate_products_for_mention:
+            for (
+                _mention,
+                candidates_list,
+            ) in stockkeeper_output.candidate_products_for_mention:
+                if (
+                    candidates_list
+                ):  # Check if the list of Product candidates is not empty
+                    num_mentions_with_candidates += 1
+
         assert (
-            len(stockkeeper_output.resolved_products) >= 2
-        )  # Should find multiple products
+            num_mentions_with_candidates >= 3
+        ), "Should find candidates for at least 3 product mentions for E047"
 
         # Check advisor calculated pricing with promotions
         advisor_output = result[Agents.ADVISOR]
@@ -462,16 +540,15 @@ class TestOffersIntegration:
         print(f"Comprehensive pricing provided: {len(response_body) > 200}")
 
     @pytest.mark.asyncio
-    @pytest.mark.xfail(
-        reason="Stockkeeper fails to resolve correct product ID (CBG9876) when a similar incorrect one (CBG9867) is also mentioned (E043)."
-    )
     async def test_wrong_product_id_correction(self, workflow_graph):
         """Test E043: Wrong product ID correction."""
-        email_data = {
-            "email_id": "E043",
-            "subject": "Beach bag confusion",
-            "message": "Hi, I want to order those beach bags I saw. I think the code is CBG9867? Or maybe it was CBG9876? Anyway, I want 2 of them. Thanks!",
-        }
+        email_id = "E043"
+        email_data_list = [
+            e for e in self.load_offers_emails() if e["email_id"] == email_id
+        ]
+        if not email_data_list:
+            pytest.fail(f"Email ID {email_id} not found in data/emails-for-offers.csv")
+        email_data = email_data_list[0]
 
         customer_email = self.create_customer_email(email_data)
         workflow_input = WorkflowInput(email=customer_email)
@@ -487,8 +564,17 @@ class TestOffersIntegration:
 
         # Check stockkeeper handled incorrect ID and found correct product
         stockkeeper_output = result[Agents.STOCKKEEPER]
-        product_ids = [p.product_id for p in stockkeeper_output.resolved_products]
-        assert "CBG9876" in product_ids  # Should find correct product
+        resolved_candidate_ids_wrong_id = []
+        if stockkeeper_output.candidate_products_for_mention:
+            for (
+                _mention,
+                candidates,
+            ) in stockkeeper_output.candidate_products_for_mention:
+                for product_candidate in candidates:
+                    resolved_candidate_ids_wrong_id.append(product_candidate.product_id)
+        assert (
+            "CBG9876" in resolved_candidate_ids_wrong_id
+        )  # Should find correct product
 
         # Check fulfiller processed order for 2 bags
         fulfiller_output = result[Agents.FULFILLER]
@@ -556,6 +642,16 @@ class TestOffersIntegration:
         # Check that stockkeeper found products
         stockkeeper_output = result[Agents.STOCKKEEPER]
         # Note: Some emails might not have specific products, so we just check it ran
+        has_candidates = False
+        if stockkeeper_output.candidate_products_for_mention:
+            for (
+                _mention,
+                candidates,
+            ) in stockkeeper_output.candidate_products_for_mention:
+                if candidates:
+                    has_candidates = True
+                    break
+        # assert has_candidates or not stockkeeper_output.unresolved_mentions # Or some other logic depending on test intent
 
         # Check that composer generated a response
         composer_output = result[Agents.COMPOSER]

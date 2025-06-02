@@ -1,0 +1,207 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The CGN2345 Cargo Pants are currently available, but only 2 units are
+        in stock. Since you requested 5, we do not have enough inventory to fulfill
+        the full quantity at this time.
+      answer_type: factual
+      confidence: 1.0
+      question: Can you confirm the availability of the CGN2345 Cargo Pants for a
+        quantity of 5?
+      reference_product_ids:
+      - CGN2345
+    email_id: E023
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Functionality meets style in our cargo pants. These utilitarian-inspired
+        pants feature multiple pockets and a relaxed, straight-leg fit. Perfect for
+        outdoor adventures, travel, or adding a touch of edge to your casual looks.
+      metadata: 'Found by exact product ID match; Requested quantity: 5; Original
+        mention: N/A (ID: CGN2345, Type: Cargo Pants, Category: N/A, Quantity: 5)'
+      name: Cargo Pants
+      price: 80.0
+      product_id: CGN2345
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 2
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E023
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: After weeks of consideration, I've made up my mind! Looking at
+        my bank account right now, and I'm prepared to commit to those CGN2345 Cargo
+        Pants - all 5 of them, exactly as we discussed in my previous emails about
+        the color options and material details.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: CGN2345 Cargo Pants
+        product_category: null
+        product_description: Cargo Pants - all 5 of them, exactly as we discussed
+          in my previous emails about the color options and material details.
+        product_id: CGN2345
+        product_name: null
+        product_type: Cargo Pants
+        quantity: 5
+      related_sentences:
+      - After weeks of consideration, I've made up my mind!
+      - Looking at my bank account right now, and I'm prepared to commit to those
+        CGN2345 Cargo Pants - all 5 of them, exactly as we discussed in my previous
+        emails about the color options and material details.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: Just need you to confirm the availability first, before we move
+        formward.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: CGN2345 Cargo Pants
+        product_category: null
+        product_description: Cargo Pants - all 5 of them, exactly as we discussed
+          in my previous emails about the color options and material details.
+        product_id: CGN2345
+        product_name: null
+        product_type: Cargo Pants
+        quantity: 5
+      related_sentences:
+      - Just need you to confirm the availability first, before we move formward.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E023
+  response_body: "Hello,\n\nThank you so much for your patience and for finally making\
+    \ your decision\u2014it's always exciting to see someone commit after careful\
+    \ consideration! I completely understand wanting to double-check availability\
+    \ before moving forward.\n\nRegarding the CGN2345 Cargo Pants: these are a fantastic\
+    \ choice, blending functionality and style with their multiple pockets and relaxed,\
+    \ straight-leg fit. They're perfect for everything from outdoor adventures to\
+    \ adding a bit of edge to your everyday look.\n\nAt the moment, we have only 2\
+    \ units of the CGN2345 Cargo Pants in stock. Since you were hoping for 5, I want\
+    \ to be upfront that we aren't able to fulfill the full quantity right now. If\
+    \ you'd like, I can reserve the 2 available pairs for you, or let you know as\
+    \ soon as we receive a restock.\n\nPlease let me know how you'd like to proceed\u2014\
+    whether you'd like to secure the available pairs, wait for a full restock, or\
+    \ if there's anything else I can help you with. I'm here to make sure you get\
+    \ exactly what you need!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their patience and decision-making, acknowledge
+      their excitement and commitment.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirm that the CGN2345 Cargo Pants are available, but only 2 units
+      are in stock, not the requested 5.
+    content_type: product_info
+    priority: 10
+    related_to: CGN2345
+  - content: Explain the product features and why it's a great choice, referencing
+      the provided description.
+    content_type: answer
+    priority: 8
+    related_to: CGN2345
+  - content: Offer to reserve the available pairs, notify on restock, or assist further
+      based on their preference.
+    content_type: answer
+    priority: 9
+    related_to: CGN2345
+  - content: Invite the customer to respond with their preference and offer further
+      assistance. Close with signature.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: 'Availability Update: CGN2345 Cargo Pants'
+  tone: professional and warm
+email:
+  email_id: E023
+  message: After weeks of consideration, I've made up my mind! Looking at my bank
+    account right now, and I'm prepared to commit to those CGN2345 Cargo Pants - all
+    5 of them, exactly as we discussed in my previous emails about the color options
+    and material details. Just need you to confirm the availability first, before
+    we move formward.
+  subject: Final Decision Made
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: CGN2345 Cargo Pants
+      product_category: null
+      product_description: Cargo Pants - all 5 of them, exactly as we discussed in
+        my previous emails about the color options and material details.
+      product_id: CGN2345
+      product_name: null
+      product_type: Cargo Pants
+      quantity: 5
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        description: Functionality meets style in our cargo pants. These utilitarian-inspired
+          pants feature multiple pockets and a relaxed, straight-leg fit. Perfect
+          for outdoor adventures, travel, or adding a touch of edge to your casual
+          looks.
+        metadata: 'Found by exact product ID match; Requested quantity: 5; Original
+          mention: N/A (ID: CGN2345, Type: Cargo Pants, Category: N/A, Quantity: 5)'
+        name: Cargo Pants
+        price: 80.0
+        product_id: CGN2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 2
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: CGN2345 Cargo Pants
+      product_category: null
+      product_description: Cargo Pants - all 5 of them, exactly as we discussed in
+        my previous emails about the color options and material details.
+      product_id: CGN2345
+      product_name: null
+      product_type: Cargo Pants
+      quantity: 5
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        description: Functionality meets style in our cargo pants. These utilitarian-inspired
+          pants feature multiple pockets and a relaxed, straight-leg fit. Perfect
+          for outdoor adventures, travel, or adding a touch of edge to your casual
+          looks.
+        metadata: 'Found by exact product ID match; Requested quantity: 5; Original
+          mention: N/A (ID: CGN2345, Type: Cargo Pants, Category: N/A, Quantity: 5)'
+        name: Cargo Pants
+        price: 80.0
+        product_id: CGN2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 2
+  exact_id_misses: []
+  metadata: 'Processed 2 product mentions; Made 2 resolution attempts for these mentions;
+    Found candidates for 2 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 7ms; (Debug log: 2 mentions showed >0 candidates in detailed log)'
+  unresolved_mentions: []

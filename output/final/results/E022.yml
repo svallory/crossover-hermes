@@ -1,0 +1,249 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Monica
+    email_id: E022
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I'm ready to place my order for those amazing bags I saw in your
+        latest collection - you know, the ones with the geometric patterns that everyone's
+        been talking about on Instagram?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: amazing bags with geometric patterns
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: amazing bags with geometric patterns from the latest
+          collection, preferably in the darker shade shown on social media
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 3
+      related_sentences:
+      - I want to get 3 of them, preferably in the darker shade you showed in your
+        social media posts last week.
+      - I have the cash ready to go, just let me know where to send it!
+      - Can't wait to get my hands on them.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E022
+  response_body: "Hi Monica,\n\nThank you so much for your excitement and for reaching\
+    \ out about the bags from our latest collection! I can absolutely feel your enthusiasm,\
+    \ and it's wonderful to see how much you love those geometric patterns that have\
+    \ been making waves on Instagram.\n\nI wanted to let you know that, at the moment,\
+    \ we weren't able to identify a specific product in our catalog that matches the\
+    \ description of the \"amazing bags with geometric patterns\" in the darker shade\
+    \ you mentioned. It's possible that the style you saw on social media is either\
+    \ a limited edition, a preview, or not yet available for direct order through\
+    \ our current collection.\n\nIf you have any additional details\u2014such as a\
+    \ product name, a screenshot, or a link to the post you saw\u2014I'd be more than\
+    \ happy to take another look and help track down the exact bags you're after.\
+    \ Your interest means a lot to us, and I want to make sure you get the perfect\
+    \ pieces for your collection.\n\nIn the meantime, if you'd like, I can also recommend\
+    \ some of our current bags that feature bold patterns and elegant dark tones.\
+    \ Just let me know if you'd like to see some options!\n\nThank you again for your\
+    \ passion for Hermes. I'm here to help with anything you need, so please don't\
+    \ hesitate to share more details or ask about other styles.\n\nBest regards,\n\
+    Hermes - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using Monica's name and acknowledging her excitement about
+      the bags.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Inform Monica that we couldn't identify a specific product matching her
+      description of the geometric pattern bags in the darker shade.
+    content_type: order_info
+    priority: 10
+    related_to: null
+  - content: Ask Monica for more details, such as a product name, screenshot, or link,
+      to help identify the exact bags she wants.
+    content_type: clarification_request
+    priority: 9
+    related_to: null
+  - content: Offer to recommend current bags with bold patterns and dark tones if
+      she's interested.
+    content_type: alternative_offer
+    priority: 7
+    related_to: null
+  - content: Express appreciation for her passion and offer further assistance, closing
+      with the Hermes signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: About Your Order Request for the Geometric Pattern Bags
+  tone: friendly and enthusiastic
+email:
+  email_id: E022
+  message: Hi! I'm ready to place my order for those amazing bags I saw in your latest
+    collection - you know, the ones with the geometric patterns that everyone's been
+    talking about on Instagram? I want to get 3 of them, preferably in the darker
+    shade you showed in your social media posts last week. I have the cash ready to
+    go, just let me know where to send it! Can't wait to get my hands on them. Thanks,
+    Monica
+  subject: Placing My Order Today
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: amazing bags with geometric patterns
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: amazing bags with geometric patterns from the latest collection,
+        preferably in the darker shade shown on social media
+      product_id: null
+      product_name: null
+      product_type: bag
+      quantity: 3
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Channel vintage charm with our saddle bag. This compact crossbody
+          features a classic saddle shape and a trendy, minimalist design. Perfect
+          for adding a touch of retro flair to any ensemble. Limited stock available!
+        metadata: 'Found through semantic search; Requested quantity: 3; Search query:
+          ''amazing bags with geometric patterns from the latest collection, preferably
+          in the darker shade shown on social media bag''; Similarity score: 1.113;
+          Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity: 3)'
+        name: Saddle Bag
+        price: 39.0
+        product_id: SDE2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 1
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Add a pop of color to your everyday carry with our vibrant tote
+          bag. Spacious and stylish, it's the perfect companion for running errands
+          or carrying your essentials. The vibrant hue is sure to turn heads.
+        metadata: 'Found through semantic search; Requested quantity: 3; Search query:
+          ''amazing bags with geometric patterns from the latest collection, preferably
+          in the darker shade shown on social media bag''; Similarity score: 1.131;
+          Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity: 3)'
+        name: Vibrant Tote
+        price: 39.0
+        product_id: VBT2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our quilted tote bag. This
+          spacious bag features a classic quilted design, multiple interior pockets,
+          and sturdy handles. A chic and practical choice for work, travel, or everyday
+          use. Limited-time sale - get 25% off!
+        metadata: 'Found through semantic search; Requested quantity: 3; Search query:
+          ''amazing bags with geometric patterns from the latest collection, preferably
+          in the darker shade shown on social media bag''; Similarity score: 1.171;
+          Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity: 3)'
+        name: Quilted Tote
+        price: 29.0
+        product_id: QTP5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+  order_result:
+    email_id: E022
+    lines: []
+    message: Could not identify a suitable product for your mention of 'amazing bags
+      with geometric patterns'.
+    overall_status: no_valid_products
+    stock_updated: false
+    total_discount: 0.0
+    total_price: 0.0
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 829ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: amazing bags with geometric patterns
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: amazing bags with geometric patterns from the latest collection,
+        preferably in the darker shade shown on social media
+      product_id: null
+      product_name: null
+      product_type: bag
+      quantity: 3
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Channel vintage charm with our saddle bag. This compact crossbody
+          features a classic saddle shape and a trendy, minimalist design. Perfect
+          for adding a touch of retro flair to any ensemble. Limited stock available!
+        metadata: 'Found through semantic search; Requested quantity: 3; Search query:
+          ''amazing bags with geometric patterns from the latest collection, preferably
+          in the darker shade shown on social media bag''; Similarity score: 1.113;
+          Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity: 3)'
+        name: Saddle Bag
+        price: 39.0
+        product_id: SDE2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 1
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Add a pop of color to your everyday carry with our vibrant tote
+          bag. Spacious and stylish, it's the perfect companion for running errands
+          or carrying your essentials. The vibrant hue is sure to turn heads.
+        metadata: 'Found through semantic search; Requested quantity: 3; Search query:
+          ''amazing bags with geometric patterns from the latest collection, preferably
+          in the darker shade shown on social media bag''; Similarity score: 1.131;
+          Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity: 3)'
+        name: Vibrant Tote
+        price: 39.0
+        product_id: VBT2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our quilted tote bag. This
+          spacious bag features a classic quilted design, multiple interior pockets,
+          and sturdy handles. A chic and practical choice for work, travel, or everyday
+          use. Limited-time sale - get 25% off!
+        metadata: 'Found through semantic search; Requested quantity: 3; Search query:
+          ''amazing bags with geometric patterns from the latest collection, preferably
+          in the darker shade shown on social media bag''; Similarity score: 1.171;
+          Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity: 3)'
+        name: Quilted Tote
+        price: 29.0
+        product_id: QTP5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 829ms; (Debug log: 1 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

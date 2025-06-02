@@ -1,0 +1,224 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Marco
+    email_id: E013
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I need to buy a pair of slide sandals for men, in the Men's Shoes
+        category, for the summer.
+      product_mentions:
+      - confidence: 0.95
+        mention_text: a pair of slide sandals for men
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        product_description: slide sandals for men, for the summer
+        product_id: null
+        product_name: null
+        product_type: slide sandals
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: Hi, my name is Marco
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E013
+  response_body: "Hi Marco,\n\nThank you for reaching out and for your order! I'm\
+    \ happy to confirm that we've reserved a pair of our Slide Sandals for you\u2014\
+    perfect for the summer season.\n\nHere are the details of your order:\n- **Product:**\
+    \ Slide Sandals\n- **Description:** Slip into comfort with our slide sandals.\
+    \ These casual sandals feature a lightweight, moisture-wicking design and a cushioned\
+    \ footbed for all-day support. An ideal choice for beach days, pool parties, or\
+    \ running errands in warm weather.\n- **Quantity:** 1\n- **Price:** $22.00\n\n\
+    Your total comes to $22.00. The sandals are currently in stock and your order\
+    \ is being processed.\n\nIf you\u2019re looking to complete your summer look,\
+    \ let me know if you\u2019d like recommendations for other seasonal essentials\
+    \ or accessories.\n\nShould you have any questions or need further assistance,\
+    \ just reply to this email\u2014I\u2019m here to help!\n\nBest regards,\nHermes\
+    \ - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using Marco's name and acknowledging his order request.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirmed order for Slide Sandals, including product name, description,
+      quantity, price, and stock status.
+    content_type: order_confirmation
+    priority: 10
+    related_to: SLD7654
+  - content: Suggested that Marco can ask for recommendations for other summer essentials
+      or accessories.
+    content_type: value_addition
+    priority: 6
+    related_to: null
+  - content: Order is being processed; offered further assistance if needed.
+    content_type: next_steps
+    priority: 8
+    related_to: null
+  - content: Professional and friendly closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Slide Sandals Order Confirmation
+  tone: friendly and professional
+email:
+  email_id: E013
+  message: Hi, my name is Marco and I need to buy a pair of slide sandals for men,
+    in the Men's Shoes category, for the summer.
+  subject: Shopping for Men's Sandals
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.95
+      mention_text: a pair of slide sandals for men
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      product_description: slide sandals for men, for the summer
+      product_id: null
+      product_name: null
+      product_type: slide sandals
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Slip into comfort with our slide sandals. These casual sandals
+          feature a lightweight, moisture-wicking design and a cushioned footbed for
+          all-day support. An ideal choice for beach days, pool parties, or running
+          errands in warm weather.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''slide sandals for men, for the summer slide sandals''; Similarity score:
+          0.586; Original mention: N/A (ID: N/A, Type: slide sandals, Category: Men''s
+          Shoes, Quantity: 1)'
+        name: Slide Sandals
+        price: 22.0
+        product_id: SLD7654
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 3
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Step into comfort and style with our slip-on sneakers. These
+          casual sneakers feature a sleek, minimalist design and a lightweight, cushioned
+          sole. Perfect for running errands, casual outings, or weekend wear.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''slide sandals for men, for the summer slide sandals''; Similarity score:
+          1.123; Original mention: N/A (ID: N/A, Type: slide sandals, Category: Men''s
+          Shoes, Quantity: 1)'
+        name: Slip-on Sneakers
+        price: 38.0
+        product_id: SLP7654
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 4
+  order_result:
+    email_id: E013
+    lines:
+    - alternatives: []
+      base_price: 22.0
+      description: Slip into comfort with our slide sandals. These casual sandals
+        feature a lightweight, moisture-wicking design and a cushioned footbed for
+        all-day support. An ideal choice for beach days, pool parties, or running
+        errands in warm weather.
+      name: Slide Sandals
+      product_id: SLD7654
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 2
+      total_price: 22.0
+      unit_price: 22.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 22.0
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 564ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.95
+      mention_text: a pair of slide sandals for men
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      product_description: slide sandals for men, for the summer
+      product_id: null
+      product_name: null
+      product_type: slide sandals
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Slip into comfort with our slide sandals. These casual sandals
+          feature a lightweight, moisture-wicking design and a cushioned footbed for
+          all-day support. An ideal choice for beach days, pool parties, or running
+          errands in warm weather.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''slide sandals for men, for the summer slide sandals''; Similarity score:
+          0.586; Original mention: N/A (ID: N/A, Type: slide sandals, Category: Men''s
+          Shoes, Quantity: 1)'
+        name: Slide Sandals
+        price: 22.0
+        product_id: SLD7654
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 3
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Step into comfort and style with our slip-on sneakers. These
+          casual sneakers feature a sleek, minimalist design and a lightweight, cushioned
+          sole. Perfect for running errands, casual outings, or weekend wear.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''slide sandals for men, for the summer slide sandals''; Similarity score:
+          1.123; Original mention: N/A (ID: N/A, Type: slide sandals, Category: Men''s
+          Shoes, Quantity: 1)'
+        name: Slip-on Sneakers
+        price: 38.0
+        product_id: SLP7654
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 4
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 564ms; (Debug log: 1 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

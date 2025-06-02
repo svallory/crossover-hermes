@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Literal
-import json
 
 from langchain_core.runnables import RunnableConfig
 from langsmith import traceable
@@ -17,6 +16,7 @@ from .models import (
     AdvisorInput,
     AdvisorOutput,
     InquiryAnswers,
+    QuestionAnswer,
 )
 from .prompts import ADVISOR_PROMPT
 from hermes.tools.toolkits import CatalogToolkit
@@ -45,121 +45,140 @@ async def run_advisor(
         WorkflowNodeOutput containing the advisor's factual response
     """
     agent_name = Agents.ADVISOR.value.capitalize()
-    email_id = (
-        state.classifier.email_analysis.email_id
-    )  # Define email_id early for context in case of error
+    email_id = state.classifier.email_analysis.email_id
+    # Ensure stockkeeper output is accessed correctly
+    stockkeeper_output = state.stockkeeper  # StockkeeperOutput | None
+
     logger.info(
         get_agent_logger(agent_name, f"Running for email [cyan]{email_id}[/cyan]")
     )
 
-    try:  # ADDED try block
-        # Extract data from state
-        email_analysis = state.classifier.email_analysis
-        # email_id is already defined above
-        resolved_products = (
-            state.stockkeeper.resolved_products if state.stockkeeper else []
-        )
-
-        logger.debug(
-            get_agent_logger(
-                agent_name,
-                f"  Resolved products for [cyan]{email_id}[/cyan]: [yellow]{len(resolved_products)}[/yellow]",
-            )
-        )
-
-        # Get LLM instance
-        llm = get_llm_client(
-            config=HermesConfig.from_runnable_config(config),
+    try:
+        hermes_config = HermesConfig.from_runnable_config(config)
+        llm_with_tools = get_llm_client(
+            config=hermes_config,
             schema=InquiryAnswers,
             tools=CatalogToolkit.get_tools(),
             model_strength="strong",
-            temperature=0.1,
+            temperature=0.05,
         )
 
-        # Prepare product context - pass raw product data as list of dicts
-        product_context = []
-        if resolved_products:
-            for product in resolved_products:
-                product_dict = (
-                    product.model_dump() if hasattr(product, "model_dump") else product
-                )
-                product_context.append(product_dict)
+        email_analysis_dump = state.classifier.email_analysis.model_dump()
 
-        # Create the chain using LangChain composition
-        inquiry_response_chain = ADVISOR_PROMPT | llm
+        # Prepare inputs for the prompt based on the new StockkeeperOutput structure
+        candidate_products_input = []
+        unresolved_mentions_input = []
+        programmatic_answered_questions: list[QuestionAnswer] = []
+        programmatic_unsuccessful_references: list[str] = []
+        explicitly_not_found_ids_for_prompt: list[str] = []
 
-        # Use the retry handler to handle validation errors
+        if stockkeeper_output:
+            if stockkeeper_output.candidate_products_for_mention:
+                candidate_products_input = [
+                    {
+                        "original_mention": mention.model_dump(),
+                        "candidates": [p.model_dump(exclude_none=True) for p in prods],
+                    }
+                    for mention, prods in stockkeeper_output.candidate_products_for_mention
+                ]
+            if stockkeeper_output.unresolved_mentions:
+                unresolved_mentions_input = [
+                    mention.model_dump()
+                    for mention in stockkeeper_output.unresolved_mentions
+                ]
+
+            # Process exact_id_misses
+            if (
+                hasattr(stockkeeper_output, "exact_id_misses")
+                and stockkeeper_output.exact_id_misses
+            ):
+                for missed_mention in stockkeeper_output.exact_id_misses:
+                    if missed_mention.product_id:
+                        question_text = f"Regarding product ID '{missed_mention.product_id}' (mentioned as '{missed_mention.mention_text}'), is it available?"
+                        answer_text = f"The product with ID '{missed_mention.product_id}' (mentioned as '{missed_mention.mention_text}') could not be found in our catalog."
+
+                        programmatic_qa = QuestionAnswer(
+                            question=question_text,
+                            answer=answer_text,
+                            confidence=1.0,
+                            reference_product_ids=[missed_mention.product_id],
+                            answer_type="unavailable",
+                        )
+                        programmatic_answered_questions.append(programmatic_qa)
+                        if (
+                            missed_mention.product_id
+                            not in programmatic_unsuccessful_references
+                        ):
+                            programmatic_unsuccessful_references.append(
+                                missed_mention.product_id
+                            )
+                        if (
+                            missed_mention.product_id
+                            not in explicitly_not_found_ids_for_prompt
+                        ):
+                            explicitly_not_found_ids_for_prompt.append(
+                                missed_mention.product_id
+                            )
+
+        prompt_input_dict = {
+            "email_analysis": email_analysis_dump,
+            "candidate_products_for_mention": candidate_products_input,
+            "unresolved_mentions": unresolved_mentions_input,
+            "explicitly_not_found_ids": explicitly_not_found_ids_for_prompt,
+        }
+
+        # Determine which prompt to use based on language
+        # This part of your existing logic might need to be preserved/adapted
+        current_prompt = ADVISOR_PROMPT
+        if state.classifier.email_analysis.language == "Arabic":
+            # current_prompt = الاجابه_على_السؤال_بالعربية_prompt # Ensure this is correctly defined and imported
+            logger.info(get_agent_logger(agent_name, "Using Arabic prompt for Advisor"))
+            # For now, let's assume ADVISOR_PROMPT is language-agnostic or English,
+            # and handle multilingual aspects within the prompt or via separate prompts if truly needed.
+            pass
+
+        chain_with_tools = current_prompt | llm_with_tools
         retry_handler = ToolCallRetryHandler(max_retries=2, backoff_factor=0.0)
 
-        # Prepare input data
-        email_analysis_data = (
-            email_analysis.model_dump()
-            if hasattr(email_analysis, "model_dump")
-            else email_analysis
-        )
-
         response_data = await retry_handler.retry_with_tool_calling(
-            chain=inquiry_response_chain,
-            input_data={
-                "email_analysis": email_analysis_data,
-                "retrieved_products_context": product_context,
-            },
+            chain=chain_with_tools,
+            input_data=prompt_input_dict,
             retry_prompt_template=DEFAULT_RETRY_TEMPLATE,
         )
 
-        # Ensure we get the right type
         if isinstance(response_data, InquiryAnswers):
-            inquiry_response = response_data
+            inquiry_answers = response_data
         elif isinstance(response_data, dict):
-            response_data["email_id"] = email_id
-
-            # Attempt to parse stringified metadata
-            for product_list_key in ["primary_products", "related_products"]:
-                if (
-                    product_list_key in response_data
-                    and response_data[product_list_key]
-                ):
-                    for product_data in response_data[product_list_key]:
-                        if (
-                            isinstance(product_data, dict)
-                            and "metadata" in product_data
-                            and isinstance(product_data["metadata"], str)
-                        ):
-                            try:
-                                product_data["metadata"] = json.loads(
-                                    product_data["metadata"]
-                                )
-                            except json.JSONDecodeError:
-                                print(
-                                    f"Warning: Could not parse metadata string for product in {product_list_key}: {product_data.get('product_id')}"
-                                )
-                        elif (
-                            isinstance(product_data, dict)
-                            and "metadata" in product_data
-                            and product_data["metadata"] is None
-                        ):
-                            product_data["metadata"] = None
-
-            inquiry_response = InquiryAnswers(**response_data)
+            # Ensure email_id is present if creating from dict
+            if "email_id" not in response_data and email_id:
+                response_data["email_id"] = email_id
+            inquiry_answers = InquiryAnswers(**response_data)
         else:
-            # Fallback for unexpected response type
-            # This path should ideally not be hit if retry_handler works or schema is good
-            error_msg = f"Unexpected response type {type(response_data)} from LLM for email [cyan]{email_id}[/cyan] after retries."
-            logger.error(get_agent_logger(agent_name, error_msg))
-            raise RuntimeError(f"Advisor: {error_msg}")
+            raise ValueError(
+                f"Unexpected response format from LLM: {type(response_data)}"
+            )
 
-        # Ensure email_id is set correctly
-        inquiry_response.email_id = email_id
+        inquiry_answers.email_id = email_id  # Ensure email_id is set
+
+        # Merge programmatic answers and unsuccessful references
+        # Prepend to ensure they appear first or are distinctly handled if order matters
+        inquiry_answers.answered_questions = (
+            programmatic_answered_questions + inquiry_answers.answered_questions
+        )
+        for ref_id in programmatic_unsuccessful_references:
+            if ref_id not in inquiry_answers.unsuccessful_references:
+                inquiry_answers.unsuccessful_references.append(ref_id)
+
         logger.info(
             get_agent_logger(
                 agent_name,
-                f"Factual response generation complete for email [cyan]{email_id}[/cyan]",
+                f"Successfully processed inquiries for email [cyan]{email_id}[/cyan]. Questions answered: {len(inquiry_answers.answered_questions)}",
             )
         )
-
         return create_node_response(
-            Agents.ADVISOR, AdvisorOutput(inquiry_answers=inquiry_response)
+            Agents.ADVISOR, AdvisorOutput(inquiry_answers=inquiry_answers)
         )
+
     except Exception as e:
         error_message = f"Error in {agent_name} for email {email_id}: {e}"
         logger.error(get_agent_logger(agent_name, error_message), exc_info=True)

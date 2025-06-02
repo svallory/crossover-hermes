@@ -1,0 +1,229 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The Saddle Bag costs $39.00. It is suitable for all seasons, including
+        spring, making it a versatile accessory for your wardrobe.
+      answer_type: factual
+      confidence: 0.9
+      question: I'd like to know how much does Saddle bag cost and if it is suitable
+        for spring season?
+      reference_product_ids:
+      - SDE2345
+    email_id: E020
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Channel vintage charm with our saddle bag. This compact crossbody
+        features a classic saddle shape and a trendy, minimalist design. Perfect for
+        adding a touch of retro flair to any ensemble. Limited stock available!
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''Saddle bag bag''; Similarity score: 0.664; Original mention: N/A (ID: N/A,
+        Type: bag, Category: Bags, Quantity: 1)'
+      name: Saddle Bag
+      price: 39.0
+      product_id: SDE2345
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 1
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Embrace boho-chic style with our fringe crossbody bag. This compact
+        bag features a fringed exterior and a stylish saddle shape. Perfect for adding
+        a touch of free-spirited flair to any outfit.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''Saddle bag bag''; Similarity score: 1.033; Original mention: N/A (ID: N/A,
+        Type: bag, Category: Bags, Quantity: 1)'
+      name: Fringe Crossbody
+      price: 67.0
+      product_id: FRP6789
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 2
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our leather messenger bag.
+        Crafted from premium, full-grain leather, this bag features a spacious main
+        compartment, multiple pockets, and an adjustable strap for a comfortable fit.
+        A timeless choice for work, travel, or everyday use.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''Saddle bag bag''; Similarity score: 1.101; Original mention: N/A (ID: N/A,
+        Type: bag, Category: Bags, Quantity: 1)'
+      name: Leather Messenger Bag
+      price: 37.99
+      product_id: LTH2109
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 4
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Antonio
+    email_id: E020
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'd like to know how much does Saddle bag cost and if it is suitable
+        for spring season?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: Saddle bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: Saddle bag
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 1
+      related_sentences:
+      - Hello
+      - Thank you, Antonio
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E020
+  response_body: "Hello Antonio,\n\nThank you for reaching out! I\u2019m happy to\
+    \ help with your question about the Saddle Bag.\n\nThe Saddle Bag is priced at\
+    \ $39.00. It\u2019s designed with a classic saddle shape and a minimalist, vintage-inspired\
+    \ look\u2014perfect for adding a touch of retro flair to your outfits. Even better,\
+    \ it\u2019s suitable for all seasons, including spring, so you\u2019ll find it\
+    \ a versatile accessory for your wardrobe as the weather warms up.\n\nIf you\u2019\
+    re interested in exploring similar styles, you might also like our Fringe Crossbody\
+    \ ($67.00), which brings a boho-chic vibe with its fringed exterior and is especially\
+    \ great for spring and summer. Another option is the Leather Messenger Bag ($37.99),\
+    \ crafted from premium full-grain leather for a timeless look that works year-round.\n\
+    \nIf you\u2019d like more details or want to see photos of any of these bags,\
+    \ just let me know. I\u2019m here to help you find the perfect piece for your\
+    \ spring style!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using Antonio's name and acknowledgment of his inquiry.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Provided price and description for the Saddle Bag ($39.00), highlighting
+      its suitability for all seasons, including spring.
+    content_type: product_info
+    priority: 10
+    related_to: SDE2345
+  - content: Directly answered Antonio's question about cost and seasonal suitability,
+      referencing the factual answer from the advisor.
+    content_type: answer
+    priority: 9
+    related_to: SDE2345
+  - content: 'Suggested related products: Fringe Crossbody ($67.00) for a boho-chic
+      spring look, and Leather Messenger Bag ($37.99) for a timeless, versatile option.'
+    content_type: alternative
+    priority: 7
+    related_to: null
+  - content: Offered to provide more details or photos and encouraged Antonio to reach
+      out for further assistance.
+    content_type: next_steps
+    priority: 6
+    related_to: null
+  - content: Professional and warm closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: "Your Inquiry About the Saddle Bag \u2013 Details and Spring Style Suggestions"
+  tone: professional and warm
+email:
+  email_id: E020
+  message: Hello I'd like to know how much does Saddle bag cost and if it is suitable
+    for spring season? Thank you, Antonio
+  subject: Price check
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: Saddle bag
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: Saddle bag
+      product_id: null
+      product_name: null
+      product_type: bag
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Channel vintage charm with our saddle bag. This compact crossbody
+          features a classic saddle shape and a trendy, minimalist design. Perfect
+          for adding a touch of retro flair to any ensemble. Limited stock available!
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Saddle bag bag''; Similarity score: 0.664; Original mention: N/A (ID:
+          N/A, Type: bag, Category: Bags, Quantity: 1)'
+        name: Saddle Bag
+        price: 39.0
+        product_id: SDE2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 1
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Embrace boho-chic style with our fringe crossbody bag. This compact
+          bag features a fringed exterior and a stylish saddle shape. Perfect for
+          adding a touch of free-spirited flair to any outfit.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Saddle bag bag''; Similarity score: 1.033; Original mention: N/A (ID:
+          N/A, Type: bag, Category: Bags, Quantity: 1)'
+        name: Fringe Crossbody
+        price: 67.0
+        product_id: FRP6789
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 2
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable
+          fit. A timeless choice for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Saddle bag bag''; Similarity score: 1.101; Original mention: N/A (ID:
+          N/A, Type: bag, Category: Bags, Quantity: 1)'
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 299ms; (Debug log: 1 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

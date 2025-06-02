@@ -1,0 +1,258 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Liz
+    email_id: E007
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Please send me 5 CLF2109 Cable Knit Beanies and 2 pairs of FZZ1098
+        Fuzzy Slippers.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: CLF2109 Cable Knit Beanies
+        product_category: null
+        product_description: Cable Knit Beanies
+        product_id: CLF2109
+        product_name: null
+        product_type: beanie
+        quantity: 5
+      - confidence: 1.0
+        mention_text: FZZ1098 Fuzzy Slippers
+        product_category: null
+        product_description: Fuzzy Slippers
+        product_id: FZZ1098
+        product_name: null
+        product_type: slippers
+        quantity: 2
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: I'm prepping some holiday gift baskets.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E007
+  response_body: "Hi Liz,\n\nThank you so much for your order and for letting us be\
+    \ part of your holiday gift basket preparations! That sounds like such a thoughtful\
+    \ project.\n\nHere's an update on your order:\n\n- The Fuzzy Slippers (2 pairs)\
+    \ are confirmed and reserved for you. These ultra-soft slippers feature a plush,\
+    \ fuzzy exterior and a cushioned, moisture-wicking footbed\u2014perfect for cozying\
+    \ up at home or adding a touch of comfort to your gift baskets. Your total for\
+    \ the slippers comes to $58.00.\n\n- For the Cable Knit Beanies, we currently\
+    \ have only 2 available out of the 5 you requested. These beanies are knitted\
+    \ from premium wool with a classic cable pattern and a soft, stretchy fit\u2014\
+    ideal for keeping warm and stylish during the colder months. Unfortunately, the\
+    \ remaining 3 beanies are out of stock at the moment.\n\nIf you'd like, I can\
+    \ reserve the 2 available beanies for you and let you know as soon as we receive\
+    \ more stock. Please let me know how you'd like to proceed, or if you'd like suggestions\
+    \ for alternative cozy accessories to complete your gift baskets.\n\nThank you\
+    \ again for choosing Hermes for your holiday gifting. If you have any questions\
+    \ or need help with your order, just let me know\u2014I'm here to help!\n\nBest\
+    \ regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using Liz's name and acknowledging her holiday gift basket
+      preparations.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirmed 2 pairs of Fuzzy Slippers are reserved and included in the
+      order at $58.00 total. Provided product description for added value.
+    content_type: order_confirmation
+    priority: 9
+    related_to: FZZ1098
+  - content: Explained that only 2 out of 5 Cable Knit Beanies are available; described
+      the product and offered to reserve the available quantity or notify when more
+      are in stock.
+    content_type: stock_update
+    priority: 9
+    related_to: CLF2109
+  - content: Asked Liz how she'd like to proceed regarding the beanies and offered
+      to suggest alternative cozy accessories if interested.
+    content_type: next_steps
+    priority: 8
+    related_to: CLF2109
+  - content: Expressed appreciation for her business, offered further assistance,
+      and included the Hermes signature.
+    content_type: closing
+    priority: 7
+    related_to: null
+  subject: "Your Holiday Gift Basket Order \u2013 Update on Beanies and Slippers"
+  tone: warm and professional
+email:
+  email_id: E007
+  message: Hi, this is Liz. Please send me 5 CLF2109 Cable Knit Beanies and 2 pairs
+    of FZZ1098 Fuzzy Slippers. I'm prepping some holiday gift baskets.
+  subject: Order for Beanies, Slippers
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: CLF2109 Cable Knit Beanies
+      product_category: null
+      product_description: Cable Knit Beanies
+      product_id: CLF2109
+      product_name: null
+      product_type: beanie
+      quantity: 5
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Bundle up in our cable knit beanie. Knitted from premium wool,
+          this classic beanie features a timeless cable knit pattern and a soft, stretchy
+          fit. A versatile accessory for adding a touch of warmth and texture to your
+          cold-weather looks.
+        metadata: 'Found by exact product ID match; Requested quantity: 5; Original
+          mention: N/A (ID: CLF2109, Type: beanie, Category: N/A, Quantity: 5)'
+        name: Cable Knit Beanie
+        price: 16.0
+        product_id: CLF2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: FZZ1098 Fuzzy Slippers
+      product_category: null
+      product_description: Fuzzy Slippers
+      product_id: FZZ1098
+      product_name: null
+      product_type: slippers
+      quantity: 2
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+          a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+          comfort. An ideal choice for lounging at home or running errands on chilly
+          days.
+        metadata: 'Found by exact product ID match; Requested quantity: 2; Original
+          mention: N/A (ID: FZZ1098, Type: slippers, Category: N/A, Quantity: 2)'
+        name: Fuzzy Slippers
+        price: 29.0
+        product_id: FZZ1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  order_result:
+    email_id: E007
+    lines:
+    - alternatives: []
+      base_price: 16.0
+      description: Bundle up in our cable knit beanie. Knitted from premium wool,
+        this classic beanie features a timeless cable knit pattern and a soft, stretchy
+        fit. A versatile accessory for adding a touch of warmth and texture to your
+        cold-weather looks.
+      name: Cable Knit Beanie
+      product_id: CLF2109
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 5
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - out of stock
+      stock: 2
+      total_price: 80.0
+      unit_price: 16.0
+    - alternatives: []
+      base_price: 29.0
+      description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+        a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+        comfort. An ideal choice for lounging at home or running errands on chilly
+        days.
+      name: Fuzzy Slippers
+      product_id: FZZ1098
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 2
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 0
+      total_price: 58.0
+      unit_price: 29.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 58.0
+  stockkeeper_metadata: 'Processed 2 product mentions; Made 2 resolution attempts
+    for these mentions; Found candidates for 2 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 11ms; (Debug log: 2 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: CLF2109 Cable Knit Beanies
+      product_category: null
+      product_description: Cable Knit Beanies
+      product_id: CLF2109
+      product_name: null
+      product_type: beanie
+      quantity: 5
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Bundle up in our cable knit beanie. Knitted from premium wool,
+          this classic beanie features a timeless cable knit pattern and a soft, stretchy
+          fit. A versatile accessory for adding a touch of warmth and texture to your
+          cold-weather looks.
+        metadata: 'Found by exact product ID match; Requested quantity: 5; Original
+          mention: N/A (ID: CLF2109, Type: beanie, Category: N/A, Quantity: 5)'
+        name: Cable Knit Beanie
+        price: 16.0
+        product_id: CLF2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: FZZ1098 Fuzzy Slippers
+      product_category: null
+      product_description: Fuzzy Slippers
+      product_id: FZZ1098
+      product_name: null
+      product_type: slippers
+      quantity: 2
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+          a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+          comfort. An ideal choice for lounging at home or running errands on chilly
+          days.
+        metadata: 'Found by exact product ID match; Requested quantity: 2; Original
+          mention: N/A (ID: FZZ1098, Type: slippers, Category: N/A, Quantity: 2)'
+        name: Fuzzy Slippers
+        price: 29.0
+        product_id: FZZ1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  exact_id_misses: []
+  metadata: 'Processed 2 product mentions; Made 2 resolution attempts for these mentions;
+    Found candidates for 2 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 11ms; (Debug log: 2 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

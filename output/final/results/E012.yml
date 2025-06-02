@@ -1,0 +1,378 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: 'Based on your request for messenger bag or briefcase style options,
+        a strong match is our Leather Messenger Bag (product_id: LTH2109). It is crafted
+        from premium, full-grain leather, features a spacious main compartment, multiple
+        pockets, and an adjustable strap for comfort. This bag is a timeless choice
+        for work, travel, or everyday use and is likely to be slightly smaller and
+        more streamlined than a traditional briefcase. We also have a Leather Backpack
+        (LTH1098) and a Leather Tote (LTH5432) as additional options, though these
+        are less direct matches for a briefcase or messenger style.'
+      answer_type: factual
+      confidence: 0.9
+      question: What are some messenger bag or briefcase style options you have, preferably
+        slightly smaller than my previous leather briefcase?
+      reference_product_ids:
+      - LTH2109
+      - LTH1098
+      - LTH5432
+    email_id: E012
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our leather messenger bag.
+        Crafted from premium, full-grain leather, this bag features a spacious main
+        compartment, multiple pockets, and an adjustable strap for a comfortable fit.
+        A timeless choice for work, travel, or everyday use.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''messenger bag or briefcase style options, slightly smaller than previous
+        leather briefcase messenger bag or briefcase''; Similarity score: 0.771; Original
+        mention: N/A (ID: N/A, Type: messenger bag or briefcase, Category: Bags, Quantity:
+        1)'
+      name: Leather Messenger Bag
+      price: 37.99
+      product_id: LTH2109
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 4
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Upgrade your daily carry with our leather backpack. Crafted from
+        premium leather, this stylish backpack features multiple compartments, a padded
+        laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
+        travel, or everyday use.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''messenger bag or briefcase style options, slightly smaller than previous
+        leather briefcase messenger bag or briefcase''; Similarity score: 0.960; Original
+        mention: N/A (ID: N/A, Type: messenger bag or briefcase, Category: Bags, Quantity:
+        1)'
+      name: Leather Backpack
+      price: 43.99
+      product_id: LTH1098
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 7
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Elevate your everyday carry with our leather tote bag. Crafted
+        from premium, full-grain leather, this bag features a spacious interior, multiple
+        pockets, and sturdy handles. Perfect for work, travel, or running errands
+        in style.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''messenger bag or briefcase style options, slightly smaller than previous
+        leather briefcase messenger bag or briefcase''; Similarity score: 1.092; Original
+        mention: N/A (ID: N/A, Type: messenger bag or briefcase, Category: Bags, Quantity:
+        1)'
+      name: Leather Tote
+      price: 28.0
+      product_id: LTH5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 6
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E012
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: Last year for my birthday, my wife Emily got me a really nice
+        leather briefcase from your store.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: leather briefcase
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: leather briefcase from your store
+        product_id: null
+        product_name: null
+        product_type: briefcase
+        quantity: 1
+      related_sentences:
+      - I loved it and used it every day for work until the strap broke a few months
+        ago.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: Speaking of broken things, I also need to get my lawnmower fixed
+        before spring.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: What were some of the other messenger bag or briefcase style
+        options you have?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: messenger bag or briefcase style options
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: messenger bag or briefcase style options, slightly smaller
+          than previous leather briefcase
+        product_id: null
+        product_name: null
+        product_type: messenger bag or briefcase
+        quantity: 1
+      related_sentences:
+      - I could go for something slightly smaller than my previous one.
+      - Oh right, work bags! Let me know what you'd recommend.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: Oh and we also need to make dinner reservations for our anniversary
+        next month.
+      product_mentions: []
+      related_sentences:
+      - Maybe a nice Italian place downtown.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E012
+  response_body: "Hello,\n\nThank you for reaching out and sharing your story about\
+    \ the leather briefcase your wife gifted you last year. It\u2019s always wonderful\
+    \ to hear how our pieces become part of your daily routine\u2014though I\u2019\
+    m sorry to hear about the strap breaking! If you ever need advice on repairs or\
+    \ care, just let me know.\n\nFor your search for a new work bag\u2014especially\
+    \ something slightly smaller and in a messenger or briefcase style\u2014I have\
+    \ a few options that I think you\u2019ll love:\n\n\u2022 The Leather Messenger\
+    \ Bag (product_id: LTH2109) is a standout choice. Crafted from premium, full-grain\
+    \ leather, it features a spacious main compartment, multiple pockets, and an adjustable\
+    \ strap for comfort. It\u2019s a timeless option for work, travel, or everyday\
+    \ use, and is likely a bit more streamlined than a traditional briefcase. This\
+    \ model is currently in stock for $37.99.\n\nIf you\u2019re open to exploring\
+    \ other styles, here are a couple more options that might suit your needs:\n\n\
+    \u2022 Leather Backpack (LTH1098): This stylish backpack is made from premium\
+    \ leather and offers multiple compartments, a padded laptop sleeve, and adjustable\
+    \ straps. It\u2019s perfect for work, travel, or everyday use, and is available\
+    \ for $43.99.\n\n\u2022 Leather Tote (LTH5432): For a versatile and elegant option,\
+    \ our leather tote features a spacious interior, multiple pockets, and sturdy\
+    \ handles. It\u2019s great for work or running errands in style, priced at $28.00.\n\
+    \nAll of these bags are designed for all seasons and blend style with practicality.\
+    \ If you\u2019d like more details or want to see photos, just let me know\u2014\
+    I\u2019m happy to help you find the perfect fit for your daily routine.\n\nAnd\
+    \ happy early anniversary to you and Emily! If you\u2019re ever looking for a\
+    \ special gift or something to mark the occasion, I\u2019d be delighted to suggest\
+    \ a few ideas from our collection.\n\nPlease let me know if you have any questions\
+    \ or if you\u2019d like to reserve any of these bags.\n\nBest regards,\nHermes\
+    \ - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting and acknowledgment of the customer's story about the gifted
+      briefcase and its daily use.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Present the Leather Messenger Bag (LTH2109) as the top recommendation,
+      with details on size, features, and price.
+    content_type: answer
+    priority: 9
+    related_to: LTH2109
+  - content: Suggest the Leather Backpack (LTH1098) and Leather Tote (LTH5432) as
+      additional options, with descriptions and prices.
+    content_type: alternative
+    priority: 8
+    related_to: LTH1098
+  - content: Suggest the Leather Tote (LTH5432) as another versatile option, with
+      description and price.
+    content_type: alternative
+    priority: 7
+    related_to: LTH5432
+  - content: Mention all bags are suitable for all seasons and blend style with practicality.
+      Offer to provide more details or photos.
+    content_type: value_add
+    priority: 6
+    related_to: null
+  - content: Acknowledge the upcoming anniversary and offer to suggest gift ideas
+      if interested.
+    content_type: personalization
+    priority: 5
+    related_to: null
+  - content: Invite the customer to ask questions or reserve a bag, and offer further
+      assistance.
+    content_type: next_steps
+    priority: 4
+    related_to: null
+  - content: Professional and warm closing with signature.
+    content_type: closing
+    priority: 3
+    related_to: null
+  subject: 'Discover Your Next Work Bag: Messenger, Backpack, and More'
+  tone: professional and warm
+email:
+  email_id: E012
+  message: Hey, hope you're doing well. Last year for my birthday, my wife Emily got
+    me a really nice leather briefcase from your store. I loved it and used it every
+    day for work until the strap broke a few months ago. Speaking of broken things,
+    I also need to get my lawnmower fixed before spring. Anyway, what were some of
+    the other messenger bag or briefcase style options you have? I could go for something
+    slightly smaller than my previous one. Oh and we also need to make dinner reservations
+    for our anniversary next month. Maybe a nice Italian place downtown. What was
+    I saying again? Oh right, work bags! Let me know what you'd recommend. Thanks!
+  subject: Rambling About a New Work Bag
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: leather briefcase
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: leather briefcase from your store
+      product_id: null
+      product_name: null
+      product_type: briefcase
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable
+          fit. A timeless choice for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''leather briefcase from your store briefcase''; Similarity score: 0.944;
+          Original mention: N/A (ID: N/A, Type: briefcase, Category: Bags, Quantity:
+          1)'
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Upgrade your daily carry with our leather backpack. Crafted from
+          premium leather, this stylish backpack features multiple compartments, a
+          padded laptop sleeve, and adjustable straps for a comfortable fit. Perfect
+          for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''leather briefcase from your store briefcase''; Similarity score: 0.970;
+          Original mention: N/A (ID: N/A, Type: briefcase, Category: Bags, Quantity:
+          1)'
+        name: Leather Backpack
+        price: 43.99
+        product_id: LTH1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Elevate your everyday carry with our leather tote bag. Crafted
+          from premium, full-grain leather, this bag features a spacious interior,
+          multiple pockets, and sturdy handles. Perfect for work, travel, or running
+          errands in style.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''leather briefcase from your store briefcase''; Similarity score: 1.075;
+          Original mention: N/A (ID: N/A, Type: briefcase, Category: Bags, Quantity:
+          1)'
+        name: Leather Tote
+        price: 28.0
+        product_id: LTH5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 6
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: messenger bag or briefcase style options
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: messenger bag or briefcase style options, slightly smaller
+        than previous leather briefcase
+      product_id: null
+      product_name: null
+      product_type: messenger bag or briefcase
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable
+          fit. A timeless choice for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''messenger bag or briefcase style options, slightly smaller than previous
+          leather briefcase messenger bag or briefcase''; Similarity score: 0.771;
+          Original mention: N/A (ID: N/A, Type: messenger bag or briefcase, Category:
+          Bags, Quantity: 1)'
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Upgrade your daily carry with our leather backpack. Crafted from
+          premium leather, this stylish backpack features multiple compartments, a
+          padded laptop sleeve, and adjustable straps for a comfortable fit. Perfect
+          for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''messenger bag or briefcase style options, slightly smaller than previous
+          leather briefcase messenger bag or briefcase''; Similarity score: 0.960;
+          Original mention: N/A (ID: N/A, Type: messenger bag or briefcase, Category:
+          Bags, Quantity: 1)'
+        name: Leather Backpack
+        price: 43.99
+        product_id: LTH1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Elevate your everyday carry with our leather tote bag. Crafted
+          from premium, full-grain leather, this bag features a spacious interior,
+          multiple pockets, and sturdy handles. Perfect for work, travel, or running
+          errands in style.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''messenger bag or briefcase style options, slightly smaller than previous
+          leather briefcase messenger bag or briefcase''; Similarity score: 1.092;
+          Original mention: N/A (ID: N/A, Type: messenger bag or briefcase, Category:
+          Bags, Quantity: 1)'
+        name: Leather Tote
+        price: 28.0
+        product_id: LTH5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 6
+  exact_id_misses: []
+  metadata: 'Processed 2 product mentions; Made 2 resolution attempts for these mentions;
+    Found candidates for 2 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 1377ms; (Debug log: 2 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

@@ -1,9 +1,13 @@
 import pandas as pd  # type: ignore
 from enum import Enum
 from pydantic import BaseModel
+import logging  # Add logging import
 
 from hermes.data.load_data import load_products_df
 from hermes.model.errors import ProductNotFound
+# Removed: from hermes.tools.catalog_tools import update_product_stock as catalog_update_product_stock
+
+logger = logging.getLogger(__name__)  # Initialize logger
 
 
 class StockStatus(BaseModel):
@@ -69,11 +73,25 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateStat
     # Standardize the product ID format
     product_id = product_id.replace(" ", "").upper()
 
-    # Find the product
+    # Load the products DataFrame
     products_df = load_products_df()
 
+    if (
+        products_df is None
+    ):  # Should ideally be handled by load_products_df raising an error
+        logger.error(
+            "Products DataFrame is not loaded. Cannot update stock for product_id: %s",
+            product_id,
+        )
+        return StockUpdateStatus.PRODUCT_NOT_FOUND
+
+    # Find the product
     product_rows = products_df[products_df["product_id"] == product_id]
     if product_rows.empty:
+        logger.warning(
+            "Product ID '%s' not found in DataFrame for stock update attempt.",
+            product_id,
+        )
         return StockUpdateStatus.PRODUCT_NOT_FOUND
 
     # Get current stock
@@ -86,14 +104,46 @@ def update_stock(product_id: str, quantity_to_decrement: int) -> StockUpdateStat
             int(float(str(current_stock_val))) if pd.notna(current_stock_val) else 0
         )
     except (ValueError, TypeError):
-        current_stock = 0
+        logger.error(
+            "Error converting stock value for product ID '%s'. Value: %s",
+            product_id,
+            current_stock_val,
+            exc_info=True,
+        )
+        current_stock = 0  # Treat as 0 if conversion fails
 
     # Check if we have enough stock
     if current_stock < quantity_to_decrement:
+        logger.info(
+            "Insufficient stock for product ID '%s'. Requested: %d, Available: %d",
+            product_id,
+            quantity_to_decrement,
+            current_stock,
+        )
         return StockUpdateStatus.INSUFFICIENT_STOCK
 
-    # Update the stock - this modifies the cached DataFrame directly
-    new_stock = current_stock - quantity_to_decrement
-    products_df.loc[product_row_index, "stock"] = new_stock
+    # Calculate the new stock level
+    new_stock_level = current_stock - quantity_to_decrement
+
+    # Ensure new_stock_level is non-negative (already done in previous logic, but good to be explicit)
+    if new_stock_level < 0:
+        logger.warning(
+            "Calculated new_stock_level for product ID '%s' is %d (decrementing %d from %d). Setting to 0.",
+            product_id,
+            new_stock_level,
+            quantity_to_decrement,
+            current_stock,
+        )
+        new_stock_level = 0
+
+    # Directly update the stock in the DataFrame
+    products_df.loc[product_row_index, "stock"] = new_stock_level
+    logger.info(
+        "Stock for product ID '%s' updated to %d in the in-memory DataFrame (decremented by %d from %d).",
+        product_id,
+        new_stock_level,
+        quantity_to_decrement,
+        current_stock,
+    )
 
     return StockUpdateStatus.SUCCESS

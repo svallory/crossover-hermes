@@ -43,3 +43,10 @@ class AlternativeProduct(BaseModel):
     reason: str = Field(
         description="Reason this product is recommended as an alternative"
     )
+
+
+class ProductNotFound(BaseModel):
+    """Represents the case where a product was not found by ID."""
+
+    message: str = Field(description="A message indicating the product was not found.")
+    query_product_id: str = Field(description="The product ID that was queried.")

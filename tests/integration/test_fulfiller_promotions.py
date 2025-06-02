@@ -37,30 +37,31 @@ class TestFulfillerPromotionDetection:
 
     @pytest.fixture
     def hermes_config(self):
-        """Create a test configuration with real API keys for integration testing."""
-        # Use real API keys from environment for integration tests
-        llm_provider = cast(
-            Literal["OpenAI", "Gemini"], os.getenv("LLM_PROVIDER", "OpenAI")
-        )
+        """Create a test configuration for integration testing.
+        This will now primarily rely on HermesConfig to pick up defaults
+        from environment variables or its internal _DEFAULT_CONFIG,
+        ensuring test LLM configuration aligns with the project's base config.
+        """
+        llm_provider_env = os.getenv("LLM_PROVIDER")
+        temp_config_for_provider = HermesConfig()
 
-        if llm_provider == "OpenAI":
-            api_key = os.getenv("OPENAI_API_KEY")
+        llm_provider_to_use = llm_provider_env or temp_config_for_provider.llm_provider
+
+        api_key = os.getenv(f"{llm_provider_to_use.upper()}_API_KEY")
+        if not api_key:
+            if llm_provider_to_use == "OpenAI":
+                api_key = os.getenv("OPENAI_API_KEY")
+            elif llm_provider_to_use == "Gemini":
+                api_key = os.getenv("GEMINI_API_KEY")
+
             if not api_key:
-                pytest.skip("OPENAI_API_KEY not set - skipping integration test")
-        else:  # Gemini
-            api_key = os.getenv("GEMINI_API_KEY")
-            if not api_key:
-                pytest.skip("GEMINI_API_KEY not set - skipping integration test")
+                pytest.skip(
+                    f"{llm_provider_to_use.upper()}_API_KEY (or fallback OPENAI/GEMINI_API_KEY) not set - skipping integration test"
+                )
 
         return HermesConfig(
-            llm_provider=llm_provider,
+            llm_provider=cast(Literal["OpenAI", "Gemini"], llm_provider_to_use),
             llm_api_key=api_key,
-            llm_strong_model_name="gpt-4o-mini"
-            if llm_provider == "OpenAI"
-            else "gemini-1.5-flash",
-            llm_weak_model_name="gpt-4o-mini"
-            if llm_provider == "OpenAI"
-            else "gemini-1.5-flash",
         )
 
     @pytest.fixture
@@ -97,6 +98,7 @@ class TestFulfillerPromotionDetection:
         self,
         email_id: str,
         product_id: str,
+        name: str,
         quantity: int,
         base_price: float,
         promotion_text: Optional[str] = None,
@@ -105,7 +107,8 @@ class TestFulfillerPromotionDetection:
         """Create a mock order response that simulates LLM output."""
         order_line = OrderLine(
             product_id=product_id,
-            description=f"Test product {product_id}",
+            name=name,
+            description=f"Test product {product_id} - {name}",
             quantity=quantity,
             base_price=base_price,
             unit_price=base_price,
@@ -172,6 +175,11 @@ class TestFulfillerPromotionDetection:
             message="I'd like to order 2 canvas beach bags",
         )
 
+        product_mention_for_stockkeeper = ProductMention(
+            product_name="canvas beach bag",
+            quantity=2,
+        )
+
         email_analysis = EmailAnalysis(
             email_id="test_001",
             primary_intent="order request",
@@ -179,19 +187,19 @@ class TestFulfillerPromotionDetection:
                 Segment(
                     segment_type=SegmentType.ORDER,
                     main_sentence="I'd like to order 2 canvas beach bags",
-                    product_mentions=[
-                        ProductMention(
-                            product_name="canvas beach bag",
-                            quantity=2,
-                        )
-                    ],
+                    product_mentions=[product_mention_for_stockkeeper],
                 )
             ],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         stockkeeper_output = StockkeeperOutput(
-            resolved_products=[canvas_bag], unresolved_mentions=[]
+            candidate_products_for_mention=[
+                (product_mention_for_stockkeeper, [canvas_bag])
+            ],
+            unresolved_mentions=[],
+            metadata="Test metadata for canvas beach bag BOGO.",
+            exact_id_misses=[],
         )
 
         fulfiller_input = FulfillerInput(
@@ -285,6 +293,11 @@ class TestFulfillerPromotionDetection:
             message="I want to buy a quilted tote bag",
         )
 
+        product_mention_for_stockkeeper_tote = ProductMention(
+            product_name="quilted tote",
+            quantity=1,
+        )
+
         email_analysis = EmailAnalysis(
             email_id="test_002",
             primary_intent="order request",
@@ -292,19 +305,19 @@ class TestFulfillerPromotionDetection:
                 Segment(
                     segment_type=SegmentType.ORDER,
                     main_sentence="I want to buy a quilted tote bag",
-                    product_mentions=[
-                        ProductMention(
-                            product_name="quilted tote",
-                            quantity=1,
-                        )
-                    ],
+                    product_mentions=[product_mention_for_stockkeeper_tote],
                 )
             ],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         stockkeeper_output = StockkeeperOutput(
-            resolved_products=[quilted_tote], unresolved_mentions=[]
+            candidate_products_for_mention=[
+                (product_mention_for_stockkeeper_tote, [quilted_tote])
+            ],
+            unresolved_mentions=[],
+            metadata="Test metadata for quilted tote promotion.",
+            exact_id_misses=[],
         )
 
         fulfiller_input = FulfillerInput(
@@ -408,6 +421,15 @@ class TestFulfillerPromotionDetection:
             message="I'd like to order the plaid flannel vest and matching plaid shirt",
         )
 
+        product_mention_vest = ProductMention(
+            product_name="plaid flannel vest",
+            quantity=1,
+        )
+        product_mention_shirt = ProductMention(
+            product_name="plaid shirt",
+            quantity=1,
+        )
+
         email_analysis = EmailAnalysis(
             email_id="test_combination",
             primary_intent="order request",
@@ -415,23 +437,20 @@ class TestFulfillerPromotionDetection:
                 Segment(
                     segment_type=SegmentType.ORDER,
                     main_sentence="I'd like to order the plaid flannel vest and matching plaid shirt",
-                    product_mentions=[
-                        ProductMention(
-                            product_name="plaid flannel vest",
-                            quantity=1,
-                        ),
-                        ProductMention(
-                            product_name="plaid shirt",
-                            quantity=1,
-                        ),
-                    ],
+                    product_mentions=[product_mention_vest, product_mention_shirt],
                 )
             ],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         stockkeeper_output = StockkeeperOutput(
-            resolved_products=[plaid_vest, plaid_shirt], unresolved_mentions=[]
+            candidate_products_for_mention=[
+                (product_mention_vest, [plaid_vest]),
+                (product_mention_shirt, [plaid_shirt]),
+            ],
+            unresolved_mentions=[],
+            metadata="Test metadata for combination promotion.",
+            exact_id_misses=[],
         )
 
         fulfiller_input = FulfillerInput(
@@ -521,6 +540,7 @@ class TestFulfillerPromotionDetection:
         mock_order_response = self.create_mock_order_response(
             email_id="test_004",
             product_id="BMX5432",
+            name="Bomber Jacket",
             quantity=1,
             base_price=62.99,
             promotion_text="Buy now and get a free matching beanie!",
@@ -534,6 +554,11 @@ class TestFulfillerPromotionDetection:
             message="I want the bomber jacket",
         )
 
+        product_mention_bomber = ProductMention(
+            product_name="bomber jacket",
+            quantity=1,
+        )
+
         email_analysis = EmailAnalysis(
             email_id="test_004",
             primary_intent="order request",
@@ -541,19 +566,17 @@ class TestFulfillerPromotionDetection:
                 Segment(
                     segment_type=SegmentType.ORDER,
                     main_sentence="I want the bomber jacket",
-                    product_mentions=[
-                        ProductMention(
-                            product_name="bomber jacket",
-                            quantity=1,
-                        )
-                    ],
+                    product_mentions=[product_mention_bomber],
                 )
             ],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         stockkeeper_output = StockkeeperOutput(
-            resolved_products=[bomber_jacket], unresolved_mentions=[]
+            candidate_products_for_mention=[(product_mention_bomber, [bomber_jacket])],
+            unresolved_mentions=[],
+            metadata="Test metadata for bomber jacket promotion.",
+            exact_id_misses=[],
         )
 
         fulfiller_input = FulfillerInput(
@@ -646,6 +669,7 @@ class TestFulfillerPromotionDetection:
         mock_order_response = self.create_mock_order_response(
             email_id="test_005",
             product_id="KMN3210",
+            name="Knit Mini Dress",
             quantity=2,
             base_price=53.0,
             promotion_text="Limited-time sale - get two for the price of one!",
@@ -659,6 +683,11 @@ class TestFulfillerPromotionDetection:
             message="I want 2 knit mini dresses",
         )
 
+        product_mention_knit_dress = ProductMention(
+            product_name="knit mini dress",
+            quantity=2,
+        )
+
         email_analysis = EmailAnalysis(
             email_id="test_005",
             primary_intent="order request",
@@ -666,19 +695,17 @@ class TestFulfillerPromotionDetection:
                 Segment(
                     segment_type=SegmentType.ORDER,
                     main_sentence="I want 2 knit mini dresses",
-                    product_mentions=[
-                        ProductMention(
-                            product_name="knit mini dress",
-                            quantity=2,
-                        )
-                    ],
+                    product_mentions=[product_mention_knit_dress],
                 )
             ],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         stockkeeper_output = StockkeeperOutput(
-            resolved_products=[knit_dress], unresolved_mentions=[]
+            candidate_products_for_mention=[(product_mention_knit_dress, [knit_dress])],
+            unresolved_mentions=[],
+            metadata="Test metadata for knit dress BOGO.",
+            exact_id_misses=[],
         )
 
         fulfiller_input = FulfillerInput(
@@ -763,6 +790,7 @@ class TestFulfillerPromotionDetection:
         mock_order_response = self.create_mock_order_response(
             email_id="test_006",
             product_id="RSG8901",
+            name="Retro Sunglasses",
             quantity=1,
             base_price=26.99,
             promotion_text=None,
@@ -776,6 +804,11 @@ class TestFulfillerPromotionDetection:
             message="I want retro sunglasses",
         )
 
+        product_mention_sunglasses = ProductMention(
+            product_name="retro sunglasses",
+            quantity=1,
+        )
+
         email_analysis = EmailAnalysis(
             email_id="test_006",
             primary_intent="order request",
@@ -783,19 +816,19 @@ class TestFulfillerPromotionDetection:
                 Segment(
                     segment_type=SegmentType.ORDER,
                     main_sentence="I want retro sunglasses",
-                    product_mentions=[
-                        ProductMention(
-                            product_name="retro sunglasses",
-                            quantity=1,
-                        )
-                    ],
+                    product_mentions=[product_mention_sunglasses],
                 )
             ],
         )
 
         classifier_output = ClassifierOutput(email_analysis=email_analysis)
         stockkeeper_output = StockkeeperOutput(
-            resolved_products=[regular_product], unresolved_mentions=[]
+            candidate_products_for_mention=[
+                (product_mention_sunglasses, [regular_product])
+            ],
+            unresolved_mentions=[],
+            metadata="Test metadata for no promotion product.",
+            exact_id_misses=[],
         )
 
         fulfiller_input = FulfillerInput(

@@ -1,0 +1,165 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E010
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I would like to order 1 pair of RSG8901 Retro Sunglasses.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: RSG8901 Retro Sunglasses
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: Retro Sunglasses
+        product_id: RSG8901
+        product_name: null
+        product_type: sunglasses
+        quantity: 1
+      related_sentences:
+      - Hello, I would like to order 1 pair of RSG8901 Retro Sunglasses.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E010
+  response_body: "Hello,\n\nThank you for your order! I'm delighted to confirm that\
+    \ we've received your request for 1 pair of Retro Sunglasses.\n\nHere are the\
+    \ details of your order:\n- **Product:** Retro Sunglasses\n- **Description:**\
+    \ Transport yourself back in time with our retro sunglasses. These vintage-inspired\
+    \ shades offer a cool, nostalgic vibe while protecting your eyes from the sun's\
+    \ rays. Perfect for beach days or city strolls.\n- **Quantity:** 1\n- **Price:**\
+    \ $26.99\n\nYour total comes to $26.99. At this time, no promotions have been\
+    \ applied to this order.\n\nWe'll begin processing your order right away. If you\
+    \ have any questions or would like to explore more accessories to complement your\
+    \ new sunglasses, just let me know\u2014I'd be happy to help!\n\nThank you for\
+    \ choosing Hermes. We look forward to delivering a touch of vintage style to your\
+    \ wardrobe.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their order and acknowledge receipt.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirm the order for 1 pair of Retro Sunglasses, including product description,
+      quantity, and price.
+    content_type: order_confirmation
+    priority: 10
+    related_to: RSG8901
+  - content: State the total price of $26.99 and note that no promotions were applied.
+    content_type: order_total
+    priority: 8
+    related_to: null
+  - content: Inform the customer that the order will be processed and offer assistance
+      for any further questions or accessory suggestions.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Express appreciation for their business and include the Hermes signature.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: "Your Order for Retro Sunglasses \u2013 Confirmation from Hermes"
+  tone: professional and warm
+email:
+  email_id: E010
+  message: Hello, I would like to order 1 pair of RSG8901 Retro Sunglasses. Thanks!
+  subject: Purchase Retro Sunglasses
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: RSG8901 Retro Sunglasses
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: Retro Sunglasses
+      product_id: RSG8901
+      product_name: null
+      product_type: sunglasses
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: RSG8901, Type: sunglasses, Category: Accessories, Quantity:
+          1)'
+        name: Retro Sunglasses
+        price: 26.99
+        product_id: RSG8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 1
+  order_result:
+    email_id: E010
+    lines:
+    - alternatives: []
+      base_price: 26.99
+      description: Transport yourself back in time with our retro sunglasses. These
+        vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+        eyes from the sun's rays. Perfect for beach days or city strolls.
+      name: Retro Sunglasses
+      product_id: RSG8901
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 0
+      total_price: 26.99
+      unit_price: 26.99
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 26.99
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 5ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: RSG8901 Retro Sunglasses
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: Retro Sunglasses
+      product_id: RSG8901
+      product_name: null
+      product_type: sunglasses
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: RSG8901, Type: sunglasses, Category: Accessories, Quantity:
+          1)'
+        name: Retro Sunglasses
+        price: 26.99
+        product_id: RSG8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 1
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 5ms; (Debug log: 1 mentions showed >0 candidates in detailed log)'
+  unresolved_mentions: []

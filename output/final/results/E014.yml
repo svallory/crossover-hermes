@@ -1,0 +1,208 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Johny
+    email_id: E014
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: Please send me 1 Sleek Wallet.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: Sleek Wallet
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: null
+        product_id: null
+        product_name: Sleek Wallet
+        product_type: wallet
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E014
+  response_body: "Hi Johny,\n\nThank you so much for your order! I'm happy to confirm\
+    \ that we've reserved 1 Sleek Wallet for you.\n\nThis wallet is a fantastic choice\u2014\
+    it's designed to keep your essentials organized and secure, with multiple card\
+    \ slots and a billfold compartment. Not only is it functional, but it also adds\
+    \ a touch of style to your everyday carry.\n\nYour order details:\n- Sleek Wallet\n\
+    \  - Quantity: 1\n  - Price: $30.00\n\nYour total comes to $30.00. At this time,\
+    \ no promotions were applied, but please let me know if you have any questions\
+    \ about current offers or future purchases.\n\nWe'll process your order right\
+    \ away, and you'll receive a shipping update as soon as it's on its way to you.\n\
+    \nIf you need any assistance or would like recommendations for other accessories\
+    \ to complement your new wallet, just let me know\u2014I'm here to help!\n\nBest\
+    \ regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Personalized greeting using customer's name and thanking for the order.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirmed order for 1 Sleek Wallet, including product description and
+      price.
+    content_type: order_confirmation
+    priority: 10
+    related_to: SWL2345
+  - content: 'Highlighted features of the Sleek Wallet: multiple card slots, billfold
+      compartment, stylish and functional.'
+    content_type: product_info
+    priority: 8
+    related_to: SWL2345
+  - content: Provided order summary with total price and noted no promotions applied.
+    content_type: order_summary
+    priority: 8
+    related_to: null
+  - content: Explained that the order will be processed and shipping update will follow.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Offered assistance and recommendations for complementary accessories
+      if desired.
+    content_type: value_addition
+    priority: 6
+    related_to: null
+  - content: Professional closing with brand signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Sleek Wallet Order Confirmation
+  tone: professional and warm
+email:
+  email_id: E014
+  message: Please send me 1 Sleek Wallet. Thanks, Johny
+  subject: Sleek Wallet Order
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: Sleek Wallet
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: null
+      product_id: null
+      product_name: Sleek Wallet
+      product_type: wallet
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Keep your essentials organized and secure with our sleek wallet.
+          Featuring multiple card slots and a billfold compartment, this stylish wallet
+          is both functional and fashionable. Perfect for everyday carry.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Sleek Wallet wallet''; Similarity score: 0.495; Original mention: Sleek
+          Wallet (ID: N/A, Type: wallet, Category: Accessories, Quantity: 1)'
+        name: Sleek Wallet
+        price: 30.0
+        product_id: SWL2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 5
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Upgrade your everyday carry with our leather bifold wallet. Crafted
+          from premium, full-grain leather, this sleek wallet features multiple card
+          slots, a billfold compartment, and a timeless, minimalist design. A sophisticated
+          choice for any occasion.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Sleek Wallet wallet''; Similarity score: 0.864; Original mention: Sleek
+          Wallet (ID: N/A, Type: wallet, Category: Accessories, Quantity: 1)'
+        name: Leather Bifold Wallet
+        price: 21.0
+        product_id: LTH0976
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  order_result:
+    email_id: E014
+    lines:
+    - alternatives: []
+      base_price: 30.0
+      description: Keep your essentials organized and secure with our sleek wallet.
+        Featuring multiple card slots and a billfold compartment, this stylish wallet
+        is both functional and fashionable. Perfect for everyday carry.
+      name: Sleek Wallet
+      product_id: SWL2345
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 4
+      total_price: 30.0
+      unit_price: 30.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 30.0
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 742ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: Sleek Wallet
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: null
+      product_id: null
+      product_name: Sleek Wallet
+      product_type: wallet
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Keep your essentials organized and secure with our sleek wallet.
+          Featuring multiple card slots and a billfold compartment, this stylish wallet
+          is both functional and fashionable. Perfect for everyday carry.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Sleek Wallet wallet''; Similarity score: 0.495; Original mention: Sleek
+          Wallet (ID: N/A, Type: wallet, Category: Accessories, Quantity: 1)'
+        name: Sleek Wallet
+        price: 30.0
+        product_id: SWL2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 5
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Upgrade your everyday carry with our leather bifold wallet. Crafted
+          from premium, full-grain leather, this sleek wallet features multiple card
+          slots, a billfold compartment, and a timeless, minimalist design. A sophisticated
+          choice for any occasion.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Sleek Wallet wallet''; Similarity score: 0.864; Original mention: Sleek
+          Wallet (ID: N/A, Type: wallet, Category: Accessories, Quantity: 1)'
+        name: Leather Bifold Wallet
+        price: 21.0
+        product_id: LTH0976
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 742ms; (Debug log: 1 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

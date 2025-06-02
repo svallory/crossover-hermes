@@ -1,0 +1,170 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E017
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I want to place an order for that popular item you sell.
+      product_mentions:
+      - confidence: 0.5
+        mention_text: that popular item you sell
+        product_category: null
+        product_description: that popular item you sell. The one that's been selling
+          like hotcakes lately.
+        product_id: null
+        product_name: null
+        product_type: null
+        quantity: 1
+      related_sentences:
+      - The one that's been selling like hotcakes lately.
+      - You know what I mean right?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E017
+  response_body: "Hello,\n\nThank you for reaching out to place an order with us!\
+    \ I believe the item you mentioned\u2014the one that's been selling like hotcakes\u2014\
+    is our Corduroy Bucket Hat. This trendy hat features a soft corduroy construction\
+    \ and a relaxed, bucket silhouette, making it a must-have accessory for a laidback,\
+    \ streetwear-inspired look.\n\nI'm happy to confirm that your order for 1 Corduroy\
+    \ Bucket Hat has been successfully created. The price for this item is $28.00,\
+    \ and we currently have it in stock, so your order is being processed right away.\n\
+    \nIf you\u2019re interested in styling ideas or would like to see other accessories\
+    \ that pair well with your new bucket hat, just let me know\u2014I'd be delighted\
+    \ to help you put together the perfect look.\n\nIf you have any questions or need\
+    \ further assistance, feel free to reply to this email. Thank you for choosing\
+    \ Hermes!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Warmly greet the customer and acknowledge their order request, referencing
+      their description of the popular item.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirm the order for the Corduroy Bucket Hat, including product details,
+      price, and stock status.
+    content_type: order_confirmation
+    priority: 10
+    related_to: CBY6789
+  - content: Offer to provide styling ideas or suggest complementary accessories if
+      the customer is interested.
+    content_type: value_addition
+    priority: 6
+    related_to: CBY6789
+  - content: Invite the customer to reach out with any questions or requests for further
+      assistance.
+    content_type: next_steps
+    priority: 5
+    related_to: null
+  - content: Professional and friendly closing with Hermes signature.
+    content_type: closing
+    priority: 4
+    related_to: null
+  subject: "Your Order for the Corduroy Bucket Hat \u2013 Confirmation & Next Steps"
+  tone: professional and friendly
+email:
+  email_id: E017
+  message: Hi there I want to place an order for that popular item you sell. The one
+    that's been selling like hotcakes lately. You know what I mean right?
+  subject: nan
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.5
+      mention_text: that popular item you sell
+      product_category: null
+      product_description: that popular item you sell. The one that's been selling
+        like hotcakes lately.
+      product_id: null
+      product_name: null
+      product_type: null
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Keep it casual and cool with our corduroy bucket hat. This trendy
+          hat features a soft corduroy construction and a relaxed, bucket silhouette.
+          A must-have accessory for achieving a laidback, streetwear-inspired look.
+        metadata: 'Found through fuzzy name matching; Requested quantity: 1; Search
+          query: ''that popular item you sell''; Similarity score: 0.400; Original
+          mention: N/A (ID: N/A, Type: N/A, Category: N/A, Quantity: 1)'
+        name: Corduroy Bucket Hat
+        price: 28.0
+        product_id: CBY6789
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 3
+  order_result:
+    email_id: E017
+    lines:
+    - alternatives: []
+      base_price: 28.0
+      description: Keep it casual and cool with our corduroy bucket hat. This trendy
+        hat features a soft corduroy construction and a relaxed, bucket silhouette.
+        A must-have accessory for achieving a laidback, streetwear-inspired look.
+      name: Corduroy Bucket Hat
+      product_id: CBY6789
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 2
+      total_price: 28.0
+      unit_price: 28.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 28.0
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 372ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.5
+      mention_text: that popular item you sell
+      product_category: null
+      product_description: that popular item you sell. The one that's been selling
+        like hotcakes lately.
+      product_id: null
+      product_name: null
+      product_type: null
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Keep it casual and cool with our corduroy bucket hat. This trendy
+          hat features a soft corduroy construction and a relaxed, bucket silhouette.
+          A must-have accessory for achieving a laidback, streetwear-inspired look.
+        metadata: 'Found through fuzzy name matching; Requested quantity: 1; Search
+          query: ''that popular item you sell''; Similarity score: 0.400; Original
+          mention: N/A (ID: N/A, Type: N/A, Category: N/A, Quantity: 1)'
+        name: Corduroy Bucket Hat
+        price: 28.0
+        product_id: CBY6789
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 3
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 372ms; (Debug log: 1 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

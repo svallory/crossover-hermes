@@ -1,0 +1,420 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Both the Leather Backpack (LTH1098) and the Leather Tote (LTH5432) are
+        suitable for carrying a laptop and documents for work. The Leather Backpack
+        features multiple compartments, a padded laptop sleeve, and adjustable straps,
+        making it ideal for organization and comfort, especially if you carry your
+        laptop regularly. The Leather Tote also offers a spacious interior and multiple
+        pockets, providing ample space for documents and essentials, with sturdy handles
+        for easy carrying. If you prioritize a dedicated laptop sleeve and hands-free
+        carrying, the backpack may be preferable. If you prefer a more classic tote
+        style with easy access, the tote is a strong choice.
+      answer_type: factual
+      confidence: 0.95
+      question: 'Which would be better for carrying a laptop and documents for work:
+        the LTH1098 Leather Backpack or the Leather Tote?'
+      reference_product_ids:
+      - LTH1098
+      - LTH5432
+    - answer: The Leather Backpack (LTH1098) features multiple compartments and a
+        padded laptop sleeve, which suggests a focus on organization. The Leather
+        Tote (LTH5432) also includes multiple pockets and a spacious interior. While
+        both offer organizational features, the backpack is likely to provide more
+        compartmentalized storage due to its design, whereas the tote offers a large
+        main space with several pockets.
+      answer_type: factual
+      confidence: 0.85
+      question: Does one have more organizational pockets than the other?
+      reference_product_ids:
+      - LTH1098
+      - LTH5432
+    email_id: E003
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Upgrade your daily carry with our leather backpack. Crafted from
+        premium leather, this stylish backpack features multiple compartments, a padded
+        laptop sleeve, and adjustable straps for a comfortable fit. Perfect for work,
+        travel, or everyday use.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: LTH1098, Type: backpack, Category: Bags, Quantity: 1)'
+      name: Leather Backpack
+      price: 43.99
+      product_id: LTH1098
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 7
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Elevate your everyday carry with our leather tote bag. Crafted
+        from premium, full-grain leather, this bag features a spacious interior, multiple
+        pockets, and sturdy handles. Perfect for work, travel, or running errands
+        in style.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''Leather Tote tote''; Similarity score: 0.550; Original mention: N/A (ID:
+        N/A, Type: tote, Category: Bags, Quantity: 1)'
+      name: Leather Tote
+      price: 28.0
+      product_id: LTH5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 6
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Streamline your daily carry with our sleek backpack. Designed for
+        both style and functionality, this bag features multiple compartments to keep
+        your essentials organized and a padded laptop sleeve for added protection.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''a new bag to carry my laptop and documents for work bag''; Similarity score:
+        1.012; Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity:
+        1)'
+      name: Sleek Backpack
+      price: 29.99
+      product_id: SBP4567
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 6
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our quilted tote bag. This
+        spacious bag features a classic quilted design, multiple interior pockets,
+        and sturdy handles. A chic and practical choice for work, travel, or everyday
+        use. Limited-time sale - get 25% off!
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''Leather Tote tote''; Similarity score: 0.867; Original mention: N/A (ID:
+        N/A, Type: tote, Category: Bags, Quantity: 1)'
+      name: Quilted Tote
+      price: 29.0
+      product_id: QTP5432
+      product_type: ''
+      promotion: null
+      promotion_text: Limited-time sale - get 25% off!
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 7
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our leather messenger bag.
+        Crafted from premium, full-grain leather, this bag features a spacious main
+        compartment, multiple pockets, and an adjustable strap for a comfortable fit.
+        A timeless choice for work, travel, or everyday use.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''a new bag to carry my laptop and documents for work bag''; Similarity score:
+        1.021; Original mention: N/A (ID: N/A, Type: bag, Category: Bags, Quantity:
+        1)'
+      name: Leather Messenger Bag
+      price: 37.99
+      product_id: LTH2109
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 4
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: David
+    email_id: E003
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I need a new bag to carry my laptop and documents for work.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: a new bag to carry my laptop and documents for work
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: a new bag to carry my laptop and documents for work
+        product_id: null
+        product_name: null
+        product_type: bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: I'm having a hard time deciding which would be better - the LTH1098
+        Leather Backpack or the Leather Tote?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: LTH1098 Leather Backpack
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: Leather Backpack
+        product_id: LTH1098
+        product_name: null
+        product_type: backpack
+        quantity: 1
+      - confidence: 0.95
+        mention_text: Leather Tote
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: Leather Tote
+        product_id: null
+        product_name: null
+        product_type: tote
+        quantity: 1
+      related_sentences:
+      - Does one have more organizational pockets than the other?
+      - Any insight would be appreciated!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E003
+  response_body: "Hi David,\n\nThank you for reaching out and sharing a bit about\
+    \ what you\u2019re looking for! It sounds like you need a reliable bag to keep\
+    \ your laptop and documents organized for work, and I\u2019m happy to help you\
+    \ decide between the options you mentioned.\n\nBoth the Leather Backpack (LTH1098)\
+    \ and the Leather Tote (LTH5432) are excellent choices for carrying work essentials:\n\
+    \n- The Leather Backpack is crafted from premium leather and features multiple\
+    \ compartments, a padded laptop sleeve, and adjustable straps. It\u2019s especially\
+    \ great if you want to keep things organized and prefer hands-free carrying\u2014\
+    perfect for commuting or moving between meetings.\n\n- The Leather Tote, also\
+    \ made from full-grain leather, offers a spacious interior with multiple pockets\
+    \ and sturdy handles. It\u2019s a classic, stylish option that gives you easy\
+    \ access to your items and plenty of room for documents and daily essentials.\n\
+    \nIf you\u2019re looking for maximum organization, the backpack\u2019s design\u2014\
+    with its dedicated laptop sleeve and extra compartments\u2014might be the better\
+    \ fit. On the other hand, if you prefer a more open layout and a timeless look,\
+    \ the tote is a fantastic choice.\n\nIf you\u2019re open to exploring a few more\
+    \ options, you might also like:\n- The Sleek Backpack: Stylish and functional,\
+    \ with multiple compartments and a padded laptop sleeve ($29.99).\n- The Quilted\
+    \ Tote: Chic and practical, with a classic quilted design and multiple interior\
+    \ pockets\u2014currently on a limited-time sale at 25% off ($29.00).\n- The Leather\
+    \ Messenger Bag: A timeless work bag with a spacious main compartment and adjustable\
+    \ strap ($37.99).\n\nLet me know if you\u2019d like more details on any of these,\
+    \ or if you have other preferences in mind. I\u2019m here to help you find the\
+    \ perfect bag for your work needs!\n\nBest regards,\nHermes - Delivering divine\
+    \ fashion"
+  response_points:
+  - content: Warm greeting using David's name and acknowledging his need for a new
+      work bag.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Detailed comparison of the Leather Backpack (LTH1098) and Leather Tote
+      (LTH5432), highlighting organizational features, style, and suitability for
+      work.
+    content_type: product_info
+    priority: 10
+    related_to: LTH1098
+  - content: Explanation that the backpack offers more compartmentalized storage,
+      while the tote provides a spacious main area with several pockets.
+    content_type: product_info
+    priority: 9
+    related_to: LTH5432
+  - content: 'Suggestions of related products: Sleek Backpack, Quilted Tote (with
+      sale), and Leather Messenger Bag, including brief descriptions and prices.'
+    content_type: alternative
+    priority: 7
+    related_to: null
+  - content: Directly addresses David's questions about organization and suitability
+      for carrying a laptop and documents.
+    content_type: answer
+    priority: 10
+    related_to: null
+  - content: Encouragement to reach out for more details or preferences, and a professional
+      closing with the Hermes signature.
+    content_type: closing
+    priority: 8
+    related_to: null
+  subject: 'Choosing the Perfect Work Bag: Leather Backpack vs. Leather Tote'
+  tone: professional and warm
+email:
+  email_id: E003
+  message: Hello, I need a new bag to carry my laptop and documents for work. My name
+    is David and I'm having a hard time deciding which would be better - the LTH1098
+    Leather Backpack or the Leather Tote? Does one have more organizational pockets
+    than the other? Any insight would be appreciated!
+  subject: Need your help
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: a new bag to carry my laptop and documents for work
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: a new bag to carry my laptop and documents for work
+      product_id: null
+      product_name: null
+      product_type: bag
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Upgrade your daily carry with our leather backpack. Crafted from
+          premium leather, this stylish backpack features multiple compartments, a
+          padded laptop sleeve, and adjustable straps for a comfortable fit. Perfect
+          for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''a new bag to carry my laptop and documents for work bag''; Similarity
+          score: 0.915; Original mention: N/A (ID: N/A, Type: bag, Category: Bags,
+          Quantity: 1)'
+        name: Leather Backpack
+        price: 43.99
+        product_id: LTH1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Streamline your daily carry with our sleek backpack. Designed
+          for both style and functionality, this bag features multiple compartments
+          to keep your essentials organized and a padded laptop sleeve for added protection.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''a new bag to carry my laptop and documents for work bag''; Similarity
+          score: 1.012; Original mention: N/A (ID: N/A, Type: bag, Category: Bags,
+          Quantity: 1)'
+        name: Sleek Backpack
+        price: 29.99
+        product_id: SBP4567
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 6
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable
+          fit. A timeless choice for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''a new bag to carry my laptop and documents for work bag''; Similarity
+          score: 1.021; Original mention: N/A (ID: N/A, Type: bag, Category: Bags,
+          Quantity: 1)'
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: LTH1098 Leather Backpack
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: Leather Backpack
+      product_id: LTH1098
+      product_name: null
+      product_type: backpack
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Upgrade your daily carry with our leather backpack. Crafted from
+          premium leather, this stylish backpack features multiple compartments, a
+          padded laptop sleeve, and adjustable straps for a comfortable fit. Perfect
+          for work, travel, or everyday use.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: LTH1098, Type: backpack, Category: Bags, Quantity: 1)'
+        name: Leather Backpack
+        price: 43.99
+        product_id: LTH1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+  - !!python/tuple
+    - confidence: 0.95
+      mention_text: Leather Tote
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: Leather Tote
+      product_id: null
+      product_name: null
+      product_type: tote
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Elevate your everyday carry with our leather tote bag. Crafted
+          from premium, full-grain leather, this bag features a spacious interior,
+          multiple pockets, and sturdy handles. Perfect for work, travel, or running
+          errands in style.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Leather Tote tote''; Similarity score: 0.550; Original mention: N/A (ID:
+          N/A, Type: tote, Category: Bags, Quantity: 1)'
+        name: Leather Tote
+        price: 28.0
+        product_id: LTH5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 6
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our quilted tote bag. This
+          spacious bag features a classic quilted design, multiple interior pockets,
+          and sturdy handles. A chic and practical choice for work, travel, or everyday
+          use. Limited-time sale - get 25% off!
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Leather Tote tote''; Similarity score: 0.867; Original mention: N/A (ID:
+          N/A, Type: tote, Category: Bags, Quantity: 1)'
+        name: Quilted Tote
+        price: 29.0
+        product_id: QTP5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable
+          fit. A timeless choice for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Leather Tote tote''; Similarity score: 0.882; Original mention: N/A (ID:
+          N/A, Type: tote, Category: Bags, Quantity: 1)'
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  exact_id_misses: []
+  metadata: 'Processed 3 product mentions; Made 3 resolution attempts for these mentions;
+    Found candidates for 3 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 1316ms; (Debug log: 3 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

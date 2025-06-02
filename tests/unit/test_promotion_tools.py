@@ -16,6 +16,7 @@ class TestPromotionTools:
             lines=[
                 OrderLine(
                     product_id="TST001",
+                    name="Test Shirt",
                     description="Test Shirt",
                     quantity=2,
                     base_price=100.0,
@@ -68,6 +69,7 @@ class TestPromotionTools:
             lines=[
                 OrderLine(
                     product_id="TST001",
+                    name="Test Shirt",
                     description="Test Shirt",
                     quantity=4,
                     base_price=50.0,
@@ -120,6 +122,7 @@ class TestPromotionTools:
             lines=[
                 OrderLine(
                     product_id="TST005",
+                    name="Test Dress",
                     description="Test Dress",
                     quantity=1,
                     base_price=100.0,
@@ -169,6 +172,7 @@ class TestPromotionTools:
             lines=[
                 OrderLine(
                     product_id="TST001",
+                    name="Test Shirt",
                     description="Test Shirt",
                     quantity=2,
                     base_price=50.0,
@@ -177,6 +181,7 @@ class TestPromotionTools:
                 ),
                 OrderLine(
                     product_id="TST002",
+                    name="Test Pants",
                     description="Test Pants",
                     quantity=1,
                     base_price=100.0,
@@ -269,6 +274,7 @@ class TestPromotionToolsWithTestData:
         order_lines.append(
             OrderLine(
                 product_id="QTP5432",
+                name=tote_row["name"],
                 description=tote_row["name"],
                 quantity=1,
                 base_price=float(tote_row["price"]),
@@ -283,6 +289,7 @@ class TestPromotionToolsWithTestData:
         order_lines.append(
             OrderLine(
                 product_id="CBG9876",
+                name=bag_row["name"],
                 description=bag_row["name"],
                 quantity=2,  # Order 2 to trigger BOGO
                 base_price=bag_price,
@@ -297,6 +304,7 @@ class TestPromotionToolsWithTestData:
         order_lines.append(
             OrderLine(
                 product_id="RSG8901",
+                name=regular_row["name"],
                 description=regular_row["name"],
                 quantity=1,
                 base_price=regular_price,

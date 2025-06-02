@@ -1,0 +1,266 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E008
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I'd want to order one of your Versatile Scarves, the one that
+        can be worn as a scarf, shawl, or headwrap.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: Versatile Scarves
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: the one that can be worn as a scarf, shawl, or headwrap
+        product_id: null
+        product_name: Versatile Scarf
+        product_type: scarf
+        quantity: 1
+      related_sentences:
+      - Hello, I'd want to order one of your Versatile Scarves, the one that can be
+        worn as a scarf, shawl, or headwrap. Thanks!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+composer:
+  email_id: E008
+  response_body: "Hello,\n\nThank you so much for your order! I'm delighted to confirm\
+    \ that we've reserved one of our Versatile Scarves for you. This piece is a true\
+    \ favorite among our customers\u2014lightweight and designed to be worn as a scarf,\
+    \ shawl, or headwrap, making it perfect for travel or those in-between seasons.\n\
+    \nHere are the details of your order:\n- Product: Versatile Scarf\n- Description:\
+    \ Add a touch of versatility to your wardrobe with our versatile scarf. This lightweight,\
+    \ multi-purpose accessory can be worn as a scarf, shawl, or even a headwrap. Perfect\
+    \ for transitional seasons or travel.\n- Quantity: 1\n- Price: $23.00\n\nYour\
+    \ total comes to $23.00. At this time, no promotions have been applied, but please\
+    \ let me know if you have any questions about ongoing offers or if you'd like\
+    \ recommendations for coordinating accessories.\n\nIf you need this scarf as a\
+    \ gift or for a special occasion, just let me know\u2014I'm happy to help with\
+    \ any special requests. Your order is now being processed, and you'll receive\
+    \ a shipping update as soon as it's on its way.\n\nIf you have any other questions\
+    \ or would like suggestions for items that pair beautifully with your new scarf,\
+    \ feel free to reach out.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their order and acknowledge their interest in
+      the Versatile Scarf.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirm the order for the Versatile Scarf, including product details,
+      price, and quantity.
+    content_type: order_confirmation
+    priority: 10
+    related_to: VSC6789
+  - content: Highlight the versatility and appeal of the scarf, referencing its use
+      as a scarf, shawl, or headwrap.
+    content_type: product_info
+    priority: 8
+    related_to: VSC6789
+  - content: Offer to assist with gift requests or special occasions, and invite the
+      customer to ask about coordinating accessories or ongoing promotions.
+    content_type: value_addition
+    priority: 6
+    related_to: null
+  - content: Inform the customer that the order is being processed and that a shipping
+      update will follow.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Express willingness to help further and close with the Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: "Your Order for the Versatile Scarf \u2013 Confirmation from Hermes"
+  tone: professional and warm
+email:
+  email_id: E008
+  message: Hello, I'd want to order one of your Versatile Scarves, the one that can
+    be worn as a scarf, shawl, or headwrap. Thanks!
+  subject: Ordering a Versatile Scarf-like item
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: Versatile Scarves
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: the one that can be worn as a scarf, shawl, or headwrap
+      product_id: null
+      product_name: Versatile Scarf
+      product_type: scarf
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Add a touch of versatility to your wardrobe with our versatile
+          scarf. This lightweight, multi-purpose accessory can be worn as a scarf,
+          shawl, or even a headwrap. Perfect for transitional seasons or travel.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Versatile Scarf the one that can be worn as a scarf, shawl, or headwrap
+          scarf''; Similarity score: 0.385; Original mention: Versatile Scarf (ID:
+          N/A, Type: scarf, Category: Accessories, Quantity: 1)'
+        name: Versatile Scarf
+        price: 23.0
+        product_id: VSC6789
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 6
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Wrap yourself in comfort with our cozy shawl. Knitted from soft,
+          warm yarn, this versatile accessory can be worn as a shawl, scarf, or even
+          a lightweight blanket. Perfect for chilly evenings or adding a cozy layer
+          to your outfit.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Versatile Scarf the one that can be worn as a scarf, shawl, or headwrap
+          scarf''; Similarity score: 0.808; Original mention: Versatile Scarf (ID:
+          N/A, Type: scarf, Category: Accessories, Quantity: 1)'
+        name: Cozy Shawl
+        price: 22.0
+        product_id: CSH1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 3
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Stay cozy and stylish with our infinity scarf. This versatile
+          accessory features a soft, chunky knit construction and an endless loop
+          design for easy wearing. Perfect for adding a touch of warmth and texture
+          to your winter ensembles.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Versatile Scarf the one that can be worn as a scarf, shawl, or headwrap
+          scarf''; Similarity score: 0.853; Original mention: Versatile Scarf (ID:
+          N/A, Type: scarf, Category: Accessories, Quantity: 1)'
+        name: Infinity Scarf
+        price: 28.0
+        product_id: SFT1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 8
+  order_result:
+    email_id: E008
+    lines:
+    - alternatives: []
+      base_price: 23.0
+      description: Add a touch of versatility to your wardrobe with our versatile
+        scarf. This lightweight, multi-purpose accessory can be worn as a scarf, shawl,
+        or even a headwrap. Perfect for transitional seasons or travel.
+      name: Versatile Scarf
+      product_id: VSC6789
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 5
+      total_price: 23.0
+      unit_price: 23.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 23.0
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 1110ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: Versatile Scarves
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: the one that can be worn as a scarf, shawl, or headwrap
+      product_id: null
+      product_name: Versatile Scarf
+      product_type: scarf
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Add a touch of versatility to your wardrobe with our versatile
+          scarf. This lightweight, multi-purpose accessory can be worn as a scarf,
+          shawl, or even a headwrap. Perfect for transitional seasons or travel.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Versatile Scarf the one that can be worn as a scarf, shawl, or headwrap
+          scarf''; Similarity score: 0.385; Original mention: Versatile Scarf (ID:
+          N/A, Type: scarf, Category: Accessories, Quantity: 1)'
+        name: Versatile Scarf
+        price: 23.0
+        product_id: VSC6789
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 6
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Wrap yourself in comfort with our cozy shawl. Knitted from soft,
+          warm yarn, this versatile accessory can be worn as a shawl, scarf, or even
+          a lightweight blanket. Perfect for chilly evenings or adding a cozy layer
+          to your outfit.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Versatile Scarf the one that can be worn as a scarf, shawl, or headwrap
+          scarf''; Similarity score: 0.808; Original mention: Versatile Scarf (ID:
+          N/A, Type: scarf, Category: Accessories, Quantity: 1)'
+        name: Cozy Shawl
+        price: 22.0
+        product_id: CSH1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 3
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Stay cozy and stylish with our infinity scarf. This versatile
+          accessory features a soft, chunky knit construction and an endless loop
+          design for easy wearing. Perfect for adding a touch of warmth and texture
+          to your winter ensembles.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Versatile Scarf the one that can be worn as a scarf, shawl, or headwrap
+          scarf''; Similarity score: 0.853; Original mention: Versatile Scarf (ID:
+          N/A, Type: scarf, Category: Accessories, Quantity: 1)'
+        name: Infinity Scarf
+        price: 28.0
+        product_id: SFT1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 8
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 1110ms; (Debug log: 1 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

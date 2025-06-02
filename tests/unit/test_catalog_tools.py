@@ -6,11 +6,13 @@ from hermes.tools.catalog_tools import (
     find_product_by_id,
     find_product_by_name,
     search_products_by_description,
-    metadata_to_product,
     find_complementary_products,
     search_products_with_filters,
     find_products_for_occasion,
 )
+from hermes.data.vector_store import metadata_to_product
+
+# import hermes.data.vector_store # No longer needed for patch.object
 from hermes.model.product import Product, ProductCategory, Season
 from hermes.model.errors import ProductNotFound
 
@@ -98,14 +100,38 @@ class TestCatalogTools:
         assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.load_products_df")
-    @patch("hermes.tools.catalog_tools._vector_store")
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_by_description_valid(
-        self, mock_vector_store_instance, mock_load_df_unused
+        self,
+        mock_create_vector_store_func,
+        mock_find_product_by_id_tool,
+        mock_load_df_unused,
     ):
         """Test searching products by description with valid query."""
-        # mock_get_vector_store is no longer needed as we patch the instance
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
 
-        # Mock similarity search results
+        # Mock find_product_by_id to return a live product for TST001
+        mock_live_product_tst001 = Product(
+            product_id="TST001",
+            name="Live Test Shirt",
+            category=ProductCategory.SHIRTS,
+            stock=10,  # Ensure positive stock
+            price=29.99,
+            seasons=[Season.SPRING],
+            description="Live description.",
+            product_type="live_type",
+        )
+        # Configure mock for specific input "TST001"
+        mock_find_product_by_id_tool.invoke.side_effect = (
+            lambda args: mock_live_product_tst001
+            if args.get("product_id") == "TST001"
+            else ProductNotFound(
+                message="Generic mock error", query_product_id=args.get("product_id")
+            )
+        )
+
+        # Mock similarity search results from vector store
         mock_doc = MagicMock()
         mock_doc.metadata = {
             "product_id": "TST001",
@@ -121,38 +147,34 @@ class TestCatalogTools:
             (mock_doc, 0.5)
         ]
 
-        # Call function directly (not a @tool)
-        result = search_products_by_description(query="comfortable", top_k=2)
+        result = search_products_by_description.invoke(
+            {"query": "comfortable", "top_k": 2}
+        )
 
-        # Verify result
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0].product_id == "TST001"
+        assert result[0].stock == 10
 
-    @patch("hermes.tools.catalog_tools._vector_store")
-    def test_search_products_by_description_no_match(self, mock_vector_store_instance):
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_search_products_by_description_no_match(
+        self, mock_create_vector_store_func
+    ):
         """Test searching products by description with no matches."""
-        # mock_get_vector_store is no longer needed
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
         mock_vector_store_instance.similarity_search_with_score.return_value = []
 
-        # Call function directly (not a @tool)
-        result = search_products_by_description(query="nonexistent term")
-
-        # Verify result
+        result = search_products_by_description.invoke({"query": "nonexistent term"})
         assert isinstance(result, ProductNotFound)
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_complementary_products_valid(
-        self, mock_load_df, mock_get_vector_store
+        self, mock_load_df, mock_create_vector_store_func
     ):
         """Test finding complementary products with valid product ID."""
-        # Setup mock data frame
         mock_load_df.return_value = get_mock_products_df()
-
-        # Setup mock vector store
-        mock_vector_store = MagicMock()
-        mock_get_vector_store.return_value = mock_vector_store
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
 
         mock_doc = MagicMock()
         mock_doc.metadata = {
@@ -165,38 +187,32 @@ class TestCatalogTools:
             "type": "",
             "description": "Another test shirt",
         }
-        mock_vector_store.similarity_search_with_score.return_value = [(mock_doc, 0.5)]
+        mock_vector_store_instance.similarity_search_with_score.return_value = [
+            (mock_doc, 0.5)
+        ]
 
-        # Call @tool function using invoke with an accessory product that has complementary categories
         result = find_complementary_products.invoke(
-            {"product_id": "TST005", "limit": 2}  # Use TST005 which is Women's Clothing
+            {"product_id": "TST005", "limit": 2}
         )
-
-        # The function should return ProductNotFound or a list depending on the mock data
-        # Since our mock data may not have the right structure, let's accept both outcomes
         assert isinstance(result, (list, ProductNotFound))
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_complementary_products_invalid_product(
-        self, mock_load_df, mock_get_vector_store
+        self, mock_load_df, mock_create_vector_store_func
     ):
         """Test finding complementary products with invalid product ID."""
-        # Setup mock data frame
         mock_load_df.return_value = get_mock_products_df()
 
-        # Call @tool function using invoke
         result = find_complementary_products.invoke(
             {"product_id": "NONEXISTENT", "limit": 2}
         )
-
-        # Verify result
         assert isinstance(result, ProductNotFound)
 
-    @patch("hermes.tools.catalog_tools._vector_store")
-    def test_search_products_with_filters_valid(self, mock_vector_store_instance):
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_search_products_with_filters_valid(self, mock_create_vector_store_func):
         """Test searching products with filters."""
-        # mock_get_vector_store is no longer needed
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
 
         mock_doc = MagicMock()
         mock_doc.metadata = {
@@ -213,7 +229,6 @@ class TestCatalogTools:
             (mock_doc, 0.5)
         ]
 
-        # Call the function directly
         result = search_products_with_filters.invoke(
             {
                 "query": "comfortable shirt",
@@ -225,21 +240,16 @@ class TestCatalogTools:
                 "top_k": 3,
             }
         )
-
-        # Verify result
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0].product_id == "TST001"
 
     @patch("hermes.tools.catalog_tools.get_vector_store")
-    def test_search_products_with_filters_no_match(self, mock_get_vector_store):
+    def test_search_products_with_filters_no_match(self, mock_create_vector_store_func):
         """Test searching products with filters that don't match."""
-        # Setup mock vector store
-        mock_vector_store = MagicMock()
-        mock_get_vector_store.return_value = mock_vector_store
-        mock_vector_store.similarity_search_with_score.return_value = []
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
+        mock_vector_store_instance.similarity_search_with_score.return_value = []
 
-        # Call @tool function using invoke
         result = search_products_with_filters.invoke(
             {
                 "query": "nonexistent product",
@@ -251,14 +261,33 @@ class TestCatalogTools:
                 "top_k": None,
             }
         )
-
-        # Verify result
         assert isinstance(result, ProductNotFound)
 
-    @patch("hermes.tools.catalog_tools._vector_store")
-    def test_find_products_for_occasion_valid(self, mock_vector_store_instance):
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_find_products_for_occasion_valid(
+        self, mock_create_vector_store_func, mock_find_product_by_id_tool
+    ):
         """Test finding products for a specific occasion."""
-        # mock_get_vector_store is no longer needed
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
+
+        mock_live_product_tst001 = Product(
+            product_id="TST001",
+            name="Live Formal Shirt",
+            category=ProductCategory.SHIRTS,
+            stock=5,
+            price=49.99,
+            seasons=[Season.SPRING],
+            description="Live formal description.",
+            product_type="live_formal_type",
+        )
+        mock_find_product_by_id_tool.invoke.side_effect = (
+            lambda args: mock_live_product_tst001
+            if args.get("product_id") == "TST001"
+            else ProductNotFound(
+                message="Generic mock error", query_product_id=args.get("product_id")
+            )
+        )
 
         mock_doc = MagicMock()
         mock_doc.metadata = {
@@ -275,28 +304,23 @@ class TestCatalogTools:
             (mock_doc, 0.5)
         ]
 
-        # Call @tool function using invoke
         result = find_products_for_occasion.invoke(
             {"occasion": "business meeting", "limit": 3}
         )
-
-        # Verify result
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0].product_id == "TST001"
+        assert result[0].stock == 5
 
-    @patch("hermes.tools.catalog_tools._vector_store")
-    def test_find_products_for_occasion_no_match(self, mock_vector_store_instance):
+    @patch("hermes.tools.catalog_tools.get_vector_store")
+    def test_find_products_for_occasion_no_match(self, mock_create_vector_store_func):
         """Test finding products for occasion with no matches."""
-        # mock_get_vector_store is no longer needed
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
         mock_vector_store_instance.similarity_search_with_score.return_value = []
 
-        # Call @tool function using invoke
         result = find_products_for_occasion.invoke(
             {"occasion": "space travel", "limit": 3}
         )
-
-        # Verify result
         assert isinstance(result, ProductNotFound)
 
 
@@ -320,15 +344,27 @@ class TestCatalogToolsCriticalScenarios:
 class TestMetadataConversion:
     """Test the metadata_to_product conversion function."""
 
-    def test_metadata_to_product_basic(self):
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    def test_metadata_to_product_basic(self, mock_find_product_by_id_tool):
         """Test basic metadata to product conversion."""
+        mock_live_product = Product(
+            product_id="TST001",
+            name="Live Test Product",
+            category=ProductCategory.ACCESSORIES,
+            stock=5,
+            price=30.00,
+            seasons=[Season.SPRING],
+            description="Live description.",
+            product_type="live_test",
+        )
+        mock_find_product_by_id_tool.invoke.return_value = mock_live_product
+
         metadata = {
             "product_id": "TST001",
             "name": "Test Product",
             "category": "Accessories",
-            "stock": 10,
             "price": 29.99,
-            "season": "Spring",
+            "season": "Spring,Summer",
             "type": "test",
             "description": "A test product",
         }
@@ -338,27 +374,137 @@ class TestMetadataConversion:
         assert isinstance(product, Product)
         assert product.product_id == "TST001"
         assert product.name == "Test Product"
+        assert product.description == "A test product"
+        assert product.product_type == "test"
+        assert product.stock == 5
+        assert product.price == 30.00
         assert product.category == ProductCategory.ACCESSORIES
-        assert product.stock == 10
-        assert product.price == 29.99
+        assert product.seasons == [Season.SPRING, Season.SUMMER]
 
-    def test_metadata_to_product_season_handling(self):
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    def test_metadata_to_product_season_handling(self, mock_find_product_by_id_tool):
         """Test season handling in metadata conversion."""
+        mock_live_product = Product(
+            product_id="TST001",
+            name="Live Test Product",
+            category=ProductCategory.ACCESSORIES,
+            stock=10,
+            price=29.99,
+            seasons=[Season.FALL],
+            description="Live description",
+            product_type="live_type",
+        )
+        mock_find_product_by_id_tool.invoke.return_value = mock_live_product
+
         metadata = {
             "product_id": "TST001",
             "name": "Test Product",
             "category": "Accessories",
-            "stock": 10,
-            "price": 29.99,
-            "season": "Fall, Winter",
+            "season": "Fall,Winter",
             "type": "",
             "description": "A test product",
+            "price": 29.99,
         }
 
         product = metadata_to_product(metadata)
 
-        assert Season.FALL in product.seasons
-        assert Season.WINTER in product.seasons
+        assert isinstance(product, Product)
+        assert product.seasons == [Season.FALL, Season.WINTER]
+
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    def test_metadata_to_product_not_found_in_live_catalog(
+        self, mock_find_product_by_id_tool
+    ):
+        """Test metadata_to_product when product ID from metadata is not in live catalog."""
+        mock_find_product_by_id_tool.invoke.return_value = ProductNotFound(
+            message="Not found", query_product_id="TST002"
+        )
+
+        metadata = {
+            "product_id": "TST002",
+            "name": "Fallback Product",
+            "category": "Shirts",
+            "price": 19.99,
+            "season": "Summer",
+            "type": "fallback_type",
+            "description": "A product description from metadata.",
+        }
+
+        product = metadata_to_product(metadata)
+
+        assert isinstance(product, Product)
+        assert product.product_id == "TST002"
+        assert product.name == "Fallback Product"
+        assert product.category == ProductCategory.SHIRTS
+        assert product.stock == 0
+        assert product.price == 19.99
+        assert product.seasons == [Season.SUMMER]
+        assert product.product_type == "fallback_type"
+        assert product.description == "A product description from metadata."
+        assert product.metadata is not None and (
+            "Fallback: Original product ID 'TST002' not found in live catalog."
+            in product.metadata
+        )
+
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    def test_metadata_to_product_invalid_category_in_metadata(
+        self, mock_find_product_by_id_tool
+    ):
+        """Test metadata_to_product with an invalid category string in metadata when live product is found."""
+        mock_live_product = Product(
+            product_id="TST003",
+            name="Live Product Name",
+            category=ProductCategory.MENS_SHOES,
+            stock=15,
+            price=75.00,
+            seasons=[Season.ALL_SEASONS],
+            description="Live description",
+            product_type="live_type",
+        )
+        mock_find_product_by_id_tool.invoke.return_value = mock_live_product
+
+        metadata = {
+            "product_id": "TST003",
+            "name": "Product from Metadata",
+            "category": "InvalidCategoryValue",
+            "price": 70.00,
+            "season": "Spring",
+            "type": "meta_type",
+            "description": "Meta description",
+        }
+        product = metadata_to_product(metadata)
+        assert isinstance(product, Product)
+        assert product.category == ProductCategory.MENS_SHOES
+
+    @patch("hermes.tools.catalog_tools.find_product_by_id")
+    def test_metadata_to_product_invalid_season_in_metadata(
+        self, mock_find_product_by_id_tool
+    ):
+        """Test metadata_to_product with an invalid season string in metadata when live product is found."""
+        mock_live_product = Product(
+            product_id="TST004",
+            name="Live Product Name",
+            category=ProductCategory.BAGS,
+            stock=20,
+            price=120.00,
+            seasons=[Season.FALL, Season.WINTER],
+            description="Live description",
+            product_type="live_type",
+        )
+        mock_find_product_by_id_tool.invoke.return_value = mock_live_product
+
+        metadata = {
+            "product_id": "TST004",
+            "name": "Product from Metadata",
+            "category": "Bags",
+            "price": 110.00,
+            "season": "InvalidSeason,Spring",
+            "type": "meta_type",
+            "description": "Meta description",
+        }
+        product = metadata_to_product(metadata)
+        assert isinstance(product, Product)
+        assert product.seasons == [Season.FALL, Season.WINTER]
 
 
 class TestCatalogToolsWithTestData:
@@ -367,16 +513,9 @@ class TestCatalogToolsWithTestData:
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_with_test_data(self, mock_load_df):
         """Test finding a product by ID with test product data."""
-        # Setup mock with test data
         mock_load_df.return_value = get_test_products_df()
-
-        # Use a product ID from the test data
-        test_product_id = "RSG8901"  # Retro Sunglasses
-
-        # Call the tool function directly
+        test_product_id = "RSG8901"
         result = find_product_by_id.invoke({"product_id": test_product_id})
-
-        # Verify the result is a Product object
         assert isinstance(result, Product)
         assert result.product_id == test_product_id
         assert result.name == "Retro Sunglasses"
@@ -385,43 +524,29 @@ class TestCatalogToolsWithTestData:
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_with_spanish_name_test_data(self, mock_load_df):
         """Test finding a product by ID when mention has a Spanish name, using test data."""
-        # Setup mock with test data
         mock_load_df.return_value = get_test_products_df()
-
-        # Product ID from the user's YAML example
         product_id_to_find = "CHN0987"
-        expected_name = "Chunky Knit Beanie"  # Name in products.csv for CHN0987
-
-        # Call the tool function directly
+        expected_name = "Chunky Knit Beanie"
         result = find_product_by_id.invoke({"product_id": product_id_to_find})
-
-        # Verify the result is a Product object
         assert isinstance(result, Product)
         assert result.product_id == product_id_to_find
-        assert result.name == expected_name  # Check against the actual name in the CSV
+        assert result.name == expected_name
         assert result.category == ProductCategory.ACCESSORIES
 
     @patch("hermes.tools.catalog_tools.load_products_df")
     def test_find_product_by_id_not_found_with_test_data(self, mock_load_df):
         """Test finding a product with invalid ID using test data."""
-        # Setup mock with test data
         mock_load_df.return_value = get_test_products_df()
-
-        # Call with non-existent ID
         result = find_product_by_id.invoke({"product_id": "NONEXISTENT"})
-
-        # Verify the result is a ProductNotFound object
         assert isinstance(result, ProductNotFound)
         assert "No product found" in result.message
 
-    @patch("hermes.tools.catalog_tools._vector_store")
+    @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_by_description_with_test_data(
-        self, mock_vector_store_instance
+        self, mock_create_vector_store_func
     ):
         """Test searching products by description using test data."""
-        # mock_get_vector_store is no longer needed
-
-        # Mock document representing a leather wallet from test data
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
         mock_doc = MagicMock()
         mock_doc.metadata = {
             "product_id": "LTH0976",
@@ -436,8 +561,6 @@ class TestCatalogToolsWithTestData:
         mock_vector_store_instance.similarity_search_with_score.return_value = [
             (mock_doc, 0.5)
         ]
-
-        # Call the function directly (this test was misnamed, it tests search_products_with_filters)
         result = search_products_with_filters.invoke(
             {
                 "query": "leather",
@@ -449,30 +572,16 @@ class TestCatalogToolsWithTestData:
                 "top_k": None,
             }
         )
-
-        # Verify the result is a list of Product objects
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0].product_id == "LTH0976"
 
-    @patch("hermes.tools.catalog_tools.load_products_df")
-    def test_find_complementary_products_with_test_data(self, mock_load_df):
-        mock_load_df.return_value = get_test_products_df()
-        result = find_complementary_products.invoke(
-            {"product_id": "TST005", "limit": 2}  # TST005 is Women's Clothing
-        )
-        assert isinstance(
-            result, list
-        )  # Expect a list, actual content depends on test_products_df
-
-    @patch("hermes.tools.catalog_tools._vector_store")
+    @patch("hermes.tools.catalog_tools.get_vector_store")
     def test_search_products_with_filters_with_test_data(
-        self, mock_vector_store_instance
+        self, mock_create_vector_store_func
     ):
         """Test searching products with filters using test data."""
-        # mock_get_vector_store is no longer needed
-
-        # Mock document representing a leather wallet from test data
+        mock_vector_store_instance = mock_create_vector_store_func.return_value
         mock_doc = MagicMock()
         mock_doc.metadata = {
             "product_id": "LTH0976",
@@ -487,8 +596,6 @@ class TestCatalogToolsWithTestData:
         mock_vector_store_instance.similarity_search_with_score.return_value = [
             (mock_doc, 0.5)
         ]
-
-        # Call function directly
         result = search_products_with_filters.invoke(
             {
                 "query": "leather",
@@ -500,8 +607,6 @@ class TestCatalogToolsWithTestData:
                 "top_k": None,
             }
         )
-
-        # Verify result is a Product object
         assert isinstance(result, list)
         assert len(result) == 1
         assert result[0].product_id == "LTH0976"

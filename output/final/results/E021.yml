@@ -1,0 +1,456 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Yes, there are several winter hats available in our store. The 'Corduroy
+        Bucket Hat' and the 'Chunky Knit Beanie' are both suitable for winter, offering
+        warmth and style. The 'Corduroy Bucket Hat' features a soft corduroy construction
+        and is ideal for fall and winter, while the 'Chunky Knit Beanie' is knitted
+        from thick, cozy yarn for extra warmth during cold weather.
+      answer_type: factual
+      confidence: 0.9
+      question: Are there any winter hats in your store?
+      reference_product_ids:
+      - CBY6789
+      - CHN0987
+    email_id: E021
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Channel vintage charm with our saddle bag. This compact crossbody
+        features a classic saddle shape and a trendy, minimalist design. Perfect for
+        adding a touch of retro flair to any ensemble. Limited stock available!
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: SDE2345, Type: N/A, Category: N/A, Quantity: 1)'
+      name: Saddle Bag
+      price: 39.0
+      product_id: SDE2345
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 1
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Add a touch of edgy cool to your wardrobe with our distressed jeans.
+        Featuring strategic rips and fading, these jeans offer a lived-in, vintage
+        vibe. Perfect for casual outings or dressing up with a blazer.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: DJN8901, Type: N/A, Category: N/A, Quantity: 1)'
+      name: Distressed Jeans
+      price: 57.99
+      product_id: DJN8901
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 5
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Clothing
+      description: Embrace the classic with our rugged denim jacket. Crafted from
+        durable, high-quality denim, this jacket features a vintage-inspired wash
+        and distressed details. Layer it over a tee for a casual, cool vibe or dress
+        it up with a button-down.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: RGD7654, Type: N/A, Category: N/A, Quantity: 1)'
+      name: Rugged Denim Jacket
+      price: 41.0
+      product_id: RGD7654
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      stock: 5
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Embrace the retro trend with our corduroy pants. Crafted from soft,
+        textured corduroy, these high-waisted pants offer a flattering fit and a touch
+        of vintage charm. Dress them up with a blouse or keep it casual with a tee.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: CRD3210, Type: N/A, Category: N/A, Quantity: 1)'
+      name: Corduroy Pants
+      price: 65.0
+      product_id: CRD3210
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 5
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      description: Keep it casual and cool with our corduroy bucket hat. This trendy
+        hat features a soft corduroy construction and a relaxed, bucket silhouette.
+        A must-have accessory for achieving a laidback, streetwear-inspired look.
+      metadata: 'Found through semantic search; Search query: ''winter hats hat'';
+        Similarity score: 0.988; Original mention: N/A (ID: N/A, Type: hat, Category:
+        Accessories, Quantity: None)'
+      name: Corduroy Bucket Hat
+      price: 28.0
+      product_id: CBY6789
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 3
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      description: Keep your head toasty with our chunky knit beanie. Knitted from
+        thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and a
+        touch of rustic charm. A versatile accessory to elevate your cold-weather
+        looks.
+      metadata: 'Found through semantic search; Search query: ''winter hats hat'';
+        Similarity score: 1.019; Original mention: N/A (ID: N/A, Type: hat, Category:
+        Accessories, Quantity: None)'
+      name: Chunky Knit Beanie
+      price: 22.0
+      product_id: CHN0987
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 2
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E021
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: 'So I''ve bought quite large collection of vintage items from
+        your store: SDE2345, DJN8901, RGD7654, CRD3210, those are perfect fit for
+        my style!'
+      product_mentions:
+      - confidence: 1.0
+        mention_text: SDE2345
+        product_category: null
+        product_description: null
+        product_id: SDE2345
+        product_name: null
+        product_type: null
+        quantity: 1
+      - confidence: 1.0
+        mention_text: DJN8901
+        product_category: null
+        product_description: null
+        product_id: DJN8901
+        product_name: null
+        product_type: null
+        quantity: 1
+      - confidence: 1.0
+        mention_text: RGD7654
+        product_category: null
+        product_description: null
+        product_id: RGD7654
+        product_name: null
+        product_type: null
+        quantity: 1
+      - confidence: 1.0
+        mention_text: CRD3210
+        product_category: null
+        product_description: null
+        product_id: CRD3210
+        product_name: null
+        product_type: null
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: I need your advice if there are any winter hats in your store?
+      product_mentions:
+      - confidence: 0.9
+        mention_text: winter hats
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: winter hats
+        product_id: null
+        product_name: null
+        product_type: hat
+        quantity: null
+      related_sentences:
+      - Thank you!
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E021
+  response_body: "Hello,\n\nThank you so much for sharing your love for our vintage\
+    \ collection! It\u2019s wonderful to hear that the Saddle Bag, Distressed Jeans,\
+    \ Rugged Denim Jacket, and Corduroy Pants have all been a perfect fit for your\
+    \ style. We truly appreciate your loyalty and passion for unique, retro-inspired\
+    \ pieces.\n\nRegarding your question about winter hats, I\u2019m happy to let\
+    \ you know that we have several options in store. Two standout choices for the\
+    \ colder months are:\n\n- Corduroy Bucket Hat ($28.00): This trendy hat features\
+    \ a soft corduroy construction and a relaxed, bucket silhouette\u2014perfect for\
+    \ a laidback, streetwear-inspired look. It\u2019s ideal for both fall and winter,\
+    \ and we currently have a few in stock.\n\n- Chunky Knit Beanie ($22.00): Knitted\
+    \ from thick, cozy yarn, this beanie offers a slouchy, oversized fit and a touch\
+    \ of rustic charm. It\u2019s a versatile accessory to keep you warm and stylish\
+    \ throughout the season.\n\nBoth hats are designed to complement a vintage wardrobe\
+    \ and would pair beautifully with your existing collection, especially the Corduroy\
+    \ Pants and Rugged Denim Jacket. If you\u2019d like more details or styling tips,\
+    \ just let me know\u2014I\u2019m always here to help you find the perfect finishing\
+    \ touch for your look.\n\nIf you\u2019re interested in either of these hats or\
+    \ have any other questions, feel free to reply to this email. I\u2019m happy to\
+    \ assist with your next selection!\n\nBest regards,\nHermes - Delivering divine\
+    \ fashion"
+  response_points:
+  - content: Warmly acknowledge the customer's enthusiasm for their vintage collection
+      and express appreciation for their loyalty.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Highlight the Saddle Bag, Distressed Jeans, Rugged Denim Jacket, and
+      Corduroy Pants as part of their collection, referencing their vintage appeal
+      and fit.
+    content_type: product_info
+    priority: 9
+    related_to: SDE2345
+  - content: Answer the inquiry about winter hats, confirming availability and describing
+      the Corduroy Bucket Hat and Chunky Knit Beanie with their features and prices.
+    content_type: product_info
+    priority: 10
+    related_to: CBY6789
+  - content: Suggest that both hats would complement the customer's vintage wardrobe,
+      especially with the Corduroy Pants and Rugged Denim Jacket.
+    content_type: alternative
+    priority: 8
+    related_to: CRD3210
+  - content: Invite the customer to reply for more details, styling tips, or to place
+      an order for the hats.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Close with a professional and warm signature, reinforcing Hermes' commitment
+      to style and service.
+    content_type: closing
+    priority: 6
+    related_to: null
+  subject: Your Vintage Collection & Winter Hat Recommendations
+  tone: professional and warm
+email:
+  email_id: E021
+  message: 'So I''ve bought quite large collection of vintage items from your store:
+    SDE2345, DJN8901, RGD7654, CRD3210, those are perfect fit for my style! I need
+    your advice if there are any winter hats in your store? Thank you!'
+  subject: nan
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: SDE2345
+      product_category: null
+      product_description: null
+      product_id: SDE2345
+      product_name: null
+      product_type: null
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Channel vintage charm with our saddle bag. This compact crossbody
+          features a classic saddle shape and a trendy, minimalist design. Perfect
+          for adding a touch of retro flair to any ensemble. Limited stock available!
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: SDE2345, Type: N/A, Category: N/A, Quantity: 1)'
+        name: Saddle Bag
+        price: 39.0
+        product_id: SDE2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 1
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: DJN8901
+      product_category: null
+      product_description: null
+      product_id: DJN8901
+      product_name: null
+      product_type: null
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        description: Add a touch of edgy cool to your wardrobe with our distressed
+          jeans. Featuring strategic rips and fading, these jeans offer a lived-in,
+          vintage vibe. Perfect for casual outings or dressing up with a blazer.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: DJN8901, Type: N/A, Category: N/A, Quantity: 1)'
+        name: Distressed Jeans
+        price: 57.99
+        product_id: DJN8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 5
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: RGD7654
+      product_category: null
+      product_description: null
+      product_id: RGD7654
+      product_name: null
+      product_type: null
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Clothing
+        description: Embrace the classic with our rugged denim jacket. Crafted from
+          durable, high-quality denim, this jacket features a vintage-inspired wash
+          and distressed details. Layer it over a tee for a casual, cool vibe or dress
+          it up with a button-down.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: RGD7654, Type: N/A, Category: N/A, Quantity: 1)'
+        name: Rugged Denim Jacket
+        price: 41.0
+        product_id: RGD7654
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        stock: 5
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: CRD3210
+      product_category: null
+      product_description: null
+      product_id: CRD3210
+      product_name: null
+      product_type: null
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        description: Embrace the retro trend with our corduroy pants. Crafted from
+          soft, textured corduroy, these high-waisted pants offer a flattering fit
+          and a touch of vintage charm. Dress them up with a blouse or keep it casual
+          with a tee.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: CRD3210, Type: N/A, Category: N/A, Quantity: 1)'
+        name: Corduroy Pants
+        price: 65.0
+        product_id: CRD3210
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 5
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: winter hats
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: winter hats
+      product_id: null
+      product_name: null
+      product_type: hat
+      quantity: null
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Protect your face from the sun in style with our trendy bucket
+          hat. This casual hat features a cotton construction and a wide, floppy brim.
+          A must-have accessory for beach days, music festivals, or adding a touch
+          of streetwear flair.
+        metadata: 'Found through semantic search; Search query: ''winter hats hat'';
+          Similarity score: 0.921; Original mention: N/A (ID: N/A, Type: hat, Category:
+          Accessories, Quantity: None)'
+        name: Bucket Hat
+        price: 39.99
+        product_id: BKR0123
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 3
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Keep it casual and cool with our corduroy bucket hat. This trendy
+          hat features a soft corduroy construction and a relaxed, bucket silhouette.
+          A must-have accessory for achieving a laidback, streetwear-inspired look.
+        metadata: 'Found through semantic search; Search query: ''winter hats hat'';
+          Similarity score: 0.988; Original mention: N/A (ID: N/A, Type: hat, Category:
+          Accessories, Quantity: None)'
+        name: Corduroy Bucket Hat
+        price: 28.0
+        product_id: CBY6789
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 3
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Keep your head toasty with our chunky knit beanie. Knitted from
+          thick, cozy yarn, this trendy beanie offers a slouchy, oversized fit and
+          a touch of rustic charm. A versatile accessory to elevate your cold-weather
+          looks.
+        metadata: 'Found through semantic search; Search query: ''winter hats hat'';
+          Similarity score: 1.019; Original mention: N/A (ID: N/A, Type: hat, Category:
+          Accessories, Quantity: None)'
+        name: Chunky Knit Beanie
+        price: 22.0
+        product_id: CHN0987
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  exact_id_misses: []
+  metadata: 'Processed 5 product mentions; Made 5 resolution attempts for these mentions;
+    Found candidates for 5 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 783ms; (Debug log: 5 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

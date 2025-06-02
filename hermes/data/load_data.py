@@ -5,6 +5,7 @@ from chromadb.api.models.Collection import Collection  # type: ignore
 from hermes.config import HermesConfig
 from hermes.utils.gsheets import read_data_from_gsheet
 from hermes.utils.logger import logger, get_agent_logger
+from hermes.model.enums import ProductCategory
 
 # Module-level ("global") variables, initialized to None
 _products_df: pd.DataFrame | None = None
@@ -30,9 +31,7 @@ def _parse_data_source(
     if "#" in source:
         gsheet_id, sheet_name = source.split("#", 1)
         return gsheet_id, sheet_name, None
-    elif os.path.exists(
-        source
-    ):  # If it's a path to an existing file, assume it's a CSV
+    elif os.path.exists(source):
         return None, None, source
     else:
         # Default to assuming it's a GSheet ID using the default_sheet_name
@@ -69,7 +68,6 @@ def load_emails_df(
         )
         return read_data_from_gsheet(gsheet_id, sheet_name)
     else:
-        # This case should ideally not be reached if _parse_data_source is robust
         error_msg = f"Invalid email data source: {source}"
         logger.error(get_agent_logger("Data", error_msg))
         raise ValueError(error_msg)
@@ -118,9 +116,28 @@ def load_products_df(
             raise ValueError(error_msg)
 
         if _products_df is not None:
+            # Normalize category names using regex for specific known issues
+            if "category" in _products_df.columns:
+                # quick fix for known issue with kids clothing category
+                _products_df["category"] = (
+                    _products_df["category"].astype(str).str.strip()
+                )
+                _products_df["category"] = _products_df["category"].str.replace(
+                    r"(?i)Kid(s)?\s*['’]?\s*Clothing",
+                    ProductCategory.KIDS_CLOTHING.value,
+                    regex=True,
+                )
+            else:
+                logger.warning(
+                    get_agent_logger(
+                        "Data",
+                        "Column 'category' not found in products DataFrame. Skipping normalization.",
+                    )
+                )
             logger.info(
                 get_agent_logger(
-                    "Data", f"Loaded [yellow]{len(_products_df)}[/yellow] products"
+                    "Data",
+                    f"Loaded and normalized [yellow]{len(_products_df)}[/yellow] products",
                 )
             )
 

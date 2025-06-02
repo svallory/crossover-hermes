@@ -13,7 +13,23 @@ Return your analysis as structured data following the provided schema exactly.
 
 EXTRACT:
 1. **Language**: Detect the language of the email (e.g., "English", "Spanish", "French", etc.)
-2. **Customer name**: Extract the customer's name if mentioned
+2. **Customer Name (Sender's Name)**:
+   - Your goal is to identify the name of the person who WROTE and SENT the email (the "customer").
+   - **Extraction Hierarchy**:
+     1. **Signatures/Closings**: Prioritize names found in common email sign-offs (e.g., "Thanks, [Name]", "Sincerely, [Name]", "Regards, [Name]", "Best, [Name]").
+     2. **Self-Identification**: Look for direct self-identifications (e.g., "My name is [Name]", "I am [Name]", "This is [Name]", "- [Name]").
+   - **Crucial Distinction**:
+     - Do NOT extract names of individuals mentioned in the third person or as recipients of actions/gifts (e.g., "my husband John", "a gift for my friend Sarah", "tell David that...", "for Thomas"). These are NOT the sender.
+     - If the email says "My husband is Thomas", "Thomas" is NOT the sender unless other parts of the email (like a signature) confirm the sender is also named Thomas.
+   - **Handling No Name / Ambiguity**:
+     - If the sender's name is not explicitly stated via signature or clear self-identification within the provided `message` content, set `customer_name` to `null`.
+     - Do not guess. If unsure, set to `null`.
+   - **Examples**:
+     - `message`: "Hi, I'm Alice. I need help with an order for my brother Bob. Thanks, Alice" -> `customer_name`: "Alice" (from self-identification and signature)
+     - `message`: "I want to buy a gift for my husband Thomas. What do you recommend? Sincerely, Susan" -> `customer_name`: "Susan"
+     - `message`: "Please send this to John. -Mark" -> `customer_name`: "Mark"
+     - `message`: "My son David needs a new coat for winter." (No sender signature/identification) -> `customer_name`: `null`
+     - `message`: "I'm looking for a bag for my husband Thomas. We need it for our anniversary." (No sender signature/identification) -> `customer_name`: `null`
 3. Email segments with their `segment_type`: "order", "inquiry", or "personal_statement"
 4. Primary intent: "order request" (if ≥1 order exists) or "product inquiry"
 5. Product mentions with consolidated information
@@ -56,7 +72,10 @@ PRODUCT EXTRACTION:
 - **Consolidation Within Segments**: If multiple words/phrases in a segment refer to the same product (e.g., "a dress", "it", "something", "options"), create only ONE product mention entry. Use the most descriptive mention_text (prefer specific nouns over pronouns).
 - **Product IDs**: If a product ID matching the pattern ABC1234 (3 letters, 4 numbers, e.g., LTH1098, ABC1234) is present in the text, ALWAYS extract it into the product_id field. Extract it as-is, even if formatted with spaces or brackets (e.g., "ABC 1234" or "[ABC-1234]" should be extracted as "ABC1234"). Assign high confidence (1.0) if the pattern is matched directly.
 - **Names**: Extract distinctive branded names (e.g., "Alpine Explorer", "Sunset Breeze"). For generic items (e.g., "a dress", "some bag"), set product_name to null.
-- **Categories**: If identifiable, must be exact: "Accessories", "Bags", "Kid's Clothing", "Loungewear", "Men's Accessories", "Men's Clothing", "Men's Shoes", "Women's Clothing", "Women's Shoes", "Shirts".
+- **Categories**: Your goal is to extract the product category if it is *explicitly stated or unambiguously clear from the email text itself* (e.g., 'women\\'s cargo pants', 'men\\'s shirt').
+    - If the category is clear from the email, it must be one of these exact values: "Accessories", "Bags", "Kid's Clothing", "Loungewear", "Men's Accessories", "Men's Clothing", "Men's Shoes", "Women's Clothing", "Women's Shoes", "Shirts".
+    - If the email mentions a product by ID (e.g., CGN2345) or a generic type (e.g., 'cargo pants') WITHOUT specifying a category (like men\\'s/women\\'s/kid\\'s), DO NOT GUESS or INVENT a category based on common assumptions about the product type.
+    - **If the output schema REQUIRES you to provide a category value from the list, and the email provides NO information to determine it:** This is a situation where you are forced to choose despite missing information. In this specific scenario only, you must select a value. Acknowledge that this choice is an inference due to schema constraints if the output format allows. Your primary directive is to reflect information *present in the email*.
 - **Mention Text**: Use the most specific and descriptive text that refers to the product. Prefer concrete nouns over pronouns (e.g., prefer "a dress" over "it", "some travel bag" over "them").
 - **Quantities**: If multiple quantities are mentioned for the same product, sum them up in a single mention.
 

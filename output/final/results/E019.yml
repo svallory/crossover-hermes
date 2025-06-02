@@ -1,0 +1,425 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Yes, the Chelsea Boots (CBT8901) are available for purchase. They are
+        stylish ankle boots with a sleek leather construction, elastic side panels,
+        and a sturdy lug sole. There are currently 2 pairs in stock at $65.00 each.
+      answer_type: factual
+      confidence: 1.0
+      question: Can I order Chelsea Boots [CBT 89 01]?
+      reference_product_ids:
+      - CBT8901
+    - answer: The closest match to 'Retro sunglasses' is our Retro Sunglasses (RSG8901).
+        However, they are currently out of stock. These vintage-inspired shades are
+        perfect for a nostalgic look, but we do not have them available at the moment.
+      answer_type: factual
+      confidence: 0.8
+      question: Are Retro sunglasses available for order?
+      reference_product_ids:
+      - RSG8901
+    email_id: E019
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      description: Elevate your casual looks with our Chelsea boots. These stylish
+        ankle boots feature a sleek leather construction, elastic side panels, and
+        a sturdy lug sole. An essential for completing modern, edgy outfits.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: CBT8901, Type: boots, Category: N/A, Quantity: 1)'
+      name: Chelsea Boots
+      price: 65.0
+      product_id: CBT8901
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 2
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+        a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+        comfort. An ideal choice for lounging at home or running errands on chilly
+        days.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: FZZ1098, Type: slippers, Category: N/A, Quantity: 1)'
+      name: Fuzzy Slippers
+      price: 29.0
+      product_id: FZZ1098
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 2
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E019
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I would like to buy Chelsea Boots [CBT 89 01] from you guys!
+      product_mentions:
+      - confidence: 1.0
+        mention_text: Chelsea Boots [CBT 89 01]
+        product_category: null
+        product_description: Chelsea Boots
+        product_id: CBT8901
+        product_name: null
+        product_type: boots
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: You're so awesome I'm so impressed with the quality of Fuzzy
+        Slippers - FZZ1098 I've bought from you before.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: Fuzzy Slippers - FZZ1098
+        product_category: null
+        product_description: Fuzzy Slippers
+        product_id: FZZ1098
+        product_name: null
+        product_type: slippers
+        quantity: 1
+      related_sentences:
+      - I hope the quality stays.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+    - main_sentence: I would like to order Retro sunglasses from you, but probably
+        next time!
+      product_mentions:
+      - confidence: 0.8
+        mention_text: Retro sunglasses
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: Retro sunglasses
+        product_id: null
+        product_name: Retro sunglasses
+        product_type: sunglasses
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E019
+  response_body: "Hello,\n\nThank you so much for your wonderful message! We\u2019\
+    re thrilled to hear how much you\u2019ve enjoyed your Fuzzy Slippers (FZZ1098)\
+    \ from us before. It\u2019s always fantastic to know our quality has impressed\
+    \ you, and we\u2019re committed to keeping that standard high with every order.\n\
+    \nI\u2019m happy to confirm that your order for the following items has been successfully\
+    \ created:\n\n\u2022 Chelsea Boots (CBT8901) \u2013 $65.00\nElevate your casual\
+    \ looks with these stylish ankle boots, crafted from sleek leather with elastic\
+    \ side panels and a sturdy lug sole. We currently have your pair reserved and\
+    \ ready to go!\n\n\u2022 Fuzzy Slippers (FZZ1098) \u2013 $29.00\nCozy up in these\
+    \ ultra-soft slippers, featuring a plush exterior and cushioned, moisture-wicking\
+    \ footbed. Perfect for lounging or running errands on chilly days.\n\nYour order\
+    \ total comes to $94.00. Both items are in stock and will be prepared for shipment\
+    \ shortly.\n\nRegarding your interest in Retro sunglasses: our closest match is\
+    \ the Retro Sunglasses (RSG8901), but unfortunately, they are currently out of\
+    \ stock. These vintage-inspired shades are a favorite for nostalgic style, and\
+    \ I\u2019ll be happy to let you know as soon as they\u2019re available again.\n\
+    \nIf you have any other questions or need help finding the perfect accessory for\
+    \ your next order, just let us know. We\u2019re always here to help you complete\
+    \ your look!\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting, acknowledging customer's positive feedback and loyalty.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirm successful order for Chelsea Boots (CBT8901) and Fuzzy Slippers
+      (FZZ1098), including product details and prices.
+    content_type: order_confirmation
+    priority: 10
+    related_to: CBT8901
+  - content: Confirm Fuzzy Slippers (FZZ1098) included in order, reference customer's
+      previous satisfaction.
+    content_type: order_confirmation
+    priority: 9
+    related_to: FZZ1098
+  - content: State total price of $94.00 for the order.
+    content_type: order_total
+    priority: 8
+    related_to: null
+  - content: Inform customer that Retro Sunglasses (RSG8901) are currently out of
+      stock, but note their popularity and offer to notify when available.
+    content_type: product_unavailable
+    priority: 8
+    related_to: RSG8901
+  - content: Offer further assistance and invite customer to reach out for future
+      accessory needs.
+    content_type: value_addition
+    priority: 6
+    related_to: null
+  - content: Professional and enthusiastic closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: "Your Hermes Order Confirmation \u2013 Chelsea Boots & Fuzzy Slippers"
+  tone: friendly and enthusiastic
+email:
+  email_id: E019
+  message: Hey there, I would like to buy Chelsea Boots [CBT 89 01] from you guys!
+    You're so awesome I'm so impressed with the quality of Fuzzy Slippers - FZZ1098
+    I've bought from you before. I hope the quality stays. I would like to order Retro
+    sunglasses from you, but probably next time! Thanks
+  subject: Hi
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: Chelsea Boots [CBT 89 01]
+      product_category: null
+      product_description: Chelsea Boots
+      product_id: CBT8901
+      product_name: null
+      product_type: boots
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Elevate your casual looks with our Chelsea boots. These stylish
+          ankle boots feature a sleek leather construction, elastic side panels, and
+          a sturdy lug sole. An essential for completing modern, edgy outfits.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: CBT8901, Type: boots, Category: N/A, Quantity: 1)'
+        name: Chelsea Boots
+        price: 65.0
+        product_id: CBT8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: Fuzzy Slippers - FZZ1098
+      product_category: null
+      product_description: Fuzzy Slippers
+      product_id: FZZ1098
+      product_name: null
+      product_type: slippers
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+          a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+          comfort. An ideal choice for lounging at home or running errands on chilly
+          days.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: FZZ1098, Type: slippers, Category: N/A, Quantity: 1)'
+        name: Fuzzy Slippers
+        price: 29.0
+        product_id: FZZ1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 0.8
+      mention_text: Retro sunglasses
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: Retro sunglasses
+      product_id: null
+      product_name: Retro sunglasses
+      product_type: sunglasses
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Retro sunglasses Retro sunglasses sunglasses''; Similarity score: 0.500;
+          Original mention: Retro sunglasses (ID: N/A, Type: sunglasses, Category:
+          Accessories, Quantity: 1)'
+        name: Retro Sunglasses
+        price: 26.99
+        product_id: RSG8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 0
+  order_result:
+    email_id: E019
+    lines:
+    - alternatives: []
+      base_price: 65.0
+      description: Elevate your casual looks with our Chelsea boots. These stylish
+        ankle boots feature a sleek leather construction, elastic side panels, and
+        a sturdy lug sole. An essential for completing modern, edgy outfits.
+      name: Chelsea Boots
+      product_id: CBT8901
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 1
+      total_price: 65.0
+      unit_price: 65.0
+    - alternatives: []
+      base_price: 29.0
+      description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+        a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+        comfort. An ideal choice for lounging at home or running errands on chilly
+        days.
+      name: Fuzzy Slippers
+      product_id: FZZ1098
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 1
+      total_price: 29.0
+      unit_price: 29.0
+    - alternatives: []
+      base_price: 26.99
+      description: Transport yourself back in time with our retro sunglasses. These
+        vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+        eyes from the sun's rays. Perfect for beach days or city strolls.
+      name: Retro Sunglasses
+      product_id: RSG8901
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - out of stock
+      stock: 0
+      total_price: 26.99
+      unit_price: 26.99
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 94.0
+  stockkeeper_metadata: 'Processed 3 product mentions; Made 3 resolution attempts
+    for these mentions; Found candidates for 3 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 894ms; (Debug log: 3 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: Chelsea Boots [CBT 89 01]
+      product_category: null
+      product_description: Chelsea Boots
+      product_id: CBT8901
+      product_name: null
+      product_type: boots
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Elevate your casual looks with our Chelsea boots. These stylish
+          ankle boots feature a sleek leather construction, elastic side panels, and
+          a sturdy lug sole. An essential for completing modern, edgy outfits.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: CBT8901, Type: boots, Category: N/A, Quantity: 1)'
+        name: Chelsea Boots
+        price: 65.0
+        product_id: CBT8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: Fuzzy Slippers - FZZ1098
+      product_category: null
+      product_description: Fuzzy Slippers
+      product_id: FZZ1098
+      product_name: null
+      product_type: slippers
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Cozy up in our fuzzy slippers. These ultra-soft slippers feature
+          a plush, fuzzy exterior and a cushioned, moisture-wicking footbed for ultimate
+          comfort. An ideal choice for lounging at home or running errands on chilly
+          days.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: FZZ1098, Type: slippers, Category: N/A, Quantity: 1)'
+        name: Fuzzy Slippers
+        price: 29.0
+        product_id: FZZ1098
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 0.8
+      mention_text: Retro sunglasses
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: Retro sunglasses
+      product_id: null
+      product_name: Retro sunglasses
+      product_type: sunglasses
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''Retro sunglasses Retro sunglasses sunglasses''; Similarity score: 0.500;
+          Original mention: Retro sunglasses (ID: N/A, Type: sunglasses, Category:
+          Accessories, Quantity: 1)'
+        name: Retro Sunglasses
+        price: 26.99
+        product_id: RSG8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 0
+  exact_id_misses: []
+  metadata: 'Processed 3 product mentions; Made 3 resolution attempts for these mentions;
+    Found candidates for 3 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 894ms; (Debug log: 3 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

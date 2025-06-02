@@ -1,0 +1,288 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Yes, the CBT8901 Chelsea Boots are currently in stock (2 pairs available).
+        They are designed for both Fall and Winter, featuring a sturdy lug sole and
+        sleek leather construction, making them suitable for colder months.
+      answer_type: factual
+      confidence: 1.0
+      question: Are the CBT8901 Chelsea Boots available for order, and are they suitable
+        for Fall and Winter?
+      reference_product_ids:
+      - CBT8901
+    - answer: In addition to the Chelsea Boots, you may consider the Waterproof Boots
+        (WTR7654), which feature a water-resistant outer shell and cozy fleece lining,
+        ideal for winter. Another option is the Rugged Boots (RBT0123), designed for
+        durability and suitable for both Fall and Winter.
+      answer_type: factual
+      confidence: 0.95
+      question: What are some other men's boots suitable for the colder months?
+      reference_product_ids:
+      - WTR7654
+      - RBT0123
+    email_id: E006
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      description: Elevate your casual looks with our Chelsea boots. These stylish
+        ankle boots feature a sleek leather construction, elastic side panels, and
+        a sturdy lug sole. An essential for completing modern, edgy outfits.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: CBT8901, Type: boots, Category: Men''s Shoes, Quantity:
+        1)'
+      name: Chelsea Boots
+      price: 65.0
+      product_id: CBT8901
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 2
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      description: Stay dry and comfortable in our waterproof boots. These durable
+        boots feature a water-resistant outer shell, a cozy fleece lining, and a rugged,
+        lug sole for traction. An essential for navigating snowy or rainy conditions.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''new boots for the colder months boots''; Similarity score: 0.999; Original
+        mention: N/A (ID: N/A, Type: boots, Category: Men''s Shoes, Quantity: 1)'
+      name: Waterproof Boots
+      price: 51.0
+      product_id: WTR7654
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 6
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      description: Tackle any terrain with our rugged boots. Crafted from durable
+        materials and featuring a sturdy sole, these boots offer both style and functionality.
+        Perfect for outdoor adventures or city explorations.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''new boots for the colder months boots''; Similarity score: 1.128; Original
+        mention: N/A (ID: N/A, Type: boots, Category: Men''s Shoes, Quantity: 1)'
+      name: Rugged Boots
+      price: 39.0
+      product_id: RBT0123
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Fall
+      - !!python/object/apply:hermes.model.enums.Season
+        - Winter
+      stock: 6
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Sam
+    email_id: E006
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I was thinking of ordering a pair of CBT8901 Chelsea Boots, but
+        I'll wait until Fall to actually place the order.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: CBT8901 Chelsea Boots
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        product_description: Chelsea Boots
+        product_id: CBT8901
+        product_name: null
+        product_type: boots
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: My name is Sam and I need some new boots for the colder months.
+      product_mentions:
+      - confidence: 0.7
+        mention_text: new boots for the colder months
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        product_description: new boots for the colder months
+        product_id: null
+        product_name: null
+        product_type: boots
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E006
+  response_body: "Hi Sam,\n\nThank you for reaching out and sharing your plans for\
+    \ the colder months! It sounds like you\u2019re already thinking ahead, and I\u2019\
+    m glad you mentioned the CBT8901 Chelsea Boots\u2014they\u2019re a fantastic choice\
+    \ for both Fall and Winter.\n\nThe Chelsea Boots are currently in stock (we have\
+    \ 2 pairs available). With their sleek leather construction, elastic side panels,\
+    \ and sturdy lug sole, they\u2019re designed to keep you stylish and comfortable\
+    \ as the weather cools down. Many of our customers love how versatile they are\
+    \ for both casual and more polished looks.\n\nIf you\u2019re exploring other options\
+    \ for the season, you might also like:\n- **Waterproof Boots (WTR7654)**: These\
+    \ are perfect for winter, featuring a water-resistant outer shell, cozy fleece\
+    \ lining, and a rugged lug sole\u2014ideal for snowy or rainy days.\n- **Rugged\
+    \ Boots (RBT0123)**: Built for durability, these boots are great for outdoor adventures\
+    \ or city life, and they work well for both Fall and Winter.\n\nWhenever you\u2019\
+    re ready to place your order, just let me know\u2014I\u2019m here to help make\
+    \ sure you get the perfect pair for the season. If you have any questions about\
+    \ sizing or want more details about any of these boots, feel free to ask!\n\n\
+    Best regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using customer's name and acknowledging their forward planning
+      for Fall and Winter.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirmed Chelsea Boots (CBT8901) are in stock (2 pairs), described their
+      features and suitability for colder months.
+    content_type: product_info
+    priority: 9
+    related_to: CBT8901
+  - content: Addressed Sam's inquiry about other men's boots suitable for colder months,
+      referencing Waterproof Boots (WTR7654) and Rugged Boots (RBT0123) with their
+      key features.
+    content_type: answer
+    priority: 8
+    related_to: null
+  - content: Suggested related products (Waterproof Boots and Rugged Boots) as additional
+      options for Fall and Winter.
+    content_type: alternative
+    priority: 7
+    related_to: null
+  - content: Encouraged Sam to reach out when ready to order and offered further assistance
+      with sizing or product details.
+    content_type: next_steps
+    priority: 6
+    related_to: null
+  - content: Professional and friendly closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Perfect Boots for Fall and Winter
+  tone: friendly and informative
+email:
+  email_id: E006
+  message: Hey there, I was thinking of ordering a pair of CBT8901 Chelsea Boots,
+    but I'll wait until Fall to actually place the order. My name is Sam and I need
+    some new boots for the colder months.
+  subject: nan
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: CBT8901 Chelsea Boots
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      product_description: Chelsea Boots
+      product_id: CBT8901
+      product_name: null
+      product_type: boots
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Elevate your casual looks with our Chelsea boots. These stylish
+          ankle boots feature a sleek leather construction, elastic side panels, and
+          a sturdy lug sole. An essential for completing modern, edgy outfits.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: CBT8901, Type: boots, Category: Men''s Shoes, Quantity:
+          1)'
+        name: Chelsea Boots
+        price: 65.0
+        product_id: CBT8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+  - !!python/tuple
+    - confidence: 0.7
+      mention_text: new boots for the colder months
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Men's Shoes
+      product_description: new boots for the colder months
+      product_id: null
+      product_name: null
+      product_type: boots
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Stay dry and comfortable in our waterproof boots. These durable
+          boots feature a water-resistant outer shell, a cozy fleece lining, and a
+          rugged, lug sole for traction. An essential for navigating snowy or rainy
+          conditions.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''new boots for the colder months boots''; Similarity score: 0.999; Original
+          mention: N/A (ID: N/A, Type: boots, Category: Men''s Shoes, Quantity: 1)'
+        name: Waterproof Boots
+        price: 51.0
+        product_id: WTR7654
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 6
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Elevate your casual looks with our Chelsea boots. These stylish
+          ankle boots feature a sleek leather construction, elastic side panels, and
+          a sturdy lug sole. An essential for completing modern, edgy outfits.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''new boots for the colder months boots''; Similarity score: 1.089; Original
+          mention: N/A (ID: N/A, Type: boots, Category: Men''s Shoes, Quantity: 1)'
+        name: Chelsea Boots
+        price: 65.0
+        product_id: CBT8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 2
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Men's Shoes
+        description: Tackle any terrain with our rugged boots. Crafted from durable
+          materials and featuring a sturdy sole, these boots offer both style and
+          functionality. Perfect for outdoor adventures or city explorations.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''new boots for the colder months boots''; Similarity score: 1.128; Original
+          mention: N/A (ID: N/A, Type: boots, Category: Men''s Shoes, Quantity: 1)'
+        name: Rugged Boots
+        price: 39.0
+        product_id: RBT0123
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Fall
+        - !!python/object/apply:hermes.model.enums.Season
+          - Winter
+        stock: 6
+  exact_id_misses: []
+  metadata: 'Processed 2 product mentions; Made 2 resolution attempts for these mentions;
+    Found candidates for 2 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 670ms; (Debug log: 2 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

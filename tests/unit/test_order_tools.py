@@ -3,7 +3,6 @@
 import pytest
 from unittest.mock import patch
 
-from hermes.tools.catalog_tools import find_alternatives
 from hermes.tools.order_tools import (
     check_stock,
     update_stock,
@@ -111,36 +110,6 @@ class TestOrderTools:
         # Verify result
         assert result == StockUpdateStatus.PRODUCT_NOT_FOUND
 
-    @patch("hermes.tools.catalog_tools.load_products_df")
-    def test_find_alternatives_for_oos_valid(self, mock_load_df):
-        """Test finding alternatives for out-of-stock product."""
-        # Setup mock
-        mock_load_df.return_value = get_mock_products_df()
-
-        # Call function directly (not using .invoke())
-        result = find_alternatives(original_product_id="TST003", limit=2)
-
-        # Verify result - could be list or ProductNotFound
-        if isinstance(result, list):
-            assert len(result) > 0
-            for alternative in result:
-                assert alternative.product.category == "Men's Clothing"
-                assert alternative.product.stock > 0
-        else:
-            assert isinstance(result, ProductNotFound)
-
-    @patch("hermes.tools.catalog_tools.load_products_df")
-    def test_find_alternatives_for_oos_invalid_product(self, mock_load_df):
-        """Test finding alternatives for invalid product."""
-        # Setup mock
-        mock_load_df.return_value = get_mock_products_df()
-
-        # Call function directly (not using .invoke())
-        result = find_alternatives(original_product_id="NONEXISTENT")
-
-        # Verify result
-        assert isinstance(result, ProductNotFound)
-
 
 class TestOrderToolsWithTestData:
     """Tests for the order_tools module using test data."""
@@ -187,18 +156,3 @@ class TestOrderToolsWithTestData:
 
         # Verify result
         assert result == StockUpdateStatus.SUCCESS
-
-    @patch("hermes.tools.catalog_tools.load_products_df")
-    def test_find_alternatives_for_oos_with_test_data(self, mock_load_df):
-        """Test finding alternatives for out-of-stock product using test data."""
-        # Setup mock
-        mock_load_df.return_value = get_test_products_df()
-
-        # Call function directly (not using .invoke())
-        result = find_alternatives(original_product_id="LTH0976", limit=2)
-
-        # Verify result - could be list or ProductNotFound
-        if isinstance(result, list):
-            assert len(result) >= 0
-        else:
-            assert isinstance(result, ProductNotFound)

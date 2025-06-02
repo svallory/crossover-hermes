@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Literal
 
 from langchain_core.tools import tool
@@ -20,16 +19,18 @@ from hermes.model.errors import ProductNotFound
 from hermes.model.email import ProductMention
 
 # Import get_vector_store and metadata conversion from hermes.data.vector_store
-from hermes.data.vector_store import get_vector_store, metadata_to_product
+from hermes.data.vector_store import (
+    get_vector_store,
+    metadata_to_product,
+)
+from hermes.utils.logger import logger
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Configure resolution thresholds
-SIMILAR_MATCH_THRESHOLD = 0.75  # Threshold for potential matches to consider
-
-_vector_store = get_vector_store()
+SIMILAR_MATCH_THRESHOLD = 0.65  # Threshold for potential matches to consider - CURRENTLY UNUSED FOR VECTOR SEARCH
+MAX_VECTOR_SEARCH_L2_DISTANCE = (
+    1.2  # New threshold for filtering raw vector search results
+)
 
 
 class FuzzyMatchResult(BaseModel):
@@ -50,19 +51,20 @@ ResolutionMethod = Literal[
 ]
 
 
-def create_metadata_string(
-    resolution_confidence: float | None = None,
+def _create_metadata_string(
     resolution_method: ResolutionMethod | None = None,
     requested_quantity: int | None = None,
     search_query: str | None = None,
     similarity_score: float | None = None,
 ) -> str | None:
-    """Create a natural language metadata string from resolution information."""
+    """Create a natural language metadata string from resolution information.
+
+    The reason we are using a string is due to LLMs failing to comply with complex schemas.
+    """
     parts = []
 
-    if resolution_confidence is not None:
-        confidence_pct = int(resolution_confidence * 100)
-        parts.append(f"Resolution confidence: {confidence_pct}%")
+    if resolution_method == "exact_id_match":
+        parts.append("Resolution confidence: 1.000")
 
     if resolution_method:
         method_desc = {
@@ -83,7 +85,7 @@ def create_metadata_string(
         parts.append(f"Search query: '{search_query}'")
 
     if similarity_score is not None:
-        parts.append(f"Similarity score: {similarity_score:.3f}")
+        parts.append(f"Resolution confidence: {similarity_score:.3f}")
 
     return "; ".join(parts) if parts else None
 
@@ -140,11 +142,7 @@ def _add_search_metadata_to_product(
     Returns:
         The Product object with metadata updated.
     """
-    # Convert distance score to similarity/confidence (lower distance = higher confidence)
-    confidence = max(0.0, min(1.0, 1.0 - (raw_score / 2.0)))
-
-    metadata_str = create_metadata_string(
-        resolution_confidence=confidence,
+    metadata_str = _create_metadata_string(
         resolution_method=resolution_method,
         search_query=search_query,
         similarity_score=raw_score,  # Pass the original score for transparency
@@ -173,7 +171,14 @@ def _convert_vector_results_to_products(
     """
     products = []
 
-    for doc, score_val in results:  # Renamed score to score_val
+    # Filter results by MAX_VECTOR_SEARCH_L2_DISTANCE first
+    filtered_results = [
+        (doc, score_val)
+        for doc, score_val in results
+        if score_val <= MAX_VECTOR_SEARCH_L2_DISTANCE
+    ]
+
+    for doc, score_val in filtered_results:  # Use filtered_results
         try:
             product = metadata_to_product(doc.metadata)
 
@@ -218,9 +223,7 @@ def find_product_by_id(product_id: str) -> Product | ProductNotFound:
     product_row = matching_products.iloc[0]
 
     # Create Product object with metadata
-    metadata_str = create_metadata_string(
-        resolution_confidence=1.0, resolution_method="exact_id_match"
-    )
+    metadata_str = _create_metadata_string(resolution_method="exact_id_match")
 
     return _create_product_from_row(product_row, metadata_str)
 
@@ -281,8 +284,7 @@ def find_product_by_name(
         # Convert to FuzzyMatchResult objects
         results = []
         for product_row, similarity_score in top_matches:
-            metadata_str = create_metadata_string(
-                resolution_confidence=similarity_score,
+            metadata_str = _create_metadata_string(
                 resolution_method="fuzzy_name_match",
                 search_query=product_name,
                 similarity_score=similarity_score,
@@ -302,6 +304,7 @@ def find_product_by_name(
         raise  # Re-raise the caught exception to allow it to propagate
 
 
+@tool(parse_docstring=True)
 def search_products_by_description(
     query: str,
     top_k: int = 3,
@@ -330,15 +333,9 @@ def search_products_by_description(
         if season_filter:
             filters["season"] = season_filter
 
-        results = _vector_store.similarity_search_with_score(
+        results = get_vector_store().similarity_search_with_score(
             query, top_k, filters if filters else None
         )
-
-        if not results:
-            return ProductNotFound(
-                message=f"No products found matching description: '{query}'",
-                query_product_name=query,
-            )
 
         products = _convert_vector_results_to_products(
             results, "semantic_search", search_query=query
@@ -431,8 +428,7 @@ def find_complementary_products(
 
         result_products = []
         for _, row in sampled_matches_df.iterrows():
-            metadata_str = create_metadata_string(
-                resolution_confidence=0.8,
+            metadata_str = _create_metadata_string(
                 resolution_method="complementary_category_match",
             )
             product = _create_product_from_row(row, metadata_str)
@@ -494,46 +490,42 @@ def search_products_with_filters(
         if season:
             where_clause["season"] = season
 
-        results = _vector_store.similarity_search_with_score(
+        results = get_vector_store().similarity_search_with_score(
             query, top_k * 2, where_clause if where_clause else None
         )
 
-        if not results:
+        # _convert_vector_results_to_products will handle the L2 distance filtering.
+        # The raw results are passed, and it filters internally.
+
+        # if not results: # This check is on raw results, not post-L2-filter results
+        #     return ProductNotFound(
+        #         message=f"No products found matching query: '{query}' with initial filters",
+        #         query_product_name=query,
+        #     )
+
+        filtered_products_from_convert = _convert_vector_results_to_products(
+            results, "filtered_search", search_query=query
+        )
+
+        # Now apply other filters (price, stock) to the L2-distance-filtered list
+        further_filtered_products = []
+        for product in filtered_products_from_convert:
+            if min_price is not None and product.price < min_price:
+                continue
+            if max_price is not None and product.price > max_price:
+                continue
+            if min_stock is not None and product.stock < min_stock:
+                continue
+            further_filtered_products.append(product)
+            if len(further_filtered_products) >= top_k:
+                break
+
+        if not further_filtered_products:
             return ProductNotFound(
-                message=f"No products found matching query: '{query}' with initial filters",
+                message=f"No products found matching all specified filters for query: '{query}' (after L2 distance filter max_dist={MAX_VECTOR_SEARCH_L2_DISTANCE})",
                 query_product_name=query,
             )
-
-        filtered_products = []
-        for doc, score_val in results:
-            try:
-                product = metadata_to_product(doc.metadata)
-                if min_price is not None and product.price < min_price:
-                    continue
-                if max_price is not None and product.price > max_price:
-                    continue
-                if min_stock is not None and product.stock < min_stock:
-                    continue
-
-                product = _add_search_metadata_to_product(
-                    product, score_val, "filtered_search", search_query=query
-                )
-                filtered_products.append(product)
-                if len(filtered_products) >= top_k:
-                    break
-            except Exception as conversion_error:
-                logger.error(
-                    f"Error processing filtered product entry for query '{query}': {conversion_error}",
-                    exc_info=True,
-                )  # pragma: no cover
-                continue  # pragma: no cover
-
-        if not filtered_products:
-            return ProductNotFound(
-                message=f"No products found matching all specified filters for query: '{query}'",
-                query_product_name=query,
-            )
-        return filtered_products
+        return further_filtered_products
     except ValueError:  # Specifically to allow catalog loading errors from _perform_vector_search to propagate
         raise
     except Exception as e:
@@ -566,35 +558,32 @@ def find_products_for_occasion(
     # _perform_vector_search can raise ValueError if catalog load fails, should propagate
     try:
         search_query = f"{occasion} outfit clothing attire"
-        results = _vector_store.similarity_search_with_score(search_query, limit * 2)
+        results = get_vector_store().similarity_search_with_score(
+            search_query, limit * 2
+        )
 
-        if not results:
-            return ProductNotFound(
-                message=f"No products found for occasion: '{occasion}' via initial search",
-                query_product_name=occasion,
-            )
+        # _convert_vector_results_to_products will handle the L2 distance filtering.
+
+        # if not results: # Check on raw results
+        #     return ProductNotFound(
+        #         message=f"No products found for occasion: '{occasion}' via initial search",
+        #         query_product_name=occasion,
+        #     )
+
+        converted_products = _convert_vector_results_to_products(
+            results, "occasion_search", search_query=search_query
+        )
 
         suitable_products = []
-        for doc, score_val in results:
-            try:
-                product = metadata_to_product(doc.metadata)
-                if product.stock > 0:
-                    product = _add_search_metadata_to_product(
-                        product, score_val, "occasion_search", search_query=search_query
-                    )
-                    suitable_products.append(product)
-                    if len(suitable_products) >= limit:
-                        break
-            except Exception as conversion_error:
-                logger.error(
-                    f"Error processing product for occasion '{occasion}': {conversion_error}",
-                    exc_info=True,
-                )  # pragma: no cover
-                continue  # pragma: no cover
+        for product in converted_products:
+            if product.stock > 0:
+                suitable_products.append(product)
+                if len(suitable_products) >= limit:
+                    break
 
         if not suitable_products:
             return ProductNotFound(
-                message=f"No in-stock products found suitable for occasion: '{occasion}'",
+                message=f"No in-stock products found suitable for occasion: '{occasion}' (after L2 distance filter max_dist={MAX_VECTOR_SEARCH_L2_DISTANCE})",
                 query_product_name=occasion,
             )
         return suitable_products
@@ -608,6 +597,7 @@ def find_products_for_occasion(
         raise  # Re-raise other unexpected exceptions
 
 
+@tool(parse_docstring=True)
 def find_alternatives(
     original_product_id: str, limit: int = 2
 ) -> list[AlternativeProduct] | ProductNotFound:
@@ -671,8 +661,7 @@ def find_alternatives(
         result_alternatives = []
         for _, row in top_alternatives_df.iterrows():
             similarity_score = float(row["price_similarity"])
-            metadata_str = create_metadata_string(
-                resolution_confidence=similarity_score,
+            metadata_str = _create_metadata_string(
                 resolution_method="price_similarity_match",
             )
             product = _create_product_from_row(row, metadata_str)
@@ -707,44 +696,44 @@ def find_alternatives(
 async def resolve_product_mention(
     mention: ProductMention,
     top_k: int = 3,
-) -> list[Product] | ProductNotFound:
-    """Resolve a single ProductMention to top-K candidate products using ChromaDB's capabilities.
-
-    This function leverages ChromaDB's metadata filtering and similarity search to find
-    the most relevant product candidates. The results are intended to be used as context
-    for LLM-based disambiguation.
-
-    Args:
-        mention: The product mention to resolve
-        top_k: Maximum number of candidate products to return (default: 3)
+) -> list[tuple[Product, float]] | ProductNotFound:
+    """Resolve a single ProductMention to top-K candidate products.
 
     Returns:
-        A list of candidate Product objects ranked by relevance, or ProductNotFound if no candidates found.
+        A list of (Product, l2_distance) tuples ranked by relevance (lower L2 distance is better),
+        or ProductNotFound if no candidates found.
     Raises:
-        ValueError: If the product catalog (via find_product_by_id or vector store) cannot be loaded.
-        Exception: For other unexpected errors during the resolution process.
+        ValueError: If the product catalog cannot be loaded.
+        Exception: For other unexpected errors.
     """
-    # find_product_by_id.ainvoke and _perform_vector_search can raise ValueError if catalog fails, should propagate.
     try:
-        candidates = []
+        candidates_with_scores: list[tuple[Product, float]] = []
+        explicit_id_missed = False  # Initialize
+        original_provided_id: str | None = None
+        id_miss_message_prefix: str = ""  # Initialize
 
         if mention.product_id:
-            # This call itself will propagate ValueError from load_products_df if catalog is unavailable
+            original_provided_id = mention.product_id
             id_result: Product | ProductNotFound = await find_product_by_id.ainvoke(
                 {"product_id": mention.product_id}
             )
             if isinstance(id_result, Product):
-                metadata_str = create_metadata_string(
-                    resolution_confidence=1.0,
+                # Exact match found
+                metadata_str = _create_metadata_string(
                     resolution_method="exact_id_match",
                     requested_quantity=mention.quantity,
                 )
                 id_result.metadata = metadata_str
-                return [id_result]
-            elif isinstance(id_result, ProductNotFound):
                 logger.info(
-                    f"Exact ID '{mention.product_id}' not found, proceeding with other attributes."
+                    f"[RESOLVE_PRODUCT_MENTION] Returning 1 candidate from EXACT ID MATCH for '{mention.product_id}'. Candidate: {id_result.product_id}"
                 )
+                return [(id_result, 0.0)]
+            elif isinstance(id_result, ProductNotFound):
+                logger.warning(
+                    f"[RESOLVE_PRODUCT_MENTION] Explicit Product ID '{mention.product_id}' not found by exact match. Returning ProductNotFound as per strict ID policy."
+                )
+                # If an explicit ID was provided and not found, return ProductNotFound immediately.
+                return id_result  # This is the ProductNotFound object from find_product_by_id
 
         search_parts = []
         if mention.product_name:
@@ -762,55 +751,150 @@ async def resolve_product_mention(
             )
 
         search_query = " ".join(search_parts)
-
         filters = {}
         if mention.product_category:
             filters["category"] = str(mention.product_category.value)
 
-        # This call can propagate ValueError from get_vector_store -> load_products_df
-        results = _vector_store.similarity_search_with_score(
-            search_query, top_k, filters if filters else None
+        logger.debug(
+            f"Stockkeeper: constructed search_query: '{search_query}' with filters: {filters}"
         )
 
-        if not results:
-            return ProductNotFound(
-                message=f"No products found matching vector search query: '{search_query}'",
-                query_product_name=mention.product_name,
-                query_product_id=mention.product_id,
-            )
+        # Perform vector search
+        raw_results_with_scores: list[tuple[Any, float]] = (
+            get_vector_store().similarity_search_with_score(search_query, top_k, filters if filters else None)
+        )
+        logger.debug(
+            f"Stockkeeper: raw vector search results for '{search_query}': {raw_results_with_scores}"
+        )
 
-        for doc, score_val in results:
-            confidence = max(0.0, min(1.0, 1.0 - (score_val / 2.0)))
-            if confidence >= SIMILAR_MATCH_THRESHOLD:
-                try:
-                    product_candidate = metadata_to_product(doc.metadata)
-                    product_candidate = _add_search_metadata_to_product(
-                        product_candidate,
-                        score_val,
-                        "semantic_search",
-                        search_query=search_query,
-                        requested_quantity=mention.quantity,
+        temp_semantic_candidates: list[tuple[Product, float]] = []
+        filtered_raw_results = [
+            (doc, score_val)
+            for doc, score_val in raw_results_with_scores
+            if score_val <= MAX_VECTOR_SEARCH_L2_DISTANCE
+        ]
+
+        for doc, score_val in filtered_raw_results:
+            try:
+                product = metadata_to_product(doc.metadata)
+
+                # Get standard search metadata from _add_search_metadata_to_product
+                product = _add_search_metadata_to_product(
+                    product,
+                    score_val,
+                    "semantic_search",
+                    search_query,
+                    mention.quantity,
+                )
+
+                # Augment with ID miss info if applicable
+                if explicit_id_missed:  # Use the flag directly
+                    if product.metadata:
+                        product.metadata = f"{id_miss_message_prefix}{product.metadata}"
+                    else:
+                        product.metadata = (
+                            id_miss_message_prefix.strip()
+                        )  # Remove trailing space if it's the only metadata
+
+                temp_semantic_candidates.append(
+                    (product, score_val)
+                )  # Store product and its L2 distance
+            except Exception as e:
+                logger.error(f"Error converting document to product: {e}")
+                continue
+
+        candidates_with_scores = temp_semantic_candidates
+
+        # Fallback to fuzzy search if semantic search yields no results (after L2 filtering)
+        if not candidates_with_scores:
+            # Use mention.mention_text for fuzzy search if product_name is empty but mention_text exists
+            fuzzy_search_term = mention.product_name or mention.mention_text
+            if fuzzy_search_term:
+                logger.info(
+                    f"[RESOLVE_PRODUCT_MENTION] Semantic results empty (or all > L2_dist {MAX_VECTOR_SEARCH_L2_DISTANCE}), trying fuzzy for '{fuzzy_search_term}'."
+                )
+                fuzzy_results_list: (
+                    list[FuzzyMatchResult] | ProductNotFound
+                ) = await find_product_by_name.ainvoke(
+                    {
+                        "product_name": fuzzy_search_term,
+                        "threshold": 0.40,  # Default was 0.6, consider if this is too low or fine for fallback
+                        "top_n": top_k,
+                    }
+                )
+                if isinstance(fuzzy_results_list, list) and fuzzy_results_list:
+                    logger.info(
+                        f"[RESOLVE_PRODUCT_MENTION] Fuzzy search found {len(fuzzy_results_list)} candidates for '{fuzzy_search_term}'."
                     )
-                    candidates.append(product_candidate)
-                except Exception as conversion_error:
-                    logger.error(
-                        f"Error converting document to product during mention resolution for query '{search_query}': {conversion_error}",
-                        exc_info=True,
-                    )  # pragma: no cover
-                    continue  # pragma: no cover
+                    temp_fuzzy_candidates_with_scores: list[tuple[Product, float]] = []
+                    for fuzzy_match in fuzzy_results_list:
+                        product_candidate = fuzzy_match.matched_product
+                        l2_like_distance = 1.0 - fuzzy_match.similarity_score
 
-        if not candidates:
+                        # Create fuzzy match metadata string
+                        fuzzy_metadata_str = _create_metadata_string(
+                            resolution_method="fuzzy_name_match",
+                            search_query=fuzzy_search_term,
+                            similarity_score=fuzzy_match.similarity_score,
+                            requested_quantity=mention.quantity,
+                        )
+
+                        # Augment with ID miss info if applicable
+                        if explicit_id_missed:  # Use the flag directly
+                            if fuzzy_metadata_str:
+                                product_candidate.metadata = (
+                                    f"{id_miss_message_prefix}{fuzzy_metadata_str}"
+                                )
+                            else:
+                                product_candidate.metadata = (
+                                    id_miss_message_prefix.strip()
+                                )
+                        else:
+                            product_candidate.metadata = fuzzy_metadata_str
+
+                        temp_fuzzy_candidates_with_scores.append(
+                            (product_candidate, l2_like_distance)
+                        )
+
+                    if temp_fuzzy_candidates_with_scores:
+                        # Sort fuzzy candidates by L2-like distance (ascending)
+                        temp_fuzzy_candidates_with_scores.sort(key=lambda x: x[1])
+                        candidates_with_scores = temp_fuzzy_candidates_with_scores
+                        logger.info(
+                            f"[RESOLVE_PRODUCT_MENTION] Path A2: Returning {len(candidates_with_scores)} candidates from FUZZY block for '{fuzzy_search_term}'. L2 distances: {[s for _, s in candidates_with_scores]}"
+                        )
+                        # Do not return here yet, let the final block handle it to ensure consistent logging/return point
+
+            if not candidates_with_scores:  # If still no candidates after fuzzy attempt
+                logger.info(
+                    f"[RESOLVE_PRODUCT_MENTION] Path A3: Semantic results empty AND fuzzy attempt failed/not triggered for '{search_query}' / '{fuzzy_search_term}'. Returning ProductNotFound."
+                )
+                return ProductNotFound(
+                    message=f"[RESOLVE_PRODUCT_MENTION] No products found matching vector search query: '{search_query}' or fuzzy: '{fuzzy_search_term}'",
+                    query_product_name=mention.product_name or mention.mention_text,
+                    query_product_id=mention.product_id,
+                )
+
+        if not candidates_with_scores:  # Final check if list is empty
+            logger.info(
+                f"[RESOLVE_PRODUCT_MENTION] Path C1: No candidates after all attempts (including L2 filter {MAX_VECTOR_SEARCH_L2_DISTANCE}) for query '{search_query}'. Returning ProductNotFound."
+            )
             return ProductNotFound(
-                message=f"No candidates above threshold {SIMILAR_MATCH_THRESHOLD} for query: '{search_query}'",
+                message=f"[RESOLVE_PRODUCT_MENTION] No candidates found (L2 filter {MAX_VECTOR_SEARCH_L2_DISTANCE}) for query: '{search_query}' (and fuzzy fallback if applicable)",
                 query_product_name=mention.product_name,
                 query_product_id=mention.product_id,
             )
-        return candidates
-    except ValueError:  # Specifically to allow catalog loading errors to propagate
+
+        # Results from vector search are already sorted by L2. Fuzzy results were sorted.
+        logger.info(
+            f"[RESOLVE_PRODUCT_MENTION] Returning {len(candidates_with_scores)} candidates at END of function for mention targeting '{search_query}'. L2 distances: {[s for _, s in candidates_with_scores]}"
+        )
+        return candidates_with_scores
+    except ValueError:
         raise
     except Exception as e:
         logger.error(
-            f"Unexpected error during product mention resolution for '{mention}': {e}",
+            f"[RESOLVE_PRODUCT_MENTION] Unexpected error during product mention resolution for '{mention}': {e}",
             exc_info=True,
         )
-        raise  # Re-raise other unexpected exceptions
+        raise

@@ -1,0 +1,409 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: Based on your preferences for a flattering, comfortable dress for a
+        summer wedding that is not too short, low-cut, or tight-fitting, the Floral
+        Sundress is a strong option. It features a breezy, lightweight design with
+        a vibrant floral print and a flattering silhouette, making it suitable for
+        outdoor ceremonies and warm weather. Stock is currently available.
+      answer_type: factual
+      confidence: 0.8
+      question: I'm looking for a dress for a summer wedding I have coming up. I don't
+        want anything too short, low-cut, or super tight-fitting. But I also don't
+        want it to be too loose or matronly. Something flattering but still comfortable
+        to wear for an outdoor ceremony. Any recommendations on some options that
+        might work for me?
+      reference_product_ids:
+      - FSD2345
+    - answer: For a travel bag, the Quilted Tote is a practical and stylish choice.
+        It is spacious, features a classic quilted design, and has multiple interior
+        pockets, making it suitable for travel. There is also a limited-time sale
+        of 25% off. Other options include the Leather Messenger Bag and the Leather
+        Tote, both of which are also suitable for travel and everyday use.
+      answer_type: factual
+      confidence: 0.7
+      question: And bag, I think I need some travel bag.
+      reference_product_ids:
+      - QTP5432
+      - LTH2109
+      - LTH5432
+    email_id: E016
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Embrace the warm weather in our floral sundress. This breezy, lightweight
+        dress features a vibrant floral print and a flattering silhouette. Perfect
+        for sunny days or tropical vacations.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''a dress for a summer wedding, not too short, low-cut, or tight-fitting,
+        but also not too loose or matronly, flattering and comfortable for an outdoor
+        ceremony dress''; Similarity score: 0.888; Original mention: N/A (ID: N/A,
+        Type: dress, Category: Women''s Clothing, Quantity: 1)'
+      name: Floral Sundress
+      price: 58.0
+      product_id: FSD2345
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      stock: 4
+    related_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      description: Embrace the blooming season with our floral maxi dress. This breezy,
+        lightweight dress features a vibrant floral pattern and a flattering silhouette
+        that flows gracefully with every step. Perfect for garden parties, beach vacations,
+        or romantic evenings. Act now and get 20% off!
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''a dress for a summer wedding, not too short, low-cut, or tight-fitting,
+        but also not too loose or matronly, flattering and comfortable for an outdoor
+        ceremony dress''; Similarity score: 1.022; Original mention: N/A (ID: N/A,
+        Type: dress, Category: Women''s Clothing, Quantity: 1)'
+      name: Floral Maxi Dress
+      price: 56.0
+      product_id: FLD9876
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      stock: 7
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our quilted tote bag. This
+        spacious bag features a classic quilted design, multiple interior pockets,
+        and sturdy handles. A chic and practical choice for work, travel, or everyday
+        use. Limited-time sale - get 25% off!
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''travel bag travel bag''; Similarity score: 1.024; Original mention: N/A
+        (ID: N/A, Type: travel bag, Category: Bags, Quantity: 1)'
+      name: Quilted Tote
+      price: 29.0
+      product_id: QTP5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 7
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Carry your essentials in style with our leather messenger bag.
+        Crafted from premium, full-grain leather, this bag features a spacious main
+        compartment, multiple pockets, and an adjustable strap for a comfortable fit.
+        A timeless choice for work, travel, or everyday use.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''travel bag travel bag''; Similarity score: 1.030; Original mention: N/A
+        (ID: N/A, Type: travel bag, Category: Bags, Quantity: 1)'
+      name: Leather Messenger Bag
+      price: 37.99
+      product_id: LTH2109
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 4
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      description: Elevate your everyday carry with our leather tote bag. Crafted
+        from premium, full-grain leather, this bag features a spacious interior, multiple
+        pockets, and sturdy handles. Perfect for work, travel, or running errands
+        in style.
+      metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+        ''travel bag travel bag''; Similarity score: 1.081; Original mention: N/A
+        (ID: N/A, Type: travel bag, Category: Bags, Quantity: 1)'
+      name: Leather Tote
+      price: 28.0
+      product_id: LTH5432
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - All seasons
+      stock: 6
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: Claire
+    email_id: E016
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: I'm looking for a dress for a summer wedding I have coming up.
+      product_mentions:
+      - confidence: 0.9
+        mention_text: a dress for a summer wedding
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        product_description: a dress for a summer wedding, not too short, low-cut,
+          or tight-fitting, but also not too loose or matronly, flattering and comfortable
+          for an outdoor ceremony
+        product_id: null
+        product_name: null
+        product_type: dress
+        quantity: 1
+      related_sentences:
+      - I don't want anything too short, low-cut, or super tight-fitting.
+      - But I also don't want it to be too loose or matronly.
+      - Something flattering but still comfortable to wear for an outdoor ceremony.
+      - Any recommendations on some options that might work for me?
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: And bag, I think I need some travel bag.
+      product_mentions:
+      - confidence: 0.8
+        mention_text: travel bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: travel bag
+        product_id: null
+        product_name: null
+        product_type: travel bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+    - main_sentence: My name is Claire.
+      product_mentions: []
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E016
+  response_body: "Hi Claire,\n\nThank you so much for reaching out! It sounds like\
+    \ you have a beautiful summer wedding coming up, and I\u2019d love to help you\
+    \ find the perfect dress and travel bag for the occasion.\n\nFor the dress, based\
+    \ on your preferences for something flattering, comfortable, and suitable for\
+    \ an outdoor ceremony (not too short, low-cut, or tight-fitting, but also not\
+    \ too loose or matronly), the Floral Sundress is a wonderful option. It\u2019\
+    s breezy and lightweight, with a vibrant floral print and a silhouette that\u2019\
+    s both flattering and easy to wear\u2014perfect for warm weather and outdoor celebrations.\
+    \ We currently have it in stock for $58.00.\n\nIf you\u2019re open to a slightly\
+    \ different style, you might also like the Floral Maxi Dress. It offers a graceful,\
+    \ flowing silhouette with a similar floral pattern, ideal for garden parties or\
+    \ romantic evenings. This one is available for $56.00 and currently comes with\
+    \ a 20% discount.\n\nFor your travel bag, the Quilted Tote is a practical and\
+    \ stylish choice. It\u2019s spacious, features a classic quilted design, and has\
+    \ multiple interior pockets\u2014great for keeping everything organized on the\
+    \ go. Plus, it\u2019s on a limited-time sale at 25% off, bringing it to $29.00.\
+    \ If you prefer leather, the Leather Messenger Bag ($37.99) and the Leather Tote\
+    \ ($28.00) are both crafted from premium, full-grain leather and offer plenty\
+    \ of space for travel or everyday use.\n\nIf you\u2019d like more details or have\
+    \ any other preferences, just let me know\u2014I\u2019m here to help you feel\
+    \ confident and comfortable for your special event!\n\nBest regards,\nHermes -\
+    \ Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using Claire's name and acknowledging her upcoming summer
+      wedding.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Recommend the Floral Sundress as a flattering, comfortable option for
+      a summer wedding, with price and stock info.
+    content_type: product_info
+    priority: 9
+    related_to: FSD2345
+  - content: Suggest the Floral Maxi Dress as another stylish, season-appropriate
+      option, mentioning the 20% discount.
+    content_type: alternative
+    priority: 8
+    related_to: FLD9876
+  - content: Present the Quilted Tote as a practical, stylish travel bag with sale
+      price, and mention Leather Messenger Bag and Leather Tote as alternatives.
+    content_type: product_info
+    priority: 8
+    related_to: QTP5432
+  - content: Integrate factual answers from inquiry_answers, referencing both dress
+      and bag recommendations.
+    content_type: answer
+    priority: 7
+    related_to: null
+  - content: Invite Claire to share more preferences or ask for additional details,
+      emphasizing willingness to assist.
+    content_type: next_steps
+    priority: 6
+    related_to: null
+  - content: Professional, friendly closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Summer Wedding Outfit & Travel Bag Recommendations
+  tone: friendly and helpful
+email:
+  email_id: E016
+  message: Hello, I'm looking for a dress for a summer wedding I have coming up. My
+    name is Claire. I don't want anything too short, low-cut, or super tight-fitting.
+    But I also don't want it to be too loose or matronly. Something flattering but
+    still comfortable to wear for an outdoor ceremony. Any recommendations on some
+    options that might work for me? Thank you! And bag, I think I need some travel
+    bag.
+  subject: Summer Wedding Guest Dress Preferences
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 0.9
+      mention_text: a dress for a summer wedding
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Women's Clothing
+      product_description: a dress for a summer wedding, not too short, low-cut, or
+        tight-fitting, but also not too loose or matronly, flattering and comfortable
+        for an outdoor ceremony
+      product_id: null
+      product_name: null
+      product_type: dress
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        description: Embrace the warm weather in our floral sundress. This breezy,
+          lightweight dress features a vibrant floral print and a flattering silhouette.
+          Perfect for sunny days or tropical vacations.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''a dress for a summer wedding, not too short, low-cut, or tight-fitting,
+          but also not too loose or matronly, flattering and comfortable for an outdoor
+          ceremony dress''; Similarity score: 0.888; Original mention: N/A (ID: N/A,
+          Type: dress, Category: Women''s Clothing, Quantity: 1)'
+        name: Floral Sundress
+        price: 58.0
+        product_id: FSD2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 4
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        description: Embrace the blooming season with our floral maxi dress. This
+          breezy, lightweight dress features a vibrant floral pattern and a flattering
+          silhouette that flows gracefully with every step. Perfect for garden parties,
+          beach vacations, or romantic evenings. Act now and get 20% off!
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''a dress for a summer wedding, not too short, low-cut, or tight-fitting,
+          but also not too loose or matronly, flattering and comfortable for an outdoor
+          ceremony dress''; Similarity score: 1.022; Original mention: N/A (ID: N/A,
+          Type: dress, Category: Women''s Clothing, Quantity: 1)'
+        name: Floral Maxi Dress
+        price: 56.0
+        product_id: FLD9876
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 7
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Women's Clothing
+        description: Embrace effortless style with our flowy linen top. Crafted from
+          airy, breathable linen, this relaxed top features a flattering drape and
+          a chic, minimalist design. An ideal choice for warm weather or layering
+          during transitional seasons.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''a dress for a summer wedding, not too short, low-cut, or tight-fitting,
+          but also not too loose or matronly, flattering and comfortable for an outdoor
+          ceremony dress''; Similarity score: 1.197; Original mention: N/A (ID: N/A,
+          Type: dress, Category: Women''s Clothing, Quantity: 1)'
+        name: Flowy Linen Top
+        price: 41.0
+        product_id: FLT5678
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 8
+  - !!python/tuple
+    - confidence: 0.8
+      mention_text: travel bag
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: travel bag
+      product_id: null
+      product_name: null
+      product_type: travel bag
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our quilted tote bag. This
+          spacious bag features a classic quilted design, multiple interior pockets,
+          and sturdy handles. A chic and practical choice for work, travel, or everyday
+          use. Limited-time sale - get 25% off!
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''travel bag travel bag''; Similarity score: 1.024; Original mention: N/A
+          (ID: N/A, Type: travel bag, Category: Bags, Quantity: 1)'
+        name: Quilted Tote
+        price: 29.0
+        product_id: QTP5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 7
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Carry your essentials in style with our leather messenger bag.
+          Crafted from premium, full-grain leather, this bag features a spacious main
+          compartment, multiple pockets, and an adjustable strap for a comfortable
+          fit. A timeless choice for work, travel, or everyday use.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''travel bag travel bag''; Similarity score: 1.030; Original mention: N/A
+          (ID: N/A, Type: travel bag, Category: Bags, Quantity: 1)'
+        name: Leather Messenger Bag
+        price: 37.99
+        product_id: LTH2109
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+      - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Elevate your everyday carry with our leather tote bag. Crafted
+          from premium, full-grain leather, this bag features a spacious interior,
+          multiple pockets, and sturdy handles. Perfect for work, travel, or running
+          errands in style.
+        metadata: 'Found through semantic search; Requested quantity: 1; Search query:
+          ''travel bag travel bag''; Similarity score: 1.081; Original mention: N/A
+          (ID: N/A, Type: travel bag, Category: Bags, Quantity: 1)'
+        name: Leather Tote
+        price: 28.0
+        product_id: LTH5432
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 6
+  exact_id_misses: []
+  metadata: 'Processed 2 product mentions; Made 2 resolution attempts for these mentions;
+    Found candidates for 2 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 1495ms; (Debug log: 2 mentions showed >0 candidates in detailed
+    log)'
+  unresolved_mentions: []

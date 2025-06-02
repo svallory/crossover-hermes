@@ -1,0 +1,101 @@
+
+--- Testing Query: 'Leather Bifold Wallet' (Exact name match) ---
+Expected Product IDs: ['LTH0976']
+Search Results (ID, Name, Score):
+  Rank 1: LTH0976, 'Leather Bifold Wallet', Score=0.4659 <-- EXPECTED
+  Rank 2: SWL2345, 'Sleek Wallet', Score=0.8767 
+  Rank 3: LTH1098, 'Leather Backpack', Score=1.0515 
+  Rank 4: LTH2109, 'Leather Messenger Bag', Score=1.0534 
+  Rank 5: LTH5432, 'Leather Tote', Score=1.1587 
+
+--- Testing Query: 'Vibrant Tote bag' (Exact name with 'bag' suffix) ---
+Expected Product IDs: ['VBT2345']
+Search Results (ID, Name, Score):
+  Rank 1: VBT2345, 'Vibrant Tote', Score=0.4308 <-- EXPECTED
+  Rank 2: QTP5432, 'Quilted Tote', Score=0.9241 
+  Rank 3: LTH5432, 'Leather Tote', Score=0.9776 
+  Rank 4: SDE2345, 'Saddle Bag', Score=1.1053 
+  Rank 5: CBG9876, 'Canvas Beach Bag', Score=1.1442 
+
+--- Testing Query: 'Infinity Scarves' (Plural query vs. singular product name) ---
+Expected Product IDs: ['SFT1098']
+Search Results (ID, Name, Score):
+  Rank 1: SFT1098, 'Infinity Scarf', Score=0.6080 <-- EXPECTED
+  Rank 2: VSC6789, 'Versatile Scarf', Score=0.9168 
+  Rank 3: CSH1098, 'Cozy Shawl', Score=1.2244 
+  Rank 4: PTR9876, 'Patterned Tie', Score=1.2754 
+  Rank 5: FNK9876, 'Fair Isle Sweater', Score=1.3613 
+
+--- Testing Query: 'leather briefcase' (Key User Scenario: 'leather briefcase'. Expect LTH2109 (Leather Messenger Bag) as a candidate.) ---
+Expected Product IDs: ['LTH2109', 'LTH1098', 'LTH5432']
+Search Results (ID, Name, Score):
+  Rank 1: LTH2109, 'Leather Messenger Bag', Score=0.7778 <-- EXPECTED
+    >>>> 'Leather Messenger Bag' (LTH2109) score for 'leather briefcase': 0.7778
+  Rank 2: LTH1098, 'Leather Backpack', Score=0.8051 <-- EXPECTED
+  Rank 3: LTH0976, 'Leather Bifold Wallet', Score=0.8961 
+  Rank 4: LTH5432, 'Leather Tote', Score=0.9722 <-- EXPECTED
+  Rank 5: SBP4567, 'Sleek Backpack', Score=1.1449 
+
+--- Testing Query: 'messenger bag' (Specific query: 'messenger bag') ---
+Expected Product IDs: ['LTH2109']
+Search Results (ID, Name, Score):
+  Rank 1: LTH2109, 'Leather Messenger Bag', Score=0.7147 <-- EXPECTED
+  Rank 2: CCB6789, 'Chic Crossbody', Score=0.9987 
+  Rank 3: SDE2345, 'Saddle Bag', Score=1.0219 
+  Rank 4: QTP5432, 'Quilted Tote', Score=1.0549 
+  Rank 5: LTH1098, 'Leather Backpack', Score=1.0741 
+
+--- Testing Query: 'messenger bag or briefcase style options' (Query from email E012) ---
+Expected Product IDs: ['LTH2109', 'LTH1098', 'LTH5432']
+Search Results (ID, Name, Score):
+  Rank 1: LTH2109, 'Leather Messenger Bag', Score=0.8125 <-- EXPECTED
+  Rank 2: LTH1098, 'Leather Backpack', Score=1.0353 <-- EXPECTED
+  Rank 3: SBP4567, 'Sleek Backpack', Score=1.0387 
+  Rank 4: CCB6789, 'Chic Crossbody', Score=1.0602 
+  Rank 5: QTP5432, 'Quilted Tote', Score=1.0880 
+
+--- Testing Query: 'a bag for work' (Abstract query: 'a bag for work') ---
+Expected Product IDs: ['LTH2109', 'LTH5432', 'LTH1098', 'SBP4567']
+Search Results (ID, Name, Score):
+  Rank 1: LTH2109, 'Leather Messenger Bag', Score=0.9736 <-- EXPECTED
+  Rank 2: QTP5432, 'Quilted Tote', Score=0.9998 
+  Rank 3: LTH5432, 'Leather Tote', Score=1.0323 <-- EXPECTED
+  Rank 4: LTH1098, 'Leather Backpack', Score=1.0395 <-- EXPECTED
+  Rank 5: CCB6789, 'Chic Crossbody', Score=1.1304 
+
+--- Testing Query: 'slide sandals for men' (Specific query from email E013) ---
+Expected Product IDs: ['SLD7654']
+Search Results (ID, Name, Score):
+  Rank 1: SLD7654, 'Slide Sandals', Score=0.6783 <-- EXPECTED
+  Rank 2: CLG4567, 'Clog Sandals', Score=0.8404 
+  Rank 3: SND7654, 'Strappy Sandals', Score=0.8995 
+  Rank 4: SLP7654, 'Slip-on Sneakers', Score=1.0823 
+  Rank 5: MLR0123, 'Mule Loafers', Score=1.0980 
+
+--- Testing Query: 'delicious pizza recipe' (Irrelevant query; expect no good matches or very high distance scores) ---
+Expected Product IDs: None
+Search Results (ID, Name, Score):
+  Rank 1: DLD0123, 'Delightful Dress', Score=1.5112 
+  Rank 2: PTD3210, 'Printed Tunic Dress', Score=1.5560 
+  Rank 3: CPJ2345, 'Cozy Pajama Set', Score=1.6135 
+  Rank 4: FRP9876, 'Fringe Poncho', Score=1.6368 
+  Rank 5: PTD8901, 'Patchwork Denim Jacket', Score=1.6386 
+  Top score for irrelevant query 'delicious pizza recipe' was 1.5112.
+
+--- Testing Query: 'Chunky Knit Beanie' (Match English name (product CHN0987 was 'Gorro de punto grueso' in E009)) ---
+Expected Product IDs: ['CHN0987']
+Search Results (ID, Name, Score):
+  Rank 1: CHN0987, 'Chunky Knit Beanie', Score=0.4313 <-- EXPECTED
+  Rank 2: CLF2109, 'Cable Knit Beanie', Score=0.7896 
+  Rank 3: CHN5432, 'Chunky Knit Sweater', Score=0.8085 
+  Rank 4: SKR3210, 'Ski Sweater', Score=1.0283 
+  Rank 5: SFT1098, 'Infinity Scarf', Score=1.0882 
+
+--- Testing Query: 'Saddle bag' (Specific query from email E020) ---
+Expected Product IDs: ['SDE2345']
+Search Results (ID, Name, Score):
+  Rank 1: SDE2345, 'Saddle Bag', Score=0.6598 <-- EXPECTED
+  Rank 2: FRP6789, 'Fringe Crossbody', Score=1.0860 
+  Rank 3: LTH2109, 'Leather Messenger Bag', Score=1.1164 
+  Rank 4: QTP5432, 'Quilted Tote', Score=1.1367 
+  Rank 5: CCB6789, 'Chic Crossbody', Score=1.1672 

@@ -1,0 +1,150 @@
+advisor:
+  inquiry_answers:
+    answered_questions:
+    - answer: The RSG8901 Retro Sunglasses are described as vintage-inspired and offer
+        a cool, nostalgic vibe. While the exact era is not specified in the product
+        description, the term 'retro' and 'vintage-inspired' typically refer to styles
+        reminiscent of the 1950s and 1960s. However, the product details do not confirm
+        a specific decade as the inspiration.
+      answer_type: factual
+      confidence: 0.8
+      question: The description for the RSG8901 Retro Sunglasses says they offer 'a
+        cool, nostalgic vibe'. What era are they inspired by exactly? The 1950s, 1960s?
+      reference_product_ids:
+      - RSG8901
+    email_id: E011
+    primary_products:
+    - category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      description: Transport yourself back in time with our retro sunglasses. These
+        vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+        eyes from the sun's rays. Perfect for beach days or city strolls.
+      metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+        mention: N/A (ID: RSG8901, Type: sunglasses, Category: Accessories, Quantity:
+        1)'
+      name: Retro Sunglasses
+      price: 26.99
+      product_id: RSG8901
+      product_type: ''
+      promotion: null
+      promotion_text: null
+      seasons:
+      - !!python/object/apply:hermes.model.enums.Season
+        - Spring
+      - !!python/object/apply:hermes.model.enums.Season
+        - Summer
+      stock: 0
+    related_products: []
+    unanswered_questions: []
+    unsuccessful_references: []
+classifier:
+  email_analysis:
+    customer_name: null
+    email_id: E011
+    language: English
+    primary_intent: product inquiry
+    segments:
+    - main_sentence: The description for the RSG8901 Retro Sunglasses says they offer
+        'a cool, nostalgic vibe'. What era are they inspired by exactly? The 1950s,
+        1960s?
+      product_mentions:
+      - confidence: 1.0
+        mention_text: RSG8901 Retro Sunglasses
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        product_description: Retro Sunglasses
+        product_id: RSG8901
+        product_name: null
+        product_type: sunglasses
+        quantity: 1
+      related_sentences:
+      - I'm just curious about the style inspiration.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - inquiry
+composer:
+  email_id: E011
+  response_body: "Hello,\n\nThank you for reaching out with your question about the\
+    \ RSG8901 Retro Sunglasses. I love your curiosity about the style inspiration\
+    \ behind these shades!\n\nThe RSG8901 Retro Sunglasses are described as vintage-inspired\
+    \ and offer that cool, nostalgic vibe. While the product description doesn't specify\
+    \ a particular decade, the terms \"retro\" and \"vintage-inspired\" often point\
+    \ to styles reminiscent of the 1950s and 1960s. However, there isn't a confirmed\
+    \ era listed in the official details, so the design draws broadly from those classic\
+    \ mid-century looks without tying itself to a single decade.\n\nIf you have any\
+    \ more questions about these sunglasses or would like recommendations for other\
+    \ accessories with a specific era in mind, just let me know\u2014I'm here to help!\n\
+    \nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Thank the customer for their inquiry and acknowledge their curiosity
+      about the style inspiration.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Explain that the RSG8901 Retro Sunglasses are vintage-inspired and offer
+      a nostalgic vibe, but the product description does not specify a particular
+      era. Mention that 'retro' and 'vintage-inspired' typically refer to the 1950s
+      and 1960s, though no specific decade is confirmed.
+    content_type: answer
+    priority: 10
+    related_to: RSG8901
+  - content: Reiterate that the official product details do not confirm a specific
+      decade as the inspiration.
+    content_type: answer
+    priority: 9
+    related_to: RSG8901
+  - content: Invite the customer to ask further questions or request recommendations
+      for accessories inspired by a particular era.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Professional and warm closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: About the Era Inspiration for the RSG8901 Retro Sunglasses
+  tone: professional and warm
+email:
+  email_id: E011
+  message: Hi there, The description for the RSG8901 Retro Sunglasses says they offer
+    'a cool, nostalgic vibe'. What era are they inspired by exactly? The 1950s, 1960s?
+    I'm just curious about the style inspiration. Thank you!
+  subject: Question on Retro Sunglasses Description
+errors: {}
+fulfiller: null
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: RSG8901 Retro Sunglasses
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Accessories
+      product_description: Retro Sunglasses
+      product_id: RSG8901
+      product_name: null
+      product_type: sunglasses
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Accessories
+        description: Transport yourself back in time with our retro sunglasses. These
+          vintage-inspired shades offer a cool, nostalgic vibe while protecting your
+          eyes from the sun's rays. Perfect for beach days or city strolls.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: N/A (ID: RSG8901, Type: sunglasses, Category: Accessories, Quantity:
+          1)'
+        name: Retro Sunglasses
+        price: 26.99
+        product_id: RSG8901
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - Spring
+        - !!python/object/apply:hermes.model.enums.Season
+          - Summer
+        stock: 0
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 2ms; (Debug log: 1 mentions showed >0 candidates in detailed log)'
+  unresolved_mentions: []

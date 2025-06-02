@@ -1,0 +1,180 @@
+advisor: null
+classifier:
+  email_analysis:
+    customer_name: Jessica
+    email_id: E002
+    language: English
+    primary_intent: order request
+    segments:
+    - main_sentence: I'm looking to buy the VBT2345 Vibrant Tote bag.
+      product_mentions:
+      - confidence: 1.0
+        mention_text: VBT2345 Vibrant Tote bag
+        product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        product_description: Vibrant Tote bag
+        product_id: VBT2345
+        product_name: Vibrant Tote
+        product_type: tote bag
+        quantity: 1
+      related_sentences: []
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - order
+    - main_sentence: I love tote bags, they're so convenient for carrying all my stuff.
+      product_mentions: []
+      related_sentences:
+      - Last summer I bought this really cute straw tote that I used at the beach.
+      - Oh, and a few years ago I got this nylon tote as a free gift with purchase
+        that I still use for groceries.
+      segment_type: !!python/object/apply:hermes.model.email.SegmentType
+      - personal_statement
+composer:
+  email_id: E002
+  response_body: "Hi Jessica,\n\nThank you so much for your order! I can tell you\
+    \ really love tote bags\u2014they really are the ultimate in convenience for carrying\
+    \ everything you need. It sounds like you\u2019ve built quite the collection,\
+    \ from that cute straw tote for the beach to your trusty nylon grocery bag.\n\n\
+    I\u2019m excited to confirm that your order for the Vibrant Tote has been successfully\
+    \ placed. Here are the details:\n\n- **Product:** Vibrant Tote\n- **Description:**\
+    \ Add a pop of color to your everyday carry with our vibrant tote bag. Spacious\
+    \ and stylish, it's the perfect companion for running errands or carrying your\
+    \ essentials. The vibrant hue is sure to turn heads.\n- **Quantity:** 1\n- **Price:**\
+    \ $39.00\n\nYour total comes to $39.00. The Vibrant Tote is currently in stock,\
+    \ so we\u2019ll be preparing your order for shipment right away.\n\nIf you\u2019\
+    re ever looking to expand your tote collection or want to try a new style, just\
+    \ let me know\u2014I\u2019d be happy to recommend something that fits your needs.\
+    \ And of course, if you have any questions or need assistance with your order,\
+    \ I\u2019m here to help.\n\nBest regards,\nHermes - Delivering divine fashion"
+  response_points:
+  - content: Warm greeting using Jessica's name and referencing her love of tote bags.
+    content_type: greeting
+    priority: 10
+    related_to: null
+  - content: Confirmed order for the Vibrant Tote, including product details, price,
+      and stock status.
+    content_type: order_confirmation
+    priority: 10
+    related_to: VBT2345
+  - content: Referenced Jessica's personal statement about her tote bag collection
+      to build rapport.
+    content_type: personalization
+    priority: 8
+    related_to: null
+  - content: Offered to recommend more totes or new styles in the future.
+    content_type: value_addition
+    priority: 6
+    related_to: null
+  - content: Explained that the order is being prepared for shipment and offered further
+      assistance.
+    content_type: next_steps
+    priority: 7
+    related_to: null
+  - content: Professional and friendly closing with Hermes signature.
+    content_type: closing
+    priority: 5
+    related_to: null
+  subject: Your Vibrant Tote Order Confirmation
+  tone: friendly and enthusiastic
+email:
+  email_id: E002
+  message: Good morning, I'm looking to buy the VBT2345 Vibrant Tote bag. My name
+    is Jessica and I love tote bags, they're so convenient for carrying all my stuff.
+    Last summer I bought this really cute straw tote that I used at the beach. Oh,
+    and a few years ago I got this nylon tote as a free gift with purchase that I
+    still use for groceries.
+  subject: Buy Vibrant Tote with noise
+errors: {}
+fulfiller:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: VBT2345 Vibrant Tote bag
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: Vibrant Tote bag
+      product_id: VBT2345
+      product_name: Vibrant Tote
+      product_type: tote bag
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Add a pop of color to your everyday carry with our vibrant tote
+          bag. Spacious and stylish, it's the perfect companion for running errands
+          or carrying your essentials. The vibrant hue is sure to turn heads.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: Vibrant Tote (ID: VBT2345, Type: tote bag, Category: Bags, Quantity:
+          1)'
+        name: Vibrant Tote
+        price: 39.0
+        product_id: VBT2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  order_result:
+    email_id: E002
+    lines:
+    - alternatives: []
+      base_price: 39.0
+      description: Add a pop of color to your everyday carry with our vibrant tote
+        bag. Spacious and stylish, it's the perfect companion for running errands
+        or carrying your essentials. The vibrant hue is sure to turn heads.
+      name: Vibrant Tote
+      product_id: VBT2345
+      promotion: null
+      promotion_applied: false
+      promotion_description: null
+      quantity: 1
+      status: !!python/object/apply:hermes.model.order.OrderLineStatus
+      - created
+      stock: 3
+      total_price: 39.0
+      unit_price: 39.0
+    message: null
+    overall_status: created
+    stock_updated: true
+    total_discount: 0.0
+    total_price: 39.0
+  stockkeeper_metadata: 'Processed 1 product mentions; Made 1 resolution attempts
+    for these mentions; Found candidates for 1 mentions; 0 mentions had no candidates
+    found (unresolved); Processing took 2ms; (Debug log: 1 mentions showed >0 candidates
+    in detailed log)'
+  unresolved_mentions: []
+stockkeeper:
+  candidate_products_for_mention:
+  - !!python/tuple
+    - confidence: 1.0
+      mention_text: VBT2345 Vibrant Tote bag
+      product_category: !!python/object/apply:hermes.model.enums.ProductCategory
+      - Bags
+      product_description: Vibrant Tote bag
+      product_id: VBT2345
+      product_name: Vibrant Tote
+      product_type: tote bag
+      quantity: 1
+    - - category: !!python/object/apply:hermes.model.enums.ProductCategory
+        - Bags
+        description: Add a pop of color to your everyday carry with our vibrant tote
+          bag. Spacious and stylish, it's the perfect companion for running errands
+          or carrying your essentials. The vibrant hue is sure to turn heads.
+        metadata: 'Found by exact product ID match; Requested quantity: 1; Original
+          mention: Vibrant Tote (ID: VBT2345, Type: tote bag, Category: Bags, Quantity:
+          1)'
+        name: Vibrant Tote
+        price: 39.0
+        product_id: VBT2345
+        product_type: ''
+        promotion: null
+        promotion_text: null
+        seasons:
+        - !!python/object/apply:hermes.model.enums.Season
+          - All seasons
+        stock: 4
+  exact_id_misses: []
+  metadata: 'Processed 1 product mentions; Made 1 resolution attempts for these mentions;
+    Found candidates for 1 mentions; 0 mentions had no candidates found (unresolved);
+    Processing took 2ms; (Debug log: 1 mentions showed >0 candidates in detailed log)'
+  unresolved_mentions: []
